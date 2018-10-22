@@ -10,6 +10,9 @@ fn main() {
     a.show();
 
     a.add_rule(AclPerm::Deny, "3.3.3.3");
+    a.add_rule(AclPerm::Deny, "any");
+    a.add_rule(AclPerm::Deny, "hoge");
+    a.add_rule(AclPerm::Deny, "1000");
     a.show();
 }
 
