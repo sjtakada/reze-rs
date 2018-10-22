@@ -1,17 +1,15 @@
 extern crate common;
 
-use common::access_list;
+use common::acl::*;
 
 fn main() {
-    println!("Hello, world!");
-
-    let mut a = access_list::AccessList::new("100".to_string());
-    a.add_rule(access_list::AclPermission::Permit, "1.1.1.1".to_string());
-    a.add_rule(access_list::AclPermission::Deny, "2.2.2.2".to_string());
+    let mut a = AclBasic::new("100".to_string());
+    a.add_rule(AclPerm::Permit, "1.1.1.1");
+    a.add_rule(AclPerm::Deny, "2.2.2.2");
 
     a.show();
 
-    a.add_rule(access_list::AclPermission::Deny, "3.3.3.3".to_string());
+    a.add_rule(AclPerm::Deny, "3.3.3.3");
     a.show();
 }
 
