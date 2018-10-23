@@ -3,16 +3,18 @@ extern crate common;
 use common::acl::*;
 
 fn main() {
-    let mut a = AclBasic::new("100".to_string());
-    a.add_rule(AclPerm::Permit, "1.1.1.1");
-    a.add_rule(AclPerm::Deny, "2.2.2.2");
+    let mut ac = AclCollection::new();
+//    let mut &acl = ac.get("100");
 
-    a.show();
+    ac.get_mut("100").add_rule(AclPerm::Permit, "1.1.1.1");
+    ac.get_mut("100").add_rule(AclPerm::Deny, "2.2.2.2");
 
-    a.add_rule(AclPerm::Deny, "3.3.3.3");
-    a.add_rule(AclPerm::Deny, "any");
-    a.add_rule(AclPerm::Deny, "hoge");
-    a.add_rule(AclPerm::Deny, "1000");
-    a.show();
+    ac.get_mut("100").show();
+
+    ac.get_mut("100").add_rule(AclPerm::Deny, "3.3.3.3");
+    ac.get_mut("100").add_rule(AclPerm::Deny, "any");
+    ac.get_mut("100").add_rule(AclPerm::Deny, "hoge");
+    ac.get_mut("100").add_rule(AclPerm::Deny, "1000");
+    ac.get_mut("100").show();
 }
 
