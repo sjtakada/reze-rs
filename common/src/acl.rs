@@ -1,11 +1,11 @@
-//
-// ACL: Access Control List
-//
-// Example:
-//   access-list 100 permit 1.1.1.1
-//   access-list 100 deny 2.2.2.2
-//   access-list 100 permit any
-//
+///
+/// ACL: Access Control List
+///
+/// # CLI Output
+///   access-list 100 permit 1.1.1.1
+///   access-list 100 deny 2.2.2.2
+///   access-list 100 permit any
+///
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
@@ -159,6 +159,7 @@ impl AclCollection {
                 }
             }
             None => {
+                // nothing to do.
             }
         }
     }
@@ -166,27 +167,59 @@ impl AclCollection {
 
 // Tests.
 
-#[test]
-pub fn test_acl () {
-    let mut ac = AclCollection::new();
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    ac.get_mut("100").add_rule(AclPerm::Permit, "1.1.1.1");
-    ac.get_mut("100").add_rule(AclPerm::Deny, "2.2.2.2");
-    ac.get_mut("100").add_rule(AclPerm::Deny, "3.3.3.3");
-    ac.get_mut("100").add_rule(AclPerm::Deny, "any");
+    #[test]
+    pub fn test_acl () {
+        let mut ac = AclCollection::new();
 
-    // XXX unwrap
-    let a = Ipv4Addr::from_str("1.1.1.1").unwrap();
-    assert_eq!(&AclPerm::Permit, ac.check("100", &a));
+        ac.get_mut("100").add_rule(AclPerm::Permit, "1.1.1.1");
+        ac.get_mut("100").add_rule(AclPerm::Deny, "2.2.2.2");
+        ac.get_mut("100").add_rule(AclPerm::Deny, "3.3.3.3");
+        ac.get_mut("100").add_rule(AclPerm::Deny, "any");
 
-    let a = Ipv4Addr::from_str("2.2.2.2").unwrap();
-    assert_eq!(&AclPerm::Deny, ac.check("100", &a));
+        let a = Ipv4Addr::from_str("1.1.1.1").unwrap();
+        assert_eq!(&AclPerm::Permit, ac.check("100", &a));
 
-    let a = Ipv4Addr::from_str("3.3.3.3").unwrap();
-    assert_eq!(&AclPerm::Deny, ac.check("100", &a));
+        let a = Ipv4Addr::from_str("2.2.2.2").unwrap();
+        assert_eq!(&AclPerm::Deny, ac.check("100", &a));
 
-    let a = Ipv4Addr::from_str("4.4.4.4").unwrap();
-    assert_eq!(&AclPerm::Deny, ac.check("100", &a));
+        let a = Ipv4Addr::from_str("3.3.3.3").unwrap();
+        assert_eq!(&AclPerm::Deny, ac.check("100", &a));
+    }
 
-    assert_eq!(&AclPerm::Deny, ac.check("200", &a));
+    #[test]
+    pub fn test_acl_permit_any () {
+        let mut ac = AclCollection::new();
+
+        ac.get_mut("100").add_rule(AclPerm::Permit, "any");
+        ac.get_mut("100").add_rule(AclPerm::Deny, "1.1.1.1");
+        ac.get_mut("100").add_rule(AclPerm::Deny, "2.2.2.2");
+        ac.get_mut("100").add_rule(AclPerm::Deny, "3.3.3.3");
+
+        let a = Ipv4Addr::from_str("1.1.1.1").unwrap();
+        assert_eq!(&AclPerm::Permit, ac.check("100", &a));
+
+        let a = Ipv4Addr::from_str("2.2.2.2").unwrap();
+        assert_eq!(&AclPerm::Permit, ac.check("100", &a));
+
+        let a = Ipv4Addr::from_str("3.3.3.3").unwrap();
+        assert_eq!(&AclPerm::Permit, ac.check("100", &a));
+    }
+
+    #[test]
+    pub fn test_acl_no_existence() {
+        let ac = AclCollection::new();
+
+        let a = Ipv4Addr::from_str("1.1.1.1").unwrap();
+        let b = Ipv4Addr::from_str("2.2.2.2").unwrap();
+
+        // should deny any.
+        assert_eq!(&AclPerm::Deny, ac.check("100", &a));
+        assert_eq!(&AclPerm::Deny, ac.check("200", &a));
+        assert_eq!(&AclPerm::Deny, ac.check("100", &b));
+        assert_eq!(&AclPerm::Deny, ac.check("200", &b));
+    }
 }
