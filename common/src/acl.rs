@@ -14,7 +14,9 @@ use std::net::Ipv4Addr;
 use std::net::AddrParseError;
 use std::fmt;
 
+//
 // Type definitions.
+//
 
 // (permit|deny)
 #[derive(PartialEq)]
@@ -45,7 +47,9 @@ pub struct AclCollection {
     acls: HashMap<String, Acl>,
 }
 
+//
 // Implementations.
+//
 
 // AclPerm
 impl AclPerm {
@@ -98,14 +102,14 @@ impl Acl {
         Acl{ rules: Vec::new() }
     }
 
-    pub fn add_rule(&mut self, perm: AclPerm, addr: &str) {
-        let a = AclRuleAddr::from_str(addr);
-        match a {
+    // Return number of rules for now.
+    pub fn add_rule(&mut self, perm: AclPerm, addr_str: &str) -> Result<usize, AddrParseError> {
+        match AclRuleAddr::from_str(addr_str) {
             Ok(addr) => {
                 self.rules.push(AclRule::new(perm, addr));
+                Ok(self.rules.len())
             },
-            Err(e) => {
-            }
+            Err(e) => Err(e)
         }
     }
 
@@ -150,6 +154,7 @@ impl AclCollection {
         }
     }
 
+    // for CLI, may be moved out in the future.
     pub fn show(&self, name: &str) {
         match self.acls.get(name) {
             Some(acl) => {
@@ -165,7 +170,9 @@ impl AclCollection {
     }
 }
 
+//
 // Tests.
+//
 
 #[cfg(test)]
 mod tests {
