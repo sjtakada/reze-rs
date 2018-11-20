@@ -4,3 +4,7 @@ version = "0.1.0"
 authors = ["Toshiaki Takada <toshiaki.takada@gmail.com>"]
 
 [dependencies]
+#mio = "0.6.16"
+tokio = "0.1.11"
+futures = "0.1.25"
+thread-id = "3.3.0"
