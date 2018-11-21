@@ -7,6 +7,9 @@
 
 use std::io;
 use std::io::prelude::*;
+//use std::sync::Arc;
+//use tokio::runtime;
+use tokio::runtime::current_thread;
 use futures::{Future, Async, Poll};
 
 pub struct BootStrap {
@@ -17,9 +20,25 @@ impl BootStrap {
     pub fn new() -> BootStrap {
         BootStrap { }
     }
+
+    pub fn run(&mut self) {
+        let mut runtime = match current_thread::Runtime::new() {
+            Ok(runtime) => runtime,
+            Err(err) => panic!("Error: {}", err)
+        };
+
+        let task = BootStrapTask { };
+
+        runtime.spawn(task);
+        runtime.run();
+    }
 }
 
-impl Future for BootStrap {
+struct BootStrapTask {
+
+}
+
+impl Future for BootStrapTask {
     type Item = ();
     type Error = ();
 
@@ -41,7 +60,7 @@ impl Future for BootStrap {
                     break;
                 }
                 _ => {
-                    println!("% unknown command");
+                    println!("% Unknown command");
                 }
             }
         }

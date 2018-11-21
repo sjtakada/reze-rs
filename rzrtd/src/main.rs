@@ -7,18 +7,19 @@ extern crate rzrtd;
 extern crate tokio;
 extern crate futures;
 
+use std::sync::Arc;
 use tokio::runtime::current_thread;
 
 use rzrtd::core::bootstrap::BootStrap;
 
 fn main() {
-    let bootstrap = BootStrap::new();
+    // TODO: command line arguments.
 
-    // Start bootstrap thread in this context.
-    let mut runtime = current_thread::Runtime::new().unwrap();
-    runtime.spawn(bootstrap);
-    runtime.run().unwrap();
+    // BootStrap.
+    println!("ReZe RouterD started.");
+
+    let mut bootstrap = BootStrap::new();
+    bootstrap.run();
 
     println!("ReZe RouterD terminated.");
 }
-
