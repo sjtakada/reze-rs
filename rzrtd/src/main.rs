@@ -19,6 +19,6 @@ fn main() {
     runtime.spawn(bootstrap);
     runtime.run().unwrap();
 
-    println!("Hello, world!");
+    println!("ReZe RouterD terminated.");
 }
 
