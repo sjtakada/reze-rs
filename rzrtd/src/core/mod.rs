@@ -1,6 +1,9 @@
 //
 // ReZe.Rs - Router Daemon
-//           Core functions.
-// Copyright (C) 2018 Toshiaki Takada
+//   Copyright (C) 2018 Toshiaki Takada
 //
-pub mod bootstrap;
+// Core module.
+//
+pub mod protocols;
+pub mod router_master;
+pub mod master_message;

@@ -1,25 +1,18 @@
 //
 // ReZe.Rs - Router Daemon
-// Copyright (C) 2018 Toshiaki Takada
+//   Copyright (C) 2018 Toshiaki Takada
 //
 
-extern crate rzrtd;
-extern crate tokio;
-extern crate futures;
-
-use std::sync::Arc;
-use tokio::runtime::current_thread;
-
-use rzrtd::core::bootstrap::BootStrap;
+use rzrtd::core::router_master::RouterMaster;
 
 fn main() {
     // TODO: command line arguments.
 
-    // BootStrap.
+    // Start daemon
     println!("ReZe RouterD started.");
 
-    let mut bootstrap = BootStrap::new();
-    bootstrap.run();
+    let mut master = RouterMaster::new();
+    master.run();
 
     println!("ReZe RouterD terminated.");
 }
