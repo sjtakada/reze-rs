@@ -6,3 +6,4 @@
 pub mod core;
 pub mod zebra;
 pub mod ospf;
+pub mod bgp;

@@ -3,7 +3,7 @@
 //   Copyright (C) 2018 Toshiaki Takada
 //
 
-use rzrtd::core::router_master::RouterMaster;
+use rzrtd::core::master::RouterMaster;
 
 fn main() {
     // TODO: command line arguments.

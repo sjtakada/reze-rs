@@ -17,7 +17,7 @@ use std::thread::JoinHandle;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::time::Duration;
-use std::marker::Send;
+//use std::marker::Send;
 
 use super::protocols::ProtocolType;
 use super::message::master::ProtoToMaster;
@@ -25,35 +25,15 @@ use super::message::master::MasterToProto;
 use super::message::zebra::ProtoToZebra;
 use super::message::zebra::ZebraToProto;
 
-trait ProtocolMaster {
-    fn start(&self);
+use super::super::zebra::master::ZebraMaster;
+use super::super::bgp::master::BgpMaster;
+use super::super::ospf::master::OspfMaster;
+
+pub trait ProtocolMaster {
+    fn start(&self,
+             sender_p2m: mpsc::Sender<ProtoToMaster>,
+             sender_p2z: mpsc::Sender<ProtoToZebra>);
 //    fn finish(&self);
-}
-
-pub struct ZebraMaster {
-    // Zebra Message Receiver
-//    receiver: Cell<mpsc::Receiver<ProtoToZebra>>
-}
-
-impl ProtocolMaster for ZebraMaster {
-    fn start(&self) {
-    }
-}
-
-pub struct OspfMaster {
-}
-
-impl ProtocolMaster for OspfMaster {
-    fn start(&self) {
-    }
-}
-
-pub struct BgpMaster {
-}
-
-impl ProtocolMaster for BgpMaster {
-    fn start(&self) {
-    }
 }
 
 struct MasterTuple {
@@ -74,9 +54,12 @@ impl MasterFactory {
         MasterFactory {}
     }
 
+    pub fn get_zebra(&self) -> Arc<ZebraMaster> {
+        Arc::new(ZebraMaster{})
+    }
+
     pub fn get_protocol(&self, p: &ProtocolType) -> Arc<ProtocolMaster + Send + Sync> {
         match p {
-            ProtocolType::Zebra => Arc::new(ZebraMaster{}),
             ProtocolType::Ospf => Arc::new(OspfMaster{}),
             ProtocolType::Bgp => Arc::new(BgpMaster{}),
             _ => panic!("Not supported")
@@ -110,17 +93,9 @@ impl RouterMaster {
         // Create channel from RouterMaster to ProtocolMaster
         let (sender, receiver) = mpsc::channel::<MasterToProto>();
         let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
-        let proto = self.factory.get_protocol(&ProtocolType::Zebra);
+        let zebra = self.factory.get_zebra();
         let handle = thread::spawn(move || {
-            loop {
-                proto.start();
-
-                // handle receiver chan
-
-                thread::sleep(Duration::from_secs(2));
-                sender_p2m.send(ProtoToMaster::TimerRegistration((1, 2)));
-                println!("*** sender sending timer reg");
-            }
+            zebra.start(sender_p2m);
 
             // TODO: may need some cleanup, before returning.
             ()
@@ -130,24 +105,15 @@ impl RouterMaster {
     }
 
     // Construct ProtocolMaster instance and spawn a thread.
-    fn spawn_master(&self, p: ProtocolType,
-                    sender_p2m: mpsc::Sender<ProtoToMaster>,
-                    sender_p2z: mpsc::Sender<ProtoToZebra>)
-                    -> (JoinHandle<()>, mpsc::Sender<MasterToProto>) {
+    fn spawn_protocol(&self, p: ProtocolType,
+                      sender_p2m: mpsc::Sender<ProtoToMaster>,
+                      sender_p2z: mpsc::Sender<ProtoToZebra>)
+                      -> (JoinHandle<()>, mpsc::Sender<MasterToProto>) {
         // Create channel from RouterMaster to ProtocolMaster
         let (sender, receiver) = mpsc::channel::<MasterToProto>();
-        let proto = self.factory.get_protocol(&p);
+        let protocol = self.factory.get_protocol(&p);
         let handle = thread::spawn(move || {
-            loop {
-                proto.start();
-
-                // handle receiver chan
-
-                thread::sleep(Duration::from_secs(2));
-                sender_p2m.send(ProtoToMaster::TimerRegistration((1, 2)));
-                println!("*** sender sending timer reg");
-            }
-
+            protocol.start(sender_p2m, sender_p2z);
             // TODO: may need some cleanup, before returning.
             ()
         });
@@ -166,8 +132,8 @@ impl RouterMaster {
 
         // Spawn ospf instance
         let (handle, sender) =
-            self.spawn_master(ProtocolType::Ospf, mpsc::Sender::clone(&sender_p2m),
-                              mpsc::Sender::clone(&sender_p2z));
+            self.spawn_protocol(ProtocolType::Ospf, mpsc::Sender::clone(&sender_p2m),
+                                mpsc::Sender::clone(&sender_p2z));
         self.masters.insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
         loop {
@@ -231,4 +197,5 @@ impl Future for BootStrapTask {
     }
 }
 */
+
 

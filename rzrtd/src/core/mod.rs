@@ -4,7 +4,7 @@
 //
 // Core module.
 //
+pub mod master;
 pub mod protocols;
-pub mod router_master;
 pub mod message;
 
