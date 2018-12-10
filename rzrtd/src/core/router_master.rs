@@ -9,17 +9,21 @@
 //   Run timer server and notify clients.
 //
 
-use std::io;
-use std::io::prelude::*;
+//use std::io;
+//use std::io::prelude::*;
+use std::collections::HashMap;
 use std::thread;
+use std::thread::JoinHandle;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::time::Duration;
 use std::marker::Send;
 
-use super::master_message::MessageToMaster;
-use super::master_message::MessageToProto;
 use super::protocols::ProtocolType;
+use super::message::master::ProtoToMaster;
+use super::message::master::MasterToProto;
+use super::message::zebra::ProtoToZebra;
+use super::message::zebra::ZebraToProto;
 
 trait ProtocolMaster {
     fn start(&self);
@@ -27,6 +31,8 @@ trait ProtocolMaster {
 }
 
 pub struct ZebraMaster {
+    // Zebra Message Receiver
+//    receiver: Cell<mpsc::Receiver<ProtoToZebra>>
 }
 
 impl ProtocolMaster for ZebraMaster {
@@ -50,6 +56,14 @@ impl ProtocolMaster for BgpMaster {
     }
 }
 
+struct MasterTuple {
+    // Thread Join handle
+    handle: JoinHandle<()>,
+
+    // Channel sender from Master To Protocol
+    sender: mpsc::Sender<MasterToProto>,
+}
+
 // Master Factory
 //   Each master runs its own thread, and contains all data to run protocol.
 //   Each master may communicate through several channels.
@@ -70,22 +84,12 @@ impl MasterFactory {
     }
 }
 
-/*
-impl Protocol {
-    pub fn get(p: &ProtocolType) -> Protocol {
-        match p {
-            ProtocolType::Zebra => Protocol::Zebra(Zebra {}),
-            ProtocolType::Ospf => Protocol::Ospf(Ospf {}),
-            ProtocolType::Bgp => Protocol::Bgp(Bgp {}),
-            _ => panic!("Not supported")
-        }
-    }
-}
- */
-
 pub struct RouterMaster {
     // Master Factory
     factory: MasterFactory,
+
+    // ProtocolMaster map
+    masters: HashMap<ProtocolType, MasterTuple>,
 
     // channel to zebra
     // timer facility
@@ -94,64 +98,77 @@ pub struct RouterMaster {
 
 impl RouterMaster {
     pub fn new() -> RouterMaster {
-        let factory = MasterFactory::new();
-
-        RouterMaster { factory }
+        RouterMaster {
+            factory: MasterFactory::new(),
+            masters: HashMap::new()
+        }
     }
 
-    // set returned sender channel with protocol id to map
-    pub fn proto_init(&self, p: &ProtocolType,
-                      sender_p2m: mpsc::Sender<MessageToMaster>)
-                      -> mpsc::Sender<MessageToProto> {
-        let (sender, receiver) = mpsc::channel::<MessageToProto>();
-        let proto = self.factory.get_protocol(&p);
-        let proto_t = thread::spawn(move || {
+    // Construct ProtocolMaster instance and spawn a thread.
+    fn spawn_zebra(&self, sender_p2m: mpsc::Sender<ProtoToMaster>)
+                   -> (JoinHandle<()>, mpsc::Sender<MasterToProto>, mpsc::Sender<ProtoToZebra>) {
+        // Create channel from RouterMaster to ProtocolMaster
+        let (sender, receiver) = mpsc::channel::<MasterToProto>();
+        let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
+        let proto = self.factory.get_protocol(&ProtocolType::Zebra);
+        let handle = thread::spawn(move || {
             loop {
                 proto.start();
 
                 // handle receiver chan
 
                 thread::sleep(Duration::from_secs(2));
-                sender_p2m.send(MessageToMaster::TimerRegistration((1, 2)));
+                sender_p2m.send(ProtoToMaster::TimerRegistration((1, 2)));
                 println!("*** sender sending timer reg");
             }
+
+            // TODO: may need some cleanup, before returning.
+            ()
         });
 
-        sender
+        (handle, sender, sender_p2z)
     }
 
-    pub fn run(&mut self) {
-        // Create multi sender channel.
-        let (sender_proto, receiver) = mpsc::channel::<MessageToMaster>();
+    // Construct ProtocolMaster instance and spawn a thread.
+    fn spawn_master(&self, p: ProtocolType,
+                    sender_p2m: mpsc::Sender<ProtoToMaster>,
+                    sender_p2z: mpsc::Sender<ProtoToZebra>)
+                    -> (JoinHandle<()>, mpsc::Sender<MasterToProto>) {
+        // Create channel from RouterMaster to ProtocolMaster
+        let (sender, receiver) = mpsc::channel::<MasterToProto>();
+        let proto = self.factory.get_protocol(&p);
+        let handle = thread::spawn(move || {
+            loop {
+                proto.start();
+
+                // handle receiver chan
+
+                thread::sleep(Duration::from_secs(2));
+                sender_p2m.send(ProtoToMaster::TimerRegistration((1, 2)));
+                println!("*** sender sending timer reg");
+            }
+
+            // TODO: may need some cleanup, before returning.
+            ()
+        });
+
+        (handle, sender)
+    }
+
+    pub fn start(&mut self) {
+        // Create multi sender channel from ProtocolMaster to RouterMaster
+        let (sender_p2m, receiver) = mpsc::channel::<ProtoToMaster>();
 
         // Spawn zebra instance
-        self.proto_init(&ProtocolType::Zebra, mpsc::Sender::clone(&sender_proto));
+        let (handle, sender, sender_p2z) =
+            self.spawn_zebra(mpsc::Sender::clone(&sender_p2m));
+        self.masters.insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
         // Spawn ospf instance
-        self.proto_init(&ProtocolType::Ospf, mpsc::Sender::clone(&sender_proto));
-
-        /*
-        let (chan_tx_m2p, chan_rx_m2p) = mpsc::channel::<MessageToProto>();
-        let sender = mpsc::Sender::clone(&sender_proto);
-        let zebra = thread::spawn(move || {
-            loop {
-                thread::sleep(Duration::from_secs(2));
-                sender.send(MessageToMaster::TimerRegistration((1, 2)));
-                println!("*** sender sending timer reg");
-            }
-        });
-        
-        // spawn ospf instance
-        let (chan_tx_m2p, chan_rx_m2p) = mpsc::channel::<MessageToProto>();
-        let sender = mpsc::Sender::clone(&sender_proto);
-        let ospf = thread::spawn(move || {
-            loop {
-                thread::sleep(Duration::from_secs(3));
-                sender.send(MessageToMaster::TimerRegistration((3, 4)));
-                println!("*** sender sending timer reg");
-            }
-        });
-         */
+        let (handle, sender) =
+            self.spawn_master(ProtocolType::Ospf, mpsc::Sender::clone(&sender_p2m),
+                              mpsc::Sender::clone(&sender_p2z));
+        self.masters.insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
         loop {
             // process CLI, API
@@ -160,10 +177,10 @@ impl RouterMaster {
             // process channel
             while let Ok(d) = receiver.try_recv() {
                 match d {
-                    MessageToMaster::TimerRegistration((x, y)) => {
+                    ProtoToMaster::TimerRegistration((x, y)) => {
                         println!("*** receive timer reg {} {}", x, y);
                     }
-                    MessageToMaster::ProtoTermination(i) => {
+                    ProtoToMaster::ProtoTermination(i) => {
                     }
                 }
             }

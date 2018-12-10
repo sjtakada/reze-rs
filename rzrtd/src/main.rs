@@ -12,7 +12,7 @@ fn main() {
     println!("ReZe RouterD started.");
 
     let mut master = RouterMaster::new();
-    master.run();
+    master.start();
 
     println!("ReZe RouterD terminated.");
 }

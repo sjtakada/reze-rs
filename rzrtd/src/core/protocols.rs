@@ -5,14 +5,14 @@
 // Protocols.
 //
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub enum ProtocolType {
     Master,
     Zebra,
     Rip,
     Ripng,
     Ospf,
-    Ospfv3,
+    OspfV3,
     Isis,
     Eigrp,
     Bgp,

@@ -13,14 +13,13 @@
 //   - Protocol Termination
 //
 
-pub enum MessageToMaster {
+pub enum ProtoToMaster {
     TimerRegistration((i32, i32)),
     ProtoTermination(i32)
 }
 
-pub enum MessageToProto {
+pub enum MasterToProto {
     TimerExpiration(i32),
     PostConfig((String, Vec<String>))
 }
-
 
