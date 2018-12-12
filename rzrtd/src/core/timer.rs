@@ -52,7 +52,6 @@ impl Server {
     pub fn pop_if_expired(&mut self) -> Option<Entry> {
         match self.heap.peek() {
             Some(entry) if entry.expiration < Instant::now() => {
-                println!("** selfpop {:?} {:?}", entry.expiration, Instant::now());
                 self.heap.pop()
             },
             _ => None,

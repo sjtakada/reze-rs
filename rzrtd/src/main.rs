@@ -3,16 +3,27 @@
 //   Copyright (C) 2018 Toshiaki Takada
 //
 
+#[macro_use] extern crate log;
+use log::{debug, info, warn, error};
+use simplelog::*;
+
 use rzrtd::core::master::RouterMaster;
 
 fn main() {
     // TODO: command line arguments.
 
+    // Init logger
+    CombinedLogger::init(
+        vec![
+            TermLogger::new(LevelFilter::Debug, Config::default()).unwrap()
+        ]
+    ).unwrap();
+
     // Start daemon
-    println!("ReZe RouterD started.");
+    info!("ReZe RouterD started.");
 
     let mut master = RouterMaster::new();
     master.start();
 
-    println!("ReZe RouterD terminated.");
+    info!("ReZe RouterD terminated.");
 }

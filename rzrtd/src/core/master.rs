@@ -9,6 +9,8 @@
 //   Run timer server and notify clients.
 //
 
+use log::debug;
+
 //use std::io;
 //use std::io::prelude::*;
 use std::collections::HashMap;
@@ -151,12 +153,12 @@ impl RouterMaster {
                 while let Ok(d) = receiver.try_recv() {
                     match d {
                         ProtoToMaster::TimerRegistration((p, d, token)) => {
-                            println!("*** receive timer reg {} {}", p, token);
+                            debug!("ProtoToMaster receive timer reg {} {}", p, token);
 
                             self.timer.register(p, d, token);
                         }
                         ProtoToMaster::ProtoTermination(i) => {
-                            println!("*** TBD");
+                            debug!("ProtoToMaster TBD");
                         }
                     }
                 }

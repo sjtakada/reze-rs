@@ -9,6 +9,8 @@ use std::thread;
 use std::time::Duration;
 use std::sync::mpsc;
 
+use log::debug;
+
 use super::super::core::message::master::ProtoToMaster;
 use super::super::core::message::master::MasterToProto;
 use super::super::core::message::zebra::ProtoToZebra;
@@ -25,13 +27,13 @@ impl ProtocolMaster for OspfMaster {
              sender_p2z: mpsc::Sender<ProtoToZebra>) {
 
         sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Ospf, Duration::from_secs(10), 1)));
-        println!("*** sender sending first timer reg");
+        debug!("OSPF Master: sender sending first timer reg");
         loop {
             while let Ok(d) = receiver_m2p.try_recv() {
-                println!("*** received timer expiration");
+                debug!("OSPF Master: received timer expiration");
                 sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Ospf,
                                                                   Duration::from_secs(10), 1)));
-                println!("*** sender sending another timer reg");
+                debug!("OSPF Master: sender sending another timer reg");
             }
 
             thread::sleep(Duration::from_millis(100));
