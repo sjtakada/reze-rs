@@ -13,8 +13,12 @@
 //   - Protocol Termination
 //
 
+use std::time::Duration;
+
+use super::super::protocols::ProtocolType;
+
 pub enum ProtoToMaster {
-    TimerRegistration((i32, i32)),
+    TimerRegistration((ProtocolType, Duration, i32)),
     ProtoTermination(i32)
 }
 

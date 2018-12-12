@@ -9,6 +9,7 @@ use std::time::Duration;
 use std::sync::mpsc;
 
 use super::super::core::message::master::ProtoToMaster;
+use super::super::core::protocols::ProtocolType;
 
 pub struct ZebraMaster {
     // Zebra Message Receiver
@@ -20,9 +21,11 @@ impl ZebraMaster {
         // Main loop for zebra
         loop {
             // handle receiver chan
-            thread::sleep(Duration::from_secs(2));
-            sender_p2m.send(ProtoToMaster::TimerRegistration((1, 2)));
-            println!("*** sender sending timer reg");
+//            thread::sleep(Duration::from_secs(2));
+//            sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Zebra, Duration::from_secs(5), 1)));
+//            println!("*** sender sending timer reg");
+
+            // TBD: TimerClient
         }
     }
 }

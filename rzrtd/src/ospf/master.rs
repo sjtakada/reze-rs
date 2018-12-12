@@ -10,8 +10,10 @@ use std::time::Duration;
 use std::sync::mpsc;
 
 use super::super::core::message::master::ProtoToMaster;
+use super::super::core::message::master::MasterToProto;
 use super::super::core::message::zebra::ProtoToZebra;
 use super::super::core::master::ProtocolMaster;
+use super::super::core::protocols::ProtocolType;
 
 pub struct OspfMaster {
 }
@@ -19,11 +21,20 @@ pub struct OspfMaster {
 impl ProtocolMaster for OspfMaster {
     fn start(&self,
              sender_p2m: mpsc::Sender<ProtoToMaster>,
+             receiver_m2p: mpsc::Receiver<MasterToProto>,
              sender_p2z: mpsc::Sender<ProtoToZebra>) {
+
+        sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Ospf, Duration::from_secs(10), 1)));
+        println!("*** sender sending first timer reg");
         loop {
-            thread::sleep(Duration::from_secs(2));
-            sender_p2m.send(ProtoToMaster::TimerRegistration((1, 2)));
-            println!("*** sender sending timer reg");
+            while let Ok(d) = receiver_m2p.try_recv() {
+                println!("*** received timer expiration");
+                sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Ospf,
+                                                                  Duration::from_secs(10), 1)));
+                println!("*** sender sending another timer reg");
+            }
+
+            thread::sleep(Duration::from_millis(100));
         }
     }
 }

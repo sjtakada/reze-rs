@@ -17,6 +17,7 @@ use std::thread::JoinHandle;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::time::Duration;
+use std::time::Instant;
 //use std::marker::Send;
 
 use super::protocols::ProtocolType;
@@ -25,6 +26,8 @@ use super::message::master::MasterToProto;
 use super::message::zebra::ProtoToZebra;
 use super::message::zebra::ZebraToProto;
 
+use super::timer;
+
 use super::super::zebra::master::ZebraMaster;
 use super::super::bgp::master::BgpMaster;
 use super::super::ospf::master::OspfMaster;
@@ -32,6 +35,7 @@ use super::super::ospf::master::OspfMaster;
 pub trait ProtocolMaster {
     fn start(&self,
              sender_p2m: mpsc::Sender<ProtoToMaster>,
+             receiver_m2p: mpsc::Receiver<MasterToProto>,
              sender_p2z: mpsc::Sender<ProtoToZebra>);
 //    fn finish(&self);
 }
@@ -74,8 +78,10 @@ pub struct RouterMaster {
     // ProtocolMaster map
     masters: HashMap<ProtocolType, MasterTuple>,
 
+    // Timer server
+    timer: timer::Server,
+
     // channel to zebra
-    // timer facility
     // command API handler
 }
 
@@ -83,7 +89,8 @@ impl RouterMaster {
     pub fn new() -> RouterMaster {
         RouterMaster {
             factory: MasterFactory::new(),
-            masters: HashMap::new()
+            masters: HashMap::new(),
+            timer: timer::Server::new()
         }
     }
 
@@ -110,15 +117,15 @@ impl RouterMaster {
                       sender_p2z: mpsc::Sender<ProtoToZebra>)
                       -> (JoinHandle<()>, mpsc::Sender<MasterToProto>) {
         // Create channel from RouterMaster to ProtocolMaster
-        let (sender, receiver) = mpsc::channel::<MasterToProto>();
+        let (sender_m2p, receiver_m2p) = mpsc::channel::<MasterToProto>();
         let protocol = self.factory.get_protocol(&p);
         let handle = thread::spawn(move || {
-            protocol.start(sender_p2m, sender_p2z);
+            protocol.start(sender_p2m, receiver_m2p, sender_p2z);
             // TODO: may need some cleanup, before returning.
             ()
         });
 
-        (handle, sender)
+        (handle, sender_m2p)
     }
 
     pub fn start(&mut self) {
@@ -134,27 +141,43 @@ impl RouterMaster {
         let (handle, sender) =
             self.spawn_protocol(ProtocolType::Ospf, mpsc::Sender::clone(&sender_p2m),
                                 mpsc::Sender::clone(&sender_p2z));
-        self.masters.insert(ProtocolType::Zebra, MasterTuple { handle, sender });
+        self.masters.insert(ProtocolType::Ospf, MasterTuple { handle, sender });
 
         loop {
-            // process CLI, API
+            // TBD: process CLI, API, poll()
 
-            println!("*** loop 1");
-            // process channel
-            while let Ok(d) = receiver.try_recv() {
-                match d {
-                    ProtoToMaster::TimerRegistration((x, y)) => {
-                        println!("*** receive timer reg {} {}", x, y);
-                    }
-                    ProtoToMaster::ProtoTermination(i) => {
+            // process channels
+            for m in &self.masters {
+                while let Ok(d) = receiver.try_recv() {
+                    match d {
+                        ProtoToMaster::TimerRegistration((p, d, token)) => {
+                            println!("*** receive timer reg {} {}", p, token);
+
+                            self.timer.register(p, d, token);
+                        }
+                        ProtoToMaster::ProtoTermination(i) => {
+                            println!("*** TBD");
+                        }
                     }
                 }
             }
 
-            println!("*** loop 3");
-            thread::sleep(Duration::from_secs(1));
+            thread::sleep(Duration::from_millis(100));
 
             // process timer
+            match self.timer.pop_if_expired() {
+                Some(entry) => {
+                    match self.masters.get(&entry.protocol) {
+                        Some(m) => {
+                            m.sender.send(MasterToProto::TimerExpiration(entry.token));
+                        }
+                        None => {
+                            panic!("error");
+                        }
+                    }
+                },
+                _ => { }
+            }
 
             // push expired event to channel
         }

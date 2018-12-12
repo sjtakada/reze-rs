@@ -7,4 +7,4 @@
 pub mod master;
 pub mod protocols;
 pub mod message;
-
+pub mod timer;
