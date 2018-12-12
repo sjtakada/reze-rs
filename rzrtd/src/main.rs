@@ -3,7 +3,6 @@
 //   Copyright (C) 2018 Toshiaki Takada
 //
 
-//#[macro_use] extern crate log;
 use log::info;
 use simplelog::*;
 

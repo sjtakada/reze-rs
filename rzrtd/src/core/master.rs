@@ -40,7 +40,6 @@ pub trait ProtocolMaster {
              receiver_m2p: mpsc::Receiver<MasterToProto>,
              sender_p2z: mpsc::Sender<ProtoToZebra>);
 //    fn finish(&self);
-
 }
 
 struct MasterTuple {
