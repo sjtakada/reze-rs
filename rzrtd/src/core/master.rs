@@ -19,7 +19,7 @@ use std::thread::JoinHandle;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::time::Duration;
-use std::time::Instant;
+//use std::time::Instant;
 //use std::marker::Send;
 
 use super::protocols::ProtocolType;
@@ -40,6 +40,7 @@ pub trait ProtocolMaster {
              receiver_m2p: mpsc::Receiver<MasterToProto>,
              sender_p2z: mpsc::Sender<ProtoToZebra>);
 //    fn finish(&self);
+
 }
 
 struct MasterTuple {
@@ -180,8 +181,6 @@ impl RouterMaster {
                 },
                 _ => { }
             }
-
-            // push expired event to channel
         }
     }
 }

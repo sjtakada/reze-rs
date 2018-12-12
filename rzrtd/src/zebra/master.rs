@@ -4,12 +4,13 @@
 //
 // Zebra Master
 //
-use std::thread;
-use std::time::Duration;
+
+//use std::thread;
+//use std::time::Duration;
 use std::sync::mpsc;
 
 use super::super::core::message::master::ProtoToMaster;
-use super::super::core::protocols::ProtocolType;
+//use super::super::core::protocols::ProtocolType;
 
 pub struct ZebraMaster {
     // Zebra Message Receiver

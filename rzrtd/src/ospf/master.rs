@@ -4,7 +4,7 @@
 //
 // OSPF Master
 //
-//use super::master::ProtocolMaster;
+
 use std::thread;
 use std::time::Duration;
 use std::sync::mpsc;

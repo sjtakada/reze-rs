@@ -3,8 +3,8 @@
 //   Copyright (C) 2018 Toshiaki Takada
 //
 
-#[macro_use] extern crate log;
-use log::{debug, info, warn, error};
+//#[macro_use] extern crate log;
+use log::info;
 use simplelog::*;
 
 use rzrtd::core::master::RouterMaster;
