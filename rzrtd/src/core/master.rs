@@ -18,6 +18,8 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::sync::mpsc;
 use std::sync::Arc;
+//use std::rc::Rc;
+use std::boxed::Box;
 use std::time::Duration;
 //use std::time::Instant;
 //use std::marker::Send;
@@ -34,7 +36,20 @@ use super::super::zebra::master::ZebraMaster;
 use super::super::bgp::master::BgpMaster;
 use super::super::ospf::master::OspfMaster;
 
-pub trait ProtocolMaster {
+pub struct ProtocolMaster {
+    inner: Box<MasterInner + Send + Sync>,
+}
+
+impl ProtocolMaster {
+    pub fn start(&self,
+             sender_p2m: mpsc::Sender<ProtoToMaster>,
+             receiver_m2p: mpsc::Receiver<MasterToProto>,
+             sender_p2z: mpsc::Sender<ProtoToZebra>) {
+        self.inner.start(sender_p2m, receiver_m2p, sender_p2z);
+    }
+}
+
+pub trait MasterInner {
     fn start(&self,
              sender_p2m: mpsc::Sender<ProtoToMaster>,
              receiver_m2p: mpsc::Receiver<MasterToProto>,
@@ -57,18 +72,20 @@ struct MasterFactory;
 
 impl MasterFactory {
     pub fn new() -> MasterFactory {
-        MasterFactory {}
+        MasterFactory { }
     }
 
-    pub fn get_zebra(&self) -> Arc<ZebraMaster> {
-        Arc::new(ZebraMaster{})
+    pub fn get_zebra(&self) -> ZebraMaster {
+        ZebraMaster { }
     }
 
-    pub fn get_protocol(&self, p: &ProtocolType) -> Arc<ProtocolMaster + Send + Sync> {
-        match p {
-            ProtocolType::Ospf => Arc::new(OspfMaster{}),
-            ProtocolType::Bgp => Arc::new(BgpMaster{}),
-            _ => panic!("Not supported")
+    pub fn get_protocol(&self, p: &ProtocolType) -> ProtocolMaster {
+        ProtocolMaster {
+            inner: match p {
+                ProtocolType::Ospf => Box::new(OspfMaster { }),
+                ProtocolType::Bgp => Box::new(BgpMaster { }),
+                _ => panic!("Not supported")
+            }
         }
     }
 }
@@ -77,7 +94,7 @@ pub struct RouterMaster {
     // Master Factory
     factory: MasterFactory,
 
-    // ProtocolMaster map
+    // MasterInner map
     masters: HashMap<ProtocolType, MasterTuple>,
 
     // Timer server
@@ -96,29 +113,29 @@ impl RouterMaster {
         }
     }
 
-    // Construct ProtocolMaster instance and spawn a thread.
+    // Construct MasterInner instance and spawn a thread.
     fn spawn_zebra(&self, sender_p2m: mpsc::Sender<ProtoToMaster>)
                    -> (JoinHandle<()>, mpsc::Sender<MasterToProto>, mpsc::Sender<ProtoToZebra>) {
-        // Create channel from RouterMaster to ProtocolMaster
-        let (sender, receiver) = mpsc::channel::<MasterToProto>();
+        // Create channel from RouterMaster to MasterInner
+        let (sender_m2p, receiver_m2p) = mpsc::channel::<MasterToProto>();
         let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
         let zebra = self.factory.get_zebra();
         let handle = thread::spawn(move || {
-            zebra.start(sender_p2m);
+            zebra.start(sender_p2m, receiver_m2p);
 
             // TODO: may need some cleanup, before returning.
             ()
         });
 
-        (handle, sender, sender_p2z)
+        (handle, sender_m2p, sender_p2z)
     }
 
-    // Construct ProtocolMaster instance and spawn a thread.
+    // Construct MasterInner instance and spawn a thread.
     fn spawn_protocol(&self, p: ProtocolType,
                       sender_p2m: mpsc::Sender<ProtoToMaster>,
                       sender_p2z: mpsc::Sender<ProtoToZebra>)
                       -> (JoinHandle<()>, mpsc::Sender<MasterToProto>) {
-        // Create channel from RouterMaster to ProtocolMaster
+        // Create channel from RouterMaster to MasterInner
         let (sender_m2p, receiver_m2p) = mpsc::channel::<MasterToProto>();
         let protocol = self.factory.get_protocol(&p);
         let handle = thread::spawn(move || {
@@ -131,7 +148,7 @@ impl RouterMaster {
     }
 
     pub fn start(&mut self) {
-        // Create multi sender channel from ProtocolMaster to RouterMaster
+        // Create multi sender channel from MasterInner to RouterMaster
         let (sender_p2m, receiver) = mpsc::channel::<ProtoToMaster>();
 
         // Spawn zebra instance
