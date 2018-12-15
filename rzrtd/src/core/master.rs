@@ -38,6 +38,8 @@ use super::super::ospf::master::OspfMaster;
 
 pub struct ProtocolMaster {
     inner: Box<MasterInner + Send + Sync>,
+
+    timers: timer::Client,
 }
 
 impl ProtocolMaster {
@@ -45,7 +47,7 @@ impl ProtocolMaster {
              sender_p2m: mpsc::Sender<ProtoToMaster>,
              receiver_m2p: mpsc::Receiver<MasterToProto>,
              sender_p2z: mpsc::Sender<ProtoToZebra>) {
-        self.inner.start(sender_p2m, receiver_m2p, sender_p2z);
+        //self.inner.start(sender_p2m, receiver_m2p, sender_p2z);
     }
 }
 
@@ -85,7 +87,8 @@ impl MasterFactory {
                 ProtocolType::Ospf => Box::new(OspfMaster { }),
                 ProtocolType::Bgp => Box::new(BgpMaster { }),
                 _ => panic!("Not supported")
-            }
+            },
+            timers: timer::Client::new()
         }
     }
 }

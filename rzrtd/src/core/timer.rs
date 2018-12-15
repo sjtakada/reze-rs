@@ -7,10 +7,14 @@
 
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
+use std::collections::HashMap;
+use std::sync::Arc;
 use std::time::Instant;
 use std::time::Duration;
 
 use super::protocols::ProtocolType;
+use super::master::ProtocolMaster;
+use super::event;
 
 // Timer entry
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -59,3 +63,28 @@ impl Server {
     }
 }
 
+// Timer client
+pub struct Client {
+//    master: ProtocolMaster,
+
+    token: u32,
+
+    timers: HashMap<u32, Arc<event::EventHandler + Send + Sync>>,
+}
+
+impl Client {
+    pub fn new() -> Client {
+        Client {
+//            master: master,
+            token: 0u32,
+            timers: HashMap::new()
+        }
+    }
+
+    pub fn register(&mut self, handler: Arc<event::EventHandler + Send + Sync>, d: Duration) {
+        self.timers.insert(self.token, handler);
+        self.token += 1;
+    }
+
+    // pub fn unregister()
+}
