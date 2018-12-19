@@ -87,36 +87,8 @@ struct MasterTuple {
     sender: mpsc::Sender<MasterToProto>,
 }
 
-// Master Factory
-//   Each master runs its own thread, and contains all data to run protocol.
-//   Each master may communicate through several channels.
-struct MasterFactory;
-
-impl MasterFactory {
-    pub fn new() -> MasterFactory {
-        MasterFactory { }
-    }
-
-    pub fn get_zebra(&self) -> ZebraMaster {
-        ZebraMaster { }
-    }
-
-//    pub fn get_protocol(&self, p: &ProtocolType) -> ProtocolMaster {
-//        ProtocolMaster {
-//            inner: match p {
-//                ProtocolType::Ospf => Box::new(OspfMaster { }),
-//                ProtocolType::Bgp => Box::new(BgpMaster { }),
-//                _ => panic!("Not supported")
-//            },
-//            timers: timer::Client::new()
-//        }
-//    }
-}
 
 pub struct RouterMaster {
-    // Master Factory
-    factory: MasterFactory,
-
     // MasterInner map
     masters: HashMap<ProtocolType, MasterTuple>,
 
@@ -130,7 +102,6 @@ pub struct RouterMaster {
 impl RouterMaster {
     pub fn new() -> RouterMaster {
         RouterMaster {
-            factory: MasterFactory::new(),
             masters: HashMap::new(),
             timer: timer::Server::new()
         }
@@ -142,8 +113,8 @@ impl RouterMaster {
         // Create channel from RouterMaster to MasterInner
         let (sender_m2p, receiver_m2p) = mpsc::channel::<MasterToProto>();
         let (sender_p2z, _receiver_p2z) = mpsc::channel::<ProtoToZebra>();
-        let zebra = self.factory.get_zebra();
         let handle = thread::spawn(move || {
+            let zebra = ZebraMaster { };
             zebra.start(sender_p2m, receiver_m2p);
 
             // TODO: may need some cleanup, before returning.
