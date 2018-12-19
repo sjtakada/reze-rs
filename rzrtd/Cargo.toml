@@ -11,5 +11,6 @@ mio = "0.6.16"
 thread-id = "3.3.0"
 
 # maybe not used
+#lazycell = "1.2.1"
 #tokio = "0.1.11"
 #futures = "0.1.25"

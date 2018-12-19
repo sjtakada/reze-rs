@@ -9,6 +9,7 @@ use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::cell::RefCell;
 use std::time::Instant;
 use std::time::Duration;
 
@@ -65,23 +66,28 @@ impl Server {
 
 // Timer client
 pub struct Client {
-//    master: ProtocolMaster,
+    // Parent  
+    master: RefCell<Arc<ProtocolMaster>>,
 
+    // Token
     token: u32,
 
+    // Token to EventHandler map
     timers: HashMap<u32, Arc<event::EventHandler + Send + Sync>>,
 }
 
+// Timer client implementation
 impl Client {
-    pub fn new() -> Client {
+    // Constructor
+    pub fn new(master: Arc<ProtocolMaster>) -> Client {
         Client {
-//            master: master,
+            master: RefCell::new(master),
             token: 0u32,
             timers: HashMap::new()
         }
     }
 
-    pub fn register(&mut self, handler: Arc<event::EventHandler + Send + Sync>, d: Duration) {
+    pub fn register(&mut self, handler: Arc<event::EventHandler + Send + Sync>, _d: Duration) {
         self.timers.insert(self.token, handler);
         self.token += 1;
     }

@@ -20,6 +20,8 @@ use std::sync::mpsc;
 use std::sync::Arc;
 //use std::rc::Rc;
 use std::boxed::Box;
+//use std::cell::Cell;
+use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
 //use std::marker::Send;
@@ -28,7 +30,7 @@ use super::protocols::ProtocolType;
 use super::message::master::ProtoToMaster;
 use super::message::master::MasterToProto;
 use super::message::zebra::ProtoToZebra;
-use super::message::zebra::ZebraToProto;
+//use super::message::zebra::ZebraToProto;
 
 use super::timer;
 
@@ -37,25 +39,43 @@ use super::super::bgp::master::BgpMaster;
 use super::super::ospf::master::OspfMaster;
 
 pub struct ProtocolMaster {
+    // Protocol specific inner
     inner: Box<MasterInner + Send + Sync>,
 
-    timers: timer::Client,
+    // Timer
+    timers: RefCell<Option<timer::Client>>,
 }
 
 impl ProtocolMaster {
+    pub fn new(p: ProtocolType) -> ProtocolMaster {
+        ProtocolMaster {
+            inner: match p {
+                ProtocolType::Ospf => Box::new(OspfMaster { }),
+                ProtocolType::Bgp => Box::new(BgpMaster { }),
+                _ => panic!("Not supported")
+            },
+            timers: RefCell::new(None),
+        }
+    }
+
     pub fn start(&self,
-             sender_p2m: mpsc::Sender<ProtoToMaster>,
-             receiver_m2p: mpsc::Receiver<MasterToProto>,
-             sender_p2z: mpsc::Sender<ProtoToZebra>) {
+                 _sender_p2m: mpsc::Sender<ProtoToMaster>,
+                 _receiver_m2p: mpsc::Receiver<MasterToProto>,
+                 _sender_p2z: mpsc::Sender<ProtoToZebra>) {
         //self.inner.start(sender_p2m, receiver_m2p, sender_p2z);
+    }
+
+    pub fn timers_set(&self, timers: timer::Client) {
+        self.timers.borrow_mut().replace(timers);
     }
 }
 
 pub trait MasterInner {
     fn start(&self,
-             sender_p2m: mpsc::Sender<ProtoToMaster>,
-             receiver_m2p: mpsc::Receiver<MasterToProto>,
-             sender_p2z: mpsc::Sender<ProtoToZebra>);
+             _sender_p2m: mpsc::Sender<ProtoToMaster>,
+             _receiver_m2p: mpsc::Receiver<MasterToProto>,
+             _sender_p2z: mpsc::Sender<ProtoToZebra>);
+
 //    fn finish(&self);
 }
 
@@ -81,16 +101,16 @@ impl MasterFactory {
         ZebraMaster { }
     }
 
-    pub fn get_protocol(&self, p: &ProtocolType) -> ProtocolMaster {
-        ProtocolMaster {
-            inner: match p {
-                ProtocolType::Ospf => Box::new(OspfMaster { }),
-                ProtocolType::Bgp => Box::new(BgpMaster { }),
-                _ => panic!("Not supported")
-            },
-            timers: timer::Client::new()
-        }
-    }
+//    pub fn get_protocol(&self, p: &ProtocolType) -> ProtocolMaster {
+//        ProtocolMaster {
+//            inner: match p {
+//                ProtocolType::Ospf => Box::new(OspfMaster { }),
+//                ProtocolType::Bgp => Box::new(BgpMaster { }),
+//                _ => panic!("Not supported")
+//            },
+//            timers: timer::Client::new()
+//        }
+//    }
 }
 
 pub struct RouterMaster {
@@ -121,7 +141,7 @@ impl RouterMaster {
                    -> (JoinHandle<()>, mpsc::Sender<MasterToProto>, mpsc::Sender<ProtoToZebra>) {
         // Create channel from RouterMaster to MasterInner
         let (sender_m2p, receiver_m2p) = mpsc::channel::<MasterToProto>();
-        let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
+        let (sender_p2z, _receiver_p2z) = mpsc::channel::<ProtoToZebra>();
         let zebra = self.factory.get_zebra();
         let handle = thread::spawn(move || {
             zebra.start(sender_p2m, receiver_m2p);
@@ -140,8 +160,12 @@ impl RouterMaster {
                       -> (JoinHandle<()>, mpsc::Sender<MasterToProto>) {
         // Create channel from RouterMaster to MasterInner
         let (sender_m2p, receiver_m2p) = mpsc::channel::<MasterToProto>();
-        let protocol = self.factory.get_protocol(&p);
+
         let handle = thread::spawn(move || {
+            let protocol = Arc::new(ProtocolMaster::new(p));
+            let timers = timer::Client::new(protocol.clone());
+            protocol.timers_set(timers);
+
             protocol.start(sender_p2m, receiver_m2p, sender_p2z);
             // TODO: may need some cleanup, before returning.
             ()
@@ -169,7 +193,7 @@ impl RouterMaster {
             // TBD: process CLI, API, poll()
 
             // process channels
-            for m in &self.masters {
+            for _m in &self.masters {
                 while let Ok(d) = receiver.try_recv() {
                     match d {
                         ProtoToMaster::TimerRegistration((p, d, token)) => {
@@ -177,7 +201,7 @@ impl RouterMaster {
 
                             self.timer.register(p, d, token);
                         }
-                        ProtoToMaster::ProtoTermination(i) => {
+                        ProtoToMaster::ProtoTermination(_i) => {
                             debug!("ProtoToMaster TBD");
                         }
                     }
@@ -191,7 +215,13 @@ impl RouterMaster {
                 Some(entry) => {
                     match self.masters.get(&entry.protocol) {
                         Some(m) => {
-                            m.sender.send(MasterToProto::TimerExpiration(entry.token));
+                            let result =
+                                m.sender.send(MasterToProto::TimerExpiration(entry.token));
+                            // TODO
+                            match result {
+                                Ok(_ret) => {},
+                                Err(_err) => {}
+                            }
                         }
                         None => {
                             panic!("error");

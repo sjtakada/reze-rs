@@ -24,15 +24,29 @@ impl MasterInner for OspfMaster {
     fn start(&self,
              sender_p2m: mpsc::Sender<ProtoToMaster>,
              receiver_m2p: mpsc::Receiver<MasterToProto>,
-             sender_p2z: mpsc::Sender<ProtoToZebra>) {
+             _sender_p2z: mpsc::Sender<ProtoToZebra>) {
 
-        sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Ospf, Duration::from_secs(10), 1)));
+        let result =
+            sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Ospf, Duration::from_secs(10), 1)));
+        // TODO
+        match result {
+            Ok(_ret) => {},
+            Err(_err) => {}
+        }
+        
         debug!("OSPF Master: sender sending first timer reg");
         loop {
-            while let Ok(d) = receiver_m2p.try_recv() {
+            while let Ok(_d) = receiver_m2p.try_recv() {
                 debug!("OSPF Master: received timer expiration");
-                sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Ospf,
-                                                                  Duration::from_secs(10), 1)));
+                let result =
+                    sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Ospf,
+                                                                      Duration::from_secs(10), 1)));
+                // TODO
+                match result {
+                    Ok(_ret) => {},
+                    Err(_err) => {}
+                }
+
                 debug!("OSPF Master: sender sending another timer reg");
             }
 

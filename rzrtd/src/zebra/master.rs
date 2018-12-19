@@ -17,8 +17,8 @@ pub struct ZebraMaster {
 
 impl ZebraMaster {
     pub fn start(&self,
-                 sender_p2m: mpsc::Sender<ProtoToMaster>,
-                 receiver_m2p: mpsc::Receiver<MasterToProto>) {
+                 _sender_p2m: mpsc::Sender<ProtoToMaster>,
+                 _receiver_m2p: mpsc::Receiver<MasterToProto>) {
         // Main loop for zebra
         loop {
             // handle receiver chan
