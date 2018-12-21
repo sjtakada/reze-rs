@@ -40,29 +40,32 @@ use super::super::ospf::master::OspfMaster;
 
 pub struct ProtocolMaster {
     // Protocol specific inner
-    inner: Box<MasterInner + Send + Sync>,
+//    inner: Box<MasterInner/* + Send + Sync*/>,
+    inner: RefCell<Option<Box<MasterInner>>>,
 
     // Timer
     timers: RefCell<Option<timer::Client>>,
 }
 
 impl ProtocolMaster {
-    pub fn new(p: ProtocolType) -> ProtocolMaster {
+    pub fn new(_p: ProtocolType) -> ProtocolMaster {
         ProtocolMaster {
-            inner: match p {
-                ProtocolType::Ospf => Box::new(OspfMaster { }),
-                ProtocolType::Bgp => Box::new(BgpMaster { }),
-                _ => panic!("Not supported")
-            },
+            inner: RefCell::new(None),
             timers: RefCell::new(None),
         }
     }
 
     pub fn start(&self,
-                 _sender_p2m: mpsc::Sender<ProtoToMaster>,
-                 _receiver_m2p: mpsc::Receiver<MasterToProto>,
-                 _sender_p2z: mpsc::Sender<ProtoToZebra>) {
-        //self.inner.start(sender_p2m, receiver_m2p, sender_p2z);
+                 sender_p2m: mpsc::Sender<ProtoToMaster>,
+                 receiver_m2p: mpsc::Receiver<MasterToProto>,
+                 sender_p2z: mpsc::Sender<ProtoToZebra>) {
+        if let Some(ref mut inner) = *self.inner.borrow_mut() {
+            inner.start(sender_p2m, receiver_m2p, sender_p2z);
+        }
+    }
+
+    pub fn inner_set(&self, inner: Box<MasterInner>) {
+        self.inner.borrow_mut().replace(inner);
     }
 
     pub fn timers_set(&self, timers: timer::Client) {
@@ -72,9 +75,9 @@ impl ProtocolMaster {
 
 pub trait MasterInner {
     fn start(&self,
-             _sender_p2m: mpsc::Sender<ProtoToMaster>,
-             _receiver_m2p: mpsc::Receiver<MasterToProto>,
-             _sender_p2z: mpsc::Sender<ProtoToZebra>);
+             sender_p2m: mpsc::Sender<ProtoToMaster>,
+             receiver_m2p: mpsc::Receiver<MasterToProto>,
+             sender_p2z: mpsc::Sender<ProtoToZebra>);
 
 //    fn finish(&self);
 }
@@ -134,9 +137,14 @@ impl RouterMaster {
 
         let handle = thread::spawn(move || {
             let protocol = Arc::new(ProtocolMaster::new(p));
-            let timers = timer::Client::new(protocol.clone());
-            protocol.timers_set(timers);
+            protocol.inner_set(
+                match p {
+                    ProtocolType::Ospf => Box::new(OspfMaster::new(protocol.clone())),
+                    ProtocolType::Bgp => Box::new(BgpMaster::new(protocol.clone())),
+                    _ => panic!("Not supported")
+                });
 
+            protocol.timers_set(timer::Client::new(protocol.clone()));
             protocol.start(sender_p2m, receiver_m2p, sender_p2z);
             // TODO: may need some cleanup, before returning.
             ()
