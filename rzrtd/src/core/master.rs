@@ -26,6 +26,7 @@ use std::time::Duration;
 //use std::time::Instant;
 //use std::marker::Send;
 
+use super::event::EventHandler;
 use super::protocols::ProtocolType;
 use super::message::master::ProtoToMaster;
 use super::message::master::MasterToProto;
@@ -45,6 +46,12 @@ pub struct ProtocolMaster {
 
     // Timer
     timers: RefCell<Option<timer::Client>>,
+
+    // Sender channel for Protocol to Master Message
+    sender_p2m: RefCell<Option<mpsc::Sender<ProtoToMaster>>>,
+
+    // Sender channel for Protocol to Zebra Message
+    sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 }
 
 impl ProtocolMaster {
@@ -52,6 +59,8 @@ impl ProtocolMaster {
         ProtocolMaster {
             inner: RefCell::new(None),
             timers: RefCell::new(None),
+            sender_p2m: RefCell::new(None),
+            sender_p2z: RefCell::new(None),
         }
     }
 
@@ -60,7 +69,31 @@ impl ProtocolMaster {
                  receiver_m2p: mpsc::Receiver<MasterToProto>,
                  sender_p2z: mpsc::Sender<ProtoToZebra>) {
         if let Some(ref mut inner) = *self.inner.borrow_mut() {
-            inner.start(sender_p2m, receiver_m2p, sender_p2z);
+            self.sender_p2m.borrow_mut().replace(sender_p2m);
+            self.sender_p2z.borrow_mut().replace(sender_p2z);
+
+            inner.start();
+
+            loop {
+                while let Ok(_d) = receiver_m2p.try_recv() {
+                    // if timer expiration callback
+                }
+
+                thread::sleep(Duration::from_millis(100));
+            }
+        }
+    }
+
+    pub fn timer_register(&self, p: ProtocolType, d: Duration, handler: &EventHandler) {
+        if let Some(ref mut sender) = *self.sender_p2m.borrow_mut() {
+            let result = sender.send(ProtoToMaster::TimerRegistration((p, d, 1)));
+
+            debug!("*** ");
+
+            match result {
+                Ok(_ret) => { println!("Ok") },
+                Err(err) => { println!("Err {}", err) }
+            }
         }
     }
 
@@ -74,10 +107,10 @@ impl ProtocolMaster {
 }
 
 pub trait MasterInner {
-    fn start(&self,
-             sender_p2m: mpsc::Sender<ProtoToMaster>,
-             receiver_m2p: mpsc::Receiver<MasterToProto>,
-             sender_p2z: mpsc::Sender<ProtoToZebra>);
+    fn start(&self);
+//             sender_p2m: mpsc::Sender<ProtoToMaster>,
+//             receiver_m2p: mpsc::Receiver<MasterToProto>,
+//             sender_p2z: mpsc::Sender<ProtoToZebra>);
 
 //    fn finish(&self);
 }
