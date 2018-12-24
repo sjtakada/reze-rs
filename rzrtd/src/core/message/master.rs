@@ -18,12 +18,12 @@ use std::time::Duration;
 use super::super::protocols::ProtocolType;
 
 pub enum ProtoToMaster {
-    TimerRegistration((ProtocolType, Duration, i32)),
+    TimerRegistration((ProtocolType, Duration, u32)),
     ProtoTermination(i32)
 }
 
 pub enum MasterToProto {
-    TimerExpiration(i32),
+    TimerExpiration(u32),
     PostConfig((String, Vec<String>))
 }
 

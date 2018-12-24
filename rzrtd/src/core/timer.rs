@@ -22,7 +22,7 @@ use super::event;
 pub struct Entry {
     pub protocol: ProtocolType,
     pub expiration: Instant,
-    pub token: i32,
+    pub token: u32,
 }
 
 impl Ord for Entry {
@@ -47,7 +47,7 @@ impl Server {
         Server { heap: BinaryHeap::new() }
     }
 
-    pub fn register(&mut self, protocol: ProtocolType, d: Duration, token: i32) {
+    pub fn register(&mut self, protocol: ProtocolType, d: Duration, token: u32) {
         let entry = Entry { protocol: protocol, expiration: Instant::now() + d, token: token };
         self.heap.push(entry);
     }
@@ -87,9 +87,16 @@ impl Client {
         }
     }
 
-    pub fn register(&mut self, handler: Arc<event::EventHandler + Send + Sync>, _d: Duration) {
-        self.timers.insert(self.token, handler);
+    pub fn register(&mut self, handler: Arc<event::EventHandler + Send + Sync>, _d: Duration) -> u32 {
+        let token = self.token;
+        self.timers.insert(token, handler);
         self.token += 1;
+
+        token
+    }
+
+    pub fn unregister(&mut self, token: u32) -> Option<Arc<event::EventHandler + Send + Sync>> {
+        self.timers.remove(&token)
     }
 
     // pub fn unregister()

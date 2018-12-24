@@ -26,7 +26,7 @@ use std::time::Duration;
 //use std::time::Instant;
 //use std::marker::Send;
 
-use super::event::EventHandler;
+use super::event::*;
 use super::protocols::ProtocolType;
 use super::message::master::ProtoToMaster;
 use super::message::master::MasterToProto;
@@ -41,7 +41,6 @@ use super::super::ospf::master::OspfMaster;
 
 pub struct ProtocolMaster {
     // Protocol specific inner
-//    inner: Box<MasterInner/* + Send + Sync*/>,
     inner: RefCell<Option<Box<MasterInner>>>,
 
     // Timer
@@ -75,8 +74,26 @@ impl ProtocolMaster {
             inner.start();
 
             loop {
-                while let Ok(_d) = receiver_m2p.try_recv() {
-                    // if timer expiration callback
+                while let Ok(d) = receiver_m2p.try_recv() {
+                    match d {
+                        MasterToProto::TimerExpiration(token) => {
+                            debug!("Received TimerExpiration with token {}", token);
+
+                            if let Some(ref mut timers) = *self.timers.borrow_mut() {
+                                match timers.unregister(token) {
+                                    Some(handler) => {
+                                        handler.handle(EventType::TimerEvent);
+                                    },
+                                    None => {
+                                        debug!("*** handler doesn't exist");
+                                    }
+                                }
+                            }
+                        },
+                        _ => {
+                            debug!("Not implemented");
+                        }
+                    }
                 }
 
                 thread::sleep(Duration::from_millis(100));
@@ -84,15 +101,20 @@ impl ProtocolMaster {
         }
     }
 
-    pub fn timer_register(&self, p: ProtocolType, d: Duration, handler: &EventHandler) {
+    // TODO: may return value
+    pub fn timer_register(&self, p: ProtocolType, d: Duration, handler: Arc<EventHandler + Send + Sync>) {
         if let Some(ref mut sender) = *self.sender_p2m.borrow_mut() {
-            let result = sender.send(ProtoToMaster::TimerRegistration((p, d, 1)));
+            if let Some(ref mut timers) = *self.timers.borrow_mut() {
+                let token = timers.register(handler, d);
+                let result = sender.send(ProtoToMaster::TimerRegistration((p, d, token)));
 
-            debug!("*** ");
+                debug!("*** timer registration with token {}", token);
 
-            match result {
-                Ok(_ret) => { println!("Ok") },
-                Err(err) => { println!("Err {}", err) }
+                match result {
+                    // TODO
+                    Ok(_ret) => { println!("Ok") },
+                    Err(err) => { println!("Err {}", err) }
+                }
             }
         }
     }
