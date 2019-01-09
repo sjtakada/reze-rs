@@ -8,10 +8,9 @@
 //use std::thread;
 use std::time::Duration;
 use std::sync::Arc;
-use std::cell::Cell;
+use std::sync::Weak;
+//use std::cell::Cell;
 use std::cell::RefCell;
-use std::marker::Send;
-use std::marker::Sync;
 
 use log::debug;
 
@@ -24,7 +23,7 @@ use super::super::core::master::ProtocolMaster;
 use super::super::core::master::MasterInner;
 use super::super::core::protocols::ProtocolType;
 
-pub struct OspfMaster {
+pub struct OspfMasterInner {
     // TODO: ??? could it be just reference ???
     master: RefCell<Arc<ProtocolMaster>>,
 
@@ -32,41 +31,87 @@ pub struct OspfMaster {
     ospf: RefCell<Vec<Arc<Ospf>>>,
 }
 
-impl OspfMaster {
-    pub fn new(master: Arc<ProtocolMaster>) -> OspfMaster {
-        OspfMaster { master: RefCell::new(master),
-                     ospf: RefCell::new(Vec::new()) }
+impl OspfMasterInner {
+    pub fn new(master: Arc<ProtocolMaster>) -> OspfMasterInner {
+        OspfMasterInner { master: RefCell::new(master),
+                          ospf: RefCell::new(Vec::new()) }
     }
 }
 
-impl MasterInner for OspfMaster {
+impl MasterInner for OspfMasterInner {
     fn start(&self) {
+        // Create OSPF instance and Inner and reference each other
         let master = self.master.borrow();
-        let ospf = Arc::new(Ospf { });
+        let ospf = Arc::new(Ospf::new(master.clone()));
+        let inner = OspfInner{ ospf: Arc::downgrade(&ospf) };
+        ospf.inner.replace(Some(inner));
+
+        // Set OSPF instance to vector
         self.ospf.borrow_mut().push(ospf.clone());
 
-        master.timer_register(ProtocolType::Ospf, Duration::from_secs(10), ospf.clone());
+        // Start OSPF hello timer
+        ospf.start();
 
-        debug!("OSPF Master: sender sending first timer reg");
+        debug!("OSPF Master: sent first timer reg");
     }
 }
 
-
-//unsafe impl Send for Ospf {}
-//unsafe impl Sync for Ospf {}
-
-struct Ospf {
-
+struct OspfHelloTimer {
+    ospf: Weak<Ospf>
 }
 
-impl EventHandler for Ospf {
+unsafe impl Send for OspfHelloTimer {}
+unsafe impl Sync for OspfHelloTimer {}
+
+struct OspfInner {
+    ospf: Weak<Ospf>
+}
+
+impl OspfInner {
+    // Start Hello Timer
+    pub fn start(&self) {
+        let timer = OspfHelloTimer { ospf: self.ospf.clone() };
+        if let Some(ospf) = self.ospf.upgrade() {
+            let master = ospf.master.borrow();
+            master.timer_register(ProtocolType::Ospf, Duration::from_secs(10), Arc::new(timer));
+        }
+    }
+}
+
+struct Ospf {
+    master: RefCell<Arc<ProtocolMaster>>,
+
+    inner: RefCell<Option<OspfInner>>
+}
+
+impl Ospf {
+    pub fn new(master: Arc<ProtocolMaster>) -> Ospf {
+        Ospf {
+            master: RefCell::new(master),
+            inner: RefCell::new(None),
+        }
+    }
+
+    pub fn start(&self) {
+        if let Some(ref mut inner) = *self.inner.borrow_mut() {
+            inner.start();
+        }
+    }
+}
+
+impl EventHandler for OspfHelloTimer {
     fn handle(&self, e: EventType) {
         match e {
-            // XXX: timer expire, send another hello
             EventType::TimerEvent => {
-                println!("*** receive tiemr expiration");
+                debug!("Hello Timer fired");
+                if let Some(ospf) = self.ospf.upgrade() {
+                    debug!("Restart Hello Timer");
+                    ospf.start();
+                }
             }
-            _ => { println!("*** handle_event") }
+            _ => {
+                debug!("Unknown event");
+            }
         }
     }
 }

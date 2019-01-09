@@ -25,6 +25,7 @@ use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
 //use std::marker::Send;
+use std::sync::Mutex;
 
 use super::event::*;
 use super::protocols::ProtocolType;
@@ -37,7 +38,7 @@ use super::timer;
 
 use super::super::zebra::master::ZebraMaster;
 use super::super::bgp::master::BgpMaster;
-use super::super::ospf::master::OspfMaster;
+use super::super::ospf::master::OspfMasterInner;
 
 pub struct ProtocolMaster {
     // Protocol specific inner
@@ -51,6 +52,9 @@ pub struct ProtocolMaster {
 
     // Sender channel for Protocol to Zebra Message
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
+
+    // TODO: integrate this into timers, probably
+    lock: Mutex<i32>,
 }
 
 impl ProtocolMaster {
@@ -60,7 +64,17 @@ impl ProtocolMaster {
             timers: RefCell::new(None),
             sender_p2m: RefCell::new(None),
             sender_p2z: RefCell::new(None),
+            lock: Mutex::new(0),
         }
+    }
+
+    pub fn timer_handler_get(&self, token: u32) -> Option<Arc<EventHandler + Send + Sync>> {
+//        let lock = self.lock.lock().unwrap();
+        let mut some_handler = None;
+        if let Some(ref mut timers) = *self.timers.borrow_mut() {
+            some_handler = timers.unregister(token);
+        }
+        some_handler
     }
 
     pub fn start(&self,
@@ -79,14 +93,12 @@ impl ProtocolMaster {
                         MasterToProto::TimerExpiration(token) => {
                             debug!("Received TimerExpiration with token {}", token);
 
-                            if let Some(ref mut timers) = *self.timers.borrow_mut() {
-                                match timers.unregister(token) {
-                                    Some(handler) => {
-                                        handler.handle(EventType::TimerEvent);
-                                    },
-                                    None => {
-                                        debug!("*** handler doesn't exist");
-                                    }
+                            match self.timer_handler_get(token) {
+                                Some(handler) => {
+                                    handler.handle(EventType::TimerEvent);
+                                },
+                                None => {
+                                    debug!("Handler doesn't exist");
                                 }
                             }
                         },
@@ -104,11 +116,12 @@ impl ProtocolMaster {
     // TODO: may return value
     pub fn timer_register(&self, p: ProtocolType, d: Duration, handler: Arc<EventHandler + Send + Sync>) {
         if let Some(ref mut sender) = *self.sender_p2m.borrow_mut() {
+//            let lock = self.lock.lock().unwrap();
             if let Some(ref mut timers) = *self.timers.borrow_mut() {
                 let token = timers.register(handler, d);
                 let result = sender.send(ProtoToMaster::TimerRegistration((p, d, token)));
 
-                debug!("*** timer registration with token {}", token);
+                debug!("Timer registration with token {}", token);
 
                 match result {
                     // TODO
@@ -194,7 +207,7 @@ impl RouterMaster {
             let protocol = Arc::new(ProtocolMaster::new(p));
             protocol.inner_set(
                 match p {
-                    ProtocolType::Ospf => Box::new(OspfMaster::new(protocol.clone())),
+                    ProtocolType::Ospf => Box::new(OspfMasterInner::new(protocol.clone())),
                     ProtocolType::Bgp => Box::new(BgpMaster::new(protocol.clone())),
                     _ => panic!("Not supported")
                 });
