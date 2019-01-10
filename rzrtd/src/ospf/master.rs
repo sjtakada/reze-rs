@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018 Toshiaki Takada
+//   Copyright (C) 2018,2019 Toshiaki Takada
 //
 // OSPF Master
 //
@@ -14,14 +14,11 @@ use std::cell::RefCell;
 
 use log::debug;
 
-use super::super::core::event::*;
+use crate::core::event::*;
 
-use super::super::core::master::ProtocolMaster;
-//use super::super::core::message::master::ProtoToMaster;
-//use super::super::core::message::master::MasterToProto;
-//use super::super::core::message::zebra::ProtoToZebra;
-use super::super::core::master::MasterInner;
-use super::super::core::protocols::ProtocolType;
+use crate::core::master::ProtocolMaster;
+use crate::core::master::MasterInner;
+use crate::core::protocols::ProtocolType;
 
 pub struct OspfMasterInner {
     // TODO: ??? could it be just reference ???

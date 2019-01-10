@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018 Toshiaki Takada
+//   Copyright (C) 2018,2019 Toshiaki Takada
 //
 // Zebra Master
 //
@@ -9,16 +9,16 @@
 //use std::time::Duration;
 use std::sync::mpsc;
 
-use super::super::core::message::master::ProtoToMaster;
-use super::super::core::message::master::MasterToProto;
+use crate::core::message::nexus::ProtoToNexus;
+use crate::core::message::nexus::NexusToProto;
 
 pub struct ZebraMaster {
 }
 
 impl ZebraMaster {
     pub fn start(&self,
-                 _sender_p2m: mpsc::Sender<ProtoToMaster>,
-                 _receiver_m2p: mpsc::Receiver<MasterToProto>) {
+                 _sender_p2m: mpsc::Sender<ProtoToNexus>,
+                 _receiver_m2p: mpsc::Receiver<NexusToProto>) {
         // Main loop for zebra
         loop {
             // handle receiver chan

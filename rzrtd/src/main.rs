@@ -1,12 +1,12 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018 Toshiaki Takada
+//   Copyright (C) 2018,2019 Toshiaki Takada
 //
 
 use log::info;
 use simplelog::*;
 
-use rzrtd::core::master::RouterMaster;
+use rzrtd::core::nexus::RouterNexus;
 
 fn main() {
     // TODO: command line arguments.
@@ -21,8 +21,8 @@ fn main() {
     // Start daemon
     info!("ReZe RouterD started.");
 
-    let mut master = RouterMaster::new();
-    master.start();
+    let mut nexus = RouterNexus::new();
+    nexus.start();
 
     info!("ReZe RouterD terminated.");
 }

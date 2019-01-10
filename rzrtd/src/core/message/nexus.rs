@@ -1,13 +1,13 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018 Toshiaki Takada
+//   Copyright (C) 2018,2019 Toshiaki Takada
 //
-// Master Message
-// - Master to Protocol
+// Nexus Message
+// - Nexus to Protocol
 //   - Timer Expiration
 //   - Config Command (async)
 //   - Show Command (sync)
-// - Protocol to Master
+// - Protocol to Nexus
 //   - Timer Registration
 //   - Show Command output
 //   - Protocol Termination
@@ -15,14 +15,14 @@
 
 use std::time::Duration;
 
-use super::super::protocols::ProtocolType;
+use crate::core::protocols::ProtocolType;
 
-pub enum ProtoToMaster {
+pub enum ProtoToNexus {
     TimerRegistration((ProtocolType, Duration, u32)),
     ProtoTermination(i32)
 }
 
-pub enum MasterToProto {
+pub enum NexusToProto {
     TimerExpiration(u32),
     PostConfig((String, Vec<String>))
 }

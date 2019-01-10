@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018 Toshiaki Takada
+//   Copyright (C) 2018,2019 Toshiaki Takada
 //
 // BGP Master
 //
@@ -10,12 +10,8 @@ use std::time::Duration;
 use std::sync::Arc;
 use std::cell::RefCell;
 
-use super::super::core::master::ProtocolMaster;
-//use super::super::core::message::master::ProtoToMaster;
-//use super::super::core::message::master::MasterToProto;
-//use super::super::core::message::zebra::ProtoToZebra;
-use super::super::core::master::MasterInner;
-//use super::super::core::protocols::ProtocolType;
+use crate::core::master::ProtocolMaster;
+use crate::core::master::MasterInner;
 
 pub struct BgpMaster {
     master: RefCell<Arc<ProtocolMaster>>
