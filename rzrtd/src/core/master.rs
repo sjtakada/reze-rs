@@ -21,7 +21,7 @@ use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
 //use std::marker::Send;
-use std::sync::Mutex;
+//use std::sync::Mutex;
 
 use super::event::*;
 
@@ -37,17 +37,14 @@ pub struct ProtocolMaster {
     // Protocol specific inner
     inner: RefCell<Option<Box<MasterInner>>>,
 
-    // Timer
-    timers: RefCell<Option<timer::Client>>,
-
     // Sender channel for ProtoToNexus Message
     sender_p2m: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
 
     // Sender channel for ProtoToZebra Message
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 
-    // TODO: integrate this into timers, probably
-    lock: Mutex<i32>,
+    // Timer Client
+    timers: RefCell<Option<timer::Client>>,
 }
 
 impl ProtocolMaster {
@@ -57,12 +54,10 @@ impl ProtocolMaster {
             timers: RefCell::new(None),
             sender_p2m: RefCell::new(None),
             sender_p2z: RefCell::new(None),
-            lock: Mutex::new(0),
         }
     }
 
     pub fn timer_handler_get(&self, token: u32) -> Option<Arc<EventHandler + Send + Sync>> {
-//        let lock = self.lock.lock().unwrap();
         let mut some_handler = None;
         if let Some(ref mut timers) = *self.timers.borrow_mut() {
             some_handler = timers.unregister(token);
@@ -109,7 +104,6 @@ impl ProtocolMaster {
     // TODO: may return value
     pub fn timer_register(&self, p: ProtocolType, d: Duration, handler: Arc<EventHandler + Send + Sync>) {
         if let Some(ref mut sender) = *self.sender_p2m.borrow_mut() {
-//            let lock = self.lock.lock().unwrap();
             if let Some(ref mut timers) = *self.timers.borrow_mut() {
                 let token = timers.register(handler, d);
                 let result = sender.send(ProtoToNexus::TimerRegistration((p, d, token)));

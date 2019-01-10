@@ -12,6 +12,7 @@ use std::sync::Arc;
 use std::cell::RefCell;
 use std::time::Instant;
 use std::time::Duration;
+use std::sync::Mutex;
 
 use super::protocols::ProtocolType;
 use super::master::ProtocolMaster;
@@ -73,7 +74,7 @@ pub struct Client {
     token: u32,
 
     // Token to EventHandler map
-    timers: HashMap<u32, Arc<event::EventHandler + Send + Sync>>,
+    timers: Mutex<HashMap<u32, Arc<event::EventHandler + Send + Sync>>>,
 }
 
 // Timer client implementation
@@ -83,21 +84,21 @@ impl Client {
         Client {
             master: RefCell::new(master),
             token: 0u32,
-            timers: HashMap::new()
+            timers: Mutex::new(HashMap::new())
         }
     }
 
     pub fn register(&mut self, handler: Arc<event::EventHandler + Send + Sync>, _d: Duration) -> u32 {
         let token = self.token;
-        self.timers.insert(token, handler);
+        let mut timers = self.timers.lock().unwrap();
+        timers.insert(token, handler);
         self.token += 1;
 
         token
     }
 
     pub fn unregister(&mut self, token: u32) -> Option<Arc<event::EventHandler + Send + Sync>> {
-        self.timers.remove(&token)
+        let mut timers = self.timers.lock().unwrap();
+        timers.remove(&token)
     }
-
-    // pub fn unregister()
 }
