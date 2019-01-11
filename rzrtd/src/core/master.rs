@@ -38,39 +38,39 @@ pub struct ProtocolMaster {
     inner: RefCell<Option<Box<MasterInner>>>,
 
     // Sender channel for ProtoToNexus Message
-    sender_p2m: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
+    sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
 
     // Sender channel for ProtoToZebra Message
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 
     // Timer Client
-    timers: RefCell<Option<timer::Client>>,
+    timer_client: RefCell<Option<timer::Client>>,
 }
 
 impl ProtocolMaster {
     pub fn new(_p: ProtocolType) -> ProtocolMaster {
         ProtocolMaster {
             inner: RefCell::new(None),
-            timers: RefCell::new(None),
-            sender_p2m: RefCell::new(None),
+            timer_client: RefCell::new(None),
+            sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
         }
     }
 
     pub fn timer_handler_get(&self, token: u32) -> Option<Arc<EventHandler + Send + Sync>> {
         let mut some_handler = None;
-        if let Some(ref mut timers) = *self.timers.borrow_mut() {
-            some_handler = timers.unregister(token);
+        if let Some(ref mut timer_client) = *self.timer_client.borrow_mut() {
+            some_handler = timer_client.unregister(token);
         }
         some_handler
     }
 
     pub fn start(&self,
-                 sender_p2m: mpsc::Sender<ProtoToNexus>,
+                 sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_m2p: mpsc::Receiver<NexusToProto>,
                  sender_p2z: mpsc::Sender<ProtoToZebra>) {
         if let Some(ref mut inner) = *self.inner.borrow_mut() {
-            self.sender_p2m.borrow_mut().replace(sender_p2m);
+            self.sender_p2n.borrow_mut().replace(sender_p2n);
             self.sender_p2z.borrow_mut().replace(sender_p2z);
 
             inner.start();
@@ -103,9 +103,9 @@ impl ProtocolMaster {
 
     // TODO: may return value
     pub fn timer_register(&self, p: ProtocolType, d: Duration, handler: Arc<EventHandler + Send + Sync>) {
-        if let Some(ref mut sender) = *self.sender_p2m.borrow_mut() {
-            if let Some(ref mut timers) = *self.timers.borrow_mut() {
-                let token = timers.register(handler, d);
+        if let Some(ref mut sender) = *self.sender_p2n.borrow_mut() {
+            if let Some(ref mut timer_client) = *self.timer_client.borrow_mut() {
+                let token = timer_client.register(handler, d);
                 let result = sender.send(ProtoToNexus::TimerRegistration((p, d, token)));
 
                 debug!("Timer registration with token {}", token);
@@ -124,13 +124,13 @@ impl ProtocolMaster {
     }
 
     pub fn timers_set(&self, timers: timer::Client) {
-        self.timers.borrow_mut().replace(timers);
+        self.timer_client.borrow_mut().replace(timers);
     }
 }
 
 pub trait MasterInner {
     fn start(&self);
-//             sender_p2m: mpsc::Sender<ProtoToNexus>,
+//             sender_p2n: mpsc::Sender<ProtoToNexus>,
 //             receiver_m2p: mpsc::Receiver<NexusToProto>,
 //             sender_p2z: mpsc::Sender<ProtoToZebra>);
 

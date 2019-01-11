@@ -17,13 +17,13 @@ pub struct ZebraMaster {
 
 impl ZebraMaster {
     pub fn start(&self,
-                 _sender_p2m: mpsc::Sender<ProtoToNexus>,
+                 _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  _receiver_m2p: mpsc::Receiver<NexusToProto>) {
         // Main loop for zebra
         loop {
             // handle receiver chan
 //            thread::sleep(Duration::from_secs(2));
-//            sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Zebra, Duration::from_secs(5), 1)));
+//            sender_p2n.send(ProtoToMaster::TimerRegistration((ProtocolType::Zebra, Duration::from_secs(5), 1)));
 //            println!("*** sender sending timer reg");
 
             // TBD: TimerClient

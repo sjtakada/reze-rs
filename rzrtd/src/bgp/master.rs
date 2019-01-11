@@ -25,13 +25,13 @@ impl BgpMaster {
 
 impl MasterInner for BgpMaster {
     fn start(&self) {
-//             _sender_p2m: mpsc::Sender<ProtoToMaster>,
+//             _sender_p2n: mpsc::Sender<ProtoToMaster>,
 //             _receiver_m2p: mpsc::Receiver<MasterToProto>,
 //             _sender_p2z: mpsc::Sender<ProtoToZebra>) {
 
         loop {
             thread::sleep(Duration::from_secs(2));
-//            sender_p2m.send(ProtoToMaster::TimerRegistration((ProtocolType::Bgp, Duration::from_secs(8), 1)));
+//            sender_p2n.send(ProtoToMaster::TimerRegistration((ProtocolType::Bgp, Duration::from_secs(8), 1)));
             println!("*** sender sending timer reg");
         }
     }
