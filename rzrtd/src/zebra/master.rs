@@ -18,7 +18,7 @@ pub struct ZebraMaster {
 impl ZebraMaster {
     pub fn start(&self,
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
-                 _receiver_m2p: mpsc::Receiver<NexusToProto>) {
+                 _receiver_n2p: mpsc::Receiver<NexusToProto>) {
         // Main loop for zebra
         loop {
             // handle receiver chan

@@ -25,8 +25,8 @@ impl BgpMaster {
 
 impl MasterInner for BgpMaster {
     fn start(&self) {
-//             _sender_p2n: mpsc::Sender<ProtoToMaster>,
-//             _receiver_m2p: mpsc::Receiver<MasterToProto>,
+//             _sender_p2n: mpsc::Sender<ProtoToNexus>,
+//             _receiver_n2p: mpsc::Receiver<NexusToProto>,
 //             _sender_p2z: mpsc::Sender<ProtoToZebra>) {
 
         loop {

@@ -68,17 +68,17 @@ impl RouterNexus {
     fn spawn_zebra(&self, sender_p2n: mpsc::Sender<ProtoToNexus>)
                    -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ProtoToZebra>) {
         // Create channel from RouterNexus to MasterInner
-        let (sender_m2p, receiver_m2p) = mpsc::channel::<NexusToProto>();
+        let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
         let (sender_p2z, _receiver_p2z) = mpsc::channel::<ProtoToZebra>();
         let handle = thread::spawn(move || {
             let zebra = ZebraMaster { };
-            zebra.start(sender_p2n, receiver_m2p);
+            zebra.start(sender_p2n, receiver_n2p);
 
             // TODO: may need some cleanup, before returning.
             ()
         });
 
-        (handle, sender_m2p, sender_p2z)
+        (handle, sender_n2p, sender_p2z)
     }
 
     // Construct MasterInner instance and spawn a thread.
@@ -87,7 +87,7 @@ impl RouterNexus {
                       sender_p2z: mpsc::Sender<ProtoToZebra>)
                       -> (JoinHandle<()>, mpsc::Sender<NexusToProto>) {
         // Create channel from RouterNexus to MasterInner
-        let (sender_m2p, receiver_m2p) = mpsc::channel::<NexusToProto>();
+        let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
 
         let handle = thread::spawn(move || {
             let protocol = Arc::new(ProtocolMaster::new(p));
@@ -99,12 +99,12 @@ impl RouterNexus {
                 });
 
             protocol.timers_set(timer::Client::new(protocol.clone()));
-            protocol.start(sender_p2n, receiver_m2p, sender_p2z);
+            protocol.start(sender_p2n, receiver_n2p, sender_p2z);
             // TODO: may need some cleanup, before returning.
             ()
         });
 
-        (handle, sender_m2p)
+        (handle, sender_n2p)
     }
 
     pub fn start(&mut self) {

@@ -67,7 +67,7 @@ impl ProtocolMaster {
 
     pub fn start(&self,
                  sender_p2n: mpsc::Sender<ProtoToNexus>,
-                 receiver_m2p: mpsc::Receiver<NexusToProto>,
+                 receiver_n2p: mpsc::Receiver<NexusToProto>,
                  sender_p2z: mpsc::Sender<ProtoToZebra>) {
         if let Some(ref mut inner) = *self.inner.borrow_mut() {
             self.sender_p2n.borrow_mut().replace(sender_p2n);
@@ -76,7 +76,7 @@ impl ProtocolMaster {
             inner.start();
 
             loop {
-                while let Ok(d) = receiver_m2p.try_recv() {
+                while let Ok(d) = receiver_n2p.try_recv() {
                     match d {
                         NexusToProto::TimerExpiration(token) => {
                             debug!("Received TimerExpiration with token {}", token);
@@ -131,7 +131,7 @@ impl ProtocolMaster {
 pub trait MasterInner {
     fn start(&self);
 //             sender_p2n: mpsc::Sender<ProtoToNexus>,
-//             receiver_m2p: mpsc::Receiver<NexusToProto>,
+//             receiver_n2p: mpsc::Receiver<NexusToProto>,
 //             sender_p2z: mpsc::Sender<ProtoToZebra>);
 
 //    fn finish(&self);
