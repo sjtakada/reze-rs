@@ -12,6 +12,8 @@
 
 use log::debug;
 
+use std::io;
+use std::io::BufRead;
 use std::collections::HashMap;
 use std::thread;
 use std::thread::JoinHandle;
@@ -22,6 +24,8 @@ use std::boxed::Box;
 //use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
+use mio::*;
+use mio::unix::EventedFd;
 
 use super::event::*;
 use super::protocols::ProtocolType;
@@ -116,32 +120,62 @@ impl RouterNexus {
             self.spawn_zebra(mpsc::Sender::clone(&sender_p2n));
         self.masters.insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
-        // Spawn ospf instance
-        let (handle, sender) =
-            self.spawn_protocol(ProtocolType::Ospf, mpsc::Sender::clone(&sender_p2n),
-                                mpsc::Sender::clone(&sender_p2z));
-        self.masters.insert(ProtocolType::Ospf, MasterTuple { handle, sender });
+        // MIO poll
+        let poll = Poll::new().unwrap();
 
+        let stdin = 0;
+        let stdin_fd = EventedFd(&stdin);
+        poll.register(&stdin_fd, Token(0), Ready::readable(), PollOpt::level()) .unwrap();
+        
         loop {
             // TBD: process CLI, API, poll()
+            let mut events = Events::with_capacity(1024);
+            poll.poll(&mut events, Some(Duration::from_millis(10))).unwrap();
+
+            for event in events.iter() {
+                match event.token() {
+                    Token(0) => {
+                        let mut line = String::new();
+                        io::stdin().lock().read_line(&mut line).unwrap();
+
+                        let command = line.trim();
+
+                        match command {
+                            "ospf" => {
+                                // Spawn ospf instance
+                                let (handle, sender) =
+                                    self.spawn_protocol(ProtocolType::Ospf, mpsc::Sender::clone(&sender_p2n),
+                                                        mpsc::Sender::clone(&sender_p2z));
+                                self.masters.insert(ProtocolType::Ospf, MasterTuple { handle, sender });
+
+                            },
+                            _ => {
+                                println!("!Unknown command");
+                            }
+                        }
+                    },
+                    _ => {
+                    }
+                }
+            }
 
             // process channels
             for _m in &self.masters {
                 while let Ok(d) = receiver.try_recv() {
                     match d {
                         ProtoToNexus::TimerRegistration((p, d, token)) => {
-                            debug!("ProtoToNexus receive timer reg {} {}", p, token);
+                            debug!("Received timer registration {} {}", p, token);
 
                             self.timer.register(p, d, token);
                         }
                         ProtoToNexus::ProtoTermination(_i) => {
-                            debug!("ProtoToNexus TBD");
+                            debug!("TBD");
                         }
                     }
                 }
             }
 
-            thread::sleep(Duration::from_millis(100));
+            thread::sleep(Duration::from_millis(10));
 
             // process timer
             match self.timer.pop_if_expired() {

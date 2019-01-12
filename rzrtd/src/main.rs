@@ -19,7 +19,7 @@ fn main() {
     ).unwrap();
 
     // Start daemon
-    info!("ReZe RouterD started.");
+    info!("ReZe Router Daemon started.");
 
     let mut nexus = RouterNexus::new();
     nexus.start();
