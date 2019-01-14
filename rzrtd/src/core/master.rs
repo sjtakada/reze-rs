@@ -76,7 +76,7 @@ impl ProtocolMaster {
             inner.start();
 
             // 
-            loop {
+            'main: loop {
                 while let Ok(d) = receiver_n2p.try_recv() {
                     match d {
                         NexusToProto::TimerExpiration(token) => {
@@ -95,12 +95,19 @@ impl ProtocolMaster {
                             debug!("Received PostConfig with command {}", command);
                         },
                         NexusToProto::ProtoTermination => {
+                            debug!("Received ProtoTermination");
+                            break 'main;
                         }
                     }
                 }
 
                 thread::sleep(Duration::from_millis(100));
             }
+
+            // TODO: Some cleanup has to be done for inner.
+            // inner.finish();
+
+            debug!("Protocol terminated");
         }
     }
 
