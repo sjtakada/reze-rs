@@ -27,7 +27,7 @@ use std::time::Duration;
 use mio::*;
 use mio::unix::EventedFd;
 
-use super::event::*;
+//use super::event::*;
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
 use super::message::nexus::NexusToProto;
@@ -54,7 +54,7 @@ pub struct RouterNexus {
     masters: HashMap<ProtocolType, MasterTuple>,
 
     // Timer server
-    timer: timer::Server,
+    timer_server: timer::Server,
 
     // channel to zebra
     // command API handler
@@ -64,7 +64,7 @@ impl RouterNexus {
     pub fn new() -> RouterNexus {
         RouterNexus {
             masters: HashMap::new(),
-            timer: timer::Server::new()
+            timer_server: timer::Server::new()
         }
     }
 
@@ -111,6 +111,23 @@ impl RouterNexus {
         (handle, sender_n2p)
     }
 
+    //
+    fn finish_protocol(&mut self, proto: &ProtocolType) {
+        if let Some(tuple) = self.masters.remove(&proto) {
+            tuple.sender.send(NexusToProto::ProtoTermination);
+
+            match tuple.handle.join() {
+                Ok(_ret) => {
+                    debug!("protocol join succeeded");
+                },
+                Err(_err) => {
+                    debug!("protocol join failed");
+                }
+            }
+        }
+    }
+
+    //
     pub fn start(&mut self) {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
@@ -127,7 +144,7 @@ impl RouterNexus {
         let stdin_fd = EventedFd(&stdin);
         poll.register(&stdin_fd, Token(0), Ready::readable(), PollOpt::level()) .unwrap();
         
-        loop {
+        'main: loop {
             // TBD: process CLI, API, poll()
             let mut events = Events::with_capacity(1024);
             poll.poll(&mut events, Some(Duration::from_millis(10))).unwrap();
@@ -147,7 +164,12 @@ impl RouterNexus {
                                     self.spawn_protocol(ProtocolType::Ospf, mpsc::Sender::clone(&sender_p2n),
                                                         mpsc::Sender::clone(&sender_p2z));
                                 self.masters.insert(ProtocolType::Ospf, MasterTuple { handle, sender });
+                            },
+                            "bgp" => {
 
+                            },
+                            "quit" => {
+                                break 'main;
                             },
                             _ => {
                                 println!("!Unknown command");
@@ -160,30 +182,30 @@ impl RouterNexus {
             }
 
             // process channels
-            for _m in &self.masters {
+//          for _m in &self.masters {
                 while let Ok(d) = receiver.try_recv() {
                     match d {
                         ProtoToNexus::TimerRegistration((p, d, token)) => {
                             debug!("Received timer registration {} {}", p, token);
 
-                            self.timer.register(p, d, token);
+                            self.timer_server.register(p, d, token);
                         }
-                        ProtoToNexus::ProtoTermination(_i) => {
-                            debug!("TBD");
+                        ProtoToNexus::ProtoException(s) => {
+                            debug!("Received exception {}", s);
                         }
                     }
                 }
-            }
+//          }
 
             thread::sleep(Duration::from_millis(10));
 
-            // process timer
-            match self.timer.pop_if_expired() {
+            // Process timer
+            match self.timer_server.pop_if_expired() {
                 Some(entry) => {
                     match self.masters.get(&entry.protocol) {
-                        Some(m) => {
+                        Some(tuple) => {
                             let result =
-                                m.sender.send(NexusToProto::TimerExpiration(entry.token));
+                                tuple.sender.send(NexusToProto::TimerExpiration(entry.token));
                             // TODO
                             match result {
                                 Ok(_ret) => {},
@@ -191,13 +213,26 @@ impl RouterNexus {
                             }
                         }
                         None => {
-                            panic!("error");
+                            panic!("Unexpected error");
                         }
                     }
                 },
-                _ => { }
+                None => { }
             }
         }
+
+        // Send termination message to all threads first.
+        // TODO: is there better way to iterate hashmap and remove it at the same time?
+        let mut v = Vec::new();
+        for (proto, _tuple) in self.masters.iter_mut() {
+            v.push(proto.clone());
+        }
+
+        for proto in &v {
+            self.finish_protocol(proto);
+        }
+
+        // Nexus terminated.
     }
 }
 

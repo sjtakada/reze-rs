@@ -91,8 +91,10 @@ impl ProtocolMaster {
                                 }
                             }
                         },
-                        NexusToProto::PostConfig((command, v)) => {
+                        NexusToProto::PostConfig((command, _v)) => {
                             debug!("Received PostConfig with command {}", command);
+                        },
+                        NexusToProto::ProtoTermination => {
                         }
                     }
                 }
@@ -109,12 +111,14 @@ impl ProtocolMaster {
                 let token = timer_client.register(handler, d);
                 let result = sender.send(ProtoToNexus::TimerRegistration((p, d, token)));
 
-                debug!("Timer registration with token {}", token);
-
                 match result {
                     // TODO
-                    Ok(_ret) => { println!("Ok") },
-                    Err(err) => { println!("Err {}", err) }
+                    Ok(_ret) => {
+                        debug!("Sent Timer Registration with token {}", token);
+                    },
+                    Err(err) => {
+                        debug!("Error sending Timer Registration with token {}: error {}", token, err)
+                    }
                 }
             }
         }
