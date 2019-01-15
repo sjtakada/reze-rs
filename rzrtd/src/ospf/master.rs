@@ -11,7 +11,6 @@ use log::debug;
 use std::time::Duration;
 use std::sync::Arc;
 use std::sync::Weak;
-//use std::cell::Cell;
 use std::cell::RefCell;
 
 use crate::core::event::*;

@@ -5,7 +5,14 @@
 // Zebra Message
 //
 
+use std::sync::mpsc;
+
+use crate::core::protocols::ProtocolType;
+
 pub enum ProtoToZebra {
+    // Register ZebraToProto channel
+    RegisterProto((ProtocolType, mpsc::Sender<ZebraToProto>)),
+
     RouteAdd(i32),
     RouteLookup(i32)
 }

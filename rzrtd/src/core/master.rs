@@ -14,9 +14,7 @@ use log::{debug, error};
 use std::thread;
 use std::sync::mpsc;
 use std::sync::Arc;
-//use std::rc::Rc;
 use std::boxed::Box;
-//use std::cell::Cell;
 use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
@@ -28,7 +26,7 @@ use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
 use super::message::nexus::NexusToProto;
 use super::message::zebra::ProtoToZebra;
-//use super::message::zebra::ZebraToProto;
+use super::message::zebra::ZebraToProto;
 
 use super::timer;
 
@@ -67,13 +65,16 @@ impl ProtocolMaster {
     pub fn start(&self,
                  sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
-                 sender_p2z: mpsc::Sender<ProtoToZebra>) {
+                 sender_p2z: mpsc::Sender<ProtoToZebra>,
+                 receiver_z2p: mpsc::Receiver<ZebraToProto>) {
         if let Some(ref mut inner) = *self.inner.borrow_mut() {
             self.sender_p2n.borrow_mut().replace(sender_p2n);
             self.sender_p2z.borrow_mut().replace(sender_p2z);
 
             // Take care of protocol specific stuff.
             inner.start();
+
+            // TODO take care of receiver_z2p.try_recv()
 
             // 
             'main: loop {

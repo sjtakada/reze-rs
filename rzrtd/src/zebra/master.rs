@@ -7,29 +7,58 @@
 
 use log::{debug, error};
 
+use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
 use std::sync::mpsc;
 
 use crate::core::event::*;
 
+use crate::core::protocols::ProtocolType;
 use crate::core::message::nexus::ProtoToNexus;
 use crate::core::message::nexus::NexusToProto;
+use crate::core::message::zebra::ProtoToZebra;
+use crate::core::message::zebra::ZebraToProto;
+
+// Store Zebra Client related information.
+struct ClientTuple {
+    // Channel sender from Zebra to Protocol
+    sender: mpsc::Sender<ZebraToProto>,
+}
 
 pub struct ZebraMaster {
+    clients: HashMap<ProtocolType, ClientTuple>
 }
 
 impl ZebraMaster {
-    pub fn start(&self,
+    pub fn new() -> ZebraMaster {
+        ZebraMaster { clients: HashMap::new() }
+    }
+
+    pub fn start(&mut self,
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
-                 receiver_n2p: mpsc::Receiver<NexusToProto>) {
-
-        // XXX: handle receiver_p2z 
-
+                 receiver_n2p: mpsc::Receiver<NexusToProto>,
+                 receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
         // Main loop for zebra
         'main: loop {
             // Take care of protocol specific stuff.
             // inner.start();
+
+            // XXX: handle receiver_p2z 
+            loop {
+                while let Ok(d) = receiver_p2z.try_recv() {
+                    match d {
+                        ProtoToZebra::RegisterProto((proto, sender_z2p)) => {
+                            self.clients.insert(proto, ClientTuple { sender: sender_z2p });
+                            debug!("Register Protocol {}", proto);
+                        },
+                        ProtoToZebra::RouteAdd(_i) => {
+                        },
+                        ProtoToZebra::RouteLookup(_i) => {
+                        },
+                    }
+                }
+            }
 
             // 
             loop {
