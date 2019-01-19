@@ -7,6 +7,7 @@ edition = "2018"
 [dependencies]
 log = "0.4.6"
 simplelog = "0.5.3"
+quick-error = "1.2.2"
 mio = "0.6.16"
 thread-id = "3.3.0"
 

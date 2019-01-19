@@ -32,7 +32,6 @@ impl MasterInner for BgpMaster {
         loop {
             thread::sleep(Duration::from_secs(2));
 //            sender_p2n.send(ProtoToMaster::TimerRegistration((ProtocolType::Bgp, Duration::from_secs(8), 1)));
-            println!("*** sender sending timer reg");
         }
     }
 }

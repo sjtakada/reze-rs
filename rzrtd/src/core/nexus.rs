@@ -10,7 +10,7 @@
 //   Run timer server and notify clients.
 //
 
-use log::debug;
+use log::{debug, error};
 
 use std::io;
 use std::io::BufRead;
@@ -21,9 +21,10 @@ use std::sync::mpsc;
 use std::sync::Arc;
 use std::boxed::Box;
 //use std::cell::Cell;
-//use std::cell::RefCell;
+use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
+use quick_error::*;
 use mio::*;
 use mio::unix::EventedFd;
 
@@ -57,15 +58,34 @@ pub struct RouterNexus {
     // Timer server
     timer_server: timer::Server,
 
-    // channel to zebra
-    // command API handler
+    // Sender channel for ProtoToNexus
+    sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
+
+    // Sender channel for ProtoToZebra
+    sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
+}
+
+quick_error! {
+    #[derive(Debug)]
+    enum CoreError {
+        NexusTermination {
+            description("Nexus is terminated")
+            display(r#"Nexus is terminated"#)
+        }
+        CommandNotFound(s: String) {
+            description("The command could not be found")
+            display(r#"The command "{}" could not be found"#, s)
+        }
+    }
 }
 
 impl RouterNexus {
     pub fn new() -> RouterNexus {
         RouterNexus {
             masters: HashMap::new(),
-            timer_server: timer::Server::new()
+            timer_server: timer::Server::new(),
+            sender_p2n: RefCell::new(None),
+            sender_p2z: RefCell::new(None),
         }
     }
 
@@ -131,14 +151,61 @@ impl RouterNexus {
         }
     }
 
+    // Process command.
+    fn process_command(&mut self) -> Result<(), CoreError> {
+        let mut line = String::new();
+        io::stdin().lock().read_line(&mut line).unwrap();
+
+        let command = line.trim();
+
+        match command {
+            "ospf" => {
+                // Spawn ospf instance
+                let (handle, sender, sender_z2p) =
+                    self.spawn_protocol(ProtocolType::Ospf,
+                                        self.clone_sender_p2n(),
+                                        self.clone_sender_p2z());
+                self.masters.insert(ProtocolType::Ospf, MasterTuple { handle, sender });
+
+                // register sender_z2p to Zebra thread
+            },
+            "bgp" => {
+
+            },
+            "quit" => {
+                return Err(CoreError::NexusTermination)
+            }
+            _ => {
+                return Err(CoreError::CommandNotFound(command.to_string()))
+            }
+        }
+
+        Ok(())
+    }
+
+    fn clone_sender_p2n(&self) -> mpsc::Sender<ProtoToNexus> {
+        if let Some(ref mut sender_p2n) = *self.sender_p2n.borrow_mut() {
+            return mpsc::Sender::clone(&sender_p2n);
+        }
+        panic!("failed to clone");
+    }
+
+    fn clone_sender_p2z(&self) -> mpsc::Sender<ProtoToZebra> {
+        if let Some(ref mut sender_p2z) = *self.sender_p2z.borrow_mut() {
+            return mpsc::Sender::clone(&sender_p2z)
+        }
+        panic!("failed to clone");
+    }
+
     //
     pub fn start(&mut self) {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
+        self.sender_p2n.borrow_mut().replace(sender_p2n);
 
         // Spawn zebra instance
-        let (handle, sender, sender_p2z) =
-            self.spawn_zebra(mpsc::Sender::clone(&sender_p2n));
+        let (handle, sender, sender_p2z) = self.spawn_zebra(self.clone_sender_p2n());
+        self.sender_p2z.borrow_mut().replace(sender_p2z);
         self.masters.insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
         // MIO poll
@@ -155,53 +222,39 @@ impl RouterNexus {
 
             for event in events.iter() {
                 match event.token() {
+                    // ClI or API commands
                     Token(0) => {
-                        let mut line = String::new();
-                        io::stdin().lock().read_line(&mut line).unwrap();
-
-                        let command = line.trim();
-
-                        match command {
-                            "ospf" => {
-                                // Spawn ospf instance
-                                let (handle, sender, sender_z2p) =
-                                    self.spawn_protocol(ProtocolType::Ospf, mpsc::Sender::clone(&sender_p2n),
-                                                        mpsc::Sender::clone(&sender_p2z));
-                                self.masters.insert(ProtocolType::Ospf, MasterTuple { handle, sender });
-
-                                // register sender_z2p to Zebra thread
-                            },
-                            "bgp" => {
-
-                            },
-                            "quit" => {
+                        match self.process_command() {
+                            Err(CoreError::NexusTermination) => {
                                 break 'main;
                             },
+                            Err(CoreError::CommandNotFound(str)) => {
+                                error!("Command not found '{}'", str);
+                            },
                             _ => {
-                                println!("!Unknown command");
                             }
                         }
                     },
+                    // fallback
                     _ => {
+                        
                     }
                 }
             }
 
-            // process channels
-//          for _m in &self.masters {
-                while let Ok(d) = receiver.try_recv() {
-                    match d {
-                        ProtoToNexus::TimerRegistration((p, d, token)) => {
-                            debug!("Received timer registration {} {}", p, token);
+            // Process channels
+            while let Ok(d) = receiver.try_recv() {
+                match d {
+                    ProtoToNexus::TimerRegistration((p, d, token)) => {
+                        debug!("Received timer registration {} {}", p, token);
 
-                            self.timer_server.register(p, d, token);
-                        }
-                        ProtoToNexus::ProtoException(s) => {
-                            debug!("Received exception {}", s);
-                        }
+                        self.timer_server.register(p, d, token);
+                    }
+                    ProtoToNexus::ProtoException(s) => {
+                        debug!("Received exception {}", s);
                     }
                 }
-//          }
+            }
 
             thread::sleep(Duration::from_millis(10));
 

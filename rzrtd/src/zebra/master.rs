@@ -45,46 +45,42 @@ impl ZebraMaster {
             // inner.start();
 
             // XXX: handle receiver_p2z 
-            loop {
-                while let Ok(d) = receiver_p2z.try_recv() {
-                    match d {
-                        ProtoToZebra::RegisterProto((proto, sender_z2p)) => {
-                            self.clients.insert(proto, ClientTuple { sender: sender_z2p });
-                            debug!("Register Protocol {}", proto);
-                        },
-                        ProtoToZebra::RouteAdd(_i) => {
-                        },
-                        ProtoToZebra::RouteLookup(_i) => {
-                        },
-                    }
+            while let Ok(d) = receiver_p2z.try_recv() {
+                match d {
+                    ProtoToZebra::RegisterProto((proto, sender_z2p)) => {
+                        self.clients.insert(proto, ClientTuple { sender: sender_z2p });
+                        debug!("Register Protocol {}", proto);
+                    },
+                    ProtoToZebra::RouteAdd(_i) => {
+                    },
+                    ProtoToZebra::RouteLookup(_i) => {
+                    },
                 }
             }
 
             // 
-            loop {
-                while let Ok(d) = receiver_n2p.try_recv() {
-                    match d {
-                        NexusToProto::TimerExpiration(token) => {
-                            debug!("Received TimerExpiration with token {}", token);
+            while let Ok(d) = receiver_n2p.try_recv() {
+                match d {
+                    NexusToProto::TimerExpiration(token) => {
+                        debug!("Received TimerExpiration with token {}", token);
 
-                            /*
-                            match self.timer_handler_get(token) {
-                                Some(handler) => {
-                                    handler.handle(EventType::TimerEvent);
-                                },
-                                None => {
-                                    error!("Handler doesn't exist");
-                                }
-                            }
-                             */
-                        },
-                        NexusToProto::PostConfig((command, _v)) => {
-                            debug!("Received PostConfig with command {}", command);
-                        },
-                        NexusToProto::ProtoTermination => {
-                            debug!("Received ProtoTermination");
-                            break 'main;
-                        }
+                        /*
+                        match self.timer_handler_get(token) {
+                        Some(handler) => {
+                        handler.handle(EventType::TimerEvent);
+                    },
+                        None => {
+                        error!("Handler doesn't exist");
+                    }
+                    }
+                         */
+                    },
+                    NexusToProto::PostConfig((command, _v)) => {
+                        debug!("Received PostConfig with command {}", command);
+                    },
+                    NexusToProto::ProtoTermination => {
+                        debug!("Received ProtoTermination");
+                        break 'main;
                     }
                 }
 
@@ -93,9 +89,8 @@ impl ZebraMaster {
 
             // TODO: Some cleanup has to be done for inner.
             // inner.finish();
-
-            debug!("Protocol terminated");
         }
+        debug!("Zebra terminated");
     }
 }
 
