@@ -17,13 +17,24 @@ use std::time::Duration;
 
 use crate::core::protocols::ProtocolType;
 
+// Message from Protocol to Nexus.
 pub enum ProtoToNexus {
+    // Register timer to server.
     TimerRegistration((ProtocolType, Duration, u32)),
-    ProtoTermination(i32)
+
+    // Notify protocol exception to Nexus.
+    ProtoException(String),
 }
 
+// Message from Nexus to Protocol.
 pub enum NexusToProto {
+    // Notify timer expiration.
     TimerExpiration(u32),
-    PostConfig((String, Vec<String>))
+
+    // Send configuration.
+    PostConfig((String, Vec<String>)),
+
+    // Notify protocol termination.
+    ProtoTermination,
 }
 

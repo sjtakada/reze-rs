@@ -5,29 +5,92 @@
 // Zebra Master
 //
 
-//use std::thread;
-//use std::time::Duration;
+use log::{debug, error};
+
+use std::collections::HashMap;
+use std::thread;
+use std::time::Duration;
 use std::sync::mpsc;
 
+use crate::core::event::*;
+
+use crate::core::protocols::ProtocolType;
 use crate::core::message::nexus::ProtoToNexus;
 use crate::core::message::nexus::NexusToProto;
+use crate::core::message::zebra::ProtoToZebra;
+use crate::core::message::zebra::ZebraToProto;
+
+// Store Zebra Client related information.
+struct ClientTuple {
+    // Channel sender from Zebra to Protocol
+    sender: mpsc::Sender<ZebraToProto>,
+}
 
 pub struct ZebraMaster {
+    clients: HashMap<ProtocolType, ClientTuple>
 }
 
 impl ZebraMaster {
-    pub fn start(&self,
-                 _sender_p2n: mpsc::Sender<ProtoToNexus>,
-                 _receiver_n2p: mpsc::Receiver<NexusToProto>) {
-        // Main loop for zebra
-        loop {
-            // handle receiver chan
-//            thread::sleep(Duration::from_secs(2));
-//            sender_p2n.send(ProtoToMaster::TimerRegistration((ProtocolType::Zebra, Duration::from_secs(5), 1)));
-//            println!("*** sender sending timer reg");
+    pub fn new() -> ZebraMaster {
+        ZebraMaster { clients: HashMap::new() }
+    }
 
-            // TBD: TimerClient
+    pub fn start(&mut self,
+                 _sender_p2n: mpsc::Sender<ProtoToNexus>,
+                 receiver_n2p: mpsc::Receiver<NexusToProto>,
+                 receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
+        // Main loop for zebra
+        'main: loop {
+            // Take care of protocol specific stuff.
+            // inner.start();
+
+            // XXX: handle receiver_p2z 
+            while let Ok(d) = receiver_p2z.try_recv() {
+                match d {
+                    ProtoToZebra::RegisterProto((proto, sender_z2p)) => {
+                        self.clients.insert(proto, ClientTuple { sender: sender_z2p });
+                        debug!("Register Protocol {}", proto);
+                    },
+                    ProtoToZebra::RouteAdd(_i) => {
+                    },
+                    ProtoToZebra::RouteLookup(_i) => {
+                    },
+                }
+            }
+
+            // 
+            while let Ok(d) = receiver_n2p.try_recv() {
+                match d {
+                    NexusToProto::TimerExpiration(token) => {
+                        debug!("Received TimerExpiration with token {}", token);
+
+                        /*
+                        match self.timer_handler_get(token) {
+                        Some(handler) => {
+                        handler.handle(EventType::TimerEvent);
+                    },
+                        None => {
+                        error!("Handler doesn't exist");
+                    }
+                    }
+                         */
+                    },
+                    NexusToProto::PostConfig((command, _v)) => {
+                        debug!("Received PostConfig with command {}", command);
+                    },
+                    NexusToProto::ProtoTermination => {
+                        debug!("Received ProtoTermination");
+                        break 'main;
+                    }
+                }
+
+                thread::sleep(Duration::from_millis(100));
+            }
+
+            // TODO: Some cleanup has to be done for inner.
+            // inner.finish();
         }
+        debug!("Zebra terminated");
     }
 }
 

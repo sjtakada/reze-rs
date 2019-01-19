@@ -9,19 +9,16 @@
 //   Run timer server and notify clients.
 //
 
-use log::debug;
+use log::{debug, error};
 
 use std::thread;
 use std::sync::mpsc;
 use std::sync::Arc;
-//use std::rc::Rc;
 use std::boxed::Box;
-//use std::cell::Cell;
 use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
 //use std::marker::Send;
-//use std::sync::Mutex;
 
 use super::event::*;
 
@@ -29,7 +26,7 @@ use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
 use super::message::nexus::NexusToProto;
 use super::message::zebra::ProtoToZebra;
-//use super::message::zebra::ZebraToProto;
+use super::message::zebra::ZebraToProto;
 
 use super::timer;
 
@@ -57,7 +54,7 @@ impl ProtocolMaster {
         }
     }
 
-    pub fn timer_handler_get(&self, token: u32) -> Option<Arc<EventHandler + Send + Sync>> {
+    fn timer_handler_get(&self, token: u32) -> Option<Arc<EventHandler + Send + Sync>> {
         let mut some_handler = None;
         if let Some(ref mut timer_client) = *self.timer_client.borrow_mut() {
             some_handler = timer_client.unregister(token);
@@ -68,14 +65,19 @@ impl ProtocolMaster {
     pub fn start(&self,
                  sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
-                 sender_p2z: mpsc::Sender<ProtoToZebra>) {
+                 sender_p2z: mpsc::Sender<ProtoToZebra>,
+                 receiver_z2p: mpsc::Receiver<ZebraToProto>) {
         if let Some(ref mut inner) = *self.inner.borrow_mut() {
             self.sender_p2n.borrow_mut().replace(sender_p2n);
             self.sender_p2z.borrow_mut().replace(sender_p2z);
 
+            // Take care of protocol specific stuff.
             inner.start();
 
-            loop {
+            // TODO take care of receiver_z2p.try_recv()
+
+            // 
+            'main: loop {
                 while let Ok(d) = receiver_n2p.try_recv() {
                     match d {
                         NexusToProto::TimerExpiration(token) => {
@@ -86,18 +88,27 @@ impl ProtocolMaster {
                                     handler.handle(EventType::TimerEvent);
                                 },
                                 None => {
-                                    debug!("Handler doesn't exist");
+                                    error!("Handler doesn't exist");
                                 }
                             }
                         },
-                        _ => {
-                            debug!("Not implemented");
+                        NexusToProto::PostConfig((command, _v)) => {
+                            debug!("Received PostConfig with command {}", command);
+                        },
+                        NexusToProto::ProtoTermination => {
+                            debug!("Received ProtoTermination");
+                            break 'main;
                         }
                     }
                 }
 
                 thread::sleep(Duration::from_millis(100));
             }
+
+            // TODO: Some cleanup has to be done for inner.
+            // inner.finish();
+
+            debug!("Protocol terminated");
         }
     }
 
@@ -108,12 +119,14 @@ impl ProtocolMaster {
                 let token = timer_client.register(handler, d);
                 let result = sender.send(ProtoToNexus::TimerRegistration((p, d, token)));
 
-                debug!("Timer registration with token {}", token);
-
                 match result {
                     // TODO
-                    Ok(_ret) => { println!("Ok") },
-                    Err(err) => { println!("Err {}", err) }
+                    Ok(_ret) => {
+                        debug!("Sent Timer Registration with token {}", token);
+                    },
+                    Err(err) => {
+                        debug!("Error sending Timer Registration with token {}: error {}", token, err)
+                    }
                 }
             }
         }
@@ -130,10 +143,6 @@ impl ProtocolMaster {
 
 pub trait MasterInner {
     fn start(&self);
-//             sender_p2n: mpsc::Sender<ProtoToNexus>,
-//             receiver_n2p: mpsc::Receiver<NexusToProto>,
-//             sender_p2z: mpsc::Sender<ProtoToZebra>);
-
 //    fn finish(&self);
 }
 

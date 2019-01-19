@@ -5,14 +5,13 @@
 // OSPF Master
 //
 
+use log::debug;
+
 //use std::thread;
 use std::time::Duration;
 use std::sync::Arc;
 use std::sync::Weak;
-//use std::cell::Cell;
 use std::cell::RefCell;
-
-use log::debug;
 
 use crate::core::event::*;
 
@@ -49,7 +48,7 @@ impl MasterInner for OspfMasterInner {
         // Start OSPF hello timer
         ospf.start();
 
-        debug!("OSPF Master: sent first timer reg");
+        debug!("sent first timer reg");
     }
 }
 
