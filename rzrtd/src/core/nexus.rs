@@ -10,10 +10,14 @@
 //   Run timer server and notify clients.
 //
 
-use log::{debug, error};
+use log::debug;
+use log::error;
 
 use std::io;
 use std::io::BufRead;
+use std::io::Read;
+use std::env;
+//use std::fs::File;
 use std::collections::HashMap;
 use std::thread;
 use std::thread::JoinHandle;
@@ -24,9 +28,15 @@ use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
+//use std::path::PathBuf;
+
 use quick_error::*;
 use mio::*;
 use mio::unix::EventedFd;
+use mio_uds::UnixListener;
+use mio_uds::UnixStream;
+
+//use std::os::unix::io::IntoRawFd;
 
 //use super::event::*;
 use super::protocols::ProtocolType;
@@ -49,7 +59,6 @@ struct MasterTuple {
     // Channel sender from Master To Protocol
     sender: mpsc::Sender<NexusToProto>,
 }
-
 
 pub struct RouterNexus {
     // MasterInner map
@@ -152,11 +161,7 @@ impl RouterNexus {
     }
 
     // Process command.
-    fn process_command(&mut self) -> Result<(), CoreError> {
-        let mut line = String::new();
-        io::stdin().lock().read_line(&mut line).unwrap();
-
-        let command = line.trim();
+    fn process_command(&mut self, command: &str) -> Result<(), CoreError> {
 
         match command {
             "ospf" => {
@@ -199,6 +204,18 @@ impl RouterNexus {
 
     //
     pub fn start(&mut self) {
+        // Create Unix Domain Socket to accept commands.
+        let mut path = env::temp_dir();
+        path.push("rzrtd.cli");
+
+        //let mut token2evented: HashMap<u32, Box<Evented>> = HashMap::new();
+        let mut token2evented: HashMap<u32, RefCell<UnixStream>> = HashMap::new();
+
+        let listener = match UnixListener::bind(path) {
+            Ok(listener) => listener,
+            Err(_) => { panic!("UnixListener::bind() error"); }
+        };
+
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
         self.sender_p2n.borrow_mut().replace(sender_p2n);
@@ -213,8 +230,13 @@ impl RouterNexus {
 
         let stdin = 0;
         let stdin_fd = EventedFd(&stdin);
-        poll.register(&stdin_fd, Token(0), Ready::readable(), PollOpt::level()) .unwrap();
+        poll.register(&stdin_fd, Token(0), Ready::readable(), PollOpt::level()).unwrap();
         
+        poll.register(&listener, Token(1), Ready::readable(), PollOpt::level()).unwrap();
+
+        //token2evented.insert(0, &stdin_fd);
+        //token2evented.insert(1, &listener);
+
         'main: loop {
             // TBD: process CLI, API, poll()
             let mut events = Events::with_capacity(1024);
@@ -224,7 +246,12 @@ impl RouterNexus {
                 match event.token() {
                     // ClI or API commands
                     Token(0) => {
-                        match self.process_command() {
+                        let mut line = String::new();
+                        io::stdin().lock().read_line(&mut line).unwrap();
+
+                        let command = line.trim();
+
+                        match self.process_command(&command) {
                             Err(CoreError::NexusTermination) => {
                                 break 'main;
                             },
@@ -232,6 +259,42 @@ impl RouterNexus {
                                 error!("Command not found '{}'", str);
                             },
                             _ => {
+                            }
+                        }
+                    },
+                    Token(1) => {
+                        match listener.accept() {
+                            Ok(Some((stream, _addr))) => {
+                                println!("Got a client: {:?}", _addr);
+
+                                poll.register(&stream, Token(2), Ready::readable(), PollOpt::edge()).unwrap();
+                                token2evented.insert(2, RefCell::new(stream));
+                            },
+                            Ok(None) => println!("OK, but None???"),
+                            Err(err) => println!("accept function failed: {:?}", err),
+                        }
+                    },
+                    Token(2) => {
+                        if let Some(stream) = token2evented.get(&2) {
+
+                            let mut buffer = String::new();
+                            let mut s = stream.borrow_mut();
+
+                            s.read_to_string(&mut buffer);
+
+                            let command = buffer.trim();
+
+                            debug!("received command {}", command);
+
+                            match self.process_command(&command) {
+                                Err(CoreError::NexusTermination) => {
+                                    break 'main;
+                                },
+                                Err(CoreError::CommandNotFound(str)) => {
+                                    error!("Command not found '{}'", str);
+                                },
+                                _ => {
+                                }
                             }
                         }
                     },
@@ -294,42 +357,5 @@ impl RouterNexus {
         // Nexus terminated.
     }
 }
-
-/*
-struct BootStrapTask {
-
-}
-
-impl Future for BootStrapTask {
-    type Item = ();
-    type Error = ();
-
-    fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
-        loop {
-            print!("> ");
-            io::stdout().flush().unwrap();
-
-            let mut line = String::new();
-            let stdin = io::stdin();
-            stdin.lock().read_line(&mut line).unwrap();
-
-            match line.as_ref() {
-                "ospf\n" => {
-                    println!("% start ospf {}", line);
-                },
-                "end\n" => {
-                    println!("% end");
-                    break;
-                }
-                _ => {
-                    println!("% Unknown command");
-                }
-            }
-        }
-
-        Ok(Async::Ready(()))
-    }
-}
-*/
 
 
