@@ -28,7 +28,6 @@ use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
-//use std::path::PathBuf;
 
 use quick_error::*;
 use mio::*;
@@ -36,9 +35,7 @@ use mio::unix::EventedFd;
 use mio_uds::UnixListener;
 use mio_uds::UnixStream;
 
-//use std::os::unix::io::IntoRawFd;
-
-//use super::event::*;
+use super::event::*;
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
 use super::message::nexus::NexusToProto;
@@ -225,20 +222,22 @@ impl RouterNexus {
         self.sender_p2z.borrow_mut().replace(sender_p2z);
         self.masters.insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
+        // Read/Write FD Event Manager
+        let mut fdem = FdEventManager::new();
+
         // MIO poll
-        let poll = Poll::new().unwrap();
+        //let poll = Poll::new().unwrap();
 
-        let stdin = 0;
-        let stdin_fd = EventedFd(&stdin);
-        poll.register(&stdin_fd, Token(0), Ready::readable(), PollOpt::level()).unwrap();
-        
-        poll.register(&listener, Token(1), Ready::readable(), PollOpt::level()).unwrap();
-
-        //token2evented.insert(0, &stdin_fd);
-        //token2evented.insert(1, &listener);
+        //let stdin = 0;
+        //let stdin_fd = EventedFd(&stdin);
+        //poll.register(&stdin_fd, Token(0), Ready::readable(), PollOpt::level()).unwrap();
+        //poll.register(&listener, Token(1), Ready::readable(), PollOpt::level()).unwrap();
 
         'main: loop {
-            // TBD: process CLI, API, poll()
+
+            fdem.poll();
+
+            /*
             let mut events = Events::with_capacity(1024);
             poll.poll(&mut events, Some(Duration::from_millis(10))).unwrap();
 
@@ -304,6 +303,7 @@ impl RouterNexus {
                     }
                 }
             }
+             */
 
             // Process channels
             while let Ok(d) = receiver.try_recv() {
@@ -359,3 +359,42 @@ impl RouterNexus {
 }
 
 
+use std::path::PathBuf;
+
+pub struct MessageServer {
+    listener: UnixListener,
+}
+  
+impl MessageServer {
+    pub fn new(path: &PathBuf) -> MessageServer {
+        let listener = match UnixListener::bind(path) {
+            Ok(listener) => listener,
+            Err(_) => panic!("UnixListener::bind() error"),
+        };
+
+        MessageServer {
+            listener: listener
+        }
+    }
+}
+
+impl EventHandler for MessageServer {
+    fn handle(&self, e: EventType, param: Option<Arc<EventParam>>) {
+        match e {
+            EventType::ReadEvent => {
+                match self.listener.accept() {
+                    Ok(Some((stream, _addr))) => {
+                        debug!("Got a message client: {:?}", _addr);
+                        //poll.register(&stream, Token(2), Ready::readable(), PollOpt::edge()).unwrap();
+                        //token2evented.insert(2, RefCell::new(stream));
+                    },
+                    Ok(None) => debug!("OK, but None???"),
+                    Err(err) => debug!("accept function failed: {:?}", err),
+                }
+            },
+            _ => {
+                debug!("Unknown event");
+            }
+        }
+    }
+}
