@@ -23,8 +23,8 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::sync::mpsc;
 use std::sync::Arc;
+//use std::sync::Weak;
 use std::boxed::Box;
-//use std::cell::Cell;
 use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
@@ -205,14 +205,6 @@ impl RouterNexus {
         let mut path = env::temp_dir();
         path.push("rzrtd.cli");
 
-        //let mut token2evented: HashMap<u32, Box<Evented>> = HashMap::new();
-        let mut token2evented: HashMap<u32, RefCell<UnixStream>> = HashMap::new();
-
-        let listener = match UnixListener::bind(path) {
-            Ok(listener) => listener,
-            Err(_) => { panic!("UnixListener::bind() error"); }
-        };
-
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
         self.sender_p2n.borrow_mut().replace(sender_p2n);
@@ -223,19 +215,11 @@ impl RouterNexus {
         self.masters.insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
         // Read/Write FD Event Manager
-        let mut fdem = FdEventManager::new();
-
-        // MIO poll
-        //let poll = Poll::new().unwrap();
-
-        //let stdin = 0;
-        //let stdin_fd = EventedFd(&stdin);
-        //poll.register(&stdin_fd, Token(0), Ready::readable(), PollOpt::level()).unwrap();
-        //poll.register(&listener, Token(1), Ready::readable(), PollOpt::level()).unwrap();
+        let event_manager = Arc::new(EventManager::new());
+        let ms = MessageServer::start(event_manager.clone(), &path);
 
         'main: loop {
-
-            fdem.poll();
+            event_manager.poll();
 
             /*
             let mut events = Events::with_capacity(1024);
@@ -361,32 +345,122 @@ impl RouterNexus {
 
 use std::path::PathBuf;
 
+unsafe impl Send for MessageServerHandler {}
+unsafe impl Sync for MessageServerHandler {}
+
+pub struct MessageServerHandler {
+    stream: RefCell<Option<UnixStream>>,
+}
+
+impl MessageServerHandler {
+    pub fn new() -> MessageServerHandler {
+        MessageServerHandler {
+            stream: RefCell::new(None),
+        }
+    }
+}
+
+
+impl EventHandler for MessageServerHandler {
+    fn handle(&self, e: EventType, param: Option<Arc<EventParam>>) {
+        match e {
+            EventType::ReadEvent => {
+                let mut buffer = String::new();
+                if let Some(ref mut stream) = *self.stream.borrow_mut() {
+                    stream.read_to_string(&mut buffer);
+
+                    let command = buffer.trim();
+
+                    debug!("received command {}", command);
+
+                /*
+                match self.process_command(&command) {
+                    Err(CoreError::NexusTermination) => {
+                        break 'main;
+                    },
+                    Err(CoreError::CommandNotFound(str)) => {
+                        error!("Command not found '{}'", str);
+                    },
+                    _ => {
+                    }
+                }
+                 */
+
+                }
+            },
+            _ => {
+                debug!("Unknown event");
+            }
+        }
+    }
+}
+
+struct MessageServerInner {
+    server: RefCell<Arc<MessageServer>>,
+}
+
+impl MessageServerInner {
+    pub fn new(server: Arc<MessageServer>) -> MessageServerInner {
+        MessageServerInner {
+            server: RefCell::new(server)
+        }
+    }
+}
+
+unsafe impl Send for MessageServerInner {}
+unsafe impl Sync for MessageServerInner {}
+
 pub struct MessageServer {
+    // EventManager
+    event_manager: RefCell<Arc<EventManager>>,
+
+    // mio UnixListener
     listener: UnixListener,
+
+    // Message Server Inner
+    inner: RefCell<Option<Arc<MessageServerInner>>>,
 }
   
 impl MessageServer {
-    pub fn new(path: &PathBuf) -> MessageServer {
+    fn new(event_manager: Arc<EventManager>, path: &PathBuf) -> MessageServer {
         let listener = match UnixListener::bind(path) {
             Ok(listener) => listener,
             Err(_) => panic!("UnixListener::bind() error"),
         };
 
         MessageServer {
-            listener: listener
+            event_manager: RefCell::new(event_manager),
+            listener: listener,
+            inner: RefCell::new(None),
         }
+    }
+
+    pub fn start(mut event_manager: Arc<EventManager>, path: &PathBuf) -> Arc<MessageServer> {
+        let server = Arc::new(MessageServer::new(event_manager.clone(), path));
+        let inner = Arc::new(MessageServerInner::new(server.clone()));
+
+        event_manager.register_read(&server.listener, inner.clone());
+
+        server.inner.borrow_mut().replace(inner);
+        server
     }
 }
 
-impl EventHandler for MessageServer {
+impl EventHandler for MessageServerInner {
     fn handle(&self, e: EventType, param: Option<Arc<EventParam>>) {
+        let mut server = self.server.borrow_mut();
+
         match e {
             EventType::ReadEvent => {
-                match self.listener.accept() {
+                match server.listener.accept() {
                     Ok(Some((stream, _addr))) => {
                         debug!("Got a message client: {:?}", _addr);
-                        //poll.register(&stream, Token(2), Ready::readable(), PollOpt::edge()).unwrap();
-                        //token2evented.insert(2, RefCell::new(stream));
+
+                        let msh = Arc::new(MessageServerHandler::new());
+                        let event_manager = server.event_manager.borrow();
+
+                        event_manager.register_read(&stream, msh.clone());
+                        msh.stream.borrow_mut().replace(stream);
                     },
                     Ok(None) => debug!("OK, but None???"),
                     Err(err) => debug!("accept function failed: {:?}", err),

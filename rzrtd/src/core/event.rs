@@ -7,6 +7,7 @@
 //
 
 use std::collections::HashMap;
+use std::cell::RefCell;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -28,7 +29,8 @@ pub trait EventHandler {
     fn handle(&self, event_type: EventType, param: Option<Arc<EventParam>>);
 }
 
-pub struct FdEventManager {
+
+pub struct EventManagerInner {
     // Token index.
     index: usize,
 
@@ -42,31 +44,53 @@ pub struct FdEventManager {
     timeout: Duration,
 }
 
-impl FdEventManager {
-    pub fn new() -> FdEventManager {
-        FdEventManager {
-            index: 0,
-            handlers: HashMap::new(),
-            poll: Poll::new().unwrap(),
-            timeout: Duration::from_millis(10),
+pub struct EventManager {
+    pub inner: RefCell<EventManagerInner>,
+}
+
+impl EventManager {
+    pub fn new() -> EventManager {
+        EventManager {
+            inner: RefCell::new(EventManagerInner {
+                index: 0,
+                handlers: HashMap::new(),
+                poll: Poll::new().unwrap(),
+                timeout: Duration::from_millis(10),
+            })
         }
     }
 
-    pub fn register_read(&mut self, fd: &EventedFd, handler: Arc<EventHandler + Send + Sync>) {
-        let token = Token(self.index);
+    pub fn register_read(&self, fd: &Evented, handler: Arc<EventHandler + Send + Sync>) {
+        let mut inner = self.inner.borrow_mut();
+        let token = Token(inner.index);
 
-        self.handlers.insert(token, handler);
-        self.poll.register(fd, token, Ready::readable(), PollOpt::level()).unwrap();
+        inner.handlers.insert(token, handler);
+        inner.poll.register(fd, token, Ready::readable(), PollOpt::level()).unwrap();
 
-        self.index += 1;
+        inner.index += 1;
     }
 
-    pub fn poll(&mut self) {
+    pub fn poll_get_events(&self) -> Events {
+        let mut inner = self.inner.borrow_mut();
         let mut events = Events::with_capacity(1024);
-        self.poll.poll(&mut events, Some(self.timeout));
+        inner.poll.poll(&mut events, Some(inner.timeout));
+
+        events
+    }
+
+    pub fn poll_get_handler(&self, event: Event) -> Option<Arc<EventHandler + Send + Sync>> {
+        let mut inner = self.inner.borrow_mut();
+        match inner.handlers.get(&event.token()) {
+            Some(handler) => Some(handler.clone()),
+            None => None,
+        }
+    }
+
+    pub fn poll(&self) {
+        let events = self.poll_get_events();
 
         for event in events.iter() {
-            if let Some(handler) = self.handlers.get(&event.token()) {
+            if let Some(handler) = self.poll_get_handler(event) {
                 handler.handle(EventType::ReadEvent, None);
             }
         }
