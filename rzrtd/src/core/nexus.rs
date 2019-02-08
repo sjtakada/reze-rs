@@ -218,76 +218,15 @@ impl RouterNexus {
         let event_manager = Arc::new(EventManager::new());
         let ms = MessageServer::start(event_manager.clone(), &path);
 
+        let callback = |s: String| -> i32 {
+//            self.process_command(&s);
+            0
+        };
+
+        ms.register_message_callback(Arc::new(callback));
+
         'main: loop {
             event_manager.poll();
-
-            /*
-            let mut events = Events::with_capacity(1024);
-            poll.poll(&mut events, Some(Duration::from_millis(10))).unwrap();
-
-            for event in events.iter() {
-                match event.token() {
-                    // ClI or API commands
-                    Token(0) => {
-                        let mut line = String::new();
-                        io::stdin().lock().read_line(&mut line).unwrap();
-
-                        let command = line.trim();
-
-                        match self.process_command(&command) {
-                            Err(CoreError::NexusTermination) => {
-                                break 'main;
-                            },
-                            Err(CoreError::CommandNotFound(str)) => {
-                                error!("Command not found '{}'", str);
-                            },
-                            _ => {
-                            }
-                        }
-                    },
-                    Token(1) => {
-                        match listener.accept() {
-                            Ok(Some((stream, _addr))) => {
-                                println!("Got a client: {:?}", _addr);
-
-                                poll.register(&stream, Token(2), Ready::readable(), PollOpt::edge()).unwrap();
-                                token2evented.insert(2, RefCell::new(stream));
-                            },
-                            Ok(None) => println!("OK, but None???"),
-                            Err(err) => println!("accept function failed: {:?}", err),
-                        }
-                    },
-                    Token(2) => {
-                        if let Some(stream) = token2evented.get(&2) {
-
-                            let mut buffer = String::new();
-                            let mut s = stream.borrow_mut();
-
-                            s.read_to_string(&mut buffer);
-
-                            let command = buffer.trim();
-
-                            debug!("received command {}", command);
-
-                            match self.process_command(&command) {
-                                Err(CoreError::NexusTermination) => {
-                                    break 'main;
-                                },
-                                Err(CoreError::CommandNotFound(str)) => {
-                                    error!("Command not found '{}'", str);
-                                },
-                                _ => {
-                                }
-                            }
-                        }
-                    },
-                    // fallback
-                    _ => {
-                        
-                    }
-                }
-            }
-             */
 
             // Process channels
             while let Ok(d) = receiver.try_recv() {
@@ -373,19 +312,18 @@ impl EventHandler for MessageServerHandler {
 
                     debug!("received command {}", command);
 
-                /*
-                match self.process_command(&command) {
-                    Err(CoreError::NexusTermination) => {
-                        break 'main;
-                    },
-                    Err(CoreError::CommandNotFound(str)) => {
-                        error!("Command not found '{}'", str);
-                    },
-                    _ => {
+/*
+                    match self.process_command(&command) {
+                        Err(CoreError::NexusTermination) => {
+                            debug!("Termination");
+                        },
+                        Err(CoreError::CommandNotFound(str)) => {
+                            error!("Command not found '{}'", str);
+                        },
+                        _ => {
+                        }
                     }
-                }
-                 */
-
+*/
                 }
             },
             _ => {
@@ -419,6 +357,9 @@ pub struct MessageServer {
 
     // Message Server Inner
     inner: RefCell<Option<Arc<MessageServerInner>>>,
+
+    // Callbacks.
+    message_callback: RefCell<Option<Arc<FnMut(String) -> i32>>>,
 }
   
 impl MessageServer {
@@ -432,6 +373,7 @@ impl MessageServer {
             event_manager: RefCell::new(event_manager),
             listener: listener,
             inner: RefCell::new(None),
+            message_callback: RefCell::new(None),
         }
     }
 
@@ -443,6 +385,16 @@ impl MessageServer {
 
         server.inner.borrow_mut().replace(inner);
         server
+    }
+
+    pub fn register_connect_callback() {
+    }
+
+    pub fn register_disconnect_callback() {
+    }
+
+    pub fn register_message_callback(&self, callback: Arc<FnMut(String) -> i32>) {
+        self.message_callback.borrow_mut().replace(callback);
     }
 }
 
@@ -472,3 +424,72 @@ impl EventHandler for MessageServerInner {
         }
     }
 }
+
+
+            /*
+            let mut events = Events::with_capacity(1024);
+            poll.poll(&mut events, Some(Duration::from_millis(10))).unwrap();
+
+            for event in events.iter() {
+                match event.token() {
+                    // ClI or API commands
+                    Token(0) => {
+                        let mut line = String::new();
+                        io::stdin().lock().read_line(&mut line).unwrap();
+
+                        let command = line.trim();
+
+                        match self.process_command(&command) {
+                            Err(CoreError::NexusTermination) => {
+                                break 'main;
+                            },
+                            Err(CoreError::CommandNotFound(str)) => {
+                                error!("Command not found '{}'", str);
+                            },
+                            _ => {
+                            }
+                        }
+                    },
+                    Token(1) => {
+                        match listener.accept() {
+                            Ok(Some((stream, _addr))) => {
+                                println!("Got a client: {:?}", _addr);
+
+                                poll.register(&stream, Token(2), Ready::readable(), PollOpt::edge()).unwrap();
+                                token2evented.insert(2, RefCell::new(stream));
+                            },
+                            Ok(None) => println!("OK, but None???"),
+                            Err(err) => println!("accept function failed: {:?}", err),
+                        }
+                    },
+                    Token(2) => {
+                        if let Some(stream) = token2evented.get(&2) {
+
+                            let mut buffer = String::new();
+                            let mut s = stream.borrow_mut();
+
+                            s.read_to_string(&mut buffer);
+
+                            let command = buffer.trim();
+
+                            debug!("received command {}", command);
+
+                            match self.process_command(&command) {
+                                Err(CoreError::NexusTermination) => {
+                                    break 'main;
+                                },
+                                Err(CoreError::CommandNotFound(str)) => {
+                                    error!("Command not found '{}'", str);
+                                },
+                                _ => {
+                                }
+                            }
+                        }
+                    },
+                    // fallback
+                    _ => {
+                        
+                    }
+                }
+            }
+             */
