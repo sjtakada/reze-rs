@@ -59,7 +59,7 @@ struct MasterTuple {
 
 pub struct RouterNexus {
     // MasterInner map
-    masters: HashMap<ProtocolType, MasterTuple>,
+    masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
     // Timer server
     timer_server: timer::Server,
@@ -71,9 +71,41 @@ pub struct RouterNexus {
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 }
 
+impl EventMaster for RouterNexus {
+    // Process command.
+    fn handle(&self, s: &str) -> Result<(), CoreError> {
+
+        let command = s;
+
+        match command {
+            "ospf" => {
+                // Spawn ospf instance
+                let (handle, sender, sender_z2p) =
+                    self.spawn_protocol(ProtocolType::Ospf,
+                                        self.clone_sender_p2n(),
+                                        self.clone_sender_p2z());
+                self.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
+
+                // register sender_z2p to Zebra thread
+            },
+            "bgp" => {
+
+            },
+            "quit" => {
+                return Err(CoreError::NexusTermination)
+            }
+            _ => {
+                return Err(CoreError::CommandNotFound(command.to_string()))
+            }
+        }
+
+        Ok(())
+    }
+}
+
 quick_error! {
     #[derive(Debug)]
-    enum CoreError {
+    pub enum CoreError {
         NexusTermination {
             description("Nexus is terminated")
             display(r#"Nexus is terminated"#)
@@ -88,7 +120,7 @@ quick_error! {
 impl RouterNexus {
     pub fn new() -> RouterNexus {
         RouterNexus {
-            masters: HashMap::new(),
+            masters: RefCell::new(HashMap::new()),
             timer_server: timer::Server::new(),
             sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
@@ -143,7 +175,7 @@ impl RouterNexus {
 
     //
     fn finish_protocol(&mut self, proto: &ProtocolType) {
-        if let Some(tuple) = self.masters.remove(&proto) {
+        if let Some(tuple) = self.masters.borrow_mut().remove(&proto) {
             tuple.sender.send(NexusToProto::ProtoTermination);
 
             match tuple.handle.join() {
@@ -155,34 +187,6 @@ impl RouterNexus {
                 }
             }
         }
-    }
-
-    // Process command.
-    fn process_command(&mut self, command: &str) -> Result<(), CoreError> {
-
-        match command {
-            "ospf" => {
-                // Spawn ospf instance
-                let (handle, sender, sender_z2p) =
-                    self.spawn_protocol(ProtocolType::Ospf,
-                                        self.clone_sender_p2n(),
-                                        self.clone_sender_p2z());
-                self.masters.insert(ProtocolType::Ospf, MasterTuple { handle, sender });
-
-                // register sender_z2p to Zebra thread
-            },
-            "bgp" => {
-
-            },
-            "quit" => {
-                return Err(CoreError::NexusTermination)
-            }
-            _ => {
-                return Err(CoreError::CommandNotFound(command.to_string()))
-            }
-        }
-
-        Ok(())
     }
 
     fn clone_sender_p2n(&self) -> mpsc::Sender<ProtoToNexus> {
@@ -212,13 +216,14 @@ impl RouterNexus {
         // Spawn zebra instance
         let (handle, sender, sender_p2z) = self.spawn_zebra(self.clone_sender_p2n());
         self.sender_p2z.borrow_mut().replace(sender_p2z);
-        self.masters.insert(ProtocolType::Zebra, MasterTuple { handle, sender });
+        self.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
         // Read/Write FD Event Manager
         let event_manager = Arc::new(EventManager::new());
         let ms = MessageServer::start(event_manager.clone(), &path);
 
-        let callback = |s: String| -> i32 {
+        let mut callback = |m: Arc<EventMaster>, s: String| -> i32 {
+            m.handle("s");
 //            self.process_command(&s);
             0
         };
@@ -247,7 +252,7 @@ impl RouterNexus {
             // Process timer
             match self.timer_server.pop_if_expired() {
                 Some(entry) => {
-                    match self.masters.get(&entry.protocol) {
+                    match self.masters.borrow_mut().get(&entry.protocol) {
                         Some(tuple) => {
                             let result =
                                 tuple.sender.send(NexusToProto::TimerExpiration(entry.token));
@@ -269,7 +274,7 @@ impl RouterNexus {
         // Send termination message to all threads first.
         // TODO: is there better way to iterate hashmap and remove it at the same time?
         let mut v = Vec::new();
-        for (proto, _tuple) in self.masters.iter_mut() {
+        for (proto, _tuple) in self.masters.borrow_mut().iter_mut() {
             v.push(proto.clone());
         }
 
@@ -284,9 +289,18 @@ impl RouterNexus {
 
 use std::path::PathBuf;
 
+//
+pub trait EventMaster {
+    fn handle(&self, s: &str) -> Result<(), CoreError>;
+}
+
 unsafe impl Send for MessageServerHandler {}
 unsafe impl Sync for MessageServerHandler {}
 
+//
+pub type MessageCallback = FnMut(Arc<EventMaster>, String) -> i32;
+
+//
 pub struct MessageServerHandler {
     stream: RefCell<Option<UnixStream>>,
 }
@@ -359,7 +373,7 @@ pub struct MessageServer {
     inner: RefCell<Option<Arc<MessageServerInner>>>,
 
     // Callbacks.
-    message_callback: RefCell<Option<Arc<FnMut(String) -> i32>>>,
+    message_callback: RefCell<Option<Arc<MessageCallback>>>,
 }
   
 impl MessageServer {
@@ -393,7 +407,7 @@ impl MessageServer {
     pub fn register_disconnect_callback() {
     }
 
-    pub fn register_message_callback(&self, callback: Arc<FnMut(String) -> i32>) {
+    pub fn register_message_callback(&self, callback: Arc<MessageCallback>) {
         self.message_callback.borrow_mut().replace(callback);
     }
 }

@@ -14,6 +14,7 @@ use std::time::Duration;
 use mio::*;
 use mio::unix::EventedFd;
 
+//
 pub enum EventType {
     SimpleEvent,
     ReadEvent,
@@ -21,15 +22,18 @@ pub enum EventType {
     TimerEvent,
 }
 
+//
 pub enum EventParam {
     Param(String)
 }
 
+//
 pub trait EventHandler {
     fn handle(&self, event_type: EventType, param: Option<Arc<EventParam>>);
 }
 
 
+//
 pub struct EventManagerInner {
     // Token index.
     index: usize,
