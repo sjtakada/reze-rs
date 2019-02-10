@@ -71,7 +71,7 @@ pub struct RouterNexus {
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 }
 
-impl EventMaster for RouterNexus {
+impl UdsServerHandler for RouterNexus {
     // Process command.
     fn handle(&self, s: &str) -> Result<(), CoreError> {
 
@@ -203,6 +203,11 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
+    pub fn message_callback(handler: Arc<UdsServerHandler>, entry: Arc<UdsServerEntry>) -> i32 {
+        handler.handle("s");
+        0
+    }
+
     //
     pub fn start(&mut self) {
         // Create Unix Domain Socket to accept commands.
@@ -220,15 +225,9 @@ impl RouterNexus {
 
         // Read/Write FD Event Manager
         let event_manager = Arc::new(EventManager::new());
-        let ms = MessageServer::start(event_manager.clone(), &path);
+        let ms = UdsServer::start(event_manager.clone(), &path);
 
-        let mut callback = |m: Arc<EventMaster>, s: String| -> i32 {
-            m.handle("s");
-//            self.process_command(&s);
-            0
-        };
-
-        ms.register_message_callback(Arc::new(callback));
+        ms.register_message_callback(Arc::new(RouterNexus::message_callback));
 
         'main: loop {
             event_manager.poll();
@@ -290,31 +289,31 @@ impl RouterNexus {
 use std::path::PathBuf;
 
 //
-pub trait EventMaster {
+pub trait UdsServerHandler {
     fn handle(&self, s: &str) -> Result<(), CoreError>;
 }
 
-unsafe impl Send for MessageServerHandler {}
-unsafe impl Sync for MessageServerHandler {}
+unsafe impl Send for UdsServerEntry {}
+unsafe impl Sync for UdsServerEntry {}
 
 //
-pub type MessageCallback = FnMut(Arc<EventMaster>, String) -> i32;
+pub type UdsServerCallback = FnMut(Arc<UdsServerHandler>, Arc<UdsServerEntry>) -> i32;
 
 //
-pub struct MessageServerHandler {
+pub struct UdsServerEntry {
     stream: RefCell<Option<UnixStream>>,
 }
 
-impl MessageServerHandler {
-    pub fn new() -> MessageServerHandler {
-        MessageServerHandler {
+impl UdsServerEntry {
+    pub fn new() -> UdsServerEntry {
+        UdsServerEntry {
             stream: RefCell::new(None),
         }
     }
 }
 
 
-impl EventHandler for MessageServerHandler {
+impl EventHandler for UdsServerEntry {
     fn handle(&self, e: EventType, param: Option<Arc<EventParam>>) {
         match e {
             EventType::ReadEvent => {
@@ -347,22 +346,22 @@ impl EventHandler for MessageServerHandler {
     }
 }
 
-struct MessageServerInner {
-    server: RefCell<Arc<MessageServer>>,
+struct UdsServerInner {
+    server: RefCell<Arc<UdsServer>>,
 }
 
-impl MessageServerInner {
-    pub fn new(server: Arc<MessageServer>) -> MessageServerInner {
-        MessageServerInner {
+impl UdsServerInner {
+    pub fn new(server: Arc<UdsServer>) -> UdsServerInner {
+        UdsServerInner {
             server: RefCell::new(server)
         }
     }
 }
 
-unsafe impl Send for MessageServerInner {}
-unsafe impl Sync for MessageServerInner {}
+unsafe impl Send for UdsServerInner {}
+unsafe impl Sync for UdsServerInner {}
 
-pub struct MessageServer {
+pub struct UdsServer {
     // EventManager
     event_manager: RefCell<Arc<EventManager>>,
 
@@ -370,20 +369,20 @@ pub struct MessageServer {
     listener: UnixListener,
 
     // Message Server Inner
-    inner: RefCell<Option<Arc<MessageServerInner>>>,
+    inner: RefCell<Option<Arc<UdsServerInner>>>,
 
     // Callbacks.
-    message_callback: RefCell<Option<Arc<MessageCallback>>>,
+    message_callback: RefCell<Option<Arc<UdsServerCallback>>>,
 }
   
-impl MessageServer {
-    fn new(event_manager: Arc<EventManager>, path: &PathBuf) -> MessageServer {
+impl UdsServer {
+    fn new(event_manager: Arc<EventManager>, path: &PathBuf) -> UdsServer {
         let listener = match UnixListener::bind(path) {
             Ok(listener) => listener,
             Err(_) => panic!("UnixListener::bind() error"),
         };
 
-        MessageServer {
+        UdsServer {
             event_manager: RefCell::new(event_manager),
             listener: listener,
             inner: RefCell::new(None),
@@ -391,9 +390,9 @@ impl MessageServer {
         }
     }
 
-    pub fn start(mut event_manager: Arc<EventManager>, path: &PathBuf) -> Arc<MessageServer> {
-        let server = Arc::new(MessageServer::new(event_manager.clone(), path));
-        let inner = Arc::new(MessageServerInner::new(server.clone()));
+    pub fn start(mut event_manager: Arc<EventManager>, path: &PathBuf) -> Arc<UdsServer> {
+        let server = Arc::new(UdsServer::new(event_manager.clone(), path));
+        let inner = Arc::new(UdsServerInner::new(server.clone()));
 
         event_manager.register_read(&server.listener, inner.clone());
 
@@ -407,12 +406,12 @@ impl MessageServer {
     pub fn register_disconnect_callback() {
     }
 
-    pub fn register_message_callback(&self, callback: Arc<MessageCallback>) {
+    pub fn register_message_callback(&self, callback: Arc<UdsServerCallback>) {
         self.message_callback.borrow_mut().replace(callback);
     }
 }
 
-impl EventHandler for MessageServerInner {
+impl EventHandler for UdsServerInner {
     fn handle(&self, e: EventType, param: Option<Arc<EventParam>>) {
         let mut server = self.server.borrow_mut();
 
@@ -422,11 +421,11 @@ impl EventHandler for MessageServerInner {
                     Ok(Some((stream, _addr))) => {
                         debug!("Got a message client: {:?}", _addr);
 
-                        let msh = Arc::new(MessageServerHandler::new());
+                        let entry = Arc::new(UdsServerEntry::new());
                         let event_manager = server.event_manager.borrow();
 
-                        event_manager.register_read(&stream, msh.clone());
-                        msh.stream.borrow_mut().replace(stream);
+                        event_manager.register_read(&stream, entry.clone());
+                        entry.stream.borrow_mut().replace(stream);
                     },
                     Ok(None) => debug!("OK, but None???"),
                     Err(err) => debug!("accept function failed: {:?}", err),
