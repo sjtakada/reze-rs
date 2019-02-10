@@ -16,7 +16,6 @@ use log::error;
 use std::io;
 use std::io::BufRead;
 use std::io::Read;
-use std::env;
 //use std::fs::File;
 use std::collections::HashMap;
 use std::thread;
@@ -73,32 +72,45 @@ pub struct RouterNexus {
 
 impl UdsServerHandler for RouterNexus {
     // Process command.
-    fn handle(&self, s: &str) -> Result<(), CoreError> {
+    fn handle_message(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        if let Some(ref mut stream) = *entry.stream.borrow_mut() {
+            let mut buffer = String::new();
 
-        let command = s;
+            stream.read_to_string(&mut buffer);
+            let command = buffer.trim();
+            debug!("received command {}", command);
 
-        match command {
-            "ospf" => {
-                // Spawn ospf instance
-                let (handle, sender, sender_z2p) =
-                    self.spawn_protocol(ProtocolType::Ospf,
-                                        self.clone_sender_p2n(),
-                                        self.clone_sender_p2z());
-                self.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
+            match command {
+                "ospf" => {
+                    // Spawn ospf instance
+                    let (handle, sender, sender_z2p) =
+                        self.spawn_protocol(ProtocolType::Ospf,
+                                            self.clone_sender_p2n(),
+                                            self.clone_sender_p2z());
+                    self.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
 
-                // register sender_z2p to Zebra thread
-            },
-            "bgp" => {
+                    // register sender_z2p to Zebra thread
+                },
+                "bgp" => {
 
-            },
-            "quit" => {
-                return Err(CoreError::NexusTermination)
-            }
-            _ => {
-                return Err(CoreError::CommandNotFound(command.to_string()))
+                },
+                "quit" => {
+                    return Err(CoreError::NexusTermination)
+                }
+                _ => {
+                    return Err(CoreError::CommandNotFound(command.to_string()))
+                }
             }
         }
 
+        Ok(())
+    }
+
+    fn handle_connect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        Ok(())
+    }
+    
+    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
         Ok(())
     }
 }
@@ -174,7 +186,7 @@ impl RouterNexus {
     }
 
     //
-    fn finish_protocol(&mut self, proto: &ProtocolType) {
+    fn finish_protocol(&self, proto: &ProtocolType) {
         if let Some(tuple) = self.masters.borrow_mut().remove(&proto) {
             tuple.sender.send(NexusToProto::ProtoTermination);
 
@@ -203,17 +215,8 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
-    pub fn message_callback(handler: Arc<UdsServerHandler>, entry: Arc<UdsServerEntry>) -> i32 {
-        handler.handle("s");
-        0
-    }
-
     //
-    pub fn start(&mut self) {
-        // Create Unix Domain Socket to accept commands.
-        let mut path = env::temp_dir();
-        path.push("rzrtd.cli");
-
+    pub fn start(&self, event_manager: Arc<EventManager>) {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
         self.sender_p2n.borrow_mut().replace(sender_p2n);
@@ -223,15 +226,10 @@ impl RouterNexus {
         self.sender_p2z.borrow_mut().replace(sender_p2z);
         self.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
-        // Read/Write FD Event Manager
-        let event_manager = Arc::new(EventManager::new());
-        let ms = UdsServer::start(event_manager.clone(), &path);
-
-        ms.register_message_callback(Arc::new(RouterNexus::message_callback));
-
         'main: loop {
             event_manager.poll();
 
+ /*
             // Process channels
             while let Ok(d) = receiver.try_recv() {
                 match d {
@@ -268,6 +266,7 @@ impl RouterNexus {
                 },
                 None => { }
             }
+*/
         }
 
         // Send termination message to all threads first.
@@ -290,25 +289,27 @@ use std::path::PathBuf;
 
 //
 pub trait UdsServerHandler {
-    fn handle(&self, s: &str) -> Result<(), CoreError>;
+    fn handle_message(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
+    fn handle_connect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
+    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
 }
 
 unsafe impl Send for UdsServerEntry {}
 unsafe impl Sync for UdsServerEntry {}
 
-//
-pub type UdsServerCallback = FnMut(Arc<UdsServerHandler>, Arc<UdsServerEntry>) -> i32;
-
-//
+// Unix Domain Socket server entry, created per connect.
 pub struct UdsServerEntry {
+    // Pointer to UdsServer.
+    server: RefCell<Arc<UdsServer>>,
+
+    // mio UnixStream.
     stream: RefCell<Option<UnixStream>>,
 }
 
 impl UdsServerEntry {
-    pub fn new() -> UdsServerEntry {
-        UdsServerEntry {
-            stream: RefCell::new(None),
-        }
+    pub fn new(server: Arc<UdsServer>) -> Arc<UdsServerEntry> {
+        Arc::new(UdsServerEntry { server: RefCell::new(server),
+                                  stream: RefCell::new(None) })
     }
 }
 
@@ -317,15 +318,18 @@ impl EventHandler for UdsServerEntry {
     fn handle(&self, e: EventType, param: Option<Arc<EventParam>>) {
         match e {
             EventType::ReadEvent => {
+                let server = self.server.borrow_mut();
+                let handler = server.handler.borrow_mut();
+
+                handler.handle_message(server.clone(), self);
+/*
                 let mut buffer = String::new();
                 if let Some(ref mut stream) = *self.stream.borrow_mut() {
+
                     stream.read_to_string(&mut buffer);
-
                     let command = buffer.trim();
-
                     debug!("received command {}", command);
 
-/*
                     match self.process_command(&command) {
                         Err(CoreError::NexusTermination) => {
                             debug!("Termination");
@@ -336,8 +340,8 @@ impl EventHandler for UdsServerEntry {
                         _ => {
                         }
                     }
-*/
                 }
+*/
             },
             _ => {
                 debug!("Unknown event");
@@ -365,18 +369,18 @@ pub struct UdsServer {
     // EventManager
     event_manager: RefCell<Arc<EventManager>>,
 
-    // mio UnixListener
-    listener: UnixListener,
+    // Message Server Handler
+    handler: RefCell<Arc<UdsServerHandler>>,
 
     // Message Server Inner
     inner: RefCell<Option<Arc<UdsServerInner>>>,
 
-    // Callbacks.
-    message_callback: RefCell<Option<Arc<UdsServerCallback>>>,
+    // mio UnixListener
+    listener: UnixListener,
 }
   
 impl UdsServer {
-    fn new(event_manager: Arc<EventManager>, path: &PathBuf) -> UdsServer {
+    fn new(event_manager: Arc<EventManager>, handler: Arc<UdsServerHandler>, path: &PathBuf) -> UdsServer {
         let listener = match UnixListener::bind(path) {
             Ok(listener) => listener,
             Err(_) => panic!("UnixListener::bind() error"),
@@ -384,30 +388,20 @@ impl UdsServer {
 
         UdsServer {
             event_manager: RefCell::new(event_manager),
-            listener: listener,
+            handler: RefCell::new(handler),
             inner: RefCell::new(None),
-            message_callback: RefCell::new(None),
+            listener: listener,
         }
     }
 
-    pub fn start(mut event_manager: Arc<EventManager>, path: &PathBuf) -> Arc<UdsServer> {
-        let server = Arc::new(UdsServer::new(event_manager.clone(), path));
+    pub fn start(mut event_manager: Arc<EventManager>, handler: Arc<UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
+        let server = Arc::new(UdsServer::new(event_manager.clone(), handler, path));
         let inner = Arc::new(UdsServerInner::new(server.clone()));
 
         event_manager.register_read(&server.listener, inner.clone());
 
         server.inner.borrow_mut().replace(inner);
         server
-    }
-
-    pub fn register_connect_callback() {
-    }
-
-    pub fn register_disconnect_callback() {
-    }
-
-    pub fn register_message_callback(&self, callback: Arc<UdsServerCallback>) {
-        self.message_callback.borrow_mut().replace(callback);
     }
 }
 
@@ -421,7 +415,7 @@ impl EventHandler for UdsServerInner {
                     Ok(Some((stream, _addr))) => {
                         debug!("Got a message client: {:?}", _addr);
 
-                        let entry = Arc::new(UdsServerEntry::new());
+                        let entry = UdsServerEntry::new(server.clone());
                         let event_manager = server.event_manager.borrow();
 
                         event_manager.register_read(&stream, entry.clone());
@@ -505,4 +499,31 @@ impl EventHandler for UdsServerInner {
                     }
                 }
             }
+
+
+    pub fn register_message_callback(&self, callback: Arc<UdsServerCallback>) {
+        self.message_callback.borrow_mut().replace(callback);
+    }
+
+    pub fn message_callback(handler: Arc<UdsServerHandler>, entry: Arc<UdsServerEntry>) -> i32 {
+        handler.handle("s");
+        0
+    }
+
+//
+//pub type UdsServerCallback = FnMut(Arc<UdsServerHandler>, Arc<UdsServerEntry>) -> i32;
+
+// Inner for EventHandler.
+struct UdsServerEntryInner {
+    entry: RefCell<Arc<UdsServerEntry>>,
+}
+
+impl UdsServerEntryInner {
+    pub fn new(entry: Arc<UdsServerEntry>) -> UdsServerEntryInner {
+        UdsServerEntryInner {
+            entry: RefCell::new(entry)
+        }
+    }
+}
+
              */

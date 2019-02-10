@@ -3,11 +3,17 @@
 //   Copyright (C) 2018,2019 Toshiaki Takada
 //
 
+use std::env;
+use std::sync::Arc;
+
 use log::info;
 use simplelog::*;
 
-use rzrtd::core::nexus::RouterNexus;
+use rzrtd::core::event::*;
+use rzrtd::core::nexus::*;
+use rzrtd::core::uds_server::*;
 
+// Global entry point of ReZe Router Daemon.
 fn main() {
     // TODO: command line arguments.
 
@@ -21,8 +27,24 @@ fn main() {
     // Start daemon
     info!("ReZe Router Daemon started.");
 
-    let mut nexus = RouterNexus::new();
-    nexus.start();
+    start();
 
-    info!("ReZe RouterD terminated.");
+    info!("ReZe Router Daemon terminated.");
 }
+
+// Initialize objects and associate them.
+// TODO: probably take config or command line parameters.
+fn start() {
+    // Create Unix Domain Socket to accept commands.
+    let mut path = env::temp_dir();
+    path.push("rzrtd.cli");
+
+    // Prepare some objects.
+    let event_manager = Arc::new(EventManager::new());
+    let nexus = Arc::new(RouterNexus::new());
+    let _uds_server = UdsServer::start(event_manager.clone(), nexus.clone(), &path);
+
+    // Start nexus.
+    nexus.start(event_manager);
+}
+
