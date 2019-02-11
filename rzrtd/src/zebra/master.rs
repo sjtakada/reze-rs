@@ -5,14 +5,14 @@
 // Zebra Master
 //
 
-use log::{debug, error};
+use log::debug;
 
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
 use std::sync::mpsc;
 
-use crate::core::event::*;
+//use crate::core::event::*;
 
 use crate::core::protocols::ProtocolType;
 use crate::core::message::nexus::ProtoToNexus;

@@ -13,10 +13,6 @@
 use log::debug;
 use log::error;
 
-use std::io;
-use std::io::BufRead;
-use std::io::Read;
-//use std::fs::File;
 use std::collections::HashMap;
 use std::thread;
 use std::thread::JoinHandle;
@@ -27,9 +23,6 @@ use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
-
-use mio::*;
-use mio::unix::EventedFd;
 
 use super::error::*;
 use super::event::*;
@@ -60,7 +53,7 @@ pub struct RouterNexus {
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
     // Timer server
-    timer_server: timer::Server,
+    timer_server: RefCell<timer::Server>,
 
     // Sender channel for ProtoToNexus
     sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
@@ -75,11 +68,7 @@ impl UdsServerHandler for RouterNexus {
         if let Some(command) = entry.stream_read() {
             debug!("received command {}", command);
 
-            let ospf = "ospf".to_string();
-            let quit = "quit".to_string();
-
-            match command {
-                ospf => {
+            if command == "ospf" {
                     // Spawn ospf instance
                     let (handle, sender, sender_z2p) =
                         self.spawn_protocol(ProtocolType::Ospf,
@@ -88,24 +77,34 @@ impl UdsServerHandler for RouterNexus {
                     self.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
 
                     // register sender_z2p to Zebra thread
-                },
-                quit => {
-                    return Err(CoreError::NexusTermination)
-                }
-                _ => {
-                    return Err(CoreError::CommandNotFound(command.to_string()))
-                }
+            } else if command == "quie" {
+                return Err(CoreError::NexusTermination)
+            } else {
+                return Err(CoreError::CommandNotFound(command.to_string()))
             }
         }
 
+        /*
+        match self.process_command(&command) {
+            Err(CoreError::NexusTermination) => {
+                debug!("Termination");
+            },
+            Err(CoreError::CommandNotFound(str)) => {
+                error!("Command not found '{}'", str);
+            },
+            _ => {
+            }
+        }
+    }
+*/
         Ok(())
     }
 
-    fn handle_connect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
         Ok(())
     }
     
-    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+    fn handle_disconnect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
         Ok(())
     }
 }
@@ -114,7 +113,7 @@ impl RouterNexus {
     pub fn new() -> RouterNexus {
         RouterNexus {
             masters: RefCell::new(HashMap::new()),
-            timer_server: timer::Server::new(),
+            timer_server: RefCell::new(timer::Server::new()),
             sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
         }
@@ -208,16 +207,19 @@ impl RouterNexus {
         self.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
         'main: loop {
-            event_manager.poll();
+            //
+            match event_manager.poll() {
+                Err(CoreError::NexusTermination) => break 'main,
+                _ => {}
+            }
 
- /*
             // Process channels
             while let Ok(d) = receiver.try_recv() {
                 match d {
                     ProtoToNexus::TimerRegistration((p, d, token)) => {
                         debug!("Received timer registration {} {}", p, token);
 
-                        self.timer_server.register(p, d, token);
+                        self.timer_server.borrow_mut().register(p, d, token);
                     }
                     ProtoToNexus::ProtoException(s) => {
                         debug!("Received exception {}", s);
@@ -228,7 +230,7 @@ impl RouterNexus {
             thread::sleep(Duration::from_millis(10));
 
             // Process timer
-            match self.timer_server.pop_if_expired() {
+            match self.timer_server.borrow_mut().pop_if_expired() {
                 Some(entry) => {
                     match self.masters.borrow_mut().get(&entry.protocol) {
                         Some(tuple) => {
@@ -247,7 +249,6 @@ impl RouterNexus {
                 },
                 None => { }
             }
-*/
         }
 
         // Send termination message to all threads first.

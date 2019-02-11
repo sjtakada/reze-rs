@@ -7,8 +7,6 @@
 
 use log::debug;
 
-use std::io;
-use std::io::BufRead;
 use std::io::Read;
 
 use std::sync::Arc;
@@ -23,13 +21,13 @@ use super::event::*;
 
 // Trait UdsServer callbacks.
 pub trait UdsServerHandler {
-    //
+    // callback when server accepts client connection.
     fn handle_connect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
 
-    //
+    // callback when server detects client disconnected.
     fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
 
-    //
+    // callback when server entry received message.
     fn handle_message(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
 }
 
@@ -67,38 +65,21 @@ impl UdsServerEntry {
 
 
 impl EventHandler for UdsServerEntry {
-    fn handle(&self, e: EventType, param: Option<Arc<EventParam>>) {
+    fn handle(&self, e: EventType, _param: Option<Arc<EventParam>>) -> Result<(), CoreError> {
         match e {
             EventType::ReadEvent => {
                 let server = self.server.borrow_mut();
                 let handler = server.handler.borrow_mut();
 
-                handler.handle_message(server.clone(), self);
-/*
-                let mut buffer = String::new();
-                if let Some(ref mut stream) = *self.stream.borrow_mut() {
-
-                    stream.read_to_string(&mut buffer);
-                    let command = buffer.trim();
-                    debug!("received command {}", command);
-
-                    match self.process_command(&command) {
-                        Err(CoreError::NexusTermination) => {
-                            debug!("Termination");
-                        },
-                        Err(CoreError::CommandNotFound(str)) => {
-                            error!("Command not found '{}'", str);
-                        },
-                        _ => {
-                        }
-                    }
-                }
-*/
+                // Dispatch message to Server message handler.
+                return handler.handle_message(server.clone(), self);
             },
             _ => {
                 debug!("Unknown event");
             }
         }
+
+        Ok(())
     }
 }
 
@@ -146,7 +127,7 @@ impl UdsServer {
         }
     }
 
-    pub fn start(mut event_manager: Arc<EventManager>, handler: Arc<UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
+    pub fn start(event_manager: Arc<EventManager>, handler: Arc<UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
         let server = Arc::new(UdsServer::new(event_manager.clone(), handler, path));
         let inner = Arc::new(UdsServerInner::new(server.clone()));
 
@@ -158,8 +139,8 @@ impl UdsServer {
 }
 
 impl EventHandler for UdsServerInner {
-    fn handle(&self, e: EventType, param: Option<Arc<EventParam>>) {
-        let mut server = self.server.borrow_mut();
+    fn handle(&self, e: EventType, _param: Option<Arc<EventParam>>) -> Result<(), CoreError> {
+        let server = self.server.borrow_mut();
 
         match e {
             EventType::ReadEvent => {
@@ -181,5 +162,7 @@ impl EventHandler for UdsServerInner {
                 debug!("Unknown event");
             }
         }
+
+        Ok(())
     }
 }
