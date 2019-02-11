@@ -85,7 +85,7 @@ impl ProtocolMaster {
 
                             match self.timer_handler_get(token) {
                                 Some(handler) => {
-                                    handler.handle(EventType::TimerEvent);
+                                    handler.handle(EventType::TimerEvent, None);
                                 },
                                 None => {
                                     error!("Handler doesn't exist");

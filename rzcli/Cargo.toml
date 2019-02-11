@@ -2,5 +2,8 @@
 name = "rzcli"
 version = "0.1.0"
 authors = ["Toshiaki Takada <toshiaki.takada@gmail.com>"]
+edition = "2018"
 
 [dependencies]
+mio = "0.6.16"
+mio-uds = "0.6.7"

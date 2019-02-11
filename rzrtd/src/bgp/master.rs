@@ -14,12 +14,12 @@ use crate::core::master::ProtocolMaster;
 use crate::core::master::MasterInner;
 
 pub struct BgpMaster {
-    master: RefCell<Arc<ProtocolMaster>>
+    _master: RefCell<Arc<ProtocolMaster>>
 }
 
 impl BgpMaster {
     pub fn new(master: Arc<ProtocolMaster>) -> BgpMaster {
-        BgpMaster { master: RefCell::new(master) }
+        BgpMaster { _master: RefCell::new(master) }
     }
 }
 
