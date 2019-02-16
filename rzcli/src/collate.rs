@@ -7,18 +7,48 @@
 
 use std::fmt;
 
+// Match flag.
+#[derive(PartialEq)]
+pub enum MatchFlag {
+    Full,         // Fully matched.
+    Partial,      // Partially matched, still valid.
+    Incomplete,   // String incomplete, not valid for execution.
+}
+
+impl MatchFlag {
+    pub fn to_string(&self) -> &str {
+        match *self {
+            MatchFlag::Full => "Match full",
+            MatchFlag::Partial => "Match partial",
+            MatchFlag::Incomplete => "Match incomplete",
+        }
+    }
+}
+
+impl fmt::Debug for MatchFlag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
 // Match result.
 #[derive(PartialEq)]
 pub enum MatchResult {
     Failure,
-    Success,
+    Success(MatchFlag),
 }
 
 impl MatchResult {
     pub fn to_string(&self) -> &str {
-        match *self {
-            MatchResult::Success => "Match success",
+        match self {
             MatchResult::Failure => "Match failure",
+            MatchResult::Success(flag) => {
+                match flag {
+                    MatchFlag::Full => "Fully matched",
+                    MatchFlag::Partial => "Partially matched",
+                    MatchFlag::Incomplete => "Incomplete match",
+                }
+            }
         }
     }
 }
@@ -29,28 +59,3 @@ impl fmt::Debug for MatchResult {
     }
 }
 
-// Match flag.
-#[derive(PartialEq)]
-pub enum MatchFlag {
-    Full,         // Fully matched.
-    Partial,      // Partially matched, still valid.
-    Incomplete,   // String incomplete, not valid for execution.
-    None,         // Not matched.
-}
-
-impl MatchFlag {
-    pub fn to_string(&self) -> &str {
-        match *self {
-            MatchFlag::Full => "Match full",
-            MatchFlag::Partial => "Match partial",
-            MatchFlag::Incomplete => "Match incomplete",
-            MatchFlag::None => "Match none",
-        }
-    }
-}
-
-impl fmt::Debug for MatchFlag {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.to_string())
-    }
-}

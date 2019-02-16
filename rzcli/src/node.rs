@@ -20,7 +20,7 @@ pub trait CliNode {
     fn token(&self) -> &str;
     
     // Return match result and flag against input.
-    fn collate(&self, input: &str) -> (MatchResult, MatchFlag);
+    fn collate(&self, input: &str) -> MatchResult;
 
     // Return help string ref.
     //fn help(&self) -> &str;
@@ -96,17 +96,17 @@ impl CliNode for CliNodeKeyword {
         &self.inner.token
     }
     
-    fn collate(&self, input: &str) -> (MatchResult, MatchFlag) {
+    fn collate(&self, input: &str) -> MatchResult {
         if input == self.token() {
-            return (MatchResult::Success, MatchFlag::Full)
+            return MatchResult::Success(MatchFlag::Full)
         }
 
         let t = &self.token()[0..input.len()];
         if input == t {
-            return (MatchResult::Success, MatchFlag::Partial)
+            return MatchResult::Success(MatchFlag::Partial)
         }
 
-        (MatchResult::Failure, MatchFlag::None)
+        MatchResult::Failure
     }
 
 }
@@ -135,6 +135,7 @@ pub struct CliNodeWord {
     inner: CliNodeInner,
 }
 
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -143,17 +144,14 @@ mod tests {
     pub fn test_node_keyword() {
         let node = CliNodeKeyword::new(String::from("show"), String::from("show"),
                                        String::from("help"), String::from("show"));
-        let (result, flag) = node.collate("show");
-        assert_eq!(result, MatchResult::Success);
-        assert_eq!(flag, MatchFlag::Full);
+        let result = node.collate("show");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
 
-        let (result, flag) = node.collate("sho");
-        assert_eq!(result, MatchResult::Success);
-        assert_eq!(flag, MatchFlag::Partial);
+        let result = node.collate("sho");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
-        let (result, flag) = node.collate("shop");
+        let result = node.collate("shop");
         assert_eq!(result, MatchResult::Failure);
-        assert_eq!(flag, MatchFlag::None);
     }
 }
 
