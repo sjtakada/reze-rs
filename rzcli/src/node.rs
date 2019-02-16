@@ -54,12 +54,12 @@ pub struct CliNodeInner {
 }
 
 impl CliNodeInner {
-    pub fn new(id: String, defun: String, help: String, token: String) -> CliNodeInner {
+    pub fn new(id: &str, defun: &str, help: &str, token: &str) -> CliNodeInner {
         CliNodeInner {
-            id: id,
-            defun: defun,
-            help: help,
-            token: token,
+            id: String::from(id),
+            defun: String::from(defun),
+            help: String::from(help),
+            token: String::from(token),
             sorted: false,
             hidden: false,
             next: Vec::new(),
@@ -82,7 +82,7 @@ pub struct CliNodeKeyword {
 }
 
 impl CliNodeKeyword {
-    pub fn new(id: String, defun: String, help: String, token: String) -> CliNodeKeyword {
+    pub fn new(id: &str, defun: &str, help: &str, token: &str) -> CliNodeKeyword {
         CliNodeKeyword {
             inner: CliNodeInner::new(id, defun, help, token)
         }
@@ -122,12 +122,12 @@ pub struct CliNodeRange {
 }
 
 impl CliNodeRange {
-    pub fn new(id: String, defun: String, help: String,
+    pub fn new(id: &str, defun: &str, help: &str,
                min: i64, max: i64) -> CliNodeRange {
         let token = format!("<{}-{}>", min, max);
 
         CliNodeRange {
-            inner: CliNodeInner::new(id, defun, help, token),
+            inner: CliNodeInner::new(id, defun, help, &token),
             min: min,
             max: max,
         }
@@ -189,8 +189,8 @@ mod tests {
 
     #[test]
     pub fn test_node_keyword() {
-        let node = CliNodeKeyword::new(String::from("show"), String::from("show"),
-                                       String::from("help"), String::from("show"));
+        let node = CliNodeKeyword::new("show", "show", "help", "show");
+
         let result = node.collate("show");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
 
@@ -203,8 +203,7 @@ mod tests {
 
     #[test]
     pub fn test_node_range() {
-        let node = CliNodeRange::new(String::from("range"), String::from("RANGE"),
-                                     String::from("help"), 100i64, 9999i64);
+        let node = CliNodeRange::new("range", "RANGE", "help", 100i64, 9999i64);
 
         assert_eq!(node.token(), "<100-9999>");
 
