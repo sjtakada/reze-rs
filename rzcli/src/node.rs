@@ -10,6 +10,12 @@ use std::rc::Rc;
 use super::tree;
 use super::collate::*;
 
+const CLI_TOKEN_IPV4_ADDRESS: &str = "A.B.C.D";
+const CLI_TOKEN_IPV4_PREFIX: &str = "A.B.C.D/M";
+const CLI_TOKEN_IPV6_ADDRESS: &str = "X:X::X:X";
+const CLI_TOKEN_IPV6_PREFIX: &str = "X:X::X:X/M";
+const CLI_TOKEN_WORD: &str = "WORD";
+const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
 
 // CLI Node trait.
 pub trait CliNode {
@@ -167,6 +173,82 @@ pub struct CliNodeIPv4Address {
     inner: CliNodeInner,
 }
     
+impl CliNodeIPv4Address {
+    pub fn new(id: &str, defun: &str, help: &str) -> CliNodeIPv4Address {
+        CliNodeIPv4Address {
+            inner: CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV4_ADDRESS),
+        }
+    }
+}
+
+impl CliNode for CliNodeIPv4Address {
+    fn inner(&self) -> &CliNodeInner {
+        &self.inner
+    }
+
+    fn token(&self) -> &str {
+        &self.inner.token
+    }
+    
+    fn collate(&self, input: &str) -> MatchResult {
+        enum State {
+            Init,
+            Digit,
+            Dot,
+        };
+
+        let mut val: u32 = 0;
+        let mut dots: u8 = 0;
+        let mut octets: u8 = 0;
+        let mut state = State::Init;
+
+        for c in input.chars() {
+            match state {
+                State::Init if c.is_digit(10) => {
+                    state = State::Digit;
+                    octets += 1;
+                    val = c.to_digit(10).unwrap();
+                },
+                State::Digit => {
+                    match c {
+                        '.' => {
+                            if dots == 3 {
+                                return MatchResult::Failure
+                            }
+
+                            state = State::Dot;
+                            dots += 1;
+                        },
+                        '0' ... '9' => {
+                            val = val * 10 + c.to_digit(10).unwrap();
+                            if val > 255 {
+                                return MatchResult::Failure
+                            }
+                        },
+                        _ => {
+                            return MatchResult::Failure
+                        }
+                    }
+                },
+                State::Dot if c.is_digit(10) => {
+                    val = c.to_digit(10).unwrap();
+                    state = State::Digit;
+                    octets += 1;
+                },
+                _ => {
+                    return MatchResult::Failure
+                }
+            }
+        }
+
+        if (octets != 4) {
+            return MatchResult::Success(MatchFlag::Incomplete)
+        }
+
+        MatchResult::Success(MatchFlag::Full)
+    }
+}
+
 //
 pub struct CliNodeIPv6Prefix {
     inner: CliNodeInner,
@@ -202,7 +284,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_node_range() {
+    pub fn test_node_range_1() {
         let node = CliNodeRange::new("range", "RANGE", "help", 100i64, 9999i64);
 
         assert_eq!(node.token(), "<100-9999>");
@@ -217,6 +299,51 @@ mod tests {
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
 
         let result = node.collate("10000");
+        assert_eq!(result, MatchResult::Failure);
+    }
+
+    #[test]
+    pub fn test_node_range_2() {
+        let node = CliNodeRange::new("range", "RANGE", "help", 1i64, 4294967295i64);
+
+        assert_eq!(node.token(), "<1-4294967295>");
+
+        let result = node.collate("0");
+        assert_eq!(result, MatchResult::Failure);
+
+        let result = node.collate("1");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
+        let result = node.collate("4294967295");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
+        let result = node.collate("4294967296");
+        assert_eq!(result, MatchResult::Failure);
+    }
+
+    #[test]
+    pub fn test_node_ipv4_address() {
+        let node = CliNodeIPv4Address::new("ipv4addr", "IPV4-ADDRESS", "help");
+
+        let result = node.collate("100.100.100.100");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
+        let result = node.collate("100.100.100.100.");
+        assert_eq!(result, MatchResult::Failure);
+
+        let result = node.collate("255.255.255.255");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
+        let result = node.collate("1.1.1.256");
+        assert_eq!(result, MatchResult::Failure);
+
+        let result = node.collate("255");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("1.1.1.");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("a.b.c.d");
         assert_eq!(result, MatchResult::Failure);
     }
 }

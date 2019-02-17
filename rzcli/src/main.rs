@@ -41,7 +41,7 @@ fn main() {
 
     let matches = match opts.parse(&args[1..]) {
         Ok(matches) => matches,
-        Err(err) => {
+        Err(_err) => {
             println!("Invalid option");
             print_help(&program, opts);
             return;
