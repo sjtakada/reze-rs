@@ -31,22 +31,24 @@ impl fmt::Debug for MatchFlag {
     }
 }
 
-// Match result.
+// Match result:
+//   If it succeeds, it will return either Full, Partial or incomplete, depending on the type of node.
+//   If it fails, it will return position where the match fails.
 #[derive(PartialEq)]
 pub enum MatchResult {
-    Failure,
+    Failure(u32),
     Success(MatchFlag),
 }
 
 impl MatchResult {
-    pub fn to_string(&self) -> &str {
+    pub fn to_string(&self) -> String {
         match self {
-            MatchResult::Failure => "Match failure",
+            MatchResult::Failure(pos) => format!("Match failure at {}", pos),
             MatchResult::Success(flag) => {
                 match flag {
-                    MatchFlag::Full => "Fully matched",
-                    MatchFlag::Partial => "Partially matched",
-                    MatchFlag::Incomplete => "Incomplete match",
+                    MatchFlag::Full => "Fully matched".to_string(),
+                    MatchFlag::Partial => "Partially matched".to_string(),
+                    MatchFlag::Incomplete => "Incomplete match".to_string(),
                 }
             }
         }
