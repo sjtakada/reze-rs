@@ -26,6 +26,13 @@ pub fn is_xdigit_or_colon(c: char) -> bool {
     return false
 }
 
+pub fn is_xdigit_or_colon_or_slash(c: char) -> bool {
+    if c.is_digit(16) || c == ':' || c == '/' {
+        return true
+    }
+    return false
+}
+
 // CLI Node trait.
 pub trait CliNode {
     // Return inner.
@@ -366,6 +373,139 @@ pub struct CliNodeIPv6Prefix {
     inner: CliNodeInner,
 }
 
+impl CliNodeIPv6Prefix {
+    pub fn new(id: &str, defun: &str, help: &str) -> CliNodeIPv6Prefix {
+        CliNodeIPv6Prefix {
+            inner: CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV6_PREFIX),
+        }
+    }
+}
+
+impl CliNode for CliNodeIPv6Prefix {
+    fn inner(&self) -> &CliNodeInner {
+        &self.inner
+    }
+
+    fn token(&self) -> &str {
+        &self.inner.token
+    }
+    
+    fn collate(&self, input: &str) -> MatchResult {
+        enum State {
+            Init,
+            Xdigit,
+            Colon1,
+            Colon2,
+            Slash,
+            Plen,
+        };
+
+        let mut pos: u32 = 0;
+        let mut first_colon: bool = false;
+        let mut double_colon: bool = false;
+        let mut xdigits: u32 = 0;
+        let mut xdigits_count: u8 = 0;
+        let mut colon_count: u8 = 0;
+        let mut state = State::Init;
+        let mut plen: u32 = 0;
+
+        for c in input.chars() {
+            match state {
+                State::Init if is_xdigit_or_colon(c) => {
+                    match c {
+                        ':' => {
+                            state = State::Colon1;
+                            first_colon = true;
+                            colon_count += 1;
+                        },
+                        _ => {
+                            state = State::Xdigit;
+                            xdigits += 1;
+                        }
+                    }
+                },
+                State::Xdigit if is_xdigit_or_colon_or_slash(c) => {
+                    match c {
+                        ':' => {
+                            state = State::Colon1;
+                            xdigits = 0;
+                            xdigits_count += 1;
+                            colon_count += 1;
+                        },
+                        '/' => {
+                            state = State::Slash;
+                            xdigits_count += 1;
+                        },
+                        _ => {
+                            xdigits += 1;
+                        }
+                    }
+                },
+                State::Colon1 if is_xdigit_or_colon(c) => {
+                    match c {
+                        ':' => {
+                            if double_colon {
+                                return MatchResult::Failure(pos)
+                            }
+
+                            state = State::Colon2;
+                            colon_count += 1;
+                            double_colon = true;
+                        },
+                        _ => {
+                            if first_colon {
+                                return MatchResult::Failure(pos)
+                            }
+
+                            state = State::Xdigit;
+                            xdigits += 1;
+                        }
+                    }
+
+                },
+                State::Colon2 if c.is_digit(16) => {
+                    state = State::Xdigit;
+                    xdigits += 1;
+                },
+                _ => {
+                    return MatchResult::Failure(pos)
+                }
+            }
+
+            if xdigits > 4 || xdigits_count > 8 {
+                return MatchResult::Failure(pos)
+            }
+
+            if colon_count > 7 && xdigits_count != 7 {
+                return MatchResult::Failure(pos)
+            }
+
+            pos += 1;
+        }
+
+        match state {
+            State::Colon2 => {
+                if xdigits_count == 7 {
+                    return MatchResult::Success(MatchFlag::Full)
+                }
+                else {
+                    return MatchResult::Success(MatchFlag::Incomplete)
+                }
+            },
+            State::Xdigit => {
+                if xdigits == 4 {
+                    return MatchResult::Success(MatchFlag::Full)
+                }
+                else {
+                    return MatchResult::Success(MatchFlag::Incomplete)
+                }
+            },
+            _ => MatchResult::Success(MatchFlag::Full)
+        }
+    }
+}
+
+
 // ClI IPv6 Address node
 //   match IPv6 Address (X:X::X:X)
 pub struct CliNodeIPv6Address {
@@ -417,6 +557,7 @@ impl CliNode for CliNodeIPv6Address {
                         _ => {
                             state = State::Xdigit;
                             xdigits += 1;
+                            xdigits_count += 1;
                         }
                     }
                 },
@@ -425,7 +566,6 @@ impl CliNode for CliNodeIPv6Address {
                         ':' => {
                             state = State::Colon1;
                             xdigits = 0;
-                            xdigits_count += 1;
                             colon_count += 1;
                         },
                         _ => {
@@ -451,6 +591,7 @@ impl CliNode for CliNodeIPv6Address {
 
                             state = State::Xdigit;
                             xdigits += 1;
+                            xdigits_count += 1;
                         }
                     }
 
@@ -458,6 +599,7 @@ impl CliNode for CliNodeIPv6Address {
                 State::Colon2 if c.is_digit(16) => {
                     state = State::Xdigit;
                     xdigits += 1;
+                    xdigits_count += 1;
                 },
                 _ => {
                     return MatchResult::Failure(pos)
@@ -476,6 +618,9 @@ impl CliNode for CliNodeIPv6Address {
         }
 
         match state {
+            State::Colon1 => {
+                return MatchResult::Success(MatchFlag::Incomplete)
+            },
             State::Colon2 => {
                 if xdigits_count == 7 {
                     return MatchResult::Success(MatchFlag::Full)
@@ -679,11 +824,69 @@ mod tests {
         let result = node.collate("1::2::3");
         assert_eq!(result, MatchResult::Failure(5));
 
+        let result = node.collate("1:2:3:4:5:6:");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
         let result = node.collate("1:2:3:4:5:6::");
         assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
 
         let result = node.collate("1:2:3:4:5:6:7::");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+    }
+
+    #[test]
+    pub fn test_node_ipv6_prefix() {
+        let node = CliNodeIPv6Prefix::new("ipv6prefix", "IPV6-PREFIX", "help");
+
+        let result = node.collate("::");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        /*
+        let result = node.collate("::1");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("2001::1234");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
+        let result = node.collate("2001:::1234");
+        assert_eq!(result, MatchResult::Failure(6));
+
+        let result = node.collate("2001::123x");
+        assert_eq!(result, MatchResult::Failure(9));
+
+        let result = node.collate("2001::12345");
+        assert_eq!(result, MatchResult::Failure(10));
+
+        let result = node.collate("1234:5678:90ab:cdef:1234:5678:90ab:cdef");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
+        let result = node.collate("1234:5678:90ab:cdef:1234:5678:90ab:cdef:");
+        assert_eq!(result, MatchResult::Failure(39));
+
+        let result = node.collate("1:2:3:4:5:6:7:8");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("1:2:3:4:5:6:7:8888");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
+        let result = node.collate("1:2:3:4:5:6:7:8:");
+        assert_eq!(result, MatchResult::Failure(15));
+
+        let result = node.collate("1:2:3:4:5:6::8");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("1:2:3:4:5:6::8888");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
+        let result = node.collate("1::2::3");
+        assert_eq!(result, MatchResult::Failure(5));
+
+        let result = node.collate("1:2:3:4:5:6::");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("1:2:3:4:5:6:7::");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+*/         
     }
 }
 
