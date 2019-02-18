@@ -7,6 +7,7 @@
 
 use std::char;
 use std::rc::Rc;
+use std::collections::HashMap;
 
 use super::tree;
 use super::collate::*;
@@ -530,98 +531,135 @@ impl CliNode for CliNodeIPv6Address {
     }
     
     fn collate(&self, input: &str) -> MatchResult {
+        #[derive(Copy, Clone, PartialEq)]
         enum State {
             Init,
+            FirstColon,
             Xdigit,
-            Colon1,
-            Colon2,
+            Colon,
+            DoubleColon,
+        };
+
+        enum Token {
+            Colon,
+            Xdigit,
         };
 
         let mut pos: u32 = 0;
-        let mut first_colon: bool = false;
         let mut double_colon: bool = false;
         let mut xdigits: u32 = 0;
         let mut xdigits_count: u8 = 0;
-        let mut colon_count: u8 = 0;
         let mut state = State::Init;
 
         for c in input.chars() {
+            let mut next_state = state;
+            let token = match c {
+                '0' ... '9' | 'a' ... 'f' | 'A' ... 'F'
+                    => Token::Xdigit,
+                ':' => Token::Colon,
+                _   => return MatchResult::Failure(pos),
+            };
+
             match state {
-                State::Init if is_xdigit_or_colon(c) => {
-                    match c {
-                        ':' => {
-                            state = State::Colon1;
-                            first_colon = true;
-                            colon_count += 1;
+                State::Init => {
+                    match token {
+                        Token::Colon => {
+                            next_state = State::FirstColon;
                         },
-                        _ => {
-                            state = State::Xdigit;
-                            xdigits += 1;
-                            xdigits_count += 1;
-                        }
-                    }
-                },
-                State::Xdigit if is_xdigit_or_colon(c) => {
-                    match c {
-                        ':' => {
-                            state = State::Colon1;
-                            xdigits = 0;
-                            colon_count += 1;
-                        },
-                        _ => {
+                        Token::Xdigit => {
+                            next_state = State::Xdigit;
                             xdigits += 1;
                         }
                     }
                 },
-                State::Colon1 if is_xdigit_or_colon(c) => {
-                    match c {
-                        ':' => {
+                State::FirstColon => {
+                    match token {
+                        Token::Colon => {
+                            next_state = State::DoubleColon;
+                        },
+                        Token::Xdigit => {
+                            return MatchResult::Failure(pos)
+                        }
+                    }
+                },
+                State::Xdigit => {
+                    match token {
+                        Token::Colon => {
+                            if xdigits_count == 8 {
+                                return MatchResult::Failure(pos)
+                            }
+
+                            next_state = State::Colon;
+                        },
+                        Token::Xdigit => {
+                            xdigits += 1;
+                        }
+                    }
+                },
+                State::Colon => {
+                    match token {
+                        Token::Colon => {
                             if double_colon {
                                 return MatchResult::Failure(pos)
                             }
 
-                            state = State::Colon2;
-                            colon_count += 1;
+                            next_state = State::DoubleColon;
                             double_colon = true;
                         },
-                        _ => {
-                            if first_colon {
-                                return MatchResult::Failure(pos)
-                            }
-
-                            state = State::Xdigit;
+                        Token::Xdigit => {
+                            next_state = State::Xdigit;
                             xdigits += 1;
-                            xdigits_count += 1;
                         }
                     }
 
                 },
-                State::Colon2 if c.is_digit(16) => {
-                    state = State::Xdigit;
-                    xdigits += 1;
-                    xdigits_count += 1;
+                State::DoubleColon => {
+                    match token {
+                        Token::Colon => {
+                            return MatchResult::Failure(pos)
+                        },
+                        Token::Xdigit => {
+                            next_state = State::Xdigit;
+                            xdigits += 1;
+                        }
+                    }
                 },
-                _ => {
-                    return MatchResult::Failure(pos)
-                }
             }
 
             if xdigits > 4 || xdigits_count > 8 {
                 return MatchResult::Failure(pos)
             }
 
-            if colon_count > 7 && xdigits_count != 7 {
-                return MatchResult::Failure(pos)
+            if state != next_state {
+                if next_state == State::Xdigit {
+                    xdigits_count += 1;
+                }
+                if state == State::Xdigit {
+                    xdigits = 0;
+                }
+
+                state = next_state
             }
 
             pos += 1;
         }
 
         match state {
-            State::Colon1 => {
-                return MatchResult::Success(MatchFlag::Incomplete)
+            State::Init | State::FirstColon => {
+                MatchResult::Success(MatchFlag::Incomplete)
             },
-            State::Colon2 => {
+            State::Xdigit => {
+                if xdigits == 4 && (double_colon || xdigits_count == 8) {
+                    MatchResult::Success(MatchFlag::Full)
+                }
+                else {
+                    MatchResult::Success(MatchFlag::Incomplete)
+                }
+            },
+            State::Colon => {
+                MatchResult::Success(MatchFlag::Incomplete)
+            },
+            State::DoubleColon => {
                 if xdigits_count == 7 {
                     return MatchResult::Success(MatchFlag::Full)
                 }
@@ -629,15 +667,6 @@ impl CliNode for CliNodeIPv6Address {
                     return MatchResult::Success(MatchFlag::Incomplete)
                 }
             },
-            State::Xdigit => {
-                if xdigits == 4 {
-                    return MatchResult::Success(MatchFlag::Full)
-                }
-                else {
-                    return MatchResult::Success(MatchFlag::Incomplete)
-                }
-            },
-            _ => MatchResult::Success(MatchFlag::Full)
         }
     }
 }
@@ -825,6 +854,12 @@ mod tests {
         assert_eq!(result, MatchResult::Failure(5));
 
         let result = node.collate("1:2:3:4:5:6:");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("1:2:3:4:5:6:7");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("1:2:3:4:5:6:7:");
         assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
 
         let result = node.collate("1:2:3:4:5:6::");
