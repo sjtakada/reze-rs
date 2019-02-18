@@ -9,6 +9,8 @@ use std::env;
 use std::io::*;
 use mio_uds::UnixStream;
 
+use super::readline;
+
 pub struct Cli {
     
 }
@@ -22,12 +24,19 @@ impl Cli {
         let mut path = env::temp_dir();
         path.push("rzrtd.cli");
 
+        /*
         let mut stream = match UnixStream::connect(path) {
             Ok(mut stream) => stream,
             Err(_) => panic!("Error: cannot connect to Rzrtd")
         };
+*/
 
         loop {
+            let rl = readline::CliReadline::new();
+
+            rl.gets();
+
+            /*
             stdout().write(b"> ");
             stdout().flush();
 
@@ -36,6 +45,7 @@ impl Cli {
 
             stream.write(buffer.as_ref());
             stream.flush();
+             */
         }
     }
 }
