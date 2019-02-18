@@ -360,7 +360,7 @@ impl CliNode for CliNodeIPv4Address {
             pos += 1;
         }
 
-        if (octets != 4) {
+        if octets != 4 {
             return MatchResult::Success(MatchFlag::Incomplete)
         }
 

@@ -2,7 +2,7 @@
 // ReZe.Rs - ReZe CLI
 //   Copyright (C) 2018,2019 Toshiaki Takada
 //
-// Main
+// CLI Main
 //
 
 use std::env;
