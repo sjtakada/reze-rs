@@ -59,5 +59,13 @@ fn main() {
     }
 
     let cli = Cli::new();
-    cli.start();
+    // TBD: set configuration
+    match cli.init() {
+        Ok(_) => {
+        }
+        Err(_err) => {
+        }
+    }
+
+    cli.run();
 }

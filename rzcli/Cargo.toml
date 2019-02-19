@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 getopts = "0.2.18"
+quick-error = "1.2.2"
 rustyline = "3.0.0"
 mio = "0.6.16"
 mio-uds = "0.6.7"

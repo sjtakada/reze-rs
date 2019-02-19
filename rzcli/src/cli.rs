@@ -5,36 +5,43 @@
 // CLI Main
 //
 
+//use std::io::*;
+
 use std::env;
-use std::io::*;
 use mio_uds::UnixStream;
 
-use super::readline;
+use std::cell::RefCell;
+
+use super::error::*;
+use super::readline::*;
 
 pub struct Cli {
-    
+    readline: RefCell<CliReadline>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
-        Cli { }
+        Cli {
+            readline: RefCell::new(CliReadline::new()),
+        }
     }
 
-    pub fn start(&self) {
+    pub fn init(&self) -> Result<(), CliError> {
         let mut path = env::temp_dir();
         path.push("rzrtd.cli");
 
-        /*
         let mut stream = match UnixStream::connect(path) {
             Ok(mut stream) => stream,
-            Err(_) => panic!("Error: cannot connect to Rzrtd")
+            Err(_) => return Err(CliError::ConnectError),
         };
-*/
+        
+        Ok(())
+    }
 
+    pub fn run(&self) {
         loop {
-            let rl = readline::CliReadline::new();
-
-            rl.gets();
+            // TODO, we'll get API URL and parameters here to send to server.
+            self.readline.borrow_mut().gets();
 
             /*
             stdout().write(b"> ");

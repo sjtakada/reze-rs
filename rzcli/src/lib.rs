@@ -3,6 +3,7 @@
 //   Copyright (C) 2018,2019 Toshiaki Takada
 //
 
+pub mod error;
 pub mod cli;
 pub mod collate;
 pub mod tree;

@@ -5,13 +5,16 @@
 // Readline
 //
 
+use std::cell::RefCell;
+
 use rustyline::completion::Completer;
 use rustyline::hint::Hinter;
 use rustyline::highlight::Highlighter;
 use rustyline::line_buffer::LineBuffer;
 use rustyline::error::ReadlineError;
-//use rustyline::Helper;
+use rustyline::Helper;
 use rustyline::Editor;
+use rustyline::KeyPress;
 
 pub struct CliCompleter {
 }
@@ -19,20 +22,39 @@ pub struct CliCompleter {
 impl Completer for CliCompleter {
     type Candidate = String;
 
-    fn complete(&self, line: &str, pos: usize)
-                -> rustyline::Result<(usize, Vec<String>)> {
-        let candidate: Vec<String> = Vec::new();
+    fn complete(&self, line: &str, pos: usize) -> rustyline::Result<(usize, Vec<String>)> {
+        let mut candidate: Vec<String> = Vec::new();
 
-        Ok((0usize, candidate))
+        match line.chars().next() {
+            Some(c) => {
+                match c {
+                    'u' => candidate.push("udon".to_string()),
+                    'r' => candidate.push("ramen".to_string()),
+                    's' => candidate.push("soba".to_string()),
+                    _ => {}
+                }
+            },
+            None => {
+            }
+        }
+
+//        println!("");
+//        for i in candidate.iter() {
+//            println!("{}", i);
+//        }
+
+        Ok((0, candidate))
     }
 
-    fn update(&self, _line: &mut LineBuffer, _start: usize, _elected: &str) {
-
+    fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {
+        let end = line.pos();
+        line.replace(start..end, elected)
     }
 }
 
-impl Hinter for CliReadline {
+impl Hinter for CliCompleter {
     fn hint(&self, _line: &str, _pos: usize) -> Option<String> {
+//        Some("hoge".to_string())
         None
     }
 }
@@ -41,8 +63,10 @@ impl Hinter for CliReadline {
 pub struct CliReadline {
     // Parent CLI object.
 
+    editor: RefCell<Editor<CliCompleter>>,
+
     // Readline buffer.
-    buf: [u8; 1024],
+    //buf: [u8; 1024],
 
     // Completion matched string vector.
     //matched_strvec: Vec<&str>,
@@ -51,43 +75,37 @@ pub struct CliReadline {
 
 impl CliReadline {
     pub fn new() -> CliReadline{
+        let mut editor = Editor::<CliCompleter>::new();
+        editor.set_helper(Some(CliCompleter {}));
+
         CliReadline {
-            buf: [0; 1024],
-            matched_index: 0
+            editor: RefCell::new(editor),
+            matched_index: 0,
         }
     }
 
-    // Setup Readline.
-    pub fn init(&self) {
-
-    }
-
     pub fn gets(&self) {
-        let mut rl = Editor::<()>::new();
+        let mut editor = self.editor.borrow_mut();
 
-        loop {
-            let readline = rl.readline("Router>");
-            match readline {
-                Ok(line) => {
-                    rl.add_history_entry(line.as_ref());
-                    println!("Line: {}", line);
-                },
-                Err(ReadlineError::Interrupted) => {
-                    println!("CTRL-C");
-                    break
-                },
-                Err(ReadlineError::Eof) => {
-                    println!("CTRL-D");
-                    break
-                },
-                Err(err) => {
-                    println!("Error: {:?}", err);
-                    break
-                }
+        let readline = editor.readline("Router>");
+        match readline {
+            Ok(line) => {
+                editor.add_history_entry(line.as_ref());
+                println!("Line: {}", line);
+            },
+            Err(ReadlineError::Interrupted) => {
+                println!("CTRL-C");
+            },
+            Err(ReadlineError::Eof) => {
+                println!("CTRL-D");
+            },
+            Err(err) => {
+                println!("Error: {:?}", err);
             }
         }
     }
 }
 
-//impl Highlighter for CliReadline {}
-//impl Helper for CliReadline {}
+impl Highlighter for CliCompleter {}
+impl Helper for CliCompleter {
+}
