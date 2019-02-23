@@ -10,6 +10,10 @@ use quick_error::*;
 quick_error! {
     #[derive(Debug)]
     pub enum CliError {
+        InitModeError {
+            description("Could not initialize CLI modes")
+            display(r#"Could not initialize CLI modes"#)
+        }
         ConnectError {
             description("Could not connect to the server")
             display(r#"Could not connect to the server"#)

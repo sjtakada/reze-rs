@@ -67,7 +67,7 @@ impl fmt::Debug for TokenType {
 //
 pub struct CliTree {
     // Mode name.
-    mode: String,
+    //mode: String,
     
     // Prompt.
     prompt: String,
@@ -83,9 +83,8 @@ pub struct CliTree {
 }
 
 impl CliTree {
-    pub fn new(mode: String, prompt: String, parent: Option<Rc<CliTree>>) -> CliTree {
+    pub fn new(prompt: String, parent: Option<Rc<CliTree>>) -> CliTree {
         CliTree {
-            mode: mode,
             prompt: prompt,
             parent: parent,
         }

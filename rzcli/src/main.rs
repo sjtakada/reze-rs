@@ -58,7 +58,7 @@ fn main() {
         return;
     }
 
-    let cli = Cli::new();
+    let mut cli = Cli::new();
     // TBD: set configuration
     match cli.init() {
         Ok(_) => {
