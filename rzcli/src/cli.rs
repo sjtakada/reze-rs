@@ -26,20 +26,16 @@ use super::readline::*;
 use super::tree::CliTree;
 
 pub struct Cli {
-    // Modes hierarchy.
-    modes: Vec<Rc<CliTree>>,
-
     // HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
 
-    //
+    // Readline.
     readline: RefCell<CliReadline>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
         Cli {
-            modes: Vec::new(),
             trees: HashMap::new(),
             readline: RefCell::new(CliReadline::new()),
         }
@@ -85,7 +81,6 @@ impl Cli {
         }
     }
 
-
     // Read and return JSON, if it fails, return None.
     fn json_read(&self, path: &Path) -> Option<serde_json::Value> {
         let file = match File::open(path) {
@@ -121,20 +116,7 @@ impl Cli {
         match self.json_read(pathbuf.as_path()) {
             Some(root) => {
                 if root.is_object() {
-                    for name in root.as_object().unwrap().keys() {
-                        match self.build_mode(&root[name], None) {
-                            Some(tree) => {
-                                self.modes.push(tree.clone());
-                                self.trees.insert(name.to_string(), tree.clone());
-                            },
-                            None => {
-                                println!("*** error message");
-                            }
-                        }
-                    }
-                }
-                else {
-                    return Err(CliError::InitModeError)
+                    self.build_mode(&root, None);
                 }
             },
             None => return Err(CliError::InitModeError),
@@ -144,32 +126,26 @@ impl Cli {
     }
 
     // Build CLI mode tree from JSON.
-    fn build_mode(&mut self, json: &serde_json::Value, parent: Option<Rc<CliTree>>) -> Option<Rc<CliTree>> {
-        if json.is_object() {
-            let json = json.as_object().unwrap();
-            let prompt = &json["prompt"];
-            let children = &json["children"];
+    fn build_mode(&mut self, json: &serde_json::Value, parent: Option<Rc<CliTree>>) -> Result<(), CliError> {
+        for name in json.as_object().unwrap().keys() {
+            let mode = &json[name];
+            if mode.is_object() {
+                let prompt = if mode["prompt"].is_string() {
+                    &mode["prompt"].as_str().unwrap()
+                } else {
+                    ">"
+                };
+                let children = &mode["children"];
+                let tree = Rc::new(CliTree::new(name.to_string(), prompt.to_string(), parent.clone()));
+                self.trees.insert(name.to_string(), tree.clone());
 
-            let tree = Rc::new(CliTree::new(prompt.to_string(), parent));
-
-            if children.is_object() {
-                for name in children.as_object().unwrap().keys() {
-                    match self.build_mode(&children[name], Some(tree.clone())) {
-                        Some(tree) => {
-                            self.modes.push(tree.clone());
-                            self.trees.insert(name.to_string(), tree.clone());
-                        },
-                        None => {
-                            println!("*** error message");
-                        }
-                    }
+                if children.is_object() {
+                    self.build_mode(&children, Some(tree.clone()));
                 }
             }
-
-            return Some(tree)
         }
 
-        None
+        Ok(())
     }
 
     fn parse_defun(&self, tokens: &serde_json::map::Map<String, serde_json::Value>,
@@ -291,5 +267,52 @@ mod tests {
         assert_eq!(ret, v);
 
         rm_tmp_file();
+    }
+
+    //fn mode_lists
+
+    #[test]
+    pub fn test_cli_modes() {
+        let mut cli = Cli::new();
+        let mode_json_str = r##"
+{
+  "ENABLE-MODE": {
+    "prompt": "#"
+  },
+  "CONFIG-MODE": {
+    "prompt": "(config)#",
+    "children": {
+      "EMPTY-MODE": {
+      },
+      "EMPTY-CHILDREN": {
+        "children": {
+        } 
+      },
+      "INTERFACE-MODE": {
+        "prompt": "(config-if)#"
+      },
+      "BGP-MODE": {
+        "prompt": "(config-router)#",
+        "children": {
+          "BGP-AF-MODE": {
+            "prompt": "(config-router-af)#"
+          }
+        }
+      }
+    }
+  }
+} "##;
+
+        let ret = cli.init_cli_modes();
+        let json = serde_json::from_str(&mode_json_str).unwrap();
+        let ret = cli.build_mode(&json, None);
+        let mode = &cli.trees["BGP-AF-MODE"];
+        let mode = mode.parent().unwrap();
+        assert_eq!(mode.name(), "BGP-MODE");
+        let mode = mode.parent().unwrap();
+        assert_eq!(mode.name(), "CONFIG-MODE");
+        assert_eq!(mode.prompt(), "(config)#");
+        let mode = mode.parent();
+        assert_eq!(mode, None);
     }
 }

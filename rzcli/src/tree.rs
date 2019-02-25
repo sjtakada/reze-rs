@@ -65,9 +65,10 @@ impl fmt::Debug for TokenType {
 }
 
 //
+#[derive(PartialEq)]
 pub struct CliTree {
     // Mode name.
-    //mode: String,
+    mode: String,
     
     // Prompt.
     prompt: String,
@@ -83,11 +84,24 @@ pub struct CliTree {
 }
 
 impl CliTree {
-    pub fn new(prompt: String, parent: Option<Rc<CliTree>>) -> CliTree {
+    pub fn new(mode: String, prompt: String, parent: Option<Rc<CliTree>>) -> CliTree {
         CliTree {
+            mode: mode,
             prompt: prompt,
             parent: parent,
         }
+    }
+
+    pub fn name(&self) -> &str {
+        &self.mode
+    }
+
+    pub fn parent(&self) -> Option<Rc<CliTree>> {
+        self.parent.clone()
+    }
+
+    pub fn prompt(&self) -> &str {
+        &self.prompt
     }
 
     pub fn build_command() {
@@ -208,6 +222,12 @@ impl CliTree {
     }
 
     fn find_next_by_node() {
+    }
+}
+
+impl fmt::Debug for CliTree {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.mode.to_string())
     }
 }
 
