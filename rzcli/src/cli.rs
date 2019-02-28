@@ -314,6 +314,6 @@ mod tests {
         assert_eq!(mode.name(), "CONFIG-MODE");
         assert_eq!(mode.prompt(), "(config)#");
         let mode = mode.parent();
-        assert_eq!(mode, None);
+        assert_eq!(match mode { None => true, _ => false } , true);
     }
 }

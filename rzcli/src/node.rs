@@ -44,12 +44,6 @@ pub trait CliNode {
     // Return inner.
     fn inner(&self) -> RefMut<CliNodeInner>;
 
-    // Return ClI token string ref.
-//    fn token(&self) -> &str;
-//    {
-//        &self.inner().token
-//   }
-
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
 
@@ -769,7 +763,7 @@ mod tests {
     pub fn test_node_range_1() {
         let node = CliNodeRange::new("range", "RANGE", "help", 100i64, 9999i64);
 
-        assert_eq!(node.token(), "<100-9999>");
+        assert_eq!(node.inner().token(), "<100-9999>");
 
         let result = node.collate("100");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
@@ -788,7 +782,7 @@ mod tests {
     pub fn test_node_range_2() {
         let node = CliNodeRange::new("range", "RANGE", "help", 1i64, 4294967295i64);
 
-        assert_eq!(node.token(), "<1-4294967295>");
+        assert_eq!(node.inner().token(), "<1-4294967295>");
 
         let result = node.collate("0");
         assert_eq!(result, MatchResult::Failure(0));
