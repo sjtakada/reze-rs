@@ -603,73 +603,49 @@ impl CliNode for CliNodeIPv6Address {
                 _   => return MatchResult::Failure(pos),
             };
 
-            match state {
-                State::Init => {
-                    match token {
-                        Token::Colon => {
-                            next_state = State::FirstColon;
-                        },
-                        Token::Xdigit => {
-                            next_state = State::Xdigit;
-                            xdigits += 1;
-                        }
-                    }
+            // State machine.
+            next_state = match (state, token) {
+                // Init
+                (State::Init, Token::Colon) => State::FirstColon,
+                (State::Init, Token::Xdigit) => {
+                    xdigits += 1;
+                    State::Xdigit
                 },
-                State::FirstColon => {
-                    match token {
-                        Token::Colon => {
-                            next_state = State::DoubleColon;
-                        },
-                        Token::Xdigit => {
-                            return MatchResult::Failure(pos)
-                        }
-                    }
+                // FirstColon
+                (State::FirstColon, Token::Colon) => {
+                    double_colon = true;
+                    State::DoubleColon
+                }
+                (State::FirstColon, Token::Xdigit) => return MatchResult::Failure(pos),
+                // Xdigit
+                (State::Xdigit, Token::Colon) if xdigits_count == 8 => return MatchResult::Failure(pos),
+                (State::Xdigit, Token::Colon) => State::Colon,
+                (State::Xdigit, Token::Xdigit) => {
+                    xdigits += 1;
+                    state
                 },
-                State::Xdigit => {
-                    match token {
-                        Token::Colon => {
-                            if xdigits_count == 8 {
-                                return MatchResult::Failure(pos)
-                            }
+                // Colon
+                (State::Colon, Token::Colon) if double_colon => return MatchResult::Failure(pos),
+                (State::Colon, Token::Colon) => {
+                    double_colon = true;
+                    State::DoubleColon
+                },
+                (State::Colon, Token::Xdigit) => {
+                    xdigits += 1;
+                    State::Xdigit
+                },
+                // DoubleColon
+                (State::DoubleColon, Token::Colon) => return MatchResult::Failure(pos),
+                (State::DoubleColon, Token::Xdigit) => {
+                    xdigits += 1;
+                    State::Xdigit
+                },
+                _ => {
+                    return MatchResult::Failure(pos)
+                }
+            };
 
-                            next_state = State::Colon;
-                        },
-                        Token::Xdigit => {
-                            xdigits += 1;
-                        }
-                    }
-                },
-                State::Colon => {
-                    match token {
-                        Token::Colon => {
-                            if double_colon {
-                                return MatchResult::Failure(pos)
-                            }
-
-                            next_state = State::DoubleColon;
-                            double_colon = true;
-                        },
-                        Token::Xdigit => {
-                            next_state = State::Xdigit;
-                            xdigits += 1;
-                        }
-                    }
-
-                },
-                State::DoubleColon => {
-                    match token {
-                        Token::Colon => {
-                            return MatchResult::Failure(pos)
-                        },
-                        Token::Xdigit => {
-                            next_state = State::Xdigit;
-                            xdigits += 1;
-                        }
-                    }
-                },
-            }
-
-            if xdigits > 4 || xdigits_count > 8 {
+            if xdigits > 4 {
                 return MatchResult::Failure(pos)
             }
 
@@ -688,28 +664,18 @@ impl CliNode for CliNodeIPv6Address {
         }
 
         match state {
-            State::Init | State::FirstColon => {
+            State::Init | State::FirstColon =>
+                MatchResult::Success(MatchFlag::Incomplete),
+            State::Xdigit if xdigits == 4 && (double_colon || xdigits_count == 8) =>
+                MatchResult::Success(MatchFlag::Full),
+            State::Xdigit =>
+                MatchResult::Success(MatchFlag::Incomplete),
+            State::Colon => 
+                MatchResult::Success(MatchFlag::Incomplete),
+            State::DoubleColon if xdigits_count == 7 =>
+                MatchResult::Success(MatchFlag::Full),
+            State::DoubleColon =>
                 MatchResult::Success(MatchFlag::Incomplete)
-            },
-            State::Xdigit => {
-                if xdigits == 4 && (double_colon || xdigits_count == 8) {
-                    MatchResult::Success(MatchFlag::Full)
-                }
-                else {
-                    MatchResult::Success(MatchFlag::Incomplete)
-                }
-            },
-            State::Colon => {
-                MatchResult::Success(MatchFlag::Incomplete)
-            },
-            State::DoubleColon => {
-                if xdigits_count == 7 {
-                    return MatchResult::Success(MatchFlag::Full)
-                }
-                else {
-                    return MatchResult::Success(MatchFlag::Incomplete)
-                }
-            },
         }
     }
 }
