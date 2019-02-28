@@ -5,10 +5,12 @@
 // CLI Tree.
 //
 
-use std::rc::Rc;
 use std::fmt;
 
-use super::node;
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use super::node::*;
 use super::collate;
 
 #[derive(PartialEq)]
@@ -65,7 +67,6 @@ impl fmt::Debug for TokenType {
 }
 
 //
-#[derive(PartialEq)]
 pub struct CliTree {
     // Mode name.
     mode: String,
@@ -75,6 +76,9 @@ pub struct CliTree {
 
     // Parent CliTree.
     parent: Option<Rc<CliTree>>,
+
+    // Top CliNode.
+    top: Option<RefCell<Rc<CliNode>>>,
 
     // Exit to finish flag.
     // exit_to_finish: bool;
@@ -89,6 +93,7 @@ impl CliTree {
             mode: mode,
             prompt: prompt,
             parent: parent,
+            top: None,
         }
     }
 
@@ -104,7 +109,59 @@ impl CliTree {
         &self.prompt
     }
 
-    pub fn build_command() {
+    pub fn build_command(&self, tokens: &serde_json::Value,
+                         command: &serde_json::Value) {
+//        let tokens = tokens.as_object().unwrap();
+        let defun = &command["defun"];
+        if !defun.is_string() {
+            let s = defun.as_str().unwrap();
+            let mut cv: CliNodeVec = Vec::new();
+            let mut hv: CliNodeVec = Vec::new();
+            let mut tv: CliNodeVec = Vec::new();
+
+            self.build_recursive(&mut cv, &mut hv, &mut tv, s, tokens, command);
+        }
+    }
+
+    // Create new Vec and clone reference to each CliNode.
+    //fn clone_clinode_vec(vec: &CliNodeVec) -> CliNodeVec {
+    //vec.iter().map(|v| v.clone()).collect()
+    //}
+
+    fn build_recursive(&self, curr: &mut CliNodeVec, head: &mut CliNodeVec, tail: &mut CliNodeVec,
+                       s: &str, tokens: &serde_json::Value, command: &serde_json::Value) -> TokenType {
+        //
+        let mut next: Rc<CliNode>;
+        let mut node: Rc<CliNode>;
+        let mut is_head = true;
+
+        while s.len() > 0 {
+            let (token_type, token, s) = CliTree::get_cli_token(s);
+            match token_type {
+                TokenType::LeftParen | TokenType::LeftBracket | TokenType::LeftBrace => {
+                    let mut hv: CliNodeVec = Vec::new();
+                    let mut tv: CliNodeVec = Vec::new();
+
+                    while {
+                        let mut cv = curr.clone();
+                        let token_type = self.build_recursive(&mut cv, &mut hv, &mut tv, s, tokens, command);
+
+                        token_type == TokenType::VerticalBar
+                    } { }
+
+                    if token_type == TokenType::RightBrace || token_type == TokenType::RightBracket {
+                        
+                    }
+                },
+                TokenType::RightParen | TokenType::RightBracket | TokenType::RightBrace |
+                TokenType::VerticalBar => {
+                },
+                _ => {
+                }
+            }
+        }
+
+        TokenType::Undef
     }
 
     // Parse string to return:
@@ -212,16 +269,67 @@ impl CliTree {
         (token_type, token, s)
     }
 
-    fn build_recursive() {
+//    fn vector_add_node_each(curr: &mut CliNodeVec, node: Rc<CliNode>) {
+//        for c in curr {
+//            let mut inner = c.inner();
+//            inner.push_next(node.clone());
+//        }
+//    }
+
+    // TBD: Err()
+    fn new_node_by_type(token_type: TokenType, tokens: &serde_json::Value, token: &str) -> Option<Rc<CliNode>> {
+        if !tokens[token].is_object() {
+            return None
+        }
+        let token_def = tokens[token].as_object().unwrap();
+
+        if !token_def["id"].is_string() || !token_def["help"].is_string() {
+            let id = token_def["help"].as_str().unwrap();
+            let help = token_def["help"].as_str().unwrap();
+
+            let node: Rc<CliNode> = match token_type {
+                TokenType::IPv4Prefix => Rc::new(CliNodeIPv4Prefix::new(&id, token, &help)),
+                TokenType::IPv4Address => Rc::new(CliNodeIPv4Address::new(&id, token, &help)),
+                TokenType::IPv6Prefix => Rc::new(CliNodeIPv6Prefix::new(&id, token, &help)),
+                TokenType::IPv6Address => Rc::new(CliNodeIPv6Address::new(&id, token, &help)),
+                TokenType::Range => {
+                    if token_def["range"].is_array() {
+                        let range = token_def["range"].as_array().unwrap();
+                        let min = range[0].as_i64().unwrap();
+                        let max = range[1].as_i64().unwrap();
+
+                        Rc::new(CliNodeRange::new(&id, token, &help, min, max))
+                    }
+                    else {
+                        Rc::new(CliNodeRange::new(&id, token, &help, 0, 1))
+                    }
+                },
+                TokenType::Word => Rc::new(CliNodeWord::new(&id, token, &help)),
+                //TokenType::Community => CliNodeCommunity::new(&id, token, &help),
+                TokenType::Keyword => Rc::new(CliNodeKeyword::new(&id, token, &help, "TBD")),
+                _ => {
+                    panic!("unknown type");
+                }
+            };
+
+            return Some(node)
+        }
+
+        None
     }
 
-    fn vector_add_node_each() {
-    }
+    fn find_next_by_node(vec: &CliNodeVec, new_node: Rc<CliNode>) -> Option<Rc<CliNode>> {
+        for node in vec {
+            let inner = node.inner();
+            let next = inner.next();
+            for m in next.iter() {
+                if m.inner().token() == new_node.inner().token() {
+                    return Some(m.clone());
+                }
+            }
+        }
 
-    fn new_node_by_type() {
-    }
-
-    fn find_next_by_node() {
+        None
     }
 }
 

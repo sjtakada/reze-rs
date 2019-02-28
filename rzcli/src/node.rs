@@ -7,6 +7,9 @@
 
 use std::char;
 use std::rc::Rc;
+use std::cell::Ref;
+use std::cell::RefMut;
+use std::cell::RefCell;
 use std::collections::HashMap;
 
 use super::tree;
@@ -34,14 +37,19 @@ pub fn is_xdigit_or_colon_or_slash(c: char) -> bool {
     return false
 }
 
+pub type CliNodeVec = Vec<Rc<CliNode>>;
+
 // CLI Node trait.
 pub trait CliNode {
     // Return inner.
-    fn inner(&self) -> &CliNodeInner;
+    fn inner(&self) -> RefMut<CliNodeInner>;
 
     // Return ClI token string ref.
-    fn token(&self) -> &str;
-    
+//    fn token(&self) -> &str;
+//    {
+//        &self.inner().token
+//   }
+
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
 
@@ -73,7 +81,7 @@ pub struct CliNodeInner {
     hidden: bool,
 
     // Next candidate.
-    next: Vec<Rc<CliNode>>,
+    next: RefCell<CliNodeVec>,
 }
 
 impl CliNodeInner {
@@ -85,50 +93,58 @@ impl CliNodeInner {
             token: String::from(token),
             sorted: false,
             hidden: false,
-            next: Vec::new(),
+            next: RefCell::new(Vec::new()),
         }
     }
 
-    fn help(&self) -> &str {
+    pub fn defun(&self) -> &str {
+        &self.defun
+    }
+
+    pub fn help(&self) -> &str {
         &self.help
     }
 
-    fn defun(&self) -> &str {
-        &self.defun
+    pub fn token(&self) -> &str {
+        &self.token
+    }
+
+    pub fn push_next(&mut self, node: Rc<CliNode>) {
+        self.next.borrow_mut().push(node);
+    }
+
+    pub fn next(&self) -> RefMut<CliNodeVec> {
+        self.next.borrow_mut()
     }
 }
 
 // CLI keyword node
 //   static literal
 pub struct CliNodeKeyword {
-    inner: CliNodeInner,
+    inner: RefCell<CliNodeInner>,
 }
 
 impl CliNodeKeyword {
     pub fn new(id: &str, defun: &str, help: &str, token: &str) -> CliNodeKeyword {
         CliNodeKeyword {
-            inner: CliNodeInner::new(id, defun, help, token)
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, token))
         }
     }
 }
 
 impl CliNode for CliNodeKeyword {
-    fn inner(&self) -> &CliNodeInner {
-        &self.inner
+    fn inner(&self) -> RefMut<CliNodeInner> {
+        self.inner.borrow_mut()
     }
 
-    fn token(&self) -> &str {
-        &self.inner.token
-    }
-    
     fn collate(&self, input: &str) -> MatchResult {
         let pos = 0;
 
-        if input == self.token() {
+        if input == self.inner().token {
             return MatchResult::Success(MatchFlag::Full)
         }
 
-        let t = &self.token()[0..input.len()];
+        let t = &self.inner().token[0..input.len()];
         if input == t {
             return MatchResult::Success(MatchFlag::Partial)
         }
@@ -141,7 +157,7 @@ impl CliNode for CliNodeKeyword {
 // CLI range node
 //   integer range to match numeric input.
 pub struct CliNodeRange {
-    inner: CliNodeInner,
+    inner: RefCell<CliNodeInner>,
     min: i64,
     max: i64,
 }
@@ -152,7 +168,7 @@ impl CliNodeRange {
         let token = format!("<{}-{}>", min, max);
 
         CliNodeRange {
-            inner: CliNodeInner::new(id, defun, help, &token),
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, &token)),
             min: min,
             max: max,
         }
@@ -160,14 +176,10 @@ impl CliNodeRange {
 }
 
 impl CliNode for CliNodeRange {
-    fn inner(&self) -> &CliNodeInner {
-        &self.inner
+    fn inner(&self) -> RefMut<CliNodeInner> {
+        self.inner.borrow_mut()
     }
 
-    fn token(&self) -> &str {
-        &self.inner.token
-    }
-    
     fn collate(&self, input: &str) -> MatchResult {
         let pos = 0;
 
@@ -187,26 +199,22 @@ impl CliNode for CliNodeRange {
 // CLI IPv4 Prefix node
 //   match IPv4 Prefix (A.B.C.D/M)
 pub struct CliNodeIPv4Prefix {
-    inner: CliNodeInner,
+    inner: RefCell<CliNodeInner>,
 }
 
 impl CliNodeIPv4Prefix {
     pub fn new(id: &str, defun: &str, help: &str) -> CliNodeIPv4Prefix {
         CliNodeIPv4Prefix {
-            inner: CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV4_PREFIX),
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV4_PREFIX)),
         }
     }
 }
 
 impl CliNode for CliNodeIPv4Prefix {
-    fn inner(&self) -> &CliNodeInner {
-        &self.inner
+    fn inner(&self) -> RefMut<CliNodeInner> {
+        self.inner.borrow_mut()
     }
 
-    fn token(&self) -> &str {
-        &self.inner.token
-    }
-    
     fn collate(&self, input: &str) -> MatchResult {
         enum State {
             Init,
@@ -286,26 +294,22 @@ impl CliNode for CliNodeIPv4Prefix {
 // CLI IPv4 Address node
 //   match IPv4 Address (A.B.C.D)
 pub struct CliNodeIPv4Address {
-    inner: CliNodeInner,
+    inner: RefCell<CliNodeInner>,
 }
     
 impl CliNodeIPv4Address {
     pub fn new(id: &str, defun: &str, help: &str) -> CliNodeIPv4Address {
         CliNodeIPv4Address {
-            inner: CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV4_ADDRESS),
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV4_ADDRESS)),
         }
     }
 }
 
 impl CliNode for CliNodeIPv4Address {
-    fn inner(&self) -> &CliNodeInner {
-        &self.inner
+    fn inner(&self) -> RefMut<CliNodeInner> {
+        self.inner.borrow_mut()
     }
 
-    fn token(&self) -> &str {
-        &self.inner.token
-    }
-    
     fn collate(&self, input: &str) -> MatchResult {
         enum State {
             Init,
@@ -371,26 +375,22 @@ impl CliNode for CliNodeIPv4Address {
 // ClI IPv6 Prefix node
 //   match IPv6 Prefix (X:X::X:X/M)
 pub struct CliNodeIPv6Prefix {
-    inner: CliNodeInner,
+    inner: RefCell<CliNodeInner>,
 }
 
 impl CliNodeIPv6Prefix {
     pub fn new(id: &str, defun: &str, help: &str) -> CliNodeIPv6Prefix {
         CliNodeIPv6Prefix {
-            inner: CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV6_PREFIX),
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV6_PREFIX)),
         }
     }
 }
 
 impl CliNode for CliNodeIPv6Prefix {
-    fn inner(&self) -> &CliNodeInner {
-        &self.inner
+    fn inner(&self) -> RefMut<CliNodeInner> {
+        self.inner.borrow_mut()
     }
 
-    fn token(&self) -> &str {
-        &self.inner.token
-    }
-    
     fn collate(&self, input: &str) -> MatchResult {
         #[derive(Copy, Clone, PartialEq)]
         enum State {
@@ -563,26 +563,22 @@ impl CliNode for CliNodeIPv6Prefix {
 // ClI IPv6 Address node
 //   match IPv6 Address (X:X::X:X)
 pub struct CliNodeIPv6Address {
-    inner: CliNodeInner,
+    inner: RefCell<CliNodeInner>,
 }
     
 impl CliNodeIPv6Address {
     pub fn new(id: &str, defun: &str, help: &str) -> CliNodeIPv6Address {
         CliNodeIPv6Address {
-            inner: CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV6_ADDRESS),
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, CLI_TOKEN_IPV6_ADDRESS)),
         }
     }
 }
 
 impl CliNode for CliNodeIPv6Address {
-    fn inner(&self) -> &CliNodeInner {
-        &self.inner
+    fn inner(&self) -> RefMut<CliNodeInner> {
+        self.inner.borrow_mut()
     }
 
-    fn token(&self) -> &str {
-        &self.inner.token
-    }
-    
     fn collate(&self, input: &str) -> MatchResult {
         #[derive(Copy, Clone, PartialEq)]
         enum State {
@@ -727,9 +723,26 @@ impl CliNode for CliNodeIPv6Address {
 
 //
 pub struct CliNodeWord {
-    inner: CliNodeInner,
+    inner: RefCell<CliNodeInner>,
 }
 
+impl CliNodeWord {
+    pub fn new(id: &str, defun: &str, help: &str) -> CliNodeWord {
+        CliNodeWord {
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, CLI_TOKEN_WORD)),
+        }
+    }
+}
+
+impl CliNode for CliNodeWord {
+    fn inner(&self) -> RefMut<CliNodeInner> {
+        self.inner.borrow_mut()
+    }
+
+    fn collate(&self, input: &str) -> MatchResult {
+        MatchResult::Success(MatchFlag::Incomplete)
+    }
+}
 
 //
 // Unis tests.

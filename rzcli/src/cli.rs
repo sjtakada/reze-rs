@@ -148,21 +148,22 @@ impl Cli {
         Ok(())
     }
 
-    fn parse_defun(&self, tokens: &serde_json::map::Map<String, serde_json::Value>,
+    fn parse_defun(&mut self, tokens: &serde_json::Value,
                    command: &serde_json::Value) {
         if command["mode"].is_array() {
             for mode in command["mode"].as_array().unwrap() {
-                println!("m: {}", mode);
-                // tree = tree_[modd.ascsstring];
-                // tree -> build_command(tokens, command)
+                if let Some(mode) = mode.as_str() {
+                    if let Some(tree) = self.trees.get(mode) {
+                        tree.build_command(tokens, command);
+                    }
+                }
             }
         }
     }
 
-    fn parse_defun_all(&self, tokens: &serde_json::Value,
+    fn parse_defun_all(&mut self, tokens: &serde_json::Value,
                        commands: &serde_json::Value) {
         if tokens.is_object() && commands.is_array() {
-            let tokens = tokens.as_object().unwrap();
             let commands = commands.as_array().unwrap();
             for command in commands {
                 self.parse_defun(&tokens, &command);
@@ -170,7 +171,7 @@ impl Cli {
         }
     }
 
-    fn load_cli_json(&self, path: &Path) {
+    fn load_cli_json(&mut self, path: &Path) {
         if let Some(json) = self.json_read(path) {
             if json.is_object() {
                 for k in json.as_object().unwrap().keys() {
@@ -182,7 +183,7 @@ impl Cli {
         }
     }
 
-    fn init_cli_commands(&self, dir: &Path) -> Result<(), CliError> {
+    fn init_cli_commands(&mut self, dir: &Path) -> Result<(), CliError> {
         let suffix = "cli.json";
 
         if dir.is_dir() {
