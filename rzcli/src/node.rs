@@ -581,8 +581,10 @@ impl CliNode for CliNodeIPv6Address {
             Xdigit,
             Colon,
             DoubleColon,
+            Unknown,
         };
 
+        #[derive(PartialEq)]
         enum Token {
             Colon,
             Xdigit,
@@ -600,60 +602,59 @@ impl CliNode for CliNodeIPv6Address {
                 '0' ... '9' | 'a' ... 'f' | 'A' ... 'F'
                     => Token::Xdigit,
                 ':' => Token::Colon,
-                _   => return MatchResult::Failure(pos),
+                _   => {
+                    state = State::Unknown;
+                    break;
+                }
             };
+
+            if token == Token::Xdigit {
+                xdigits += 1;
+                if xdigits > 4 {
+                    state = State::Unknown;
+                    break;
+                }
+            }
 
             // State machine.
             next_state = match (state, token) {
                 // Init
                 (State::Init, Token::Colon) => State::FirstColon,
-                (State::Init, Token::Xdigit) => {
-                    xdigits += 1;
-                    State::Xdigit
-                },
+                (State::Init, Token::Xdigit) => State::Xdigit,
                 // FirstColon
                 (State::FirstColon, Token::Colon) => {
                     double_colon = true;
                     State::DoubleColon
-                }
-                (State::FirstColon, Token::Xdigit) => return MatchResult::Failure(pos),
-                // Xdigit
-                (State::Xdigit, Token::Colon) if xdigits_count == 8 => return MatchResult::Failure(pos),
-                (State::Xdigit, Token::Colon) => State::Colon,
-                (State::Xdigit, Token::Xdigit) => {
-                    xdigits += 1;
-                    state
                 },
+                (State::FirstColon, Token::Xdigit) => State::Unknown,
+                // Xdigit
+                (State::Xdigit, Token::Colon) if xdigits_count == 8 => State::Unknown,
+                (State::Xdigit, Token::Colon) => State::Colon,
+                (State::Xdigit, Token::Xdigit) => state,
                 // Colon
-                (State::Colon, Token::Colon) if double_colon => return MatchResult::Failure(pos),
+                (State::Colon, Token::Colon) if double_colon => State::Unknown,
                 (State::Colon, Token::Colon) => {
                     double_colon = true;
                     State::DoubleColon
                 },
-                (State::Colon, Token::Xdigit) => {
-                    xdigits += 1;
-                    State::Xdigit
-                },
+                (State::Colon, Token::Xdigit) => State::Xdigit,
                 // DoubleColon
-                (State::DoubleColon, Token::Colon) => return MatchResult::Failure(pos),
-                (State::DoubleColon, Token::Xdigit) => {
-                    xdigits += 1;
-                    State::Xdigit
-                },
-                _ => {
-                    return MatchResult::Failure(pos)
-                }
+                (State::DoubleColon, Token::Colon) => State::Unknown,
+                (State::DoubleColon, Token::Xdigit) => State::Xdigit,
+                // Error
+                _ => State::Unknown,
             };
 
-            if xdigits > 4 {
-                return MatchResult::Failure(pos)
-            }
-
             if state != next_state {
+                if next_state == State::Unknown {
+                    state = State::Unknown;
+                    break;
+                }
+
                 if next_state == State::Xdigit {
                     xdigits_count += 1;
                 }
-                if state == State::Xdigit {
+                else if state == State::Xdigit {
                     xdigits = 0;
                 }
 
@@ -675,7 +676,9 @@ impl CliNode for CliNodeIPv6Address {
             State::DoubleColon if xdigits_count == 7 =>
                 MatchResult::Success(MatchFlag::Full),
             State::DoubleColon =>
-                MatchResult::Success(MatchFlag::Incomplete)
+                MatchResult::Success(MatchFlag::Incomplete),
+            State::Unknown =>
+                MatchResult::Failure(pos),
         }
     }
 }
