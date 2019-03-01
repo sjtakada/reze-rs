@@ -305,64 +305,82 @@ impl CliNode for CliNodeIPv4Address {
     }
 
     fn collate(&self, input: &str) -> MatchResult {
+        #[derive(Copy, Clone, PartialEq)]
         enum State {
             Init,
             Digit,
             Dot,
-        };
+            Unknown,
+        }
+
+        #[derive(PartialEq)]
+        enum Token {
+            Digit,
+            Dot,
+            Unknown,
+        }
 
         let mut pos: u32 = 0;
         let mut val: u32 = 0;
         let mut dots: u8 = 0;
         let mut octets: u8 = 0;
         let mut state = State::Init;
+        let mut next_state = State::Unknown;
 
         for c in input.chars() {
-            match state {
-                State::Init if c.is_digit(10) => {
-                    state = State::Digit;
-                    octets += 1;
-                    val = c.to_digit(10).unwrap();
-                },
-                State::Digit => {
-                    match c {
-                        '.' => {
-                            if dots == 3 {
-                                return MatchResult::Failure(pos)
-                            }
+            next_state = State::Unknown;
+            let token = match c {
+                '0' ... '9' => Token::Digit,
+                '.' => Token::Dot,
+                _ => break,
+            };
 
-                            state = State::Dot;
-                            dots += 1;
-                        },
-                        '0' ... '9' => {
-                            val = val * 10 + c.to_digit(10).unwrap();
-                            if val > 255 {
-                                return MatchResult::Failure(pos)
-                            }
-                        },
-                        _ => {
-                            return MatchResult::Failure(pos)
-                        },
-                    }
-                },
-                State::Dot if c.is_digit(10) => {
-                    val = c.to_digit(10).unwrap();
-                    state = State::Digit;
-                    octets += 1;
-                },
-                _ => {
-                    return MatchResult::Failure(pos)
+            // State machine.
+            next_state = match (state, token) {
+                // Init
+                (State::Init, Token::Digit) => State::Digit,
+                // Digit
+                (State::Digit, Token::Digit) => State::Digit,
+                (State::Digit, Token::Dot) if dots == 3 => break,
+                (State::Digit, Token::Dot) => State::Dot,
+                // Dot
+                (State::Dot, Token::Digit) => State::Digit,
+                // Error
+                (_, _) => break,
+            };
+
+            if next_state == State::Digit {
+                val = val * 10 + c.to_digit(10).unwrap();
+                if val > 255 {
+                    next_state = State::Unknown;
+                    break;
                 }
+            }
+
+            if state != next_state {
+                if next_state == State::Digit {
+                    octets += 1;
+                }
+                else if next_state == State::Dot {
+                    val = 0;
+                    dots += 1;
+                }
+
+                state = next_state;
             }
 
             pos += 1;
         }
 
-        if octets != 4 {
-            return MatchResult::Success(MatchFlag::Incomplete)
+        if next_state == State::Unknown {
+            MatchResult::Failure(pos)
         }
-
-        MatchResult::Success(MatchFlag::Full)
+        else if octets != 4 {
+            MatchResult::Success(MatchFlag::Incomplete)
+        }
+        else {
+            MatchResult::Success(MatchFlag::Full)
+        }
     }
 }
 
@@ -396,7 +414,7 @@ impl CliNode for CliNodeIPv6Prefix {
             Slash,
             PrefixLen,
             Unknown,
-        };
+        }
 
         #[derive(PartialEq)]
         enum Token {
@@ -405,7 +423,7 @@ impl CliNode for CliNodeIPv6Prefix {
             Slash,
             PlenDigit,
             Unknown,
-        };
+        }
 
         let mut pos: u32 = 0;
         let mut double_colon: bool = false;
@@ -537,13 +555,13 @@ impl CliNode for CliNodeIPv6Address {
             Colon,
             DoubleColon,
             Unknown,
-        };
+        }
 
         #[derive(PartialEq)]
         enum Token {
             Colon,
             Xdigit,
-        };
+        }
 
         let mut pos: u32 = 0;
         let mut double_colon: bool = false;
