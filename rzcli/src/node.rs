@@ -395,8 +395,10 @@ impl CliNode for CliNodeIPv6Prefix {
             DoubleColon,
             Slash,
             PrefixLen,
+            Unknown,
         };
 
+        #[derive(PartialEq)]
         enum Token {
             Colon,
             Digit,
@@ -423,118 +425,97 @@ impl CliNode for CliNodeIPv6Prefix {
                 _   => return MatchResult::Failure(pos),
             };
 
-            match state {
-                State::Init => {
-                    match token {
-                        Token::Colon => {
-                            next_state = State::FirstColon;
-                        },
-                        Token::Digit | Token::Xdigit => {
-                            next_state = State::Xdigit;
-                            xdigits += 1;
-                        },
-                        Token::Slash => {
-                            return MatchResult::Failure(pos)
-                        }
-                    }
+            next_state = match (state, token) {
+                // Init
+                (State::Init, Token::Colon) => State::FirstColon,
+                (State::Init, Token::Digit) |
+                (State::Init, Token::Xdigit) => {
+                    xdigits += 1;
+                    State::Xdigit
                 },
-                State::FirstColon => {
-                    match token {
-                        Token::Colon => {
-                            next_state = State::DoubleColon;
-                        },
-                        Token::Digit | Token::Xdigit | Token::Slash => {
-                            return MatchResult::Failure(pos)
-                        }
-                    }
-                },
-                State::Xdigit => {
-                    match token {
-                        Token::Colon => {
-                            if xdigits_count == 8 {
-                                return MatchResult::Failure(pos)
-                            }
-
-                            next_state = State::Colon;
-                        },
-                        Token::Digit | Token::Xdigit => {
-                            xdigits += 1;
-                        },
-                        Token::Slash => {
-                            next_state = State::Slash;
-                        }
-                    }
-                },
-                State::Colon => {
-                    match token {
-                        Token::Colon => {
-                            if double_colon {
-                                return MatchResult::Failure(pos)
-                            }
-
-                            next_state = State::DoubleColon;
-                            double_colon = true;
-                        },
-                        Token::Digit | Token::Xdigit => {
-                            next_state = State::Xdigit;
-                            xdigits += 1;
-                        },
-                        Token::Slash => {
-                            return MatchResult::Failure(pos)
-                        }
+                (State::Init, Token::Slash) => State::Unknown,
+                // FirstColon
+                (State::FirstColon, Token::Colon) => State::DoubleColon,
+                (State::FirstColon, _) => State::Unknown,
+                // Xdigit
+                (State::Xdigit, Token::Colon) => {
+                    if xdigits_count == 8 {
+                        state = State::Unknown;
+                        break;
                     }
 
+                    State::Colon
                 },
-                State::DoubleColon => {
-                    match token {
-                        Token::Colon => {
-                            return MatchResult::Failure(pos)
-                        },
-                        Token::Digit | Token::Xdigit => {
-                            next_state = State::Xdigit;
-                            xdigits += 1;
-                        },
-                        Token::Slash => {
-                            next_state = State::Slash;
-                        }
-                    }
+                (State::Xdigit, Token::Digit) |
+                (State::Xdigit, Token::Xdigit) => {
+                    xdigits += 1;
+                    state
                 },
-                State::Slash => {
-                    match token {
-                        Token::Colon | Token::Slash | Token::Xdigit => {
-                            return MatchResult::Failure(pos)
-                        },
-                        Token::Digit => {
-                            plen = c.to_digit(10).unwrap();
-                            next_state = State::PrefixLen;
-                        }
+                (State::Xdigit, Token::Slash) => State::Slash,
+                // Colon
+                (State::Colon, Token::Colon) => {
+                    if double_colon {
+                        state = State::Unknown;
+                        break;
                     }
+                    double_colon = true;
+                    State::DoubleColon
                 },
-                State::PrefixLen => {
-                    match token {
-                        Token::Colon | Token::Slash | Token::Xdigit => {
-                            return MatchResult::Failure(pos)
-                        },
-                        Token::Digit => {
-                            plen = plen * 10 + c.to_digit(10).unwrap();
-                            if plen > 128 {
-                                return MatchResult::Failure(pos)
-                            }
-                            next_state = State::PrefixLen;
-                        }
+                (State::Colon, Token::Digit) |
+                (State::Colon, Token::Xdigit) => {
+                    xdigits += 1;
+                    State::Xdigit
+                },
+                (State::Colon, Token::Slash) => State::Unknown,
+                // DoubleColon
+                (State::DoubleColon, Token::Colon) => State::Unknown,
+                (State::DoubleColon, Token::Digit) |
+                (State::DoubleColon, Token::Xdigit) => {
+                    xdigits += 1;
+                    State::Xdigit
+                },
+                (State::DoubleColon, Token::Slash) => State::Slash,
+                // Slash
+                (State::Slash, Token::Digit) => {
+                    plen = c.to_digit(10).unwrap();
+                    State::PrefixLen
+                },
+                (State::Slash, _) => State::Unknown,
+                // PrefixLen
+                (State::PrefixLen, Token::Digit) => {
+                    plen = plen * 10 + c.to_digit(10).unwrap();
+                    if plen > 128 {
+                        state = State::Unknown;
+                        break;
                     }
+                    state
+                },
+                (State::PrefixLen, _) => {
+                    state = State::Unknown;
+                    break;
                 }
-            }
+                // Error
+                _ => {
+                    state = State::Unknown;
+                    break;
+                }
+            };
 
             if xdigits > 4 || xdigits_count > 8 {
-                return MatchResult::Failure(pos)
+                state = State::Unknown;
+                break;
             }
 
             if state != next_state {
+                if next_state == State::Unknown {
+                    state = State::Unknown;
+                    break;
+                }
+
                 if next_state == State::Xdigit {
                     xdigits_count += 1;
                 }
-                if state == State::Xdigit {
+                else if state == State::Xdigit {
                     xdigits = 0;
                 }
 
@@ -547,6 +528,8 @@ impl CliNode for CliNodeIPv6Prefix {
         match state {
             State::PrefixLen if plen >= 13 || plen == 0 =>
                 MatchResult::Success(MatchFlag::Full),
+            State::Unknown =>
+                MatchResult::Failure(pos),
             _ => 
                 MatchResult::Success(MatchFlag::Incomplete),
         }
