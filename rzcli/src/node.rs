@@ -401,9 +401,10 @@ impl CliNode for CliNodeIPv6Prefix {
         #[derive(PartialEq)]
         enum Token {
             Colon,
-            Digit,
             Xdigit,
             Slash,
+            PlenDigit,
+            Unknown,
         };
 
         let mut pos: u32 = 0;
@@ -415,96 +416,67 @@ impl CliNode for CliNodeIPv6Prefix {
 
         for c in input.chars() {
             let mut next_state = state;
-            let token = match c {
-                '0' ... '9'
-                    => Token::Digit,
-                'a' ... 'f' | 'A' ... 'F'
-                    => Token::Xdigit,
-                ':' => Token::Colon,
-                '/' => Token::Slash,
-                _   => return MatchResult::Failure(pos),
+            let token = match state {
+                State::Slash | State::PrefixLen => {
+                    match c {
+                        '0' ... '9' => Token::PlenDigit,
+                        _ => Token::Unknown,
+                    }
+                },
+                _ => {
+                    match c {
+                        '0' ... '9' | 'a' ... 'f' | 'A' ... 'F'
+                            => Token::Xdigit,
+                        ':' => Token::Colon,
+                        '/' => Token::Slash,
+                        _   => Token::Unknown,
+                    }
+                },
             };
 
+            if token == Token::Xdigit {
+                xdigits += 1;
+                if xdigits > 4 {
+                    state = State::Unknown;
+                    break;
+                }
+            }
+
+            // State machine.
             next_state = match (state, token) {
                 // Init
                 (State::Init, Token::Colon) => State::FirstColon,
-                (State::Init, Token::Digit) |
-                (State::Init, Token::Xdigit) => {
-                    xdigits += 1;
-                    State::Xdigit
-                },
-                (State::Init, Token::Slash) => State::Unknown,
+                (State::Init, Token::Xdigit) => State::Xdigit,
                 // FirstColon
                 (State::FirstColon, Token::Colon) => State::DoubleColon,
-                (State::FirstColon, _) => State::Unknown,
                 // Xdigit
-                (State::Xdigit, Token::Colon) => {
-                    if xdigits_count == 8 {
-                        state = State::Unknown;
-                        break;
-                    }
-
-                    State::Colon
-                },
-                (State::Xdigit, Token::Digit) |
-                (State::Xdigit, Token::Xdigit) => {
-                    xdigits += 1;
-                    state
-                },
+                (State::Xdigit, Token::Colon) if xdigits_count == 8 => State::Unknown,
+                (State::Xdigit, Token::Colon) => State::Colon,
+                (State::Xdigit, Token::Xdigit) => State::Xdigit,
                 (State::Xdigit, Token::Slash) => State::Slash,
                 // Colon
+                (State::Colon, Token::Colon) if double_colon => State::Unknown,
                 (State::Colon, Token::Colon) => {
-                    if double_colon {
-                        state = State::Unknown;
-                        break;
-                    }
                     double_colon = true;
                     State::DoubleColon
                 },
-                (State::Colon, Token::Digit) |
-                (State::Colon, Token::Xdigit) => {
-                    xdigits += 1;
-                    State::Xdigit
-                },
-                (State::Colon, Token::Slash) => State::Unknown,
+                (State::Colon, Token::Xdigit) => State::Xdigit,
                 // DoubleColon
-                (State::DoubleColon, Token::Colon) => State::Unknown,
-                (State::DoubleColon, Token::Digit) |
-                (State::DoubleColon, Token::Xdigit) => {
-                    xdigits += 1;
-                    State::Xdigit
-                },
+                (State::DoubleColon, Token::Xdigit) => State::Xdigit,
                 (State::DoubleColon, Token::Slash) => State::Slash,
-                // Slash
-                (State::Slash, Token::Digit) => {
-                    plen = c.to_digit(10).unwrap();
-                    State::PrefixLen
-                },
-                (State::Slash, _) => State::Unknown,
-                // PrefixLen
-                (State::PrefixLen, Token::Digit) => {
+                // Slash / PrefixLen
+                (_, Token::PlenDigit) => {
                     plen = plen * 10 + c.to_digit(10).unwrap();
                     if plen > 128 {
-                        state = State::Unknown;
-                        break;
+                        State::Unknown
                     }
-                    state
+                    else {
+                        State::PrefixLen
+                    }
                 },
-                (State::PrefixLen, _) => {
-                    state = State::Unknown;
-                    break;
-                }
                 // Error
-                _ => {
-                    state = State::Unknown;
-                    break;
-                }
+                (_, _) => State::Unknown,
             };
-
-            if xdigits > 4 || xdigits_count > 8 {
-                state = State::Unknown;
-                break;
-            }
 
             if state != next_state {
                 if next_state == State::Unknown {
@@ -609,7 +581,6 @@ impl CliNode for CliNodeIPv6Address {
                     double_colon = true;
                     State::DoubleColon
                 },
-                (State::FirstColon, Token::Xdigit) => State::Unknown,
                 // Xdigit
                 (State::Xdigit, Token::Colon) if xdigits_count == 8 => State::Unknown,
                 (State::Xdigit, Token::Colon) => State::Colon,
@@ -622,10 +593,9 @@ impl CliNode for CliNodeIPv6Address {
                 },
                 (State::Colon, Token::Xdigit) => State::Xdigit,
                 // DoubleColon
-                (State::DoubleColon, Token::Colon) => State::Unknown,
                 (State::DoubleColon, Token::Xdigit) => State::Xdigit,
                 // Error
-                _ => State::Unknown,
+                (_, _) => State::Unknown,
             };
 
             if state != next_state {
