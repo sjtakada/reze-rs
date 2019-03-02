@@ -378,6 +378,9 @@ impl CliNode for CliNodeIPv4Address {
         else if octets != 4 {
             MatchResult::Success(MatchFlag::Incomplete)
         }
+        else if octets == 4 && (val != 0 && val <= 25) {
+            MatchResult::Success(MatchFlag::Incomplete)
+        }
         else {
             MatchResult::Success(MatchFlag::Full)
         }
@@ -741,6 +744,9 @@ mod tests {
     pub fn test_node_ipv4_address() {
         let node = CliNodeIPv4Address::new("ipv4addr", "IPV4-ADDRESS", "help");
 
+        let result = node.collate("0.0.0.0");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
         let result = node.collate("100.100.100.100");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
 
@@ -752,6 +758,12 @@ mod tests {
 
         let result = node.collate("1.1.1.256");
         assert_eq!(result, MatchResult::Failure(8));
+
+        let result = node.collate("1.1.1.25");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("1.1.1.26");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
 
         let result = node.collate("255");
         assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
