@@ -210,77 +210,99 @@ impl CliNode for CliNodeIPv4Prefix {
     }
 
     fn collate(&self, input: &str) -> MatchResult {
+        #[derive(Copy, Clone, PartialEq)]
         enum State {
             Init,
             Digit,
             Dot,
             Slash,
             Plen,
+            Unknown,
         };
+
+        #[derive(PartialEq)]
+        enum Token {
+            Digit,
+            Dot,
+            Slash,
+            Unknown,
+        }
 
         let mut pos: u32 = 0;
         let mut val: u32 = 0;
         let mut dots: u8 = 0;
         let mut octets: u8 = 0;
-        let mut state = State::Init;
         let mut plen: u32 = 0;
+        let mut state = State::Init;
+        let mut next_state = State::Unknown;
 
         for c in input.chars() {
-            match state {
-                State::Init if c.is_digit(10) => {
-                    state = State::Digit;
+            next_state = State::Unknown;
+            let token = match c {
+                '0' ... '9' => Token::Digit,
+                '.' => Token::Dot,
+                '/' => Token::Slash,
+                _ => break,
+            };
+
+            // State machine.
+            next_state = match (state, token) {
+                // Init
+                (State::Init, Token::Digit) => State::Digit,
+                // Digit
+                (State::Digit, Token::Digit) => State::Digit,
+                (State::Digit, Token::Dot) if dots == 3 => break,
+                (State::Digit, Token::Dot) => State::Dot,
+                (State::Digit, Token::Slash) if octets != 4 => break,
+                (State::Digit, Token::Slash) => State::Slash,
+                // Dot
+                (State::Dot, Token::Digit) => State::Digit,
+                // Slash / Plen
+                (State::Slash, Token::Digit) |
+                (State::Plen, Token::Digit) => State::Plen,
+                // Error
+                (_, _) => break,
+            };
+
+            if next_state == State::Digit {
+                val = val * 10 + c.to_digit(10).unwrap();
+                if val > 255 {
+                    next_state = State::Unknown;
+                    break;
+                }
+            }
+            else if next_state == State::Plen {
+                plen = plen * 10 + c.to_digit(10).unwrap();
+                if plen > 32 {
+                    next_state = State::Unknown;
+                    break;
+                }
+            }
+
+            if state != next_state {
+                if next_state == State::Digit {
                     octets += 1;
-                    val = c.to_digit(10).unwrap();
-                },
-                State::Digit => {
-                    match c {
-                        '.' => {
-                            if dots == 3 {
-                                return MatchResult::Failure(pos)
-                            }
-                            state = State::Dot;
-                            dots += 1;
-                        },
-                        '/' => {
-                            state = State::Slash;
-                        },
-                        '0' ... '9' => {
-                            val = val * 10 + c.to_digit(10).unwrap();
-                            if val > 255 {
-                                return MatchResult::Failure(pos)
-                            }
-                        },
-                        _ => {
-                            return MatchResult::Failure(pos)
-                        },
-                    }
-                },
-                State::Dot if c.is_digit(10) => {
-                    val = c.to_digit(10).unwrap();
-                    state = State::Digit;
-                    octets += 1;
-                },
-                State::Slash if c.is_digit(10) => {
-                    state = State::Plen;
-                    plen = c.to_digit(10).unwrap();
-                },
-                State::Plen if c.is_digit(10) => {
-                    plen = plen * 10 + c.to_digit(10).unwrap();
-                    if plen > 32 {
-                        return MatchResult::Failure(pos)
-                    }
-                },
-                _ => {
-                    return MatchResult::Failure(pos)
-                },
+                }
+                else if next_state == State::Dot {
+                    val = 0;
+                    dots += 1;
+                }
+
+                state = next_state;
             }
 
             pos += 1;
         }
 
-        match state {
-            State::Plen => MatchResult::Success(MatchFlag::Full),
-            _ => MatchResult::Success(MatchFlag::Incomplete)
+        match next_state {
+            State::Unknown =>
+                MatchResult::Failure(pos),
+            State::Plen if plen >= 1 && plen <= 3 =>
+                MatchResult::Success(MatchFlag::Incomplete),
+            State::Plen =>
+                MatchResult::Success(MatchFlag::Full),
+            _ =>
+                MatchResult::Success(MatchFlag::Incomplete)
         }
     }
 }
@@ -814,6 +836,15 @@ mod tests {
 
         let result = node.collate("0.0.0.0/0");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+
+        let result = node.collate("10.10.10.10/1");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("10.10.10.10/2");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+
+        let result = node.collate("10.10.10.10/3");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
 
         let result = node.collate("10.10.10.10/32");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
