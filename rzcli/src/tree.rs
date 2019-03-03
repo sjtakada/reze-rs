@@ -13,6 +13,8 @@ use std::rc::Rc;
 use super::node::*;
 use super::collate;
 
+
+// Token Type.
 #[derive(PartialEq)]
 pub enum TokenType {
     Undef,
@@ -66,19 +68,20 @@ impl fmt::Debug for TokenType {
     }
 }
 
-//
+// CLI Tree:
+//   consists of single CLI definition tree, built per mode.
 pub struct CliTree {
     // Mode name.
     mode: String,
     
-    // Prompt.
+    // Prompt string.
     prompt: String,
 
     // Parent CliTree.
     parent: Option<Rc<CliTree>>,
 
     // Top CliNode.
-    top: Option<RefCell<Rc<CliNode>>>,
+    top: RefCell<Rc<CliNode>>,
 
     // Exit to finish flag.
     // exit_to_finish: bool;
@@ -93,7 +96,7 @@ impl CliTree {
             mode: mode,
             prompt: prompt,
             parent: parent,
-            top: None,
+            top: RefCell::new(Rc::new(CliNodeDummy::new())),
         }
     }
 
@@ -422,4 +425,84 @@ mod tests {
         assert_eq!(s.len(), 0);
     }
 
+    #[test]
+    pub fn test_build_recursive() {
+        let json_str = r##"
+{
+  "dummy-cmd": {
+    "token": {
+      "A": {
+        "id": "0",
+        "type": "keyword",
+        "help": "help"
+      },
+      "B": {
+        "id": "1",
+        "type": "keyword",
+        "help": "help"
+      },
+      "C": {
+        "id": "2.0",
+        "type": "keyword",
+        "help": "help"
+      },
+      "D": {
+        "id": "2.1",
+        "type": "keyword",
+        "help": "help"
+      },
+      "E": {
+        "id": "3.0",
+        "type": "keyword",
+        "help": "help"
+      },
+      "F": {
+        "id": "3.1.0",
+        "type": "keyword",
+        "help": "help"
+      },
+      "G": {
+        "id": "3.1.1",
+        "type": "keyword",
+        "help": "help"
+      },
+      "H": {
+        "id": "3.2",
+        "type": "keyword",
+        "help": "help"
+      },
+      "X": {
+        "id": "4",
+        "type": "keyword",
+        "help": "help"
+      }
+    },
+    "command": [
+      {
+        "defun": "A B (C|D) (E (F|G) H) X",
+        "mode": [
+        ]
+      }
+    ]
+  }
+} "##;
+
+        let tree = CliTree::new("mode".to_string(), ">".to_string(), None);
+
+        let json: serde_json::Value = serde_json::from_str(&json_str).unwrap();
+        let json = json["dummy-cmd"].as_object().unwrap();
+        let commands: &Vec<serde_json::Value> = json["command"].as_array().unwrap();
+
+        for command in commands {
+            let defun = &command["defun"];
+            if !defun.is_string() {
+                let s = defun.as_str().unwrap();
+                let mut cv: CliNodeVec = Vec::new();
+                let mut hv: CliNodeVec = Vec::new();
+                let mut tv: CliNodeVec = Vec::new();
+
+                tree.build_recursive(&mut cv, &mut hv, &mut tv, s, &json["tokens"], command);
+            }
+        }
+    }
 }

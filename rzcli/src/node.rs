@@ -22,36 +22,15 @@ const CLI_TOKEN_IPV6_PREFIX: &str = "X:X::X:X/M";
 const CLI_TOKEN_WORD: &str = "WORD";
 const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
 
-// utilities
-pub fn is_xdigit_or_colon(c: char) -> bool {
-    if c.is_digit(16) || c == ':' {
-        return true
-    }
-    return false
-}
-
-pub fn is_xdigit_or_colon_or_slash(c: char) -> bool {
-    if c.is_digit(16) || c == ':' || c == '/' {
-        return true
-    }
-    return false
-}
-
 pub type CliNodeVec = Vec<Rc<CliNode>>;
 
-// CLI Node trait.
+// CLI Node trait: Base interface for various type of CliNode.
 pub trait CliNode {
     // Return inner.
     fn inner(&self) -> RefMut<CliNodeInner>;
 
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
-
-    // Return help string ref.
-    //fn help(&self) -> &str;
-
-    // Return defun token.
-    //fn defun_token(&self) -> &str;
 }
 
 // Common field for CliNode
@@ -112,8 +91,32 @@ impl CliNodeInner {
     }
 }
 
-// CLI keyword node
-//   static literal
+// CLI dummy node:
+//   dummy node for top of CLI tree.
+pub struct CliNodeDummy {
+    inner: RefCell<CliNodeInner>,
+}
+
+impl CliNodeDummy {
+    pub fn new() -> CliNodeDummy {
+        CliNodeDummy {
+            inner: RefCell::new(CliNodeInner::new("", "", "", ""))
+        }
+    }
+}
+
+impl CliNode for CliNodeDummy {
+    fn inner(&self) -> RefMut<CliNodeInner> {
+        self.inner.borrow_mut()
+    }
+
+    fn collate(&self, input: &str) -> MatchResult {
+        MatchResult::Failure(0)
+    }
+}
+
+// CLI keyword node:
+//   static literal.
 pub struct CliNodeKeyword {
     inner: RefCell<CliNodeInner>,
 }
@@ -148,7 +151,7 @@ impl CliNode for CliNodeKeyword {
 
 }
 
-// CLI range node
+// CLI range node:
 //   integer range to match numeric input.
 pub struct CliNodeRange {
     inner: RefCell<CliNodeInner>,
@@ -190,7 +193,7 @@ impl CliNode for CliNodeRange {
     }
 }
 
-// CLI IPv4 Prefix node
+// CLI IPv4 Prefix node:
 //   match IPv4 Prefix (A.B.C.D/M)
 pub struct CliNodeIPv4Prefix {
     inner: RefCell<CliNodeInner>,
@@ -307,7 +310,7 @@ impl CliNode for CliNodeIPv4Prefix {
     }
 }
 
-// CLI IPv4 Address node
+// CLI IPv4 Address node:
 //   match IPv4 Address (A.B.C.D)
 pub struct CliNodeIPv4Address {
     inner: RefCell<CliNodeInner>,
@@ -409,7 +412,7 @@ impl CliNode for CliNodeIPv4Address {
     }
 }
 
-// ClI IPv6 Prefix node
+// ClI IPv6 Prefix node:
 //   match IPv6 Prefix (X:X::X:X/M)
 pub struct CliNodeIPv6Prefix {
     inner: RefCell<CliNodeInner>,
@@ -552,7 +555,7 @@ impl CliNode for CliNodeIPv6Prefix {
 }
 
 
-// ClI IPv6 Address node
+// CLI IPv6 Address node:
 //   match IPv6 Address (X:X::X:X)
 pub struct CliNodeIPv6Address {
     inner: RefCell<CliNodeInner>,
@@ -680,7 +683,8 @@ impl CliNode for CliNodeIPv6Address {
 }
 
 
-//
+// CLI Word node:
+//   match any word, but stored as parameter.
 pub struct CliNodeWord {
     inner: RefCell<CliNodeInner>,
 }
@@ -704,7 +708,7 @@ impl CliNode for CliNodeWord {
 }
 
 //
-// Unis tests.
+// Unit tests.
 //
 #[cfg(test)]
 mod tests {
