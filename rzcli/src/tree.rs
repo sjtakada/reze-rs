@@ -111,7 +111,6 @@ impl CliTree {
 
     pub fn build_command(&self, tokens: &serde_json::Value,
                          command: &serde_json::Value) {
-//        let tokens = tokens.as_object().unwrap();
         let defun = &command["defun"];
         if !defun.is_string() {
             let s = defun.as_str().unwrap();
@@ -123,22 +122,16 @@ impl CliTree {
         }
     }
 
-    // Create new Vec and clone reference to each CliNode.
-    //fn clone_clinode_vec(vec: &CliNodeVec) -> CliNodeVec {
-    //vec.iter().map(|v| v.clone()).collect()
-    //}
-
     fn build_recursive(&self, curr: &mut CliNodeVec, head: &mut CliNodeVec, tail: &mut CliNodeVec,
                        s: &str, tokens: &serde_json::Value, command: &serde_json::Value) -> TokenType {
-        //
-        let mut next: Rc<CliNode>;
-        let mut node: Rc<CliNode>;
         let mut is_head = true;
 
         while s.len() > 0 {
             let (token_type, token, s) = CliTree::get_cli_token(s);
             match token_type {
-                TokenType::LeftParen | TokenType::LeftBracket | TokenType::LeftBrace => {
+                TokenType::LeftParen |
+                TokenType::LeftBracket |
+                TokenType::LeftBrace => {
                     let mut hv: CliNodeVec = Vec::new();
                     let mut tv: CliNodeVec = Vec::new();
 
@@ -150,13 +143,41 @@ impl CliTree {
                     } { }
 
                     if token_type == TokenType::RightBrace || token_type == TokenType::RightBracket {
-                        
+                        for h in hv {
+                            CliTree::vector_add_node_each(&mut tv, h.clone());
+                        }
                     }
+
+                    curr.clear();
+                    curr.append(&mut tv);
                 },
-                TokenType::RightParen | TokenType::RightBracket | TokenType::RightBrace |
+                TokenType::RightParen |
+                TokenType::RightBracket |
+                TokenType::RightBrace |
                 TokenType::VerticalBar => {
+                    curr.append(tail);
+                    return token_type;
                 },
                 _ => {
+                    if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, token) {
+                        let next = match CliTree::find_next_by_node(curr, new_node.clone()) {
+                            None => {
+                                CliTree::vector_add_node_each(curr, new_node.clone());
+                                new_node
+                            },
+                            Some(next) => next,
+                        };
+
+                        // TBD: hidden
+                        
+                        curr.clear();
+                        curr.push(next.clone());
+                        
+                        if is_head {
+                            head.push(next.clone());
+                            is_head = false;
+                        }
+                    }
                 }
             }
         }
@@ -269,12 +290,12 @@ impl CliTree {
         (token_type, token, s)
     }
 
-//    fn vector_add_node_each(curr: &mut CliNodeVec, node: Rc<CliNode>) {
-//        for c in curr {
-//            let mut inner = c.inner();
-//            inner.push_next(node.clone());
-//        }
-//    }
+    fn vector_add_node_each(curr: &mut CliNodeVec, node: Rc<CliNode>) {
+        for c in curr {
+            let mut inner = c.inner();
+            inner.push_next(node.clone());
+        }
+    }
 
     // TBD: Err()
     fn new_node_by_type(token_type: TokenType, tokens: &serde_json::Value, token: &str) -> Option<Rc<CliNode>> {
