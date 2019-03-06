@@ -119,12 +119,22 @@ impl CliNode for CliNodeDummy {
 //   static literal.
 pub struct CliNodeKeyword {
     inner: RefCell<CliNodeInner>,
+    enum_key: Option<String>,
 }
 
 impl CliNodeKeyword {
-    pub fn new(id: &str, defun: &str, help: &str, token: &str) -> CliNodeKeyword {
-        CliNodeKeyword {
-            inner: RefCell::new(CliNodeInner::new(id, defun, help, token))
+    pub fn new(id: &str, defun: &str, help: &str, enum_key: Option<&str>) -> CliNodeKeyword {
+        match enum_key {
+            Some(enum_key) =>
+                CliNodeKeyword {
+                    inner: RefCell::new(CliNodeInner::new(id, defun, help, defun)),
+                    enum_key: Some(String::from(enum_key)),
+                },
+            None => 
+                CliNodeKeyword {
+                    inner: RefCell::new(CliNodeInner::new(id, defun, help, defun)),
+                    enum_key: None
+                },
         }
     }
 }
@@ -716,7 +726,7 @@ mod tests {
 
     #[test]
     pub fn test_node_keyword() {
-        let node = CliNodeKeyword::new("show", "show", "help", "show");
+        let node = CliNodeKeyword::new("show", "show", "help", None);
 
         let result = node.collate("show");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));

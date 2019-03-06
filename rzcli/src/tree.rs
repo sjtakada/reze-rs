@@ -13,7 +13,6 @@ use std::rc::Rc;
 use super::node::*;
 use super::collate;
 
-
 // Token Type.
 #[derive(PartialEq)]
 pub enum TokenType {
@@ -115,22 +114,28 @@ impl CliTree {
     pub fn build_command(&self, tokens: &serde_json::Value,
                          command: &serde_json::Value) {
         let defun = &command["defun"];
-        if !defun.is_string() {
+        if defun.is_string() {
             let s = defun.as_str().unwrap();
             let mut cv: CliNodeVec = Vec::new();
             let mut hv: CliNodeVec = Vec::new();
             let mut tv: CliNodeVec = Vec::new();
 
-            self.build_recursive(&mut cv, &mut hv, &mut tv, s, tokens, command);
+            cv.push(self.top.borrow().clone());
+
+            CliTree::build_recursive(&mut cv, &mut hv, &mut tv, &s, tokens, command);
         }
     }
 
-    fn build_recursive(&self, curr: &mut CliNodeVec, head: &mut CliNodeVec, tail: &mut CliNodeVec,
-                       s: &str, tokens: &serde_json::Value, command: &serde_json::Value) -> TokenType {
+    fn build_recursive(curr: &mut CliNodeVec, head: &mut CliNodeVec,
+                       tail: &mut CliNodeVec, mut s: &str,
+                       tokens: &serde_json::Value, command: &serde_json::Value) -> (TokenType, usize) {
         let mut is_head = true;
+        let mut token: &str;
 
         while s.len() > 0 {
-            let (token_type, token, s) = CliTree::get_cli_token(s);
+            let (token_type, token, pos) = CliTree::get_cli_token(s);
+            s = &s[pos..];
+
             match token_type {
                 TokenType::LeftParen |
                 TokenType::LeftBracket |
@@ -140,8 +145,9 @@ impl CliTree {
 
                     while {
                         let mut cv = curr.clone();
-                        let token_type = self.build_recursive(&mut cv, &mut hv, &mut tv, s, tokens, command);
-
+                        let (token_type, pos) = CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
+                                                                         &s, tokens, command);
+                        s = &s[pos..];
                         token_type == TokenType::VerticalBar
                     } { }
 
@@ -159,7 +165,7 @@ impl CliTree {
                 TokenType::RightBrace |
                 TokenType::VerticalBar => {
                     curr.append(tail);
-                    return token_type;
+                    return (token_type, pos);
                 },
                 _ => {
                     if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, token) {
@@ -185,17 +191,18 @@ impl CliTree {
             }
         }
 
-        TokenType::Undef
+        (TokenType::Undef, 0)
     }
 
     // Parse string to return:
     //   TokenType, token and remainder of string.
-    fn get_cli_token(s: &str) -> (TokenType, &str, &str) {
+    fn get_cli_token(mut s: &str) -> (TokenType, &str, usize) {
         let mut offset = 0;
         let mut token_type = TokenType::Undef;
+        let len = s.len();
 
         // trim whitespaces at beginning.
-        let s = s.trim_left();
+        s = s.trim_left();
 
         match s.chars().next() {
             Some(c) => {
@@ -283,14 +290,14 @@ impl CliTree {
             },
             None => {
                 // caller should check token_type.
-                return (token_type, s, s);
+                return (token_type, s, s.len());
             }
         }
 
         let token = &s[0..offset];
-        let s = &s[offset..];
+        s = &s[offset..];
 
-        (token_type, token, s)
+        (token_type, token, len - s.len())
     }
 
     fn vector_add_node_each(curr: &mut CliNodeVec, node: Rc<CliNode>) {
@@ -300,46 +307,63 @@ impl CliTree {
         }
     }
 
-    // TBD: Err()
+    // Utility function to get string out of JSON value or default.
+    fn get_str_or<'a>(map: &'a serde_json::map::Map<String, serde_json::Value>, key: &str, def: &'a str) -> &'a str {
+        match map.get(key) {
+            Some(value) => {
+                value.as_str().unwrap_or(def)
+            },
+            None => def
+        }
+    }
+
+    // Return CLI Node by TokenType.
     fn new_node_by_type(token_type: TokenType, tokens: &serde_json::Value, token: &str) -> Option<Rc<CliNode>> {
-        if !tokens[token].is_object() {
-            return None
-        }
-        let token_def = tokens[token].as_object().unwrap();
+        match tokens.get(token) {
+            Some(token_def) if token_def.is_object() => {
 
-        if !token_def["id"].is_string() || !token_def["help"].is_string() {
-            let id = token_def["help"].as_str().unwrap();
-            let help = token_def["help"].as_str().unwrap();
+                let token_def = tokens[token].as_object().unwrap();
+                let id = CliTree::get_str_or(token_def, "id", "<id>");
+                let help = CliTree::get_str_or(token_def, "help", "<help>");
+                
+                let node: Rc<CliNode> = match token_type {
+                    TokenType::IPv4Prefix => Rc::new(CliNodeIPv4Prefix::new(&id, token, &help)),
+                    TokenType::IPv4Address => Rc::new(CliNodeIPv4Address::new(&id, token, &help)),
+                    TokenType::IPv6Prefix => Rc::new(CliNodeIPv6Prefix::new(&id, token, &help)),
+                    TokenType::IPv6Address => Rc::new(CliNodeIPv6Address::new(&id, token, &help)),
+                    TokenType::Range => {
+                        if token_def["range"].is_array() {
+                            let range = token_def["range"].as_array().unwrap();
+                            let min = range[0].as_i64().unwrap();
+                            let max = range[1].as_i64().unwrap();
 
-            let node: Rc<CliNode> = match token_type {
-                TokenType::IPv4Prefix => Rc::new(CliNodeIPv4Prefix::new(&id, token, &help)),
-                TokenType::IPv4Address => Rc::new(CliNodeIPv4Address::new(&id, token, &help)),
-                TokenType::IPv6Prefix => Rc::new(CliNodeIPv6Prefix::new(&id, token, &help)),
-                TokenType::IPv6Address => Rc::new(CliNodeIPv6Address::new(&id, token, &help)),
-                TokenType::Range => {
-                    if token_def["range"].is_array() {
-                        let range = token_def["range"].as_array().unwrap();
-                        let min = range[0].as_i64().unwrap();
-                        let max = range[1].as_i64().unwrap();
-
-                        Rc::new(CliNodeRange::new(&id, token, &help, min, max))
+                            Rc::new(CliNodeRange::new(&id, token, &help, min, max))
+                        }
+                        else {
+                            Rc::new(CliNodeRange::new(&id, token, &help, 0, 1))
+                        }
+                    },
+                    TokenType::Word => Rc::new(CliNodeWord::new(&id, token, &help)),
+                    //TokenType::Community => CliNodeCommunity::new(&id, token, &help),
+                    TokenType::Keyword => {
+                        match token_def.get("enum") {
+                            Some(enum_key) => {
+                                Rc::new(CliNodeKeyword::new(&id, token, &help, enum_key.as_str()))
+                            },
+                            None => {
+                                Rc::new(CliNodeKeyword::new(&id, token, &help, None))
+                            }
+                        }
+                    },
+                    _ => {
+                        return None;
                     }
-                    else {
-                        Rc::new(CliNodeRange::new(&id, token, &help, 0, 1))
-                    }
-                },
-                TokenType::Word => Rc::new(CliNodeWord::new(&id, token, &help)),
-                //TokenType::Community => CliNodeCommunity::new(&id, token, &help),
-                TokenType::Keyword => Rc::new(CliNodeKeyword::new(&id, token, &help, "TBD")),
-                _ => {
-                    panic!("unknown type");
-                }
-            };
+                };
 
-            return Some(node)
+                Some(node)
+            },
+            _ => None
         }
-
-        None
     }
 
     fn find_next_by_node(vec: &CliNodeVec, new_node: Rc<CliNode>) -> Option<Rc<CliNode>> {
@@ -369,21 +393,25 @@ mod tests {
 
     #[test]
     pub fn test_get_cli_token_1() {
-        let s = String::from("ip route IPV4-PREFIX IPV4-ADDRESS");
+        let s = "ip route IPV4-PREFIX IPV4-ADDRESS";
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token, "ip");
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token, "route");
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::IPv4Prefix);
         assert_eq!(token, "IPV4-PREFIX");
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::IPv4Address);
         assert_eq!(token, "IPV4-ADDRESS");
 
@@ -392,33 +420,40 @@ mod tests {
 
     #[test]
     pub fn test_get_cli_token_2() {
-        let s = String::from("show (ip|ipv6) route");
+        let s = "show (ip|ipv6) route";
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token, "show");
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::LeftParen);
         assert_eq!(token, "(");
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token, "ip");
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::VerticalBar);
         assert_eq!(token, "|");
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token, "ipv6");
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::RightParen);
         assert_eq!(token, ")");
 
-        let (t, token, s) = CliTree::get_cli_token(&s);
+        let (t, token, pos) = CliTree::get_cli_token(s);
+        let s = &s[pos..];
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token, "route");
 
@@ -431,47 +466,47 @@ mod tests {
 {
   "dummy-cmd": {
     "token": {
-      "A": {
+      "a": {
         "id": "0",
         "type": "keyword",
         "help": "help"
       },
-      "B": {
+      "b": {
         "id": "1",
         "type": "keyword",
         "help": "help"
       },
-      "C": {
+      "c": {
         "id": "2.0",
         "type": "keyword",
         "help": "help"
       },
-      "D": {
+      "d": {
         "id": "2.1",
         "type": "keyword",
         "help": "help"
       },
-      "E": {
+      "e": {
         "id": "3.0",
         "type": "keyword",
         "help": "help"
       },
-      "F": {
+      "f": {
         "id": "3.1.0",
         "type": "keyword",
         "help": "help"
       },
-      "G": {
+      "g": {
         "id": "3.1.1",
         "type": "keyword",
         "help": "help"
       },
-      "H": {
+      "h": {
         "id": "3.2",
         "type": "keyword",
         "help": "help"
       },
-      "X": {
+      "x": {
         "id": "4",
         "type": "keyword",
         "help": "help"
@@ -479,7 +514,7 @@ mod tests {
     },
     "command": [
       {
-        "defun": "A B (C|D) (E (F|G) H) X",
+        "defun": "a b (c|d) (e (f|g) h) x",
         "mode": [
         ]
       }
@@ -494,15 +529,15 @@ mod tests {
         let commands: &Vec<serde_json::Value> = json["command"].as_array().unwrap();
 
         for command in commands {
-            let defun = &command["defun"];
-            if !defun.is_string() {
-                let s = defun.as_str().unwrap();
-                let mut cv: CliNodeVec = Vec::new();
-                let mut hv: CliNodeVec = Vec::new();
-                let mut tv: CliNodeVec = Vec::new();
+            tree.build_command(&json["token"], command);
+        }
 
-                tree.build_recursive(&mut cv, &mut hv, &mut tv, s, &json["tokens"], command);
-            }
+        let top = tree.top.borrow();
+        let inner = top.inner();
+        let next = inner.next();
+        assert_eq!(next.len(), 1);
+        for n in next.iter() {
+            assert_eq!(n.inner().token(), "a");
         }
     }
 }
