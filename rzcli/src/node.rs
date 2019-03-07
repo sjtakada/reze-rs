@@ -27,7 +27,7 @@ pub type CliNodeVec = Vec<Rc<CliNode>>;
 // CLI Node trait: Base interface for various type of CliNode.
 pub trait CliNode {
     // Return inner.
-    fn inner(&self) -> RefMut<CliNodeInner>;
+    fn inner(&self) -> Ref<CliNodeInner>;
 
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
@@ -82,10 +82,6 @@ impl CliNodeInner {
         &self.token
     }
 
-    pub fn push_next(&mut self, node: Rc<CliNode>) {
-        self.next.borrow_mut().push(node);
-    }
-
     pub fn next(&self) -> RefMut<CliNodeVec> {
         self.next.borrow_mut()
     }
@@ -106,8 +102,8 @@ impl CliNodeDummy {
 }
 
 impl CliNode for CliNodeDummy {
-    fn inner(&self) -> RefMut<CliNodeInner> {
-        self.inner.borrow_mut()
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -140,8 +136,8 @@ impl CliNodeKeyword {
 }
 
 impl CliNode for CliNodeKeyword {
-    fn inner(&self) -> RefMut<CliNodeInner> {
-        self.inner.borrow_mut()
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -183,8 +179,8 @@ impl CliNodeRange {
 }
 
 impl CliNode for CliNodeRange {
-    fn inner(&self) -> RefMut<CliNodeInner> {
-        self.inner.borrow_mut()
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -218,8 +214,8 @@ impl CliNodeIPv4Prefix {
 }
 
 impl CliNode for CliNodeIPv4Prefix {
-    fn inner(&self) -> RefMut<CliNodeInner> {
-        self.inner.borrow_mut()
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -335,8 +331,8 @@ impl CliNodeIPv4Address {
 }
 
 impl CliNode for CliNodeIPv4Address {
-    fn inner(&self) -> RefMut<CliNodeInner> {
-        self.inner.borrow_mut()
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -437,8 +433,8 @@ impl CliNodeIPv6Prefix {
 }
 
 impl CliNode for CliNodeIPv6Prefix {
-    fn inner(&self) -> RefMut<CliNodeInner> {
-        self.inner.borrow_mut()
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -580,8 +576,8 @@ impl CliNodeIPv6Address {
 }
 
 impl CliNode for CliNodeIPv6Address {
-    fn inner(&self) -> RefMut<CliNodeInner> {
-        self.inner.borrow_mut()
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -708,8 +704,8 @@ impl CliNodeWord {
 }
 
 impl CliNode for CliNodeWord {
-    fn inner(&self) -> RefMut<CliNodeInner> {
-        self.inner.borrow_mut()
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
     }
 
     fn collate(&self, input: &str) -> MatchResult {

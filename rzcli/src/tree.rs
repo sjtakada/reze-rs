@@ -141,10 +141,11 @@ impl CliTree {
                 TokenType::LeftBrace => {
                     let mut hv: CliNodeVec = Vec::new();
                     let mut tv: CliNodeVec = Vec::new();
+                    let mut token_type;
 
                     while {
                         let mut cv = curr.clone();
-                        let token_type = CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
+                        token_type = CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
                                                                   s, tokens, command);
                         token_type == TokenType::VerticalBar
                     } { }
@@ -171,7 +172,7 @@ impl CliTree {
                     let token = token.unwrap();
 
                     if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, &token) {
-                        let next = match CliTree::find_next_by_node(curr, new_node.clone()) {
+                        let next = match CliTree::find_next_by_same_token(curr, &token) {
                             None => {
                                 CliTree::vector_add_node_each(curr, new_node.clone());
                                 new_node
@@ -306,8 +307,9 @@ impl CliTree {
 
     fn vector_add_node_each(curr: &mut CliNodeVec, node: Rc<CliNode>) {
         for c in curr {
-            let mut inner = c.inner();
-            inner.push_next(node.clone());
+            let inner = c.inner();
+            let mut next = inner.next();
+            next.push(node.clone());
         }
     }
 
@@ -370,12 +372,12 @@ impl CliTree {
         }
     }
 
-    fn find_next_by_node(vec: &CliNodeVec, new_node: Rc<CliNode>) -> Option<Rc<CliNode>> {
-        for node in vec {
-            let inner = node.inner();
+    fn find_next_by_same_token(curr: &CliNodeVec, token: &str) -> Option<Rc<CliNode>> {
+        for c in curr {
+            let inner = c.inner();
             let next = inner.next();
             for m in next.iter() {
-                if m.inner().token() == new_node.inner().token() {
+                if m.inner().token() == token {
                     return Some(m.clone());
                 }
             }
@@ -507,7 +509,7 @@ mod tests {
     },
     "command": [
       {
-        "defun": "a b (c|d) e (f|g) x",
+        "defun": "a b (c|d) {e|f|g} x",
         "mode": [
         ]
       }
@@ -549,9 +551,26 @@ mod tests {
         let n21 = &next[1];
         assert_eq!(n21.inner().token(), "d");
 
+        let inner = n20.inner();
+        let next = inner.next();
+        assert_eq!(next.len(), 3);
+
         let inner = n21.inner();
         let next = inner.next();
-        assert_eq!(next.len(), 1);
+        assert_eq!(next.len(), 3);
+
+        let n30 = &next[0];
+        assert_eq!(n30.inner().token(), "e");
+
+        let n31 = &next[1];
+        assert_eq!(n31.inner().token(), "f");
+
+        let n32 = &next[2];
+        assert_eq!(n32.inner().token(), "g");
+
+        let inner = n32.inner();
+        let next = inner.next();
+        assert_eq!(next.len(), 4);
     }
 }
 
