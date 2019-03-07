@@ -115,31 +115,25 @@ impl CliTree {
                          command: &serde_json::Value) {
         let defun = &command["defun"];
         if defun.is_string() {
-            let s = defun.as_str().unwrap();
+            let mut s = String::from(defun.as_str().unwrap());
             let mut cv: CliNodeVec = Vec::new();
             let mut hv: CliNodeVec = Vec::new();
             let mut tv: CliNodeVec = Vec::new();
 
             cv.push(self.top.borrow().clone());
 
-        println!("*** start");
-            CliTree::build_recursive(&mut cv, &mut hv, &mut tv, &s, tokens, command);
+            CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
+                                     &mut s, tokens, command);
         }
     }
 
     fn build_recursive(curr: &mut CliNodeVec, head: &mut CliNodeVec,
-                       tail: &mut CliNodeVec, mut s: &str,
-                       tokens: &serde_json::Value, command: &serde_json::Value) -> (TokenType, usize) {
+                       tail: &mut CliNodeVec, s: &mut String,
+                       tokens: &serde_json::Value, command: &serde_json::Value) -> TokenType {
         let mut is_head = true;
-        let mut token: &str;
-
-        println!("*** 0");
 
         while s.len() > 0 {
-            let (token_type, token, pos) = CliTree::get_cli_token(s);
-            s = &s[pos..];
-
-            println!("*** 1 '{}' '{}'", token, s);
+            let (token_type, token) = CliTree::get_cli_token(s);
 
             match token_type {
                 TokenType::LeftParen |
@@ -148,17 +142,13 @@ impl CliTree {
                     let mut hv: CliNodeVec = Vec::new();
                     let mut tv: CliNodeVec = Vec::new();
 
-            println!("*** 2");
                     while {
                         let mut cv = curr.clone();
-                        let (token_type, pos) = CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
-                                                                         &s, tokens, command);
-            println!("*** 3");
-                        s = &s[pos..];
+                        let token_type = CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
+                                                                  s, tokens, command);
                         token_type == TokenType::VerticalBar
                     } { }
 
-            println!("*** 4 '{}'", s);
                     if token_type == TokenType::RightBrace || token_type == TokenType::RightBracket {
                         for h in hv {
                             CliTree::vector_add_node_each(&mut tv, h.clone());
@@ -172,15 +162,15 @@ impl CliTree {
                 TokenType::RightBracket |
                 TokenType::RightBrace |
                 TokenType::VerticalBar => {
-            println!("*** 5");
                     for c in curr {
                         tail.push(c.clone());
                     }
-                    return (token_type, pos + 1);
+                    return token_type
                 },
                 _ => {
-            println!("*** 6");
-                    if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, token) {
+                    let token = token.unwrap();
+
+                    if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, &token) {
                         let next = match CliTree::find_next_by_node(curr, new_node.clone()) {
                             None => {
                                 CliTree::vector_add_node_each(curr, new_node.clone());
@@ -203,18 +193,20 @@ impl CliTree {
             }
         }
 
-        (TokenType::Undef, 0)
+        TokenType::Undef
     }
 
     // Parse string to return:
     //   TokenType, token and remainder of string.
-    fn get_cli_token(mut s: &str) -> (TokenType, &str, usize) {
+    fn get_cli_token(s: &mut String) -> (TokenType, Option<String>) {
         let mut offset = 0;
         let mut token_type = TokenType::Undef;
-        let len = s.len();
 
         // trim whitespaces at beginning.
-        s = s.trim_left();
+        let len = s.trim_start().len();
+        if len != s.len() {
+            s.replace_range(..s.len() - len, "");
+        }
 
         match s.chars().next() {
             Some(c) => {
@@ -302,14 +294,14 @@ impl CliTree {
             },
             None => {
                 // caller should check token_type.
-                return (token_type, s, s.len());
+                return (TokenType::Undef, None);
             }
         }
 
-        let token = &s[0..offset];
-        s = &s[offset..];
+        let token = String::from(&s[0..offset]);
+        s.replace_range(..offset, "");
 
-        (token_type, token, len - s.len())
+        (token_type, Some(token))
     }
 
     fn vector_add_node_each(curr: &mut CliNodeVec, node: Rc<CliNode>) {
@@ -405,69 +397,58 @@ mod tests {
 
     #[test]
     pub fn test_get_cli_token_1() {
-        let s = "ip route IPV4-PREFIX IPV4-ADDRESS";
+        let mut s = String::from("ip route IPV4-PREFIX IPV4-ADDRESS");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
-        assert_eq!(token, "ip");
+        assert_eq!(token.unwrap(), "ip");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
-        assert_eq!(token, "route");
+        assert_eq!(token.unwrap(), "route");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::IPv4Prefix);
-        assert_eq!(token, "IPV4-PREFIX");
+        assert_eq!(token.unwrap(), "IPV4-PREFIX");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::IPv4Address);
-        assert_eq!(token, "IPV4-ADDRESS");
+        assert_eq!(token.unwrap(), "IPV4-ADDRESS");
 
         assert_eq!(s.len(), 0);
     }
 
     #[test]
     pub fn test_get_cli_token_2() {
-        let s = "show (ip|ipv6) route";
+        let mut s = String::from("show (ip|ipv6) route");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
-        assert_eq!(token, "show");
+        assert_eq!(token.unwrap(), "show");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::LeftParen);
-        assert_eq!(token, "(");
+        assert_eq!(token.unwrap(), "(");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
-        assert_eq!(token, "ip");
+        assert_eq!(token.unwrap(), "ip");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::VerticalBar);
-        assert_eq!(token, "|");
+        assert_eq!(token.unwrap(), "|");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
-        assert_eq!(token, "ipv6");
+        assert_eq!(token.unwrap(), "ipv6");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::RightParen);
-        assert_eq!(token, ")");
+        assert_eq!(token.unwrap(), ")");
 
-        let (t, token, pos) = CliTree::get_cli_token(s);
-        let s = &s[pos..];
+        let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
-        assert_eq!(token, "route");
+        assert_eq!(token.unwrap(), "route");
 
         assert_eq!(s.len(), 0);
     }
@@ -571,7 +552,6 @@ mod tests {
         let inner = n21.inner();
         let next = inner.next();
         assert_eq!(next.len(), 1);
-
-        assert!(false);
     }
 }
+
