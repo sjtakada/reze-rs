@@ -20,6 +20,7 @@ use std::rc::Rc;
 use mio_uds::UnixStream;
 use serde_json;
 //use serde_json::map::*;
+use rustyline::error::ReadlineError;
 
 use super::error::CliError;
 use super::readline::*;
@@ -66,7 +67,21 @@ impl Cli {
     pub fn run(&self) {
         loop {
             // TODO, we'll get API URL and parameters here to send to server.
-            self.readline.borrow_mut().gets();
+            match self.readline.borrow_mut().gets() {
+                Ok(line) => {
+                    // exec
+                },
+                Err(ReadlineError::Interrupted) => {
+                    println!("CTRL-C");
+                },
+                Err(ReadlineError::Eof) => {
+                    println!("CTRL-D");
+                    break;
+                },
+                Err(err) => {
+                    println!("Error: {:?}", err);
+                }
+            };
 
             /*
             stdout().write(b"> ");

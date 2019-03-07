@@ -84,7 +84,7 @@ impl CliReadline {
         }
     }
 
-    pub fn gets(&self) {
+    pub fn gets(&self) -> Result<String, ReadlineError> {
         let mut editor = self.editor.borrow_mut();
 
         let readline = editor.readline("Router>");
@@ -92,16 +92,9 @@ impl CliReadline {
             Ok(line) => {
                 editor.add_history_entry(line.as_ref());
                 println!("Line: {}", line);
+                Ok(line)
             },
-            Err(ReadlineError::Interrupted) => {
-                println!("CTRL-C");
-            },
-            Err(ReadlineError::Eof) => {
-                println!("CTRL-D");
-            },
-            Err(err) => {
-                println!("Error: {:?}", err);
-            }
+            Err(err) => Err(err)
         }
     }
 }
