@@ -122,6 +122,7 @@ impl CliTree {
 
             cv.push(self.top.borrow().clone());
 
+        println!("*** start");
             CliTree::build_recursive(&mut cv, &mut hv, &mut tv, &s, tokens, command);
         }
     }
@@ -132,9 +133,13 @@ impl CliTree {
         let mut is_head = true;
         let mut token: &str;
 
+        println!("*** 0");
+
         while s.len() > 0 {
             let (token_type, token, pos) = CliTree::get_cli_token(s);
             s = &s[pos..];
+
+            println!("*** 1 '{}' '{}'", token, s);
 
             match token_type {
                 TokenType::LeftParen |
@@ -143,14 +148,17 @@ impl CliTree {
                     let mut hv: CliNodeVec = Vec::new();
                     let mut tv: CliNodeVec = Vec::new();
 
+            println!("*** 2");
                     while {
                         let mut cv = curr.clone();
                         let (token_type, pos) = CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
                                                                          &s, tokens, command);
+            println!("*** 3");
                         s = &s[pos..];
                         token_type == TokenType::VerticalBar
                     } { }
 
+            println!("*** 4 '{}'", s);
                     if token_type == TokenType::RightBrace || token_type == TokenType::RightBracket {
                         for h in hv {
                             CliTree::vector_add_node_each(&mut tv, h.clone());
@@ -164,10 +172,14 @@ impl CliTree {
                 TokenType::RightBracket |
                 TokenType::RightBrace |
                 TokenType::VerticalBar => {
-                    curr.append(tail);
-                    return (token_type, pos);
+            println!("*** 5");
+                    for c in curr {
+                        tail.push(c.clone());
+                    }
+                    return (token_type, pos + 1);
                 },
                 _ => {
+            println!("*** 6");
                     if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, token) {
                         let next = match CliTree::find_next_by_node(curr, new_node.clone()) {
                             None => {
@@ -514,7 +526,7 @@ mod tests {
     },
     "command": [
       {
-        "defun": "a b (c|d) (e (f|g) h) x",
+        "defun": "a b (c|d) e (f|g) x",
         "mode": [
         ]
       }
@@ -536,8 +548,30 @@ mod tests {
         let inner = top.inner();
         let next = inner.next();
         assert_eq!(next.len(), 1);
-        for n in next.iter() {
-            assert_eq!(n.inner().token(), "a");
-        }
+
+        let n0 = &next[0];
+        assert_eq!(n0.inner().token(), "a");
+
+        let inner = n0.inner();
+        let next = inner.next();
+        assert_eq!(next.len(), 1);
+
+        let n1 = &next[0];
+        assert_eq!(n1.inner().token(), "b");
+
+        let inner = n1.inner();
+        let next = inner.next();
+        assert_eq!(next.len(), 2);
+
+        let n20 = &next[0];
+        assert_eq!(n20.inner().token(), "c");
+        let n21 = &next[1];
+        assert_eq!(n21.inner().token(), "d");
+
+        let inner = n21.inner();
+        let next = inner.next();
+        assert_eq!(next.len(), 1);
+
+        assert!(false);
     }
 }
