@@ -26,13 +26,13 @@ use super::tree::CliTree;
 
 
 pub struct CliCompleter {
-//    trees: Rc<HashMap<String, Rc<CliTree>>>,
+    trees: Rc<HashMap<String, Rc<CliTree>>>,
 }
 
 impl CliCompleter {
     pub fn new(trees: Rc<HashMap<String, Rc<CliTree>>>) -> CliCompleter {
         CliCompleter {
-//            trees: trees
+            trees: trees
         }
     }
 }
@@ -80,7 +80,7 @@ impl Hinter for CliCompleter {
 
 pub struct CliReadline {
     // CLI mode to tree map.
-    trees: RefCell<HashMap<String, Rc<CliTree>>>,
+    trees: Rc<HashMap<String, Rc<CliTree>>>,
 
     // CLI completer.
     editor: RefCell<Editor<CliCompleter>>,
@@ -95,11 +95,14 @@ pub struct CliReadline {
 
 impl CliReadline {
     pub fn new() -> CliReadline {
+        let trees = Rc::new(HashMap::new());
+
         let mut editor = Editor::<CliCompleter>::new();
-        editor.set_helper(Some(CliCompleter { }));
+        editor.set_helper(Some(CliCompleter { trees: trees.clone() }));
 
         CliReadline {
-            trees: RefCell::new(HashMap::new()),
+            //trees: RefCell::new(HashMap::new()),
+            trees: trees.clone(),
             editor: RefCell::new(editor),
             matched_index: 0,
         }
@@ -125,7 +128,7 @@ impl CliReadline {
         if command["mode"].is_array() {
             for mode in command["mode"].as_array().unwrap() {
                 if let Some(mode) = mode.as_str() {
-                    if let Some(tree) = self.trees.borrow_mut().get(mode) {
+                    if let Some(tree) = self.trees.get(mode) {
                         tree.build_command(tokens, command);
                     }
                 }
@@ -145,7 +148,9 @@ impl CliReadline {
                 };
                 let children = &mode["children"];
                 let tree = Rc::new(CliTree::new(name.to_string(), prompt.to_string(), parent.clone()));
-                self.trees.borrow_mut().insert(name.to_string(), tree.clone());
+                if let Some(trees) = Rc::get_mut(&mut self.trees) {
+                    trees.insert(name.to_string(), tree.clone());
+                }
 
                 if children.is_object() {
                     self.build_mode(&children, Some(tree.clone()));
