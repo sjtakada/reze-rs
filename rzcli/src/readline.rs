@@ -6,6 +6,10 @@
 //
 
 use std::cell::RefCell;
+use std::rc::Rc;
+use std::collections::HashMap;
+
+use serde_json;
 
 use rustyline::completion::Completer;
 use rustyline::hint::Hinter;
@@ -16,7 +20,21 @@ use rustyline::Helper;
 use rustyline::Editor;
 use rustyline::KeyPress;
 
+use super::error::CliError;
+use super::tree::CliTree;
+
+
+
 pub struct CliCompleter {
+//    trees: Rc<HashMap<String, Rc<CliTree>>>,
+}
+
+impl CliCompleter {
+    pub fn new(trees: Rc<HashMap<String, Rc<CliTree>>>) -> CliCompleter {
+        CliCompleter {
+//            trees: trees
+        }
+    }
 }
 
 impl Completer for CliCompleter {
@@ -61,8 +79,10 @@ impl Hinter for CliCompleter {
 
 
 pub struct CliReadline {
-    // Parent CLI object.
+    // CLI mode to tree map.
+    trees: RefCell<HashMap<String, Rc<CliTree>>>,
 
+    // CLI completer.
     editor: RefCell<Editor<CliCompleter>>,
 
     // Readline buffer.
@@ -74,11 +94,12 @@ pub struct CliReadline {
 }
 
 impl CliReadline {
-    pub fn new() -> CliReadline{
+    pub fn new() -> CliReadline {
         let mut editor = Editor::<CliCompleter>::new();
-        editor.set_helper(Some(CliCompleter {}));
+        editor.set_helper(Some(CliCompleter { }));
 
         CliReadline {
+            trees: RefCell::new(HashMap::new()),
             editor: RefCell::new(editor),
             matched_index: 0,
         }
@@ -97,8 +118,44 @@ impl CliReadline {
             Err(err) => Err(err)
         }
     }
+
+    // Parse single 'defun' definition.
+    pub fn parse_defun(&mut self, tokens: &serde_json::Value,
+                       command: &serde_json::Value) {
+        if command["mode"].is_array() {
+            for mode in command["mode"].as_array().unwrap() {
+                if let Some(mode) = mode.as_str() {
+                    if let Some(tree) = self.trees.borrow_mut().get(mode) {
+                        tree.build_command(tokens, command);
+                    }
+                }
+            }
+        }
+    }
+
+    // Build CLI mode tree from JSON.
+    fn build_mode(&mut self, json: &serde_json::Value, parent: Option<Rc<CliTree>>) -> Result<(), CliError> {
+        for name in json.as_object().unwrap().keys() {
+            let mode = &json[name];
+            if mode.is_object() {
+                let prompt = if mode["prompt"].is_string() {
+                    &mode["prompt"].as_str().unwrap()
+                } else {
+                    ">"
+                };
+                let children = &mode["children"];
+                let tree = Rc::new(CliTree::new(name.to_string(), prompt.to_string(), parent.clone()));
+                self.trees.borrow_mut().insert(name.to_string(), tree.clone());
+
+                if children.is_object() {
+                    self.build_mode(&children, Some(tree.clone()));
+                }
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl Highlighter for CliCompleter {}
-impl Helper for CliCompleter {
-}
+impl Helper for CliCompleter {}

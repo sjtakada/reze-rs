@@ -19,7 +19,6 @@ use std::rc::Rc;
 
 use mio_uds::UnixStream;
 use serde_json;
-//use serde_json::map::*;
 use rustyline::error::ReadlineError;
 
 use super::error::CliError;
@@ -28,17 +27,17 @@ use super::tree::CliTree;
 
 pub struct Cli {
     // HashMap from mode name to CLI tree.
-    trees: HashMap<String, Rc<CliTree>>,
+    trees: RefCell<HashMap<String, Rc<CliTree>>>,
 
     // Readline.
-    readline: RefCell<CliReadline>,
+    readline: RefCell<Option<CliReadline>>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
         Cli {
-            trees: HashMap::new(),
-            readline: RefCell::new(CliReadline::new()),
+            trees: RefCell::new(HashMap::new()),
+            readline: RefCell::new(None),
         }
     }
 
@@ -60,28 +59,31 @@ impl Cli {
         self.init_server_connect()?;
 
         // Init readline.
+        self.readline.borrow_mut().replace(CliReadline::new());
 
         Ok(())
     }
 
     pub fn run(&self) {
-        loop {
-            // TODO, we'll get API URL and parameters here to send to server.
-            match self.readline.borrow_mut().gets() {
-                Ok(line) => {
-                    // exec
-                },
-                Err(ReadlineError::Interrupted) => {
-                    println!("CTRL-C");
-                },
-                Err(ReadlineError::Eof) => {
-                    println!("CTRL-D");
-                    break;
-                },
-                Err(err) => {
-                    println!("Error: {:?}", err);
-                }
-            };
+        if let Some(ref mut readline) = *self.readline.borrow_mut() {
+            loop {
+                // TODO, we'll get API URL and parameters here to send to server.
+                match readline.gets() {
+                    Ok(line) => {
+                        // exec
+                    },
+                    Err(ReadlineError::Interrupted) => {
+                        println!("CTRL-C");
+                    },
+                    Err(ReadlineError::Eof) => {
+                        println!("CTRL-D");
+                        break;
+                    },
+                    Err(err) => {
+                        println!("Error: {:?}", err);
+                    }
+                };
+            }
 
             /*
             stdout().write(b"> ");
@@ -152,7 +154,7 @@ impl Cli {
                 };
                 let children = &mode["children"];
                 let tree = Rc::new(CliTree::new(name.to_string(), prompt.to_string(), parent.clone()));
-                self.trees.insert(name.to_string(), tree.clone());
+                //self.trees.insert(name.to_string(), tree.clone());
 
                 if children.is_object() {
                     self.build_mode(&children, Some(tree.clone()));
@@ -168,9 +170,9 @@ impl Cli {
         if command["mode"].is_array() {
             for mode in command["mode"].as_array().unwrap() {
                 if let Some(mode) = mode.as_str() {
-                    if let Some(tree) = self.trees.get(mode) {
-                        tree.build_command(tokens, command);
-                    }
+//                    if let Some(tree) = self.trees.get(mode) {
+//                        tree.build_command(tokens, command);
+//                    }
                 }
             }
         }
@@ -181,7 +183,11 @@ impl Cli {
         if tokens.is_object() && commands.is_array() {
             let commands = commands.as_array().unwrap();
             for command in commands {
-                self.parse_defun(&tokens, &command);
+                if let Some(ref mut readline) = *self.readline.borrow_mut() {
+                    readline.parse_defun(&tokens, &command);
+                    // self.readline.borrow_mut().parse_defun(&tokens, &command);
+                    //self.parse_defun(&tokens, &command);
+                }
             }
         }
     }
@@ -213,9 +219,6 @@ impl Cli {
                         }
                     }
                 }
-
-                // TBD
-                break;
             }
         }
 
