@@ -25,19 +25,19 @@ use super::tree::CliTree;
 
 
 
-pub struct CliCompleter {
-    trees: Rc<HashMap<String, Rc<CliTree>>>,
+pub struct CliCompleter<'a> {
+    trees: &'a HashMap<String, Rc<CliTree>>,
 }
 
-impl CliCompleter {
-    pub fn new(trees: Rc<HashMap<String, Rc<CliTree>>>) -> CliCompleter {
-        CliCompleter {
+impl<'a> CliCompleter<'a> {
+    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliCompleter<'a> {
+        CliCompleter::<'a> {
             trees: trees
         }
     }
 }
 
-impl Completer for CliCompleter {
+impl<'a> Completer for CliCompleter<'a> {
     type Candidate = String;
 
     fn complete(&self, line: &str, pos: usize) -> rustyline::Result<(usize, Vec<String>)> {
@@ -70,7 +70,7 @@ impl Completer for CliCompleter {
     }
 }
 
-impl Hinter for CliCompleter {
+impl<'a> Hinter for CliCompleter<'a> {
     fn hint(&self, _line: &str, _pos: usize) -> Option<String> {
 //        Some("hoge".to_string())
         None
@@ -78,12 +78,12 @@ impl Hinter for CliCompleter {
 }
 
 
-pub struct CliReadline {
+pub struct CliReadline<'a> {
     // CLI mode to tree map.
-    trees: Rc<HashMap<String, Rc<CliTree>>>,
+    trees: &'a HashMap<String, Rc<CliTree>>,
 
     // CLI completer.
-    editor: RefCell<Editor<CliCompleter>>,
+    editor: RefCell<Editor<CliCompleter<'a>>>,
 
     // Readline buffer.
     //buf: [u8; 1024],
@@ -93,16 +93,13 @@ pub struct CliReadline {
     matched_index: usize,
 }
 
-impl CliReadline {
-    pub fn new() -> CliReadline {
-        let trees = Rc::new(HashMap::new());
-
+impl<'a> CliReadline<'a> {
+    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliReadline<'a> {
         let mut editor = Editor::<CliCompleter>::new();
-        editor.set_helper(Some(CliCompleter { trees: trees.clone() }));
+        editor.set_helper(Some(CliCompleter::new(trees)));
 
-        CliReadline {
-            //trees: RefCell::new(HashMap::new()),
-            trees: trees.clone(),
+        CliReadline::<'a> {
+            trees: trees,
             editor: RefCell::new(editor),
             matched_index: 0,
         }
@@ -121,46 +118,7 @@ impl CliReadline {
             Err(err) => Err(err)
         }
     }
-
-    // Parse single 'defun' definition.
-    pub fn parse_defun(&mut self, tokens: &serde_json::Value,
-                       command: &serde_json::Value) {
-        if command["mode"].is_array() {
-            for mode in command["mode"].as_array().unwrap() {
-                if let Some(mode) = mode.as_str() {
-                    if let Some(tree) = self.trees.get(mode) {
-                        tree.build_command(tokens, command);
-                    }
-                }
-            }
-        }
-    }
-
-    // Build CLI mode tree from JSON.
-    fn build_mode(&mut self, json: &serde_json::Value, parent: Option<Rc<CliTree>>) -> Result<(), CliError> {
-        for name in json.as_object().unwrap().keys() {
-            let mode = &json[name];
-            if mode.is_object() {
-                let prompt = if mode["prompt"].is_string() {
-                    &mode["prompt"].as_str().unwrap()
-                } else {
-                    ">"
-                };
-                let children = &mode["children"];
-                let tree = Rc::new(CliTree::new(name.to_string(), prompt.to_string(), parent.clone()));
-                if let Some(trees) = Rc::get_mut(&mut self.trees) {
-                    trees.insert(name.to_string(), tree.clone());
-                }
-
-                if children.is_object() {
-                    self.build_mode(&children, Some(tree.clone()));
-                }
-            }
-        }
-
-        Ok(())
-    }
 }
 
-impl Highlighter for CliCompleter {}
-impl Helper for CliCompleter {}
+impl<'a> Highlighter for CliCompleter<'a> {}
+impl<'a> Helper for CliCompleter<'a> {}

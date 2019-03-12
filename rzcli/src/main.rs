@@ -59,13 +59,8 @@ fn main() {
     }
 
     let mut cli = Cli::new();
-    // TBD: set configuration
     match cli.init() {
-        Ok(_) => {
-        }
-        Err(_err) => {
-        }
-    }
-
-    cli.run();
+        Ok(_) => {},
+        Err(_err) => panic!("Initialize error"),
+    };
 }
