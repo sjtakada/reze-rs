@@ -8,7 +8,7 @@
 use std::fmt;
 
 // Match flag.
-#[derive(PartialEq)]
+#[derive(PartialEq, PartialOrd, Eq, Ord, Copy, Clone)]
 pub enum MatchFlag {
     Full,         // Fully matched.
     Partial,      // Partially matched, still valid.

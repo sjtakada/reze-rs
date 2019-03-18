@@ -50,6 +50,9 @@ pub struct CliNodeInner {
     // Node vector is sorted.
     sorted: bool,
 
+    // Executable command node.
+    cmd: bool,
+
     // Hidden flag.
     hidden: bool,
 
@@ -65,6 +68,7 @@ impl CliNodeInner {
             help: String::from(help),
             token: String::from(token),
             sorted: false,
+            cmd: false,
             hidden: false,
             next: RefCell::new(Vec::new()),
         }
@@ -84,6 +88,14 @@ impl CliNodeInner {
 
     pub fn next(&self) -> RefMut<CliNodeVec> {
         self.next.borrow_mut()
+    }
+
+    pub fn is_hidden(&self) -> bool {
+        self.hidden
+    }
+
+    pub fn is_cmd(&self) -> bool {
+        self.cmd
     }
 }
 
