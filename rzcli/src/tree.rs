@@ -103,6 +103,10 @@ impl CliTree {
         &self.mode
     }
 
+    pub fn top(&self) -> Rc<CliNode> {
+        self.top.borrow().clone()
+    }
+
     pub fn parent(&self) -> Option<Rc<CliTree>> {
         self.parent.clone()
     }
