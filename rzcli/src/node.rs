@@ -7,6 +7,7 @@
 
 use std::char;
 use std::rc::Rc;
+use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefMut;
 use std::cell::RefCell;
@@ -31,6 +32,11 @@ pub trait CliNode {
 
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
+
+    // Set executable.
+    fn set_executable(&self) {
+        self.inner().set_executable();
+    }
 }
 
 // Common field for CliNode
@@ -51,7 +57,7 @@ pub struct CliNodeInner {
     sorted: bool,
 
     // Executable command node.
-    cmd: bool,
+    executable: Cell<bool>,
 
     // Hidden flag.
     hidden: bool,
@@ -68,7 +74,7 @@ impl CliNodeInner {
             help: String::from(help),
             token: String::from(token),
             sorted: false,
-            cmd: false,
+            executable: Cell::new(false),
             hidden: false,
             next: RefCell::new(Vec::new()),
         }
@@ -94,8 +100,12 @@ impl CliNodeInner {
         self.hidden
     }
 
-    pub fn is_cmd(&self) -> bool {
-        self.cmd
+    pub fn set_executable(&self) {
+        self.executable.set(true);
+    }
+
+    pub fn is_executable(&self) -> bool {
+        self.executable.get()
     }
 }
 

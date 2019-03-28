@@ -198,6 +198,10 @@ impl CliTree {
             }
         }
 
+        for n in curr {
+            n.set_executable();
+        }
+
         TokenType::Undef
     }
 
