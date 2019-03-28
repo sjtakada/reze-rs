@@ -19,7 +19,6 @@ use std::rc::Rc;
 
 use mio_uds::UnixStream;
 use serde_json;
-//use serde_json::map::*;
 use rustyline::error::ReadlineError;
 
 use super::error::CliError;
@@ -31,14 +30,14 @@ pub struct Cli {
     trees: HashMap<String, Rc<CliTree>>,
 
     // Readline.
-    readline: RefCell<CliReadline>,
+//    readline: RefCell<Option<CliReadline<'a>>>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
-            readline: RefCell::new(CliReadline::new()),
+//            readline: RefCell::new(None),
         }
     }
 
@@ -60,14 +59,19 @@ impl Cli {
         self.init_server_connect()?;
 
         // Init readline.
+        let readline = CliReadline::new(&self.trees);
 
+        // Start CLI.
+        self.run(readline);
+
+        // 
         Ok(())
     }
 
-    pub fn run(&self) {
+    pub fn run(&self, readline: CliReadline) {
         loop {
             // TODO, we'll get API URL and parameters here to send to server.
-            match self.readline.borrow_mut().gets() {
+            match readline.gets() {
                 Ok(line) => {
                     // exec
                 },
@@ -213,9 +217,6 @@ impl Cli {
                         }
                     }
                 }
-
-                // TBD
-                break;
             }
         }
 

@@ -2,10 +2,12 @@
 // ReZe.Rs - ReZe CLI
 //   Copyright (C) 2018,2019 Toshiaki Takada
 //
-// Readline
+// Readline, rustyline integration.
 //
 
+use std::collections::HashMap;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 use rustyline::completion::Completer;
 use rustyline::hint::Hinter;
@@ -16,14 +18,26 @@ use rustyline::Helper;
 use rustyline::Editor;
 use rustyline::KeyPress;
 
-pub struct CliCompleter {
+use super::tree::CliTree;
+
+pub struct CliCompleter<'a> {
+    trees: &'a HashMap<String, Rc<CliTree>>,
 }
 
-impl Completer for CliCompleter {
+impl<'a> CliCompleter<'a> {
+    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliCompleter<'a> {
+        CliCompleter::<'a> {
+            trees: trees
+        }
+    }
+}
+
+impl<'a> Completer for CliCompleter<'a> {
     type Candidate = String;
 
     fn complete(&self, line: &str, pos: usize) -> rustyline::Result<(usize, Vec<String>)> {
         let mut candidate: Vec<String> = Vec::new();
+        let line = line.trim_start();
 
         match line.chars().next() {
             Some(c) => {
@@ -52,7 +66,7 @@ impl Completer for CliCompleter {
     }
 }
 
-impl Hinter for CliCompleter {
+impl<'a> Hinter for CliCompleter<'a> {
     fn hint(&self, _line: &str, _pos: usize) -> Option<String> {
 //        Some("hoge".to_string())
         None
@@ -60,10 +74,12 @@ impl Hinter for CliCompleter {
 }
 
 
-pub struct CliReadline {
-    // Parent CLI object.
+pub struct CliReadline<'a> {
+    // CLI mode to tree map.
+    trees: &'a HashMap<String, Rc<CliTree>>,
 
-    editor: RefCell<Editor<CliCompleter>>,
+    // CLI completer.
+    editor: RefCell<Editor<CliCompleter<'a>>>,
 
     // Readline buffer.
     //buf: [u8; 1024],
@@ -73,12 +89,13 @@ pub struct CliReadline {
     matched_index: usize,
 }
 
-impl CliReadline {
-    pub fn new() -> CliReadline{
+impl<'a> CliReadline<'a> {
+    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliReadline<'a> {
         let mut editor = Editor::<CliCompleter>::new();
-        editor.set_helper(Some(CliCompleter {}));
+        editor.set_helper(Some(CliCompleter::new(trees)));
 
-        CliReadline {
+        CliReadline::<'a> {
+            trees: trees,
             editor: RefCell::new(editor),
             matched_index: 0,
         }
@@ -99,6 +116,6 @@ impl CliReadline {
     }
 }
 
-impl Highlighter for CliCompleter {}
-impl Helper for CliCompleter {
-}
+impl<'a> Highlighter for CliCompleter<'a> {}
+impl<'a> Helper for CliCompleter<'a> {}
+

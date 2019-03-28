@@ -7,6 +7,7 @@
 
 use std::char;
 use std::rc::Rc;
+use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefMut;
 use std::cell::RefCell;
@@ -31,6 +32,11 @@ pub trait CliNode {
 
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
+
+    // Set executable.
+    fn set_executable(&self) {
+        self.inner().set_executable();
+    }
 }
 
 // Common field for CliNode
@@ -50,6 +56,9 @@ pub struct CliNodeInner {
     // Node vector is sorted.
     sorted: bool,
 
+    // Executable command node.
+    executable: Cell<bool>,
+
     // Hidden flag.
     hidden: bool,
 
@@ -65,6 +74,7 @@ impl CliNodeInner {
             help: String::from(help),
             token: String::from(token),
             sorted: false,
+            executable: Cell::new(false),
             hidden: false,
             next: RefCell::new(Vec::new()),
         }
@@ -84,6 +94,18 @@ impl CliNodeInner {
 
     pub fn next(&self) -> RefMut<CliNodeVec> {
         self.next.borrow_mut()
+    }
+
+    pub fn is_hidden(&self) -> bool {
+        self.hidden
+    }
+
+    pub fn set_executable(&self) {
+        self.executable.set(true);
+    }
+
+    pub fn is_executable(&self) -> bool {
+        self.executable.get()
     }
 }
 
@@ -141,15 +163,34 @@ impl CliNode for CliNodeKeyword {
     }
 
     fn collate(&self, input: &str) -> MatchResult {
-        let pos = 0;
+        let input_len = input.len();
+        let token_len = self.inner().token.len();
+        let mut pos;
 
-        if input == self.inner().token {
-            return MatchResult::Success(MatchFlag::Full)
+        if input_len == token_len {
+            if input == self.inner().token {
+                return MatchResult::Success(MatchFlag::Full)
+            }
+
+            pos = input_len;
+        }
+        else if input_len < token_len {
+            if self.inner().token.starts_with(input) {
+                return MatchResult::Success(MatchFlag::Partial)
+            }
+
+            pos = input_len;
+        }
+        else /* if input_len > token_len */ {
+            pos = token_len + 1;
         }
 
-        let t = &self.inner().token[0..input.len()];
-        if input == t {
-            return MatchResult::Success(MatchFlag::Partial)
+        while pos > 0 {
+            pos -= 1;
+            let input = &input[..pos];
+            if self.inner().token.starts_with(input) {
+                return MatchResult::Failure(pos)
+            }
         }
 
         MatchResult::Failure(pos)
@@ -237,7 +278,7 @@ impl CliNode for CliNodeIPv4Prefix {
             Unknown,
         }
 
-        let mut pos: u32 = 0;
+        let mut pos: usize = 0;
         let mut val: u32 = 0;
         let mut dots: u8 = 0;
         let mut octets: u8 = 0;
@@ -351,7 +392,7 @@ impl CliNode for CliNodeIPv4Address {
             Unknown,
         }
 
-        let mut pos: u32 = 0;
+        let mut pos: usize = 0;
         let mut val: u32 = 0;
         let mut dots: u8 = 0;
         let mut octets: u8 = 0;
@@ -459,7 +500,7 @@ impl CliNode for CliNodeIPv6Prefix {
             Unknown,
         }
 
-        let mut pos: u32 = 0;
+        let mut pos: usize = 0;
         let mut double_colon: bool = false;
         let mut xdigits: u32 = 0;
         let mut xdigits_count: u8 = 0;
@@ -597,7 +638,7 @@ impl CliNode for CliNodeIPv6Address {
             Xdigit,
         }
 
-        let mut pos: u32 = 0;
+        let mut pos: usize = 0;
         let mut double_colon: bool = false;
         let mut xdigits: u32 = 0;
         let mut xdigits_count: u8 = 0;
@@ -731,6 +772,15 @@ mod tests {
         assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("shop");
+        assert_eq!(result, MatchResult::Failure(3));
+
+        let result = node.collate("showed");
+        assert_eq!(result, MatchResult::Failure(4));
+
+        let result = node.collate("xhow");
+        assert_eq!(result, MatchResult::Failure(0));
+
+        let result = node.collate("x");
         assert_eq!(result, MatchResult::Failure(0));
     }
 

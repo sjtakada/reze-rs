@@ -5,6 +5,7 @@
 
 pub mod error;
 pub mod cli;
+pub mod parser;
 pub mod collate;
 pub mod tree;
 pub mod node;
