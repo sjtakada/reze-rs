@@ -36,7 +36,7 @@ impl fmt::Debug for MatchFlag {
 //   If it fails, it will return position where the match fails.
 #[derive(PartialEq)]
 pub enum MatchResult {
-    Failure(u32),
+    Failure(usize),
     Success(MatchFlag),
 }
 

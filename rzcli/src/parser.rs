@@ -180,8 +180,6 @@ impl CliParser {
 
     // Given input on current CliNode, update matched_vec.
     fn match_token(&mut self, token: &str, curr: Rc<CliNode>) {
-        println!("**** match_token {}", token);
-
         //let inner = curr.inner();
         self.matched_vec.replace(
             curr.inner().next().iter()
@@ -199,12 +197,8 @@ impl CliParser {
         let mut len = token.len();
         let parsed_len = self.input.len() - self.line.len();
 
-        println!("** match_shorter {}", curr.inner().token());
-
         while len > 0 {
             let sub_token = &token[..len];
-
-            println!("** sub_token {}", sub_token);
 
             self.set_matched_vec(curr.clone());
             self.filter_hidden();
@@ -223,13 +217,7 @@ impl CliParser {
     fn parse(&mut self, curr: Rc<CliNode>) -> CliExecResult {
         let mut curr = curr;
 
-        let mut count = 0;
-        println!("** parse");
-
         loop {
-            println!("* {}", count);
-            count += 1;
-
             if !self.trim_start() {
                 break;
             }
@@ -430,6 +418,7 @@ mod tests {
             tree.build_command(&json["token"], command);
         }
 
+
         let mut p = CliParser::new("show ip ospf");
         let result = p.parse(tree.top());
         assert_eq!(result, CliExecResult::Incomplete);
@@ -450,10 +439,8 @@ mod tests {
         let result = p.parse(tree.top());
         assert_eq!(result, CliExecResult::Complete);
 
-        /*
         let mut p = CliParser::new("s ipv o i");
         let result = p.parse(tree.top());
         assert_eq!(result, CliExecResult::Complete);
-*/
     }
 }
