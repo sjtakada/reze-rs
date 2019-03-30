@@ -172,6 +172,9 @@ impl CliTree {
                     }
                     return token_type
                 },
+                TokenType::Undef => {
+                    println!("Undefined token type");
+                },
                 _ => {
                     let token = token.unwrap();
 

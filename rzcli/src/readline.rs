@@ -19,6 +19,7 @@ use rustyline::Editor;
 use rustyline::KeyPress;
 
 use super::tree::CliTree;
+use super::parser::*;
 
 pub struct CliCompleter<'a> {
     trees: &'a HashMap<String, Rc<CliTree>>,
@@ -39,6 +40,13 @@ impl<'a> Completer for CliCompleter<'a> {
         let mut candidate: Vec<String> = Vec::new();
         let line = line.trim_start();
 
+        // TBD: where am I?   should keep which mode I am.
+        let tree = &self.trees["VIEW-NODE"];
+
+        let mut parser = CliParser::new(&line);
+        parser.parse(tree.top());
+
+/*
         match line.chars().next() {
             Some(c) => {
                 match c {
@@ -51,11 +59,14 @@ impl<'a> Completer for CliCompleter<'a> {
             None => {
             }
         }
+*/
 
-//        println!("");
-//        for i in candidate.iter() {
-//            println!("{}", i);
-//        }
+        println!("");
+        let vec = parser.matched_vec(); 
+        for n in vec {
+            println!("{}", n.0.inner().token());
+            candidate.push(n.0.inner().token().to_string());
+        }
 
         Ok((0, candidate))
     }
@@ -80,9 +91,6 @@ pub struct CliReadline<'a> {
 
     // CLI completer.
     editor: RefCell<Editor<CliCompleter<'a>>>,
-
-    // Readline buffer.
-    //buf: [u8; 1024],
 
     // Completion matched string vector.
     //matched_strvec: Vec<&str>,

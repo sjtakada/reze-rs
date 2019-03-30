@@ -9,6 +9,7 @@ use std::env;
 use getopts::Options;
 
 use rzcli::cli::Cli;
+use rzcli::error::CliError;
 
 
 const CLI_VERSION: &str = "1.0";
@@ -61,6 +62,6 @@ fn main() {
     let mut cli = Cli::new();
     match cli.init() {
         Ok(_) => {},
-        Err(_err) => panic!("Initialize error"),
+        Err(err) => panic!("CLI Init error: {}", err),
     };
 }

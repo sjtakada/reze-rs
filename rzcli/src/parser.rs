@@ -7,6 +7,7 @@
 
 use std::fmt;
 use std::cell::Cell;
+use std::cell::RefMut;
 use std::rc::Rc;
 use std::collections::HashMap;
 
@@ -25,7 +26,7 @@ type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
 
 //
 #[derive(PartialEq, Copy, Clone)]
-enum CliExecResult {
+pub enum CliExecResult {
     Complete,
     Incomplete,
     Ambiguous,
@@ -92,6 +93,12 @@ impl CliParser {
         }
     }
 
+    //
+    pub fn matched_vec(&self) -> CliNodeMatchStateVec {
+        self.matched_vec.replace(Vec::new())
+    }
+
+    // Return current remaining line string.
     fn line(&self) -> &str {
         &self.line
     }
@@ -214,7 +221,7 @@ impl CliParser {
         self.matched_len = parsed_len + len;
     }
 
-    fn parse(&mut self, curr: Rc<CliNode>) -> CliExecResult {
+    pub fn parse(&mut self, curr: Rc<CliNode>) -> CliExecResult {
         let mut curr = curr;
 
         loop {

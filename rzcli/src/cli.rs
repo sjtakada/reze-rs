@@ -28,16 +28,12 @@ use super::tree::CliTree;
 pub struct Cli {
     // HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
-
-    // Readline.
-//    readline: RefCell<Option<CliReadline<'a>>>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
-//            readline: RefCell::new(None),
         }
     }
 
@@ -56,7 +52,7 @@ impl Cli {
         self.init_cli_commands(&path);
 
         // TBD: Connect server or send.
-        self.init_server_connect()?;
+        //self.init_server_connect()?;
 
         // Init readline.
         let readline = CliReadline::new(&self.trees);
@@ -221,7 +217,7 @@ impl Cli {
         }
 
         // TBD
-        panic!("hoge");
+        //panic!("hoge");
 
         Ok(())
     }
