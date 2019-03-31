@@ -7,6 +7,7 @@
 
 use std::collections::HashMap;
 use std::cell::RefCell;
+use std::cell::Cell;
 use std::rc::Rc;
 
 use rustyline::completion::Completer;
@@ -14,6 +15,7 @@ use rustyline::hint::Hinter;
 use rustyline::highlight::Highlighter;
 use rustyline::line_buffer::LineBuffer;
 use rustyline::error::ReadlineError;
+use rustyline::Cmd;
 use rustyline::Helper;
 use rustyline::Editor;
 use rustyline::KeyPress;
@@ -23,12 +25,14 @@ use super::parser::*;
 
 pub struct CliCompleter<'a> {
     trees: &'a HashMap<String, Rc<CliTree>>,
+    token_size: Cell<usize>,
 }
 
 impl<'a> CliCompleter<'a> {
     pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliCompleter<'a> {
         CliCompleter::<'a> {
-            trees: trees
+            trees: trees,
+            token_size: Cell::new(0usize),
         }
     }
 }
@@ -46,40 +50,50 @@ impl<'a> Completer for CliCompleter<'a> {
         let mut parser = CliParser::new(&line);
         parser.parse(tree.top());
 
-/*
-        match line.chars().next() {
-            Some(c) => {
-                match c {
-                    'u' => candidate.push("udon".to_string()),
-                    'r' => candidate.push("ramen".to_string()),
-                    's' => candidate.push("soba".to_string()),
-                    _ => {}
-                }
-            },
-            None => {
-            }
-        }
-*/
-
         println!("");
         let vec = parser.matched_vec(); 
         for n in vec {
-            println!("{}", n.0.inner().token());
+            println!("  {}", n.0.inner().token());
             candidate.push(n.0.inner().token().to_string());
         }
+        self.token_size.set(parser.saved_token_size());
 
         Ok((0, candidate))
     }
 
     fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {
         let end = line.pos();
-        line.replace(start..end, elected)
+        let offset = end - self.token_size.get();
+
+        line.replace(offset..end, elected)
     }
 }
 
 impl<'a> Hinter for CliCompleter<'a> {
-    fn hint(&self, _line: &str, _pos: usize) -> Option<String> {
-//        Some("hoge".to_string())
+    fn hint(&self, line: &str, _pos: usize) -> Option<String> {
+        if let Some(c) = line.chars().last() {
+            if c != '?' {
+                return None
+            }
+
+            let mut candidate: Vec<String> = Vec::new();
+            let line = line.trim_start();
+
+            // TBD: where am I?   should keep which mode I am.
+            let tree = &self.trees["VIEW-NODE"];
+
+            let mut parser = CliParser::new(&line);
+            parser.parse(tree.top());
+
+            println!("");
+            let vec = parser.matched_vec(); 
+            for n in vec {
+                println!("{}", n.0.inner().token());
+            }
+
+            return Some("".to_string())
+        }
+
         None
     }
 }
@@ -101,6 +115,9 @@ impl<'a> CliReadline<'a> {
     pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliReadline<'a> {
         let mut editor = Editor::<CliCompleter>::new();
         editor.set_helper(Some(CliCompleter::new(trees)));
+
+        // Bind '?' as hint.
+        editor.bind_sequence(KeyPress::Char('?'), Cmd::CompleteHint);
 
         CliReadline::<'a> {
             trees: trees,

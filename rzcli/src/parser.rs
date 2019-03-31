@@ -160,6 +160,11 @@ impl CliParser {
         self.token = String::from(token);
     }
 
+    // Saved token size.
+    pub fn saved_token_size(&self) -> usize {
+        self.token.len()
+    }
+
     //
     fn filter_matched(&mut self, limit: MatchFlag) {
         let min = self.matched_vec.get_mut().iter()
@@ -239,7 +244,6 @@ impl CliParser {
 
             self.save_token(&token);
             self.match_token(&token, curr.clone());
-            println!(" match_token {}", self.matched_vec.get_mut().len());
 
             // Not yet at the end of input.
             if !self.line.is_empty()  {
