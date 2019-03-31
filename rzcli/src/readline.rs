@@ -19,6 +19,7 @@ use rustyline::Cmd;
 use rustyline::Helper;
 use rustyline::Editor;
 use rustyline::KeyPress;
+use rustyline::config;
 
 use super::tree::CliTree;
 use super::parser::*;
@@ -49,27 +50,29 @@ impl<'a> Completer for CliCompleter<'a> {
 
         // TBD: where am I?   should keep which mode I am.
         let tree = &self.trees["VIEW-NODE"];
-
         let mut parser = self.parser.borrow_mut();
 
         parser.set_line(&line);
         parser.parse(tree.top());
 
-        println!("");
+//        println!("");
         let vec = parser.matched_vec(); 
         for n in vec {
-            println!("  {}", n.0.inner().token());
+//            println!("  {}", n.0.inner().token());
             candidate.push(n.0.inner().token().to_string());
         }
 
-        Ok((0, candidate))
+//println!("** matched_len {}", parser.matched_len());
+        Ok((parser.current_pos() - parser.token_len(), candidate))
     }
 
     fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {
-        let end = line.pos();
-        let offset = end - self.parser.borrow_mut().saved_token_size();
+//println!("*** update {}", start);
 
-        line.replace(offset..end, elected)
+        let end = line.pos();
+//        let offset = end - self.parser.borrow_mut().saved_token_size();
+
+        line.replace(start..end, elected)
     }
 }
 
@@ -118,11 +121,17 @@ pub struct CliReadline<'a> {
 
 impl<'a> CliReadline<'a> {
     pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliReadline<'a> {
-        let mut editor = Editor::<CliCompleter>::new();
+        // Set configuration.
+        let mut config = config::Builder::new()
+            .completion_type(config::CompletionType::List)
+            .build();
+
+        let mut editor = Editor::<CliCompleter>::with_config(config);
         editor.set_helper(Some(CliCompleter::new(trees)));
 
         // Bind '?' as hint.
         editor.bind_sequence(KeyPress::Char('?'), Cmd::CompleteHint);
+
 
         CliReadline::<'a> {
             trees: trees,

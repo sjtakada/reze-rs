@@ -92,26 +92,21 @@ impl CliParser {
         self.matched_len = 0;
         self.matched_vec.replace(Vec::new());
         self.command = false;
+    }
 
-        /*
-        let input = String::from(buf);
-        let mut line = String::from(" ");
-        line.push_str(buf);
-
-        CliParser {
-            input,
-            line,
-            token: String::new(),
-            matched_len: 0usize,
-            matched_vec: Cell::new(Vec::new()),
-            command: false,
-        }
-         */
+    //
+    pub fn current_pos(&self) -> usize {
+        self.input.len() - self.line.len()
     }
 
     //
     pub fn matched_vec(&self) -> CliNodeMatchStateVec {
         self.matched_vec.replace(Vec::new())
+    }
+
+    //
+    pub fn matched_len(&self) -> usize {
+        self.matched_len
     }
 
     // Return current remaining line string.
@@ -177,7 +172,7 @@ impl CliParser {
     }
 
     // Saved token size.
-    pub fn saved_token_size(&self) -> usize {
+    pub fn token_len(&self) -> usize {
         self.token.len()
     }
 
@@ -239,7 +234,7 @@ impl CliParser {
             len -= 1;
         }
 
-        self.matched_len = parsed_len + len;
+        self.matched_len = self.current_pos() + len;
     }
 
     pub fn parse(&mut self, curr: Rc<CliNode>) -> CliExecResult {
@@ -308,6 +303,7 @@ impl CliParser {
             break;
         }
 
+        self.matched_len = self.current_pos();
         self.command = curr.inner().is_executable();
         if self.command {
             CliExecResult::Complete
