@@ -57,9 +57,6 @@ pub struct CliParser {
     // Initial input string TB removed
     input: String,
 
-    // Input length.
-    input_len: usize,
-
     // Current input string.
     line: String,
 
@@ -77,20 +74,39 @@ pub struct CliParser {
 }
 
 impl CliParser {
-    pub fn new(buf: &str) -> CliParser {
+    pub fn new() -> CliParser {
+        CliParser {
+            input: String::new(),
+            line: String::new(),
+            token: String::new(),
+            matched_len: 0usize,
+            matched_vec: Cell::new(Vec::new()),
+            command: false,
+        }
+    }
+
+    pub fn set_line(&mut self, buf: &str) {
+        self.input = String::from(buf);
+        self.line = String::from(" ");
+        self.line.push_str(buf);
+        self.matched_len = 0;
+        self.matched_vec.replace(Vec::new());
+        self.command = false;
+
+        /*
         let input = String::from(buf);
         let mut line = String::from(" ");
         line.push_str(buf);
 
         CliParser {
             input,
-            input_len: buf.len(),
             line,
             token: String::new(),
             matched_len: 0usize,
             matched_vec: Cell::new(Vec::new()),
             command: false,
         }
+         */
     }
 
     //
@@ -309,7 +325,8 @@ mod tests {
 
     #[test]
     pub fn test_get_token() {
-        let mut p = CliParser::new("show ip ospf interface");
+        let mut p = CliParser::new();
+        p.set_line("show ip ospf interface");
 
         let ret = p.trim_start();
         assert_eq!(ret, true);
@@ -339,7 +356,8 @@ mod tests {
 
     #[test]
     pub fn test_get_token_space() {
-        let mut p = CliParser::new(" show   ip ospf ");
+        let mut p = CliParser::new();
+        p.set_line(" show   ip ospf ");
 
         let ret = p.trim_start();
         assert_eq!(ret, true);
@@ -430,27 +448,33 @@ mod tests {
         }
 
 
-        let mut p = CliParser::new("show ip ospf");
+        let mut p = CliParser::new();
+        p.set_line("show ip ospf");
         let result = p.parse(tree.top());
         assert_eq!(result, CliExecResult::Incomplete);
 
-        let mut p = CliParser::new("show x");
+        //let mut p = CliParser::new("show x");
+        p.set_line("show x");
         let result = p.parse(tree.top());
         assert_eq!(result, CliExecResult::Unrecognized);
 
-        let mut p = CliParser::new("show ip xy");
+        //let mut p = CliParser::new("show ip xy");
+        p.set_line("show ip xy");
         let result = p.parse(tree.top());
         assert_eq!(result, CliExecResult::Unrecognized);
 
-        let mut p = CliParser::new("s i o i");
+        //let mut p = CliParser::new("s i o i");
+        p.set_line("s i o i");
         let result = p.parse(tree.top());
         assert_eq!(result, CliExecResult::Ambiguous);
 
-        let mut p = CliParser::new("s ip o i");
+        //let mut p = CliParser::new("s ip o i");
+        p.set_line("s ip o i");
         let result = p.parse(tree.top());
         assert_eq!(result, CliExecResult::Complete);
 
-        let mut p = CliParser::new("s ipv o i");
+        //let mut p = CliParser::new("s ipv o i");
+        p.set_line("s ipv o i");
         let result = p.parse(tree.top());
         assert_eq!(result, CliExecResult::Complete);
     }

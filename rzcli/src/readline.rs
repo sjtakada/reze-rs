@@ -24,15 +24,18 @@ use super::tree::CliTree;
 use super::parser::*;
 
 pub struct CliCompleter<'a> {
+    // Reference to CLI command tree map.
     trees: &'a HashMap<String, Rc<CliTree>>,
-    token_size: Cell<usize>,
+
+    // CLI parser.
+    parser: RefCell<CliParser>,
 }
 
 impl<'a> CliCompleter<'a> {
     pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliCompleter<'a> {
         CliCompleter::<'a> {
             trees: trees,
-            token_size: Cell::new(0usize),
+            parser: RefCell::new(CliParser::new()),
         }
     }
 }
@@ -47,7 +50,9 @@ impl<'a> Completer for CliCompleter<'a> {
         // TBD: where am I?   should keep which mode I am.
         let tree = &self.trees["VIEW-NODE"];
 
-        let mut parser = CliParser::new(&line);
+        let mut parser = self.parser.borrow_mut();
+
+        parser.set_line(&line);
         parser.parse(tree.top());
 
         println!("");
@@ -56,14 +61,13 @@ impl<'a> Completer for CliCompleter<'a> {
             println!("  {}", n.0.inner().token());
             candidate.push(n.0.inner().token().to_string());
         }
-        self.token_size.set(parser.saved_token_size());
 
         Ok((0, candidate))
     }
 
     fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {
         let end = line.pos();
-        let offset = end - self.token_size.get();
+        let offset = end - self.parser.borrow_mut().saved_token_size();
 
         line.replace(offset..end, elected)
     }
@@ -82,7 +86,8 @@ impl<'a> Hinter for CliCompleter<'a> {
             // TBD: where am I?   should keep which mode I am.
             let tree = &self.trees["VIEW-NODE"];
 
-            let mut parser = CliParser::new(&line);
+            let mut parser = CliParser::new();
+            parser.set_line(&line);
             parser.parse(tree.top());
 
             println!("");
