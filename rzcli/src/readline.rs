@@ -18,6 +18,7 @@ use rustyline::error::ReadlineError;
 use rustyline::Cmd;
 use rustyline::Helper;
 use rustyline::Editor;
+use rustyline::Context;
 use rustyline::KeyPress;
 use rustyline::config;
 
@@ -44,7 +45,7 @@ impl<'a> CliCompleter<'a> {
 impl<'a> Completer for CliCompleter<'a> {
     type Candidate = String;
 
-    fn complete(&self, line: &str, pos: usize) -> rustyline::Result<(usize, Vec<String>)> {
+    fn complete(&self, line: &str, pos: usize, ctx: &Context<'_>) -> rustyline::Result<(usize, Vec<String>)> {
         let mut candidate: Vec<String> = Vec::new();
         let line = line.trim_start();
 
@@ -55,56 +56,40 @@ impl<'a> Completer for CliCompleter<'a> {
         parser.set_line(&line);
         parser.parse(tree.top());
 
-//        println!("");
         let vec = parser.matched_vec(); 
         for n in vec {
-//            println!("  {}", n.0.inner().token());
             candidate.push(n.0.inner().token().to_string());
         }
 
-//println!("** matched_len {}", parser.matched_len());
         Ok((parser.current_pos() - parser.token_len(), candidate))
     }
 
     fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {
-//println!("*** update {}", start);
-
         let end = line.pos();
-//        let offset = end - self.parser.borrow_mut().saved_token_size();
-
         line.replace(start..end, elected)
     }
-}
 
-impl<'a> Hinter for CliCompleter<'a> {
-    fn hint(&self, line: &str, _pos: usize) -> Option<String> {
-        if let Some(c) = line.chars().last() {
-            if c != '?' {
-                return None
-            }
+    fn custom(&self, line: &str, pos: usize, ctx: &Context<'_>) -> rustyline::Result<()> {
+        let mut candidate: Vec<String> = Vec::new();
+        let line = line.trim_start();
 
-            let mut candidate: Vec<String> = Vec::new();
-            let line = line.trim_start();
+        // TBD: where am I?   should keep which mode I am.
+        let tree = &self.trees["VIEW-NODE"];
+        let mut parser = self.parser.borrow_mut();
 
-            // TBD: where am I?   should keep which mode I am.
-            let tree = &self.trees["VIEW-NODE"];
+        parser.set_line(&line);
+        parser.parse(tree.top());
 
-            let mut parser = CliParser::new();
-            parser.set_line(&line);
-            parser.parse(tree.top());
-
-            println!("");
-            let vec = parser.matched_vec(); 
-            for n in vec {
-                println!("{}", n.0.inner().token());
-            }
-
-            return Some("".to_string())
+        let vec = parser.matched_vec(); 
+        for n in vec {
+            println!("{}", n.0.inner().token());
         }
 
-        None
+        Ok(())
     }
 }
+
+impl<'a> Hinter for CliCompleter<'a> {}
 
 
 pub struct CliReadline<'a> {
@@ -130,7 +115,7 @@ impl<'a> CliReadline<'a> {
         editor.set_helper(Some(CliCompleter::new(trees)));
 
         // Bind '?' as hint.
-        editor.bind_sequence(KeyPress::Char('?'), Cmd::CompleteHint);
+        editor.bind_sequence(KeyPress::Char('?'), Cmd::Custom);
 
 
         CliReadline::<'a> {
