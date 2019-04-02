@@ -69,7 +69,7 @@ impl<'a> Completer for CliCompleter<'a> {
         line.replace(start..end, elected)
     }
 
-    fn custom(&self, line: &str, pos: usize, ctx: &Context<'_>) -> rustyline::Result<()> {
+    fn custom(&self, line: &str, pos: usize, ctx: &Context<'_>, c: char) -> rustyline::Result<()> {
         let mut candidate: Vec<String> = Vec::new();
         let line = line.trim_start();
 
@@ -81,8 +81,10 @@ impl<'a> Completer for CliCompleter<'a> {
         parser.parse(tree.top());
 
         let vec = parser.matched_vec(); 
+        let max = vec.iter().map(|n| n.0.inner().token().len()).max().unwrap();
+
         for n in vec {
-            println!("{}", n.0.inner().token());
+            println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
         }
 
         Ok(())
@@ -115,7 +117,7 @@ impl<'a> CliReadline<'a> {
         editor.set_helper(Some(CliCompleter::new(trees)));
 
         // Bind '?' as hint.
-        editor.bind_sequence(KeyPress::Char('?'), Cmd::Custom);
+        editor.bind_sequence(KeyPress::Char('?'), Cmd::Custom('?'));
 
 
         CliReadline::<'a> {
