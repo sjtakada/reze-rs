@@ -81,10 +81,10 @@ impl<'a> Completer for CliCompleter<'a> {
         parser.parse(tree.top());
 
         let vec = parser.matched_vec(); 
-        let max = vec.iter().map(|n| n.0.inner().token().len()).max().unwrap();
-
-        for n in vec {
-            println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+        if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
+            for n in vec {
+                println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+            }
         }
 
         Ok(())

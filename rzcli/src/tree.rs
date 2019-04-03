@@ -252,16 +252,16 @@ impl CliTree {
                         token_type = TokenType::RightBrace;
                     },
                     _ => {
-                        offset = match s.find(|c: char|
-                                              c == '(' || c == ')' ||
-                                              c == '{' || c == '}' ||
-                                              c == '[' || c == '[' ||
-                                              c == '|' || c == ' ') {
-                            Some(i) => i,
-                            None => s.len()
-                        };
+                        offset = s.find(|c: char|
+                                        c == '(' || c == ')' ||
+                                        c == '{' || c == '}' ||
+                                        c == '[' || c == '[' ||
+                                        c == '|' || c == ' ').unwrap_or(s.len());
 
-                        match &s[0..offset] {
+                        let word = &s[..offset];
+                        let p = word.find(':').unwrap_or(word.len());
+
+                        match &s[..p] {
                             "IPV4-PREFIX" => {
                                 token_type = TokenType::IPv4Prefix;
                             },
@@ -409,8 +409,8 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_get_cli_token_1() {
-        let mut s = String::from("ip route IPV4-PREFIX IPV4-ADDRESS");
+    pub fn test_tree_get_cli_token_1() {
+        let mut s = String::from("ip route IPV4-PREFIX:1 IPV4-ADDRESS:2");
 
         let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
@@ -422,17 +422,17 @@ mod tests {
 
         let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::IPv4Prefix);
-        assert_eq!(token.unwrap(), "IPV4-PREFIX");
+        assert_eq!(token.unwrap(), "IPV4-PREFIX:1");
 
         let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::IPv4Address);
-        assert_eq!(token.unwrap(), "IPV4-ADDRESS");
+        assert_eq!(token.unwrap(), "IPV4-ADDRESS:2");
 
         assert_eq!(s.len(), 0);
     }
 
     #[test]
-    pub fn test_get_cli_token_2() {
+    pub fn test_tree_getcli_token_2() {
         let mut s = String::from("show (ip|ipv6) route");
 
         let (t, token) = CliTree::get_cli_token(&mut s);
@@ -467,7 +467,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_build_recursive() {
+    pub fn test_tree_build_recursive() {
         let json_str = r##"
 {
   "dummy-cmd": {
