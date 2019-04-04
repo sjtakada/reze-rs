@@ -81,10 +81,17 @@ impl<'a> Completer for CliCompleter<'a> {
         parser.parse(tree.top());
 
         let vec = parser.matched_vec(); 
-        if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
-            for n in vec {
-                println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+        if vec.len() > 0 {
+            if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
+                for n in vec {
+                    println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+                }
             }
+
+            println!("");
+        }
+        else {
+            println!("% Unrecognized command");
         }
 
         Ok(())
