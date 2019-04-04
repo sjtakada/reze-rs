@@ -1,0 +1,152 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "CLI JSON schema",
+  "description": "Define CLI tree structure",
+  "type": "object",
+  "patternProperties": {
+    "^[a-zA-Z0-9\-]+$": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "#"
+        },
+        "token": {
+          "type": "object",
+          "patternProperties": {
+            "^[:\.a-z_A-Z0-9\-]+$": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[0-9\.]+$"
+                },
+                "type": {
+                  "enum": [
+                    "keyword", "integer", "string", "ipv4address",
+                    "ipv4inversemask", "ipv4prefix",
+                    "ipv6addr", "ipv6prefix", "time", "month",
+                    "word", "community_new", "metric_offset" ]
+                },
+                "range": {
+                  "type": "array",
+                  "items": { "type": "number" },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "help": {
+                  "type": "string"
+                },
+                "hidden": {
+                  "type": "boolean"                
+                },
+                "enum": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "defun": {
+                "type": "string"
+              },
+              "mode": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9\-]+$"
+                }
+              },
+              "bind": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "action": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cond": {
+                      "type": "string"
+                    },
+                    "http": {
+                      "type": "object",
+                      "properties": {
+                        "method": {
+                          "enum": [ "GET", "POST", "PUT", "DELETE", "NOP" ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "format": {
+                          "type": "string"
+                        },
+                        "params": {
+                          "type": "object",
+                          "patternProperties": {
+                            "^[a-zA-Z0-9\-]+$": {
+                              "type": ["string", "boolean", "null", "number"]
+                            }
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "built-in": {
+                      "type": "object",
+                      "properties": {
+                        "func": {
+                          "type": "string"
+                        },
+                        "params": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "mode": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "up": {
+                          "type": "integer"
+                        },
+                        "params": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "update": {
+                "type": "object"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

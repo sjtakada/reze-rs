@@ -50,7 +50,7 @@ impl<'a> Completer for CliCompleter<'a> {
         let line = line.trim_start();
 
         // TBD: where am I?   should keep which mode I am.
-        let tree = &self.trees["VIEW-NODE"];
+        let tree = &self.trees["EXEC-MODE"];
         let mut parser = self.parser.borrow_mut();
 
         parser.set_line(&line);

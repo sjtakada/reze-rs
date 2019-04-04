@@ -1,0 +1,41 @@
+{
+  "EXEC-MODE": {
+    "type": "exec",
+    "prompts": [
+      {
+        "privilege": 1,
+        "prompt": ">"
+      },
+      {
+        "privilege": [2, 15],
+        "prompt": "#"
+      }
+    ],
+    "exit-to-quit": true
+  },
+  "CONFIG-MODE": {
+    "type": "config",
+    "prompt": "(config)#",
+    "exit-to-end": true,
+    "children": {
+      "CONFIG-IF-MODE": {
+        "prompt": "(config-if)#"
+      },
+      "CONFIG-OSPF-MODE": {
+        "prompt": "(config-router)#"
+      },
+      "CONFIG-BGP-MODE": {
+        "prompt": "(config-router)#"
+      },
+      "CONFIG-RIP-MODE": {
+        "prompt": "(config-router)#"
+      },
+      "CONFIG-RIPNG-MODE": {
+        "prompt": "(config-router)#"
+      },
+      "CONFIG-ROUTEMAP-MODE": {
+        "prompt": "(config-route-map)#"
+      }
+    }
+  }
+}
