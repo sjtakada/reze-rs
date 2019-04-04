@@ -179,7 +179,7 @@ impl CliTree {
                     let token = token.unwrap();
 
                     if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, &token) {
-                        let next = match CliTree::find_next_by_same_token(curr, &token) {
+                        let next = match CliTree::find_next_by_node(curr, new_node.clone()) {
                             None => {
                                 CliTree::vector_add_node_each(curr, new_node.clone());
                                 new_node
@@ -383,12 +383,12 @@ impl CliTree {
         }
     }
 
-    fn find_next_by_same_token(curr: &CliNodeVec, token: &str) -> Option<Rc<CliNode>> {
+    fn find_next_by_node(curr: &CliNodeVec, node: Rc<CliNode>) -> Option<Rc<CliNode>> {
         for c in curr {
             let inner = c.inner();
             let next = inner.next();
             for m in next.iter() {
-                if m.inner().token() == token {
+                if m.inner().token() == node.inner().token() {
                     return Some(m.clone());
                 }
             }
