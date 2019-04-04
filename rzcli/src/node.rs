@@ -12,6 +12,7 @@ use std::cell::Ref;
 use std::cell::RefMut;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::cmp::Ordering;
 
 use super::tree;
 use super::collate::*;
@@ -37,6 +38,11 @@ pub trait CliNode {
     fn set_executable(&self) {
         self.inner().set_executable();
     }
+
+    // Sort next nodes recursively.
+    fn sort_recursive(&self) {
+        self.inner().sort_recursive();
+    }
 }
 
 // Common field for CliNode
@@ -54,18 +60,19 @@ pub struct CliNodeInner {
     token: String,
 
     // Node vector is sorted.
-    sorted: bool,
+    sorted: Cell<bool>,
 
     // Executable command node.
     executable: Cell<bool>,
 
     // Hidden flag.
-    hidden: bool,
+    hidden: Cell<bool>,
 
     // Next candidate.
     next: RefCell<CliNodeVec>,
 }
 
+//
 impl CliNodeInner {
     pub fn new(id: &str, defun: &str, help: &str, token: &str) -> CliNodeInner {
         CliNodeInner {
@@ -73,9 +80,9 @@ impl CliNodeInner {
             defun: String::from(defun),
             help: String::from(help),
             token: String::from(token),
-            sorted: false,
+            sorted: Cell::new(false),
             executable: Cell::new(false),
-            hidden: false,
+            hidden: Cell::new(false),
             next: RefCell::new(Vec::new()),
         }
     }
@@ -97,7 +104,7 @@ impl CliNodeInner {
     }
 
     pub fn is_hidden(&self) -> bool {
-        self.hidden
+        self.hidden.get()
     }
 
     pub fn set_executable(&self) {
@@ -107,6 +114,16 @@ impl CliNodeInner {
     pub fn is_executable(&self) -> bool {
         self.executable.get()
     }
+
+    pub fn sort_recursive(&self) {
+        self.next.borrow_mut().sort_by(|a, b| a.inner().token().partial_cmp(b.inner().token()).unwrap());
+        self.sorted.set(true);
+
+        for n in self.next.borrow_mut().iter() {
+            n.sort_recursive();
+        }
+    }
+
 }
 
 // CLI dummy node:

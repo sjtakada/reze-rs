@@ -396,6 +396,11 @@ impl CliTree {
 
         None
     }
+
+    pub fn sort(&self) {
+        let top = self.top.borrow().clone();
+        top.sort_recursive();
+    }
 }
 
 impl fmt::Debug for CliTree {

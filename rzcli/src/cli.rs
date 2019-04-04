@@ -214,10 +214,11 @@ impl Cli {
                     }
                 }
             }
-        }
 
-        // TBD
-        //panic!("hoge");
+            for tree in self.trees.values() {
+                tree.sort();
+            }
+        }
 
         Ok(())
     }
