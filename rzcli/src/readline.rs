@@ -7,7 +7,7 @@
 
 use std::collections::HashMap;
 use std::cell::RefCell;
-//use std::cell::Cell;
+use std::cell::Cell;
 use std::rc::Rc;
 
 use rustyline::completion::Completer;
@@ -25,18 +25,24 @@ use rustyline::config;
 use super::tree::CliTree;
 use super::parser::*;
 
+const CLI_INITIAL_MODE: &str = "CONFIG-MODE";
+
 pub struct CliCompleter<'a> {
     // Reference to CLI command tree map.
     trees: &'a HashMap<String, Rc<CliTree>>,
+
+    // Current tree.
+    current: Rc<CliTree>,
 
     // CLI parser.
     parser: RefCell<CliParser>,
 }
 
 impl<'a> CliCompleter<'a> {
-    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliCompleter<'a> {
+    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>, mode: &str) -> CliCompleter<'a> {
         CliCompleter::<'a> {
             trees: trees,
+            current: trees[mode].clone(),
             parser: RefCell::new(CliParser::new()),
         }
     }
@@ -47,14 +53,11 @@ impl<'a> Completer for CliCompleter<'a> {
 
     fn complete(&self, line: &str, _pos: usize, _ctx: &Context<'_>) -> rustyline::Result<(usize, Vec<String>)> {
         let mut candidate: Vec<String> = Vec::new();
+        let mut parser = self.parser.borrow_mut();
         let line = line.trim_start();
 
-        // TBD: where am I?   should keep which mode I am.
-        let tree = &self.trees["EXEC-MODE"];
-        let mut parser = self.parser.borrow_mut();
-
         parser.set_line(&line);
-        parser.parse(tree.top());
+        parser.parse(self.current.top());
 
         let vec = parser.matched_vec(); 
         for n in vec {
@@ -71,13 +74,10 @@ impl<'a> Completer for CliCompleter<'a> {
 
     fn custom(&self, line: &str, _pos: usize, _ctx: &Context<'_>, _c: char) -> rustyline::Result<()> {
         let line = line.trim_start();
-
-        // TBD: where am I?   should keep which mode I am.
-        let tree = &self.trees["EXEC-MODE"];
         let mut parser = self.parser.borrow_mut();
 
         parser.set_line(&line);
-        parser.parse(tree.top());
+        parser.parse(self.current.top());
 
         let vec = parser.matched_vec(); 
         if vec.len() > 0 {
@@ -108,11 +108,7 @@ pub struct CliReadline<'a> {
     editor: RefCell<Editor<CliCompleter<'a>>>,
 
     // Current CLI mode.
-    mode: String,
-
-    // Completion matched string vector.
-    //matched_strvec: Vec<&str>,
-    //matched_index: usize,
+    mode: Cell<String>,
 }
 
 impl<'a> CliReadline<'a> {
@@ -123,7 +119,7 @@ impl<'a> CliReadline<'a> {
             .build();
 
         let mut editor = Editor::<CliCompleter>::with_config(config);
-        editor.set_helper(Some(CliCompleter::new(trees)));
+        editor.set_helper(Some(CliCompleter::new(trees, CLI_INITIAL_MODE)));
 
         // Bind '?' as hint.
         editor.bind_sequence(KeyPress::Char('?'), Cmd::Custom('?'));
@@ -132,8 +128,7 @@ impl<'a> CliReadline<'a> {
         CliReadline::<'a> {
             trees: trees,
             editor: RefCell::new(editor),
-            mode: String::from("EXEC-MODE"),
-            //matched_index: 0,
+            mode: Cell::new(String::from(CLI_INITIAL_MODE)),
         }
     }
 

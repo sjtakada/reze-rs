@@ -50,7 +50,7 @@ impl Cli {
 
         // Initialize CLI definitions.
         let path = PathBuf::from("../json");
-        self.init_cli_commands(&path);
+        self.init_cli_commands(&path)?;
 
         // TBD: Connect server or send.
         //self.init_server_connect()?;
@@ -131,7 +131,7 @@ impl Cli {
         match self.json_read(path) {
             Some(root) => {
                 if root.is_object() {
-                    self.build_mode(&root, None);
+                    self.build_mode(&root, None)?;
                 }
             },
             None => return Err(CliError::InitModeError),
@@ -155,7 +155,7 @@ impl Cli {
                 self.trees.insert(name.to_string(), tree.clone());
 
                 if children.is_object() {
-                    self.build_mode(&children, Some(tree.clone()));
+                    self.build_mode(&children, Some(tree.clone()))?;
                 }
             }
         }
