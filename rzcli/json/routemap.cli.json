@@ -37,8 +37,8 @@
       {
         "defun": "route-map WORD:2 (deny|permit) RANGE:4",
         "mode": [
-          "CONFIG-NODE",
-          "RMAP-NODE"
+          "CONFIG-MODE",
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "bind": [
           "NAME = WORD:2",
@@ -47,7 +47,7 @@
         "action": [
           {
             "mode": {
-              "name": "RMAP-NODE",
+              "name": "CONFIG-ROUTEMAP-MODE",
               "params": [
                 "NAME",
                 "SEQ"
@@ -87,7 +87,7 @@
       {
         "defun": "no route-map WORD:2",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -145,7 +145,7 @@
       {
         "defun": "no route-map WORD:2 (deny|permit) RANGE:4",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -177,7 +177,7 @@
       {
         "defun": "on-match next",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -214,7 +214,7 @@
       {
         "defun": "no on-match next",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -255,7 +255,7 @@
       {
         "defun": "on-match goto RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -292,7 +292,7 @@
       {
         "defun": "no on-match goto",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -319,7 +319,7 @@
       {
         "defun": "continue",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -351,7 +351,7 @@
       {
         "defun": "no continue",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -459,7 +459,7 @@
       {
         "defun": "show route-map (WORD:3.0|)",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -495,7 +495,7 @@
       {
         "defun": "continue RANGE:2",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -527,7 +527,7 @@
       {
         "defun": "call WORD:2",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -559,7 +559,7 @@
       {
         "defun": "no call",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -591,7 +591,7 @@
       {
         "defun": "description [WORD:2]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -623,7 +623,7 @@
       {
         "defun": "no description",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {

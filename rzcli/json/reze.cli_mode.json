@@ -21,11 +21,28 @@
       "CONFIG-IF-MODE": {
         "prompt": "(config-if)#"
       },
+      "CONFIG-LINE-VTY-MODE": {
+        "prompt": "(config-line)#"
+      },
       "CONFIG-OSPF-MODE": {
         "prompt": "(config-router)#"
       },
       "CONFIG-BGP-MODE": {
-        "prompt": "(config-router)#"
+        "prompt": "(config-router)#",
+        "children": {
+          "CONFIG-BGP-IPV4-MODE": {
+            "prompt": "(config-router-af)#"
+          },
+          "CONFIG-BGP-IPV4M-MODE": {
+            "prompt": "(config-router-af)#"
+          },
+          "CONFIG-BGP-IPV6-MODE": {
+            "prompt": "(config-router-af)#"
+          },
+          "CONFIG-BGP-IPV6M-MODE": {
+            "prompt": "(config-router-af)#"
+          }
+        }
       },
       "CONFIG-RIP-MODE": {
         "prompt": "(config-router)#"

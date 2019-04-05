@@ -44,7 +44,7 @@
       {
         "defun": "ip prefix-list WORD:3 (deny|permit) (IPV4-PREFIX:5.0|any)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -112,7 +112,7 @@
       {
         "defun": "ip prefix-list WORD:3 (deny|permit) IPV4-PREFIX:5 ge RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -194,7 +194,7 @@
       {
         "defun": "ip prefix-list WORD:3 (deny|permit) IPV4-PREFIX:5 ge RANGE:7 le RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -262,7 +262,7 @@
       {
         "defun": "ip prefix-list WORD:3 (deny|permit) IPV4-PREFIX:5 le RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -344,7 +344,7 @@
       {
         "defun": "ip prefix-list WORD:3 (deny|permit) IPV4-PREFIX:5 le RANGE:7 ge RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -418,7 +418,7 @@
       {
         "defun": "ip prefix-list WORD:3 seq RANGE:5 (deny|permit) (IPV4-PREFIX:7.0|any)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -500,7 +500,7 @@
       {
         "defun": "ip prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV4-PREFIX:7 ge RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -596,7 +596,7 @@
       {
         "defun": "ip prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV4-PREFIX:7 ge RANGE:9 le RANGE:11",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -678,7 +678,7 @@
       {
         "defun": "ip prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV4-PREFIX:7 le RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -774,7 +774,7 @@
       {
         "defun": "ip prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV4-PREFIX:7 le RANGE:9 ge RANGE:11",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -816,7 +816,7 @@
       {
         "defun": "no ip prefix-list WORD:3",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -881,7 +881,7 @@
       {
         "defun": "no ip prefix-list WORD:3 (deny|permit) (IPV4-PREFIX:5.0|any)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -954,7 +954,7 @@
       {
         "defun": "no ip prefix-list WORD:3 (deny|permit) IPV4-PREFIX:5 ge RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1041,7 +1041,7 @@
       {
         "defun": "no ip prefix-list WORD:3 (deny|permit) IPV4-PREFIX:5 ge RANGE:7 le RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1114,7 +1114,7 @@
       {
         "defun": "no ip prefix-list WORD:3 (deny|permit) IPV4-PREFIX:5 le RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1201,7 +1201,7 @@
       {
         "defun": "no ip prefix-list WORD:3 (deny|permit) IPV4-PREFIX:5 le RANGE:7 ge RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1280,7 +1280,7 @@
       {
         "defun": "no ip prefix-list WORD:3 seq RANGE:5 (deny|permit) (IPV4-PREFIX:7.0|any)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1367,7 +1367,7 @@
       {
         "defun": "no ip prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV4-PREFIX:7 ge RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1468,7 +1468,7 @@
       {
         "defun": "no ip prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV4-PREFIX:7 ge RANGE:9 le RANGE:11",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1555,7 +1555,7 @@
       {
         "defun": "no ip prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV4-PREFIX:7 le RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1656,7 +1656,7 @@
       {
         "defun": "no ip prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV4-PREFIX:7 le RANGE:9 ge RANGE:11",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1693,7 +1693,7 @@
       {
         "defun": "ip prefix-list sequence-number",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1735,7 +1735,7 @@
       {
         "defun": "no ip prefix-list sequence-number",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1782,7 +1782,7 @@
       {
         "defun": "ip prefix-list WORD:3 description [WORD:5]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1829,7 +1829,7 @@
       {
         "defun": "no ip prefix-list WORD:3 description",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1881,7 +1881,7 @@
       {
         "defun": "no ip prefix-list WORD:3 description [WORD:5]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1918,8 +1918,7 @@
       {
         "defun": "show ip prefix-list",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1961,8 +1960,7 @@
       {
         "defun": "show ip prefix-list WORD:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2018,8 +2016,7 @@
       {
         "defun": "show ip prefix-list WORD:4 seq RANGE:6",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2066,8 +2063,7 @@
       {
         "defun": "show ip prefix-list WORD:4 IPV4-PREFIX:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2119,8 +2115,7 @@
       {
         "defun": "show ip prefix-list WORD:4 IPV4-PREFIX:5 longer",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2172,8 +2167,7 @@
       {
         "defun": "show ip prefix-list WORD:4 IPV4-PREFIX:5 first-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2215,8 +2209,7 @@
       {
         "defun": "show ip prefix-list summary",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2263,8 +2256,7 @@
       {
         "defun": "show ip prefix-list summary WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2306,8 +2298,7 @@
       {
         "defun": "show ip prefix-list detail",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2354,8 +2345,7 @@
       {
         "defun": "show ip prefix-list detail WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2392,7 +2382,7 @@
       {
         "defun": "clear ip prefix-list",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2434,7 +2424,7 @@
       {
         "defun": "clear ip prefix-list WORD:4",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2481,7 +2471,7 @@
       {
         "defun": "clear ip prefix-list WORD:4 IPV4-PREFIX:5",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2541,7 +2531,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 (deny|permit) (IPV6-PREFIX:5.0|any)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2609,7 +2599,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 (deny|permit) IPV6-PREFIX:5 ge RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2691,7 +2681,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 (deny|permit) IPV6-PREFIX:5 ge RANGE:7 le RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2759,7 +2749,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 (deny|permit) IPV6-PREFIX:5 le RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2841,7 +2831,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 (deny|permit) IPV6-PREFIX:5 le RANGE:7 ge RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2915,7 +2905,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) (IPV6-PREFIX:7.0|any)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2997,7 +2987,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV6-PREFIX:7 ge RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3093,7 +3083,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV6-PREFIX:7 ge RANGE:9 le RANGE:11",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3175,7 +3165,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV6-PREFIX:7 le RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3271,7 +3261,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV6-PREFIX:7 le RANGE:9 ge RANGE:11",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3313,7 +3303,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3378,7 +3368,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 (deny|permit) (IPV6-PREFIX:5.0|any)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3451,7 +3441,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 (deny|permit) IPV6-PREFIX:5 ge RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3538,7 +3528,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 (deny|permit) IPV6-PREFIX:5 ge RANGE:7 le RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3611,7 +3601,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 (deny|permit) IPV6-PREFIX:5 le RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3698,7 +3688,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 (deny|permit) IPV6-PREFIX:5 le RANGE:7 ge RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3777,7 +3767,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) (IPV6-PREFIX:7.0|any)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3864,7 +3854,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV6-PREFIX:7 ge RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3965,7 +3955,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV6-PREFIX:7 ge RANGE:9 le RANGE:11",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -4052,7 +4042,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV6-PREFIX:7 le RANGE:9",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -4153,7 +4143,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 seq RANGE:5 (deny|permit) IPV6-PREFIX:7 le RANGE:9 ge RANGE:11",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -4190,7 +4180,7 @@
       {
         "defun": "ipv6 prefix-list sequence-number",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -4232,7 +4222,7 @@
       {
         "defun": "no ipv6 prefix-list sequence-number",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -4279,7 +4269,7 @@
       {
         "defun": "ipv6 prefix-list WORD:3 description [WORD:5]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -4326,7 +4316,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 description",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -4378,7 +4368,7 @@
       {
         "defun": "no ipv6 prefix-list WORD:3 description [WORD:5]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -4415,8 +4405,7 @@
       {
         "defun": "show ipv6 prefix-list",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4458,8 +4447,7 @@
       {
         "defun": "show ipv6 prefix-list WORD:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4515,8 +4503,7 @@
       {
         "defun": "show ipv6 prefix-list WORD:4 seq RANGE:6",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4563,8 +4550,7 @@
       {
         "defun": "show ipv6 prefix-list WORD:4 IPV6-PREFIX:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4616,8 +4602,7 @@
       {
         "defun": "show ipv6 prefix-list WORD:4 IPV6-PREFIX:5 longer",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4669,8 +4654,7 @@
       {
         "defun": "show ipv6 prefix-list WORD:4 IPV6-PREFIX:5 first-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4712,8 +4696,7 @@
       {
         "defun": "show ipv6 prefix-list summary",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4760,8 +4743,7 @@
       {
         "defun": "show ipv6 prefix-list summary WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4803,8 +4785,7 @@
       {
         "defun": "show ipv6 prefix-list detail",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4851,8 +4832,7 @@
       {
         "defun": "show ipv6 prefix-list detail WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4889,7 +4869,7 @@
       {
         "defun": "clear ipv6 prefix-list",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4931,7 +4911,7 @@
       {
         "defun": "clear ipv6 prefix-list WORD:4",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4978,7 +4958,7 @@
       {
         "defun": "clear ipv6 prefix-list WORD:4 IPV6-PREFIX:5",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

@@ -37,7 +37,7 @@
       {
         "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1|null0)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if IPV4-PREFIX:3 do ADDRESS, MASKLEN = ipv4prefix2address_masklen (IPV4-PREFIX:3)"
@@ -105,7 +105,7 @@
       {
         "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1) (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -154,7 +154,7 @@
       {
         "defun": "ip route IPV4-PREFIX:3 (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -212,7 +212,7 @@
       {
         "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1|null0)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -276,7 +276,7 @@
       {
         "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1) (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -330,7 +330,7 @@
       {
         "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -392,7 +392,7 @@
       {
         "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1|null0) RANGE:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -460,7 +460,7 @@
       {
         "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -518,7 +518,7 @@
       {
         "defun": "ip route IPV4-PREFIX:3 (reject|blackhole) RANGE:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -585,7 +585,7 @@
       {
         "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1|null0) RANGE:6",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -658,7 +658,7 @@
       {
         "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1) (reject|blackhole) RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -721,7 +721,7 @@
       {
         "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (reject|blackhole) RANGE:6",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -779,7 +779,7 @@
       {
         "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1|null0)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if IPV4-PREFIX:3 do ADDRESS, MASKLEN = ipv4prefix2address_masklen (IPV4-PREFIX:3)"
@@ -852,7 +852,7 @@
       {
         "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1) (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -906,7 +906,7 @@
       {
         "defun": "no ip route IPV4-PREFIX:3 (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -969,7 +969,7 @@
       {
         "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1|null0)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1038,7 +1038,7 @@
       {
         "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1) (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1097,7 +1097,7 @@
       {
         "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1164,7 +1164,7 @@
       {
         "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1|null0) RANGE:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1237,7 +1237,7 @@
       {
         "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1300,7 +1300,7 @@
       {
         "defun": "no ip route IPV4-PREFIX:3 (reject|blackhole) RANGE:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1447,7 +1447,7 @@
       {
         "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1) (reject|blackhole) RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1515,7 +1515,7 @@
       {
         "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (reject|blackhole) RANGE:6",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1562,7 +1562,7 @@
       {
         "defun": "ip protocol WORD:3 route-map WORD:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1604,7 +1604,7 @@
       {
         "defun": "no ip protocol WORD:3",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1641,8 +1641,7 @@
       {
         "defun": "show ip route",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1689,8 +1688,7 @@
       {
         "defun": "show ip route IPV4-PREFIX:4 longer-prefixes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1732,8 +1730,7 @@
       {
         "defun": "show ip route supernets-only",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1818,8 +1815,7 @@
       {
         "defun": "show ip route (kernel|connected|static|rip|ospf|isis|bgp|babel)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1861,8 +1857,7 @@
       {
         "defun": "show ip route IPV4-ADDR:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1904,8 +1899,7 @@
       {
         "defun": "show ip route IPV4-PREFIX:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1947,8 +1941,7 @@
       {
         "defun": "show ip route summary",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1985,8 +1978,7 @@
       {
         "defun": "show ip protocol",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2023,8 +2015,7 @@
       {
         "defun": "show ip mroute",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2071,7 +2062,7 @@
       {
         "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2130,7 +2121,7 @@
       {
         "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2177,7 +2168,7 @@
       {
         "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2236,7 +2227,7 @@
       {
         "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2292,7 +2283,7 @@
       {
         "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) RANGE:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2360,7 +2351,7 @@
       {
         "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2416,7 +2407,7 @@
       {
         "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 RANGE:6",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2484,7 +2475,7 @@
       {
         "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 (reject|blackhole) RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2536,7 +2527,7 @@
       {
         "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2600,7 +2591,7 @@
       {
         "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2652,7 +2643,7 @@
       {
         "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2716,7 +2707,7 @@
       {
         "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 (reject|blackhole)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2777,7 +2768,7 @@
       {
         "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) RANGE:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2850,7 +2841,7 @@
       {
         "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2911,7 +2902,7 @@
       {
         "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 RANGE:6",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2984,7 +2975,7 @@
       {
         "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 (reject|blackhole) RANGE:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3021,8 +3012,7 @@
       {
         "defun": "show ipv6 route",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3069,8 +3059,7 @@
       {
         "defun": "show ipv6 route IPV6-PREFIX:4 longer-prefixes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3155,8 +3144,7 @@
       {
         "defun": "show ipv6 route (kernel|connected|static|ripng|ospf6|isis|bgp|babel)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3198,8 +3186,7 @@
       {
         "defun": "show ipv6 route IPV6-ADDR:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3241,8 +3228,7 @@
       {
         "defun": "show ipv6 route IPV6-PREFIX:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3284,8 +3270,7 @@
       {
         "defun": "show ipv6 route summary",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3322,8 +3307,7 @@
       {
         "defun": "show ipv6 mroute",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

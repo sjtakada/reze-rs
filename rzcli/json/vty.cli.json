@@ -11,9 +11,7 @@
       {
         "defun": "who",
         "mode": [
-          "RESTRICTED-NODE",
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -45,7 +43,7 @@
       {
         "defun": "line vty",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -81,7 +79,7 @@
       {
         "defun": "exec-timeout RANGE:2",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -126,7 +124,7 @@
       {
         "defun": "exec-timeout RANGE:2 RANGE:3",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -158,7 +156,7 @@
       {
         "defun": "no exec-timeout",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -190,7 +188,7 @@
       {
         "defun": "access-class WORD:2",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -227,7 +225,7 @@
       {
         "defun": "no access-class (WORD:2.0|)",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -264,7 +262,7 @@
       {
         "defun": "ipv6 access-class WORD:3",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -306,7 +304,7 @@
       {
         "defun": "no ipv6 access-class (WORD:3.0|)",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -333,7 +331,7 @@
       {
         "defun": "login",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -365,7 +363,7 @@
       {
         "defun": "no login",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -397,7 +395,7 @@
       {
         "defun": "anonymous restricted",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -434,7 +432,7 @@
       {
         "defun": "no anonymous restricted",
         "mode": [
-          "VTY-NODE"
+          "CONFIG-LINE-VTY-MODE"
         ],
         "action": [
           {
@@ -466,7 +464,7 @@
       {
         "defun": "service advanced-vty",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -503,7 +501,7 @@
       {
         "defun": "no service advanced-vty",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -535,7 +533,7 @@
       {
         "defun": "terminal monitor",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -572,7 +570,7 @@
       {
         "defun": "terminal no monitor",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -609,7 +607,7 @@
       {
         "defun": "no terminal monitor",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -641,10 +639,7 @@
       {
         "defun": "show history",
         "mode": [
-          "RESTRICTED-NODE",
-          "VIEW-NODE",
-          "CONFIG-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

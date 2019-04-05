@@ -16,9 +16,9 @@
       {
         "defun": "network IPV4-PREFIX:2",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -60,9 +60,9 @@
       {
         "defun": "network IPV4-PREFIX:2 route-map WORD:4",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -99,7 +99,7 @@
       {
         "defun": "network IPV4-PREFIX:2 backdoor",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -141,9 +141,9 @@
       {
         "defun": "network IPV4-ADDR:2 mask IPV4-ADDR:4",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -195,9 +195,9 @@
       {
         "defun": "network IPV4-ADDR:2 mask IPV4-ADDR:4 route-map WORD:6",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -244,7 +244,7 @@
       {
         "defun": "network IPV4-ADDR:2 mask IPV4-ADDR:4 backdoor",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -276,9 +276,9 @@
       {
         "defun": "network IPV4-ADDR:2",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -320,9 +320,9 @@
       {
         "defun": "network IPV4-ADDR:2 route-map WORD:4",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -359,7 +359,7 @@
       {
         "defun": "network IPV4-ADDR:2 backdoor",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -396,9 +396,9 @@
       {
         "defun": "no network IPV4-PREFIX:2",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -445,9 +445,9 @@
       {
         "defun": "no network IPV4-PREFIX:2 route-map WORD:4",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -489,7 +489,7 @@
       {
         "defun": "no network IPV4-PREFIX:2 backdoor",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -536,9 +536,9 @@
       {
         "defun": "no network IPV4-ADDR:2 mask IPV4-ADDR:4",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -595,9 +595,9 @@
       {
         "defun": "no network IPV4-ADDR:2 mask IPV4-ADDR:4 route-map WORD:6",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -649,7 +649,7 @@
       {
         "defun": "no network IPV4-ADDR:2 mask IPV4-ADDR:4 backdoor",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -686,9 +686,9 @@
       {
         "defun": "no network IPV4-ADDR:2",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -735,9 +735,9 @@
       {
         "defun": "no network IPV4-ADDR:2 route-map WORD:4",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -779,7 +779,7 @@
       {
         "defun": "no network IPV4-ADDR:2 backdoor",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -811,8 +811,8 @@
       {
         "defun": "network IPV6-PREFIX:2",
         "mode": [
-          "BGP-IPV6-NODE",
-          "BGP-IPV6M-NODE"
+          "CONFIG-BGP-IPV6-MODE",
+          "CONFIG-BGP-IPV6M-MODE"
         ],
         "action": [
           {
@@ -854,7 +854,7 @@
       {
         "defun": "network IPV6-PREFIX:2 route-map WORD:4",
         "mode": [
-          "BGP-IPV6-NODE"
+          "CONFIG-BGP-IPV6-MODE"
         ],
         "action": [
           {
@@ -891,8 +891,8 @@
       {
         "defun": "no network IPV6-PREFIX:2",
         "mode": [
-          "BGP-IPV6-NODE",
-          "BGP-IPV6M-NODE"
+          "CONFIG-BGP-IPV6-MODE",
+          "CONFIG-BGP-IPV6M-MODE"
         ],
         "action": [
           {
@@ -939,7 +939,7 @@
       {
         "defun": "no network IPV6-PREFIX:2 route-map WORD:4",
         "mode": [
-          "BGP-IPV6-NODE"
+          "CONFIG-BGP-IPV6-MODE"
         ],
         "action": [
           {
@@ -981,7 +981,7 @@
       {
         "defun": "ipv6 bgp network IPV6-PREFIX:4",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -1028,7 +1028,7 @@
       {
         "defun": "no ipv6 bgp network IPV6-PREFIX:4",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -1060,9 +1060,9 @@
       {
         "defun": "aggregate-address IPV4-PREFIX:2",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1099,9 +1099,9 @@
       {
         "defun": "aggregate-address IPV4-ADDR:2 IPV4-ADDR:3",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1138,9 +1138,9 @@
       {
         "defun": "aggregate-address IPV4-PREFIX:2 summary-only",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1182,9 +1182,9 @@
       {
         "defun": "aggregate-address IPV4-ADDR:2 IPV4-ADDR:3 summary-only",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1221,9 +1221,9 @@
       {
         "defun": "aggregate-address IPV4-PREFIX:2 as-set",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1265,9 +1265,9 @@
       {
         "defun": "aggregate-address IPV4-ADDR:2 IPV4-ADDR:3 as-set",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1309,9 +1309,9 @@
       {
         "defun": "aggregate-address IPV4-PREFIX:2 as-set summary-only",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1353,9 +1353,9 @@
       {
         "defun": "aggregate-address IPV4-PREFIX:2 summary-only as-set",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1402,9 +1402,9 @@
       {
         "defun": "aggregate-address IPV4-ADDR:2 IPV4-ADDR:3 as-set summary-only",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1451,9 +1451,9 @@
       {
         "defun": "aggregate-address IPV4-ADDR:2 IPV4-ADDR:3 summary-only as-set",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1490,9 +1490,9 @@
       {
         "defun": "no aggregate-address IPV4-PREFIX:2",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1534,9 +1534,9 @@
       {
         "defun": "no aggregate-address IPV4-PREFIX:2 summary-only",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1578,9 +1578,9 @@
       {
         "defun": "no aggregate-address IPV4-PREFIX:2 as-set",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1627,9 +1627,9 @@
       {
         "defun": "no aggregate-address IPV4-PREFIX:2 as-set summary-only",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1676,9 +1676,9 @@
       {
         "defun": "no aggregate-address IPV4-PREFIX:2 summary-only as-set",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1720,9 +1720,9 @@
       {
         "defun": "no aggregate-address IPV4-ADDR:2 IPV4-ADDR:3",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1769,9 +1769,9 @@
       {
         "defun": "no aggregate-address IPV4-ADDR:2 IPV4-ADDR:3 summary-only",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1818,9 +1818,9 @@
       {
         "defun": "no aggregate-address IPV4-ADDR:2 IPV4-ADDR:3 as-set",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1872,9 +1872,9 @@
       {
         "defun": "no aggregate-address IPV4-ADDR:2 IPV4-ADDR:3 as-set summary-only",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1926,9 +1926,9 @@
       {
         "defun": "no aggregate-address IPV4-ADDR:2 IPV4-ADDR:3 summary-only as-set",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE",
-          "BGP-IPV4M-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE",
+          "CONFIG-BGP-IPV4M-MODE"
         ],
         "action": [
           {
@@ -1960,7 +1960,7 @@
       {
         "defun": "aggregate-address IPV6-PREFIX:2",
         "mode": [
-          "BGP-IPV6-NODE"
+          "CONFIG-BGP-IPV6-MODE"
         ],
         "action": [
           {
@@ -1997,7 +1997,7 @@
       {
         "defun": "aggregate-address IPV6-PREFIX:2 summary-only",
         "mode": [
-          "BGP-IPV6-NODE"
+          "CONFIG-BGP-IPV6-MODE"
         ],
         "action": [
           {
@@ -2034,7 +2034,7 @@
       {
         "defun": "no aggregate-address IPV6-PREFIX:2",
         "mode": [
-          "BGP-IPV6-NODE"
+          "CONFIG-BGP-IPV6-MODE"
         ],
         "action": [
           {
@@ -2076,7 +2076,7 @@
       {
         "defun": "no aggregate-address IPV6-PREFIX:2 summary-only",
         "mode": [
-          "BGP-IPV6-NODE"
+          "CONFIG-BGP-IPV6-MODE"
         ],
         "action": [
           {
@@ -2118,7 +2118,7 @@
       {
         "defun": "ipv6 bgp aggregate-address IPV6-PREFIX:4",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -2165,7 +2165,7 @@
       {
         "defun": "ipv6 bgp aggregate-address IPV6-PREFIX:4 summary-only",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -2212,7 +2212,7 @@
       {
         "defun": "no ipv6 bgp aggregate-address IPV6-PREFIX:4",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -2264,7 +2264,7 @@
       {
         "defun": "no ipv6 bgp aggregate-address IPV6-PREFIX:4 summary-only",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -2301,8 +2301,7 @@
       {
         "defun": "show ip bgp",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2356,8 +2355,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2406,8 +2404,7 @@
       {
         "defun": "show bgp ipv4 (unicast|multicast)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2449,9 +2446,7 @@
       {
         "defun": "show ip bgp IPV4-ADDR:4",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2510,9 +2505,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) IPV4-ADDR:6",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2566,9 +2559,7 @@
       {
         "defun": "show bgp ipv4 (unicast|multicast) IPV4-ADDR:5",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2620,8 +2611,7 @@
       {
         "defun": "show ip bgp vpnv4 all IPV4-ADDR:6",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2678,9 +2668,7 @@
       {
         "defun": "show ip bgp vpnv4 rd WORD:6 IPV4-ADDR:7",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2722,9 +2710,7 @@
       {
         "defun": "show ip bgp IPV4-PREFIX:4",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2783,9 +2769,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) IPV4-PREFIX:6",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2839,9 +2823,7 @@
       {
         "defun": "show bgp ipv4 (unicast|multicast) IPV4-PREFIX:5",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2893,9 +2875,7 @@
       {
         "defun": "show ip bgp vpnv4 all IPV4-PREFIX:6",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -2952,9 +2932,7 @@
       {
         "defun": "show ip bgp vpnv4 rd WORD:6 IPV4-PREFIX:7",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3001,8 +2979,7 @@
       {
         "defun": "show ip bgp view WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3054,9 +3031,7 @@
       {
         "defun": "show ip bgp view WORD:5 IPV4-ADDR:6",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3108,9 +3083,7 @@
       {
         "defun": "show ip bgp view WORD:5 IPV4-PREFIX:6",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3142,8 +3115,7 @@
       {
         "defun": "show bgp",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3180,8 +3152,7 @@
       {
         "defun": "show bgp ipv6",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3230,8 +3201,7 @@
       {
         "defun": "show bgp ipv6 (unicast|multicast)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3268,8 +3238,7 @@
       {
         "defun": "show ipv6 bgp",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3306,9 +3275,7 @@
       {
         "defun": "show bgp IPV6-ADDR:3",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3350,9 +3317,7 @@
       {
         "defun": "show bgp ipv6 IPV6-ADDR:4",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3406,9 +3371,7 @@
       {
         "defun": "show bgp ipv6 (unicast|multicast) IPV6-ADDR:5",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3450,8 +3413,7 @@
       {
         "defun": "show ipv6 bgp IPV6-ADDR:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3488,9 +3450,7 @@
       {
         "defun": "show bgp IPV6-PREFIX:3",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3532,9 +3492,7 @@
       {
         "defun": "show bgp ipv6 IPV6-PREFIX:4",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3588,9 +3546,7 @@
       {
         "defun": "show bgp ipv6 (unicast|multicast) IPV6-PREFIX:5",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3632,8 +3588,7 @@
       {
         "defun": "show ipv6 bgp IPV6-PREFIX:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3675,8 +3630,7 @@
       {
         "defun": "show bgp view WORD:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3723,8 +3677,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3771,9 +3724,7 @@
       {
         "defun": "show bgp view WORD:4 IPV6-ADDR:5",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3825,9 +3776,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 IPV6-ADDR:6",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3874,9 +3823,7 @@
       {
         "defun": "show bgp view WORD:4 IPV6-PREFIX:5",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3928,9 +3875,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 IPV6-PREFIX:6",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3967,8 +3912,7 @@
       {
         "defun": "show ipv6 mbgp",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4010,8 +3954,7 @@
       {
         "defun": "show ipv6 mbgp IPV6-ADDR:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4053,8 +3996,7 @@
       {
         "defun": "show ipv6 mbgp IPV6-PREFIX:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4101,8 +4043,7 @@
       {
         "defun": "show ip bgp regexp [WORD:5]",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4154,8 +4095,7 @@
       {
         "defun": "show ip bgp flap-statistics regexp [WORD:6]",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4219,8 +4159,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) regexp [WORD:7]",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4262,8 +4201,7 @@
       {
         "defun": "show bgp regexp [WORD:4]",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4310,8 +4248,7 @@
       {
         "defun": "show bgp ipv6 regexp [WORD:5]",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4358,8 +4295,7 @@
       {
         "defun": "show ipv6 bgp regexp [WORD:5]",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4406,8 +4342,7 @@
       {
         "defun": "show ipv6 mbgp regexp [WORD:5]",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4454,8 +4389,7 @@
       {
         "defun": "show ip bgp prefix-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4507,8 +4441,7 @@
       {
         "defun": "show ip bgp flap-statistics prefix-list WORD:6",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4572,8 +4505,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) prefix-list WORD:7",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4615,8 +4547,7 @@
       {
         "defun": "show bgp prefix-list WORD:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4663,8 +4594,7 @@
       {
         "defun": "show bgp ipv6 prefix-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4711,8 +4641,7 @@
       {
         "defun": "show ipv6 bgp prefix-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4759,8 +4688,7 @@
       {
         "defun": "show ipv6 mbgp prefix-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4807,8 +4735,7 @@
       {
         "defun": "show ip bgp filter-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4860,8 +4787,7 @@
       {
         "defun": "show ip bgp flap-statistics filter-list WORD:6",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4925,8 +4851,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) filter-list WORD:7",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -4968,8 +4893,7 @@
       {
         "defun": "show bgp filter-list WORD:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5016,8 +4940,7 @@
       {
         "defun": "show bgp ipv6 filter-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5064,8 +4987,7 @@
       {
         "defun": "show ipv6 bgp filter-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5112,8 +5034,7 @@
       {
         "defun": "show ipv6 mbgp filter-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5160,8 +5081,7 @@
       {
         "defun": "show ip bgp route-map WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5213,8 +5133,7 @@
       {
         "defun": "show ip bgp flap-statistics route-map WORD:6",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5278,8 +5197,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) route-map WORD:7",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5321,8 +5239,7 @@
       {
         "defun": "show bgp route-map WORD:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5369,8 +5286,7 @@
       {
         "defun": "show bgp ipv6 route-map WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5412,8 +5328,7 @@
       {
         "defun": "show ip bgp cidr-only",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5460,8 +5375,7 @@
       {
         "defun": "show ip bgp flap-statistics cidr-only",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5520,8 +5434,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) cidr-only",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5563,8 +5476,7 @@
       {
         "defun": "show ip bgp community",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5623,8 +5535,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5661,8 +5572,7 @@
       {
         "defun": "show bgp community",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5704,8 +5614,7 @@
       {
         "defun": "show bgp ipv6 community",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5747,8 +5656,7 @@
       {
         "defun": "show ipv6 bgp community",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5790,8 +5698,7 @@
       {
         "defun": "show ipv6 mbgp community",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5856,9 +5763,7 @@
       {
         "defun": "show ip bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5928,9 +5833,7 @@
       {
         "defun": "show ip bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6005,9 +5908,7 @@
       {
         "defun": "show ip bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6087,9 +5988,7 @@
       {
         "defun": "show ip bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6171,9 +6070,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community (COMMUNITY:7.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6260,9 +6157,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6354,9 +6249,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export) (COMMUNITY:9.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6453,9 +6346,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export) (COMMUNITY:9.0|local-AS|no-advertise|no-export) (COMMUNITY:10.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6526,9 +6417,7 @@
       {
         "defun": "show bgp view WORD:4 (ipv4|ipv6) (unicast|multicast) community",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6622,9 +6511,7 @@
       {
         "defun": "show bgp view WORD:4 (ipv4|ipv6) (unicast|multicast) community (COMMUNITY:8.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6723,9 +6610,7 @@
       {
         "defun": "show bgp view WORD:4 (ipv4|ipv6) (unicast|multicast) community (COMMUNITY:8.0|local-AS|no-advertise|no-export) (COMMUNITY:9.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6829,9 +6714,7 @@
       {
         "defun": "show bgp view WORD:4 (ipv4|ipv6) (unicast|multicast) community (COMMUNITY:8.0|local-AS|no-advertise|no-export) (COMMUNITY:9.0|local-AS|no-advertise|no-export) (COMMUNITY:10.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6940,9 +6823,7 @@
       {
         "defun": "show bgp view WORD:4 (ipv4|ipv6) (unicast|multicast) community (COMMUNITY:8.0|local-AS|no-advertise|no-export) (COMMUNITY:9.0|local-AS|no-advertise|no-export) (COMMUNITY:10.0|local-AS|no-advertise|no-export) (COMMUNITY:11.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7012,9 +6893,7 @@
       {
         "defun": "show ip bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7089,9 +6968,7 @@
       {
         "defun": "show ip bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7171,9 +7048,7 @@
       {
         "defun": "show ip bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7258,9 +7133,7 @@
       {
         "defun": "show ip bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7347,9 +7220,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community (COMMUNITY:7.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7441,9 +7312,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7540,9 +7409,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export) (COMMUNITY:9.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7644,9 +7511,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export) (COMMUNITY:9.0|local-AS|no-advertise|no-export) (COMMUNITY:10.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7706,9 +7571,7 @@
       {
         "defun": "show bgp community (COMMUNITY:4.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7773,9 +7636,7 @@
       {
         "defun": "show bgp ipv6 community (COMMUNITY:5.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7840,9 +7701,7 @@
       {
         "defun": "show bgp community (COMMUNITY:4.0|local-AS|no-advertise|no-export) (COMMUNITY:5.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7912,9 +7771,7 @@
       {
         "defun": "show bgp ipv6 community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -7984,9 +7841,7 @@
       {
         "defun": "show bgp community (COMMUNITY:4.0|local-AS|no-advertise|no-export) (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8061,9 +7916,7 @@
       {
         "defun": "show bgp ipv6 community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8138,9 +7991,7 @@
       {
         "defun": "show bgp community (COMMUNITY:4.0|local-AS|no-advertise|no-export) (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8220,9 +8071,7 @@
       {
         "defun": "show bgp ipv6 community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8287,8 +8136,7 @@
       {
         "defun": "show ipv6 bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8358,8 +8206,7 @@
       {
         "defun": "show ipv6 bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8434,8 +8281,7 @@
       {
         "defun": "show ipv6 bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8515,8 +8361,7 @@
       {
         "defun": "show ipv6 bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8581,9 +8426,7 @@
       {
         "defun": "show bgp community (COMMUNITY:4.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8653,9 +8496,7 @@
       {
         "defun": "show bgp ipv6 community (COMMUNITY:5.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8725,9 +8566,7 @@
       {
         "defun": "show bgp community (COMMUNITY:4.0|local-AS|no-advertise|no-export) (COMMUNITY:5.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8802,9 +8641,7 @@
       {
         "defun": "show bgp ipv6 community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8879,9 +8716,7 @@
       {
         "defun": "show bgp community (COMMUNITY:4.0|local-AS|no-advertise|no-export) (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -8961,9 +8796,7 @@
       {
         "defun": "show bgp ipv6 community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9043,9 +8876,7 @@
       {
         "defun": "show bgp community (COMMUNITY:4.0|local-AS|no-advertise|no-export) (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9130,9 +8961,7 @@
       {
         "defun": "show bgp ipv6 community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9202,8 +9031,7 @@
       {
         "defun": "show ipv6 bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9278,8 +9106,7 @@
       {
         "defun": "show ipv6 bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9359,8 +9186,7 @@
       {
         "defun": "show ipv6 bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9445,8 +9271,7 @@
       {
         "defun": "show ipv6 bgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9511,8 +9336,7 @@
       {
         "defun": "show ipv6 mbgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9582,8 +9406,7 @@
       {
         "defun": "show ipv6 mbgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9658,8 +9481,7 @@
       {
         "defun": "show ipv6 mbgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9739,8 +9561,7 @@
       {
         "defun": "show ipv6 mbgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9810,8 +9631,7 @@
       {
         "defun": "show ipv6 mbgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9886,8 +9706,7 @@
       {
         "defun": "show ipv6 mbgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -9967,8 +9786,7 @@
       {
         "defun": "show ipv6 mbgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10053,8 +9871,7 @@
       {
         "defun": "show ipv6 mbgp community (COMMUNITY:5.0|local-AS|no-advertise|no-export) (COMMUNITY:6.0|local-AS|no-advertise|no-export) (COMMUNITY:7.0|local-AS|no-advertise|no-export) (COMMUNITY:8.0|local-AS|no-advertise|no-export) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10110,8 +9927,7 @@
       {
         "defun": "show ip bgp community-list (RANGE:5.0|WORD:5.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10184,8 +10000,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community-list (RANGE:7.0|WORD:7.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10246,8 +10061,7 @@
       {
         "defun": "show ip bgp community-list (RANGE:5.0|WORD:5.1) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10325,8 +10139,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) community-list (RANGE:7.0|WORD:7.1) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10377,8 +10190,7 @@
       {
         "defun": "show bgp community-list (RANGE:4.0|WORD:4.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10434,8 +10246,7 @@
       {
         "defun": "show bgp ipv6 community-list (RANGE:5.0|WORD:5.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10482,8 +10293,7 @@
       {
         "defun": "show ipv6 bgp community-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10530,8 +10340,7 @@
       {
         "defun": "show ipv6 mbgp community-list WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10587,8 +10396,7 @@
       {
         "defun": "show bgp community-list (RANGE:4.0|WORD:4.1) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10649,8 +10457,7 @@
       {
         "defun": "show bgp ipv6 community-list (RANGE:5.0|WORD:5.1) exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10702,8 +10509,7 @@
       {
         "defun": "show ipv6 bgp community-list WORD:5 exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10755,8 +10561,7 @@
       {
         "defun": "show ipv6 mbgp community-list WORD:5 exact-match",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10803,8 +10608,7 @@
       {
         "defun": "show ip bgp IPV4-PREFIX:4 longer-prefixes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10856,8 +10660,7 @@
       {
         "defun": "show ip bgp flap-statistics IPV4-PREFIX:5 longer-prefixes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10921,8 +10724,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) IPV4-PREFIX:6 longer-prefixes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -10969,8 +10771,7 @@
       {
         "defun": "show ip bgp flap-statistics IPV4-ADDR:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11017,8 +10818,7 @@
       {
         "defun": "show ip bgp flap-statistics IPV4-PREFIX:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11060,8 +10860,7 @@
       {
         "defun": "show bgp IPV6-PREFIX:3 longer-prefixes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11108,8 +10907,7 @@
       {
         "defun": "show bgp ipv6 IPV6-PREFIX:4 longer-prefixes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11156,8 +10954,7 @@
       {
         "defun": "show ipv6 bgp IPV6-PREFIX:4 longer-prefixes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11204,8 +11001,7 @@
       {
         "defun": "show ipv6 mbgp IPV6-PREFIX:4 longer-prefixes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11266,7 +11062,7 @@
       {
         "defun": "show bgp (ipv4|ipv6) (unicast|multicast) statistics",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11315,7 +11111,7 @@
       {
         "defun": "show bgp (ipv4) (vpnv4) statistics",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11386,7 +11182,7 @@
       {
         "defun": "show bgp view WORD:4 (ipv4|ipv6) (unicast|multicast) statistics",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11445,7 +11241,7 @@
       {
         "defun": "show bgp view WORD:4 (ipv4) (vpnv4) statistics",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11502,7 +11298,7 @@
       {
         "defun": "show ip bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) prefix-counts",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11559,7 +11355,7 @@
       {
         "defun": "show bgp ipv6 neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) prefix-counts",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11633,7 +11429,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) prefix-counts",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11700,7 +11496,7 @@
       {
         "defun": "show ip bgp vpnv4 all neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) prefix-counts",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11767,8 +11563,7 @@
       {
         "defun": "show ip bgp view WORD:5 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) advertised-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11825,8 +11620,7 @@
       {
         "defun": "show ip bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) advertised-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11900,8 +11694,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) advertised-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -11963,8 +11756,7 @@
       {
         "defun": "show bgp view WORD:4 neighbors (IPV4-ADDR:6.0|IPV6-ADDR:6.1) advertised-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12031,8 +11823,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) advertised-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12094,8 +11885,7 @@
       {
         "defun": "show bgp view WORD:4 neighbors (IPV4-ADDR:6.0|IPV6-ADDR:6.1) received-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12162,8 +11952,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) received-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12215,8 +12004,7 @@
       {
         "defun": "show bgp neighbors (IPV4-ADDR:4.0|IPV6-ADDR:4.1) advertised-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12273,8 +12061,7 @@
       {
         "defun": "show bgp ipv6 neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) advertised-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12331,8 +12118,7 @@
       {
         "defun": "show ipv6 bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) advertised-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12389,8 +12175,7 @@
       {
         "defun": "show ipv6 mbgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) advertised-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12457,8 +12242,7 @@
       {
         "defun": "show ip bgp view WORD:5 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) received-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12515,8 +12299,7 @@
       {
         "defun": "show ip bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) received-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12590,8 +12373,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) received-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12684,8 +12466,7 @@
       {
         "defun": "show bgp view WORD:4 (ipv4|ipv6) (unicast|multicast) neighbors (IPV4-ADDR:8.0|IPV6-ADDR:8.1) (advertised-routes|received-routes)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12747,8 +12528,7 @@
       {
         "defun": "show ip bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) received prefix-filter",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12827,8 +12607,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) received prefix-filter",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12880,8 +12659,7 @@
       {
         "defun": "show bgp neighbors (IPV4-ADDR:4.0|IPV6-ADDR:4.1) received-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12938,8 +12716,7 @@
       {
         "defun": "show bgp ipv6 neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) received-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -12996,8 +12773,7 @@
       {
         "defun": "show bgp neighbors (IPV4-ADDR:4.0|IPV6-ADDR:4.1) received prefix-filter",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13059,8 +12835,7 @@
       {
         "defun": "show bgp ipv6 neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) received prefix-filter",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13117,8 +12892,7 @@
       {
         "defun": "show ipv6 bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) received-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13175,8 +12949,7 @@
       {
         "defun": "show ipv6 mbgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) received-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13243,9 +13016,7 @@
       {
         "defun": "show bgp view WORD:4 neighbors (IPV4-ADDR:6.0|IPV6-ADDR:6.1) received prefix-filter",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13317,9 +13088,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) received prefix-filter",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13376,8 +13145,7 @@
       {
         "defun": "show ip bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13434,8 +13202,7 @@
       {
         "defun": "show ip bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) flap-statistics",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13492,8 +13259,7 @@
       {
         "defun": "show ip bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) dampened-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13567,8 +13333,7 @@
       {
         "defun": "show ip bgp ipv4 (unicast|multicast) neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13630,8 +13395,7 @@
       {
         "defun": "show ip bgp view WORD:5 rsclient (IPV4-ADDR:7.0|IPV6-ADDR:7.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13683,8 +13447,7 @@
       {
         "defun": "show ip bgp rsclient (IPV4-ADDR:5.0|IPV6-ADDR:5.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13758,8 +13521,7 @@
       {
         "defun": "show bgp view WORD:4 ipv4 (unicast|multicast) rsclient (IPV4-ADDR:8.0|IPV6-ADDR:8.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13823,8 +13585,7 @@
       {
         "defun": "show bgp ipv4 (unicast|multicast) rsclient (IPV4-ADDR:6.0|IPV6-ADDR:6.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13891,9 +13652,7 @@
       {
         "defun": "show ip bgp view WORD:5 rsclient (IPV4-ADDR:7.0|IPV6-ADDR:7.1) IPV4-ADDR:8",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -13950,9 +13709,7 @@
       {
         "defun": "show ip bgp rsclient (IPV4-ADDR:5.0|IPV6-ADDR:5.1) IPV4-ADDR:6",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14031,9 +13788,7 @@
       {
         "defun": "show bgp view WORD:4 ipv4 (unicast|multicast) rsclient (IPV4-ADDR:8.0|IPV6-ADDR:8.1) IPV4-ADDR:9",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14102,9 +13857,7 @@
       {
         "defun": "show bgp ipv4 (unicast|multicast) rsclient (IPV4-ADDR:6.0|IPV6-ADDR:6.1) IPV4-ADDR:7",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14171,9 +13924,7 @@
       {
         "defun": "show ip bgp view WORD:5 rsclient (IPV4-ADDR:7.0|IPV6-ADDR:7.1) IPV4-PREFIX:8",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14230,9 +13981,7 @@
       {
         "defun": "show ip bgp rsclient (IPV4-ADDR:5.0|IPV6-ADDR:5.1) IPV4-PREFIX:6",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14311,9 +14060,7 @@
       {
         "defun": "show bgp view WORD:4 ipv4 (unicast|multicast) rsclient (IPV4-ADDR:8.0|IPV6-ADDR:8.1) IPV4-PREFIX:9",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14382,9 +14129,7 @@
       {
         "defun": "show bgp ipv4 (unicast|multicast) rsclient (IPV4-ADDR:6.0|IPV6-ADDR:6.1) IPV4-PREFIX:7",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14446,8 +14191,7 @@
       {
         "defun": "show bgp view WORD:4 neighbors (IPV4-ADDR:6.0|IPV6-ADDR:6.1) routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14514,8 +14258,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14577,8 +14320,7 @@
       {
         "defun": "show bgp view WORD:4 neighbors (IPV4-ADDR:6.0|IPV6-ADDR:6.1) dampened-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14645,8 +14387,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) dampened-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14708,8 +14449,7 @@
       {
         "defun": "show bgp view WORD:4 neighbors (IPV4-ADDR:6.0|IPV6-ADDR:6.1) flap-statistics",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14776,8 +14516,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1) flap-statistics",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14829,8 +14568,7 @@
       {
         "defun": "show bgp neighbors (IPV4-ADDR:4.0|IPV6-ADDR:4.1) routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14887,8 +14625,7 @@
       {
         "defun": "show bgp ipv6 neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14945,8 +14682,7 @@
       {
         "defun": "show ipv6 bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15003,8 +14739,7 @@
       {
         "defun": "show ipv6 mbgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15056,8 +14791,7 @@
       {
         "defun": "show bgp neighbors (IPV4-ADDR:4.0|IPV6-ADDR:4.1) flap-statistics",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15114,8 +14848,7 @@
       {
         "defun": "show bgp ipv6 neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) flap-statistics",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15167,8 +14900,7 @@
       {
         "defun": "show bgp neighbors (IPV4-ADDR:4.0|IPV6-ADDR:4.1) dampened-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15225,8 +14957,7 @@
       {
         "defun": "show bgp ipv6 neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1) dampened-routes",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15283,8 +15014,7 @@
       {
         "defun": "show bgp view WORD:4 rsclient (IPV4-ADDR:6.0|IPV6-ADDR:6.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15331,8 +15061,7 @@
       {
         "defun": "show bgp rsclient (IPV4-ADDR:4.0|IPV6-ADDR:4.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15406,8 +15135,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 (unicast|multicast) rsclient (IPV4-ADDR:8.0|IPV6-ADDR:8.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15471,8 +15199,7 @@
       {
         "defun": "show bgp ipv6 (unicast|multicast) rsclient (IPV4-ADDR:6.0|IPV6-ADDR:6.1)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15534,9 +15261,7 @@
       {
         "defun": "show bgp view WORD:4 rsclient (IPV4-ADDR:6.0|IPV6-ADDR:6.1) IPV6-ADDR:7",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15588,9 +15313,7 @@
       {
         "defun": "show bgp rsclient (IPV4-ADDR:4.0|IPV6-ADDR:4.1) IPV6-ADDR:5",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15669,9 +15392,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 (unicast|multicast) rsclient (IPV4-ADDR:8.0|IPV6-ADDR:8.1) IPV6-ADDR:9",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15740,9 +15461,7 @@
       {
         "defun": "show bgp ipv6 (unicast|multicast) rsclient (IPV4-ADDR:6.0|IPV6-ADDR:6.1) IPV6-ADDR:7",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15804,9 +15523,7 @@
       {
         "defun": "show bgp view WORD:4 rsclient (IPV4-ADDR:6.0|IPV6-ADDR:6.1) IPV6-PREFIX:7",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15858,9 +15575,7 @@
       {
         "defun": "show bgp rsclient (IPV4-ADDR:4.0|IPV6-ADDR:4.1) IPV6-PREFIX:5",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -15939,9 +15654,7 @@
       {
         "defun": "show bgp view WORD:4 ipv6 (unicast|multicast) rsclient (IPV4-ADDR:8.0|IPV6-ADDR:8.1) IPV6-PREFIX:9",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -16010,9 +15723,7 @@
       {
         "defun": "show bgp ipv6 (unicast|multicast) rsclient (IPV4-ADDR:6.0|IPV6-ADDR:6.1) IPV6-PREFIX:7",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -16071,7 +15782,7 @@
       {
         "defun": "distance bgp RANGE:3 RANGE:4 RANGE:5",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -16135,7 +15846,7 @@
       {
         "defun": "no distance bgp RANGE:3 RANGE:4 RANGE:5",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -16172,7 +15883,7 @@
       {
         "defun": "no distance bgp",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -16213,7 +15924,7 @@
       {
         "defun": "distance RANGE:2 IPV4-PREFIX:3",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -16259,7 +15970,7 @@
       {
         "defun": "no distance RANGE:2 IPV4-PREFIX:3",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -16305,7 +16016,7 @@
       {
         "defun": "distance RANGE:2 IPV4-PREFIX:3 WORD:4",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -16356,7 +16067,7 @@
       {
         "defun": "no distance RANGE:2 IPV4-PREFIX:3 WORD:4",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -16424,8 +16135,8 @@
       {
         "defun": "bgp dampening RANGE:3 RANGE:4 RANGE:5 RANGE:6",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE"
         ],
         "action": [
           {
@@ -16466,8 +16177,8 @@
       {
         "defun": "bgp dampening RANGE:3",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE"
         ],
         "action": [
           {
@@ -16499,8 +16210,8 @@
       {
         "defun": "bgp dampening",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE"
         ],
         "action": [
           {
@@ -16537,8 +16248,8 @@
       {
         "defun": "no bgp dampening",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE"
         ],
         "action": [
           {
@@ -16611,8 +16322,8 @@
       {
         "defun": "no bgp dampening RANGE:3 RANGE:4 RANGE:5 RANGE:6",
         "mode": [
-          "BGP-NODE",
-          "BGP-IPV4-NODE"
+          "CONFIG-BGP-MODE",
+          "CONFIG-BGP-IPV4-MODE"
         ],
         "action": [
           {
@@ -16654,8 +16365,7 @@
       {
         "defun": "show ip bgp dampened-paths",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -16697,8 +16407,7 @@
       {
         "defun": "show ip bgp flap-statistics",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -16740,7 +16449,7 @@
       {
         "defun": "clear ip bgp dampening",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -16787,7 +16496,7 @@
       {
         "defun": "clear ip bgp dampening IPV4-PREFIX:5",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -16834,7 +16543,7 @@
       {
         "defun": "clear ip bgp dampening IPV4-ADDR:5",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -16886,7 +16595,7 @@
       {
         "defun": "clear ip bgp dampening IPV4-ADDR:5 IPV4-ADDR:6",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

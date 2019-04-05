@@ -16,12 +16,12 @@
       {
         "defun": "configure terminal",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
             "mode": {
-              "name": "CONFIG-NODE"
+              "name": "CONFIG-MODE"
             }
           }
         ]
@@ -40,13 +40,12 @@
       {
         "defun": "enable",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
             "mode": {
-              "name": "ENABLE-NODE"
+              "name": "EXEC-MODE"
             }
           }
         ]
@@ -65,12 +64,12 @@
       {
         "defun": "disable",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
             "mode": {
-              "name": "VIEW-NODE"
+              "name": "EXEC-MODE"
             }
           }
         ]
@@ -89,17 +88,13 @@
       {
         "defun": "exit",
         "mode": [
-          "node",
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "INTERFACE-NODE",
-          "OSPF-NODE",
-          "BGP-NODE",
-          "RIP-NODE",
-          "OSPF6-NODE",
-          "RIPNG-NODE",
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE",
+          "CONFIG-MODE",
+          "CONFIG-IF-MODE",
+          "CONFIG-OSPF-MODE",
+          "CONFIG-BGP-MODE",
+          "CONFIG-RIP-MODE",
+          "CONFIG-RIPNG-MODE"
         ],
         "action": [
           {
@@ -110,40 +105,7 @@
         ]
       }
     ]
-  },
-  "config-quit-cmd": {
-    "token": {
-      "quit": {
-        "id": "1",
-        "type": "keyword",
-        "help": "Exit current mode and down to previous mode"
-      }
-    },
-    "command": [
-      {
-        "defun": "quit",
-        "mode": [
-          "node",
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "CONFIG-NODE",
-          "INTERFACE-NODE",
-          "OSPF-NODE",
-          "BGP-NODE",
-          "RIP-NODE",
-          "OSPF6-NODE",
-          "RIPNG-NODE"
-        ],
-        "action": [
-          {
-            "mode": {
-              "up": 1
-            }
-          }
-        ]
-      }
-    ]
-  },
+  }
   "config-end-cmd": {
     "token": {
       "end": {
@@ -156,12 +118,12 @@
       {
         "defun": "end",
         "mode": [
-          "node"
+          "CONFIG-MODE"
         ],
         "action": [
           {
             "mode": {
-              "name": "ENABLE-NODE"
+              "name": "EXEC-MODE"
             }
           }
         ]
@@ -185,8 +147,7 @@
       {
         "defun": "show version",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -213,9 +174,7 @@
       {
         "defun": "help",
         "mode": [
-          "node",
-          "VIEW-NODE",
-          "RESTRICTED-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -242,9 +201,7 @@
       {
         "defun": "list",
         "mode": [
-          "node",
-          "VIEW-NODE",
-          "RESTRICTED-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -276,7 +233,7 @@
       {
         "defun": "write file",
         "mode": [
-          "node"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -303,7 +260,7 @@
       {
         "defun": "write",
         "mode": [
-          "node"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -335,7 +292,7 @@
       {
         "defun": "write memory",
         "mode": [
-          "node"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -372,7 +329,7 @@
       {
         "defun": "copy running-config startup-config",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -404,7 +361,7 @@
       {
         "defun": "write terminal",
         "mode": [
-          "node"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -436,7 +393,7 @@
       {
         "defun": "show access-list",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -467,11 +424,7 @@
       {
         "defun": "show running-config",
         "mode": [
-          "node",
-          "ENABLE-NODE",
-          "CONFIG-NODE",
-          "INTERFACE-NODE",
-          "OSPF-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -502,7 +455,7 @@
       {
         "defun": "show startup-config",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -534,7 +487,7 @@
       {
         "defun": "hostname WORD:2",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -571,7 +524,7 @@
       {
         "defun": "no hostname (WORD:2.0|)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -609,7 +562,7 @@
       {
         "defun": "password (8) WORD:3",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -641,7 +594,7 @@
       {
         "defun": "password WORD:2",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -684,7 +637,7 @@
       {
         "defun": "enable password (8) WORD:4",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -721,7 +674,7 @@
       {
         "defun": "enable password WORD:3",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -758,7 +711,7 @@
       {
         "defun": "no enable password",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -790,7 +743,7 @@
       {
         "defun": "service password-encryption",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -827,7 +780,7 @@
       {
         "defun": "no service password-encryption",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -868,9 +821,7 @@
       {
         "defun": "terminal length RANGE:3",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -907,9 +858,7 @@
       {
         "defun": "terminal no length",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -950,7 +899,7 @@
       {
         "defun": "service terminal-length RANGE:3",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -996,7 +945,7 @@
       {
         "defun": "no service terminal-length (RANGE:3.0|)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1076,7 +1025,7 @@
       {
         "defun": "logmsg (emergencies|alerts|critical|errors|warnings|notifications|informational|debugging) [WORD:3]",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1108,8 +1057,8 @@
       {
         "defun": "show logging",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE",
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1141,7 +1090,7 @@
       {
         "defun": "log stdout",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1221,7 +1170,7 @@
       {
         "defun": "log stdout (emergencies|alerts|critical|errors|warnings|notifications|informational|debugging)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1263,7 +1212,7 @@
       {
         "defun": "no log stdout (WORD:3.0|)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1295,7 +1244,7 @@
       {
         "defun": "log monitor",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1375,7 +1324,7 @@
       {
         "defun": "log monitor (emergencies|alerts|critical|errors|warnings|notifications|informational|debugging)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1417,7 +1366,7 @@
       {
         "defun": "no log monitor (WORD:3.0|)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1454,7 +1403,7 @@
       {
         "defun": "log file WORD:3",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1539,7 +1488,7 @@
       {
         "defun": "log file WORD:3 (emergencies|alerts|critical|errors|warnings|notifications|informational|debugging)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1581,7 +1530,7 @@
       {
         "defun": "no log file (WORD:3.0|)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1628,7 +1577,7 @@
       {
         "defun": "no log file WORD:3 WORD:4",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1660,7 +1609,7 @@
       {
         "defun": "log syslog",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1740,7 +1689,7 @@
       {
         "defun": "log syslog (emergencies|alerts|critical|errors|warnings|notifications|informational|debugging)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1782,7 +1731,7 @@
       {
         "defun": "no log syslog (WORD:3.0|)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1927,7 +1876,7 @@
       {
         "defun": "no log syslog facility (kern|user|mail|daemon|auth|syslog|lpr|news|uucp|cron|local0|local1|local2|local3|local4|local5|local6|local7)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2067,7 +2016,7 @@
       {
         "defun": "log facility (kern|user|mail|daemon|auth|syslog|lpr|news|uucp|cron|local0|local1|local2|local3|local4|local5|local6|local7)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2109,7 +2058,7 @@
       {
         "defun": "no log facility (WORD:3.0|)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2141,7 +2090,7 @@
       {
         "defun": "log record-priority",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2178,7 +2127,7 @@
       {
         "defun": "no log record-priority",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2224,7 +2173,7 @@
       {
         "defun": "log timestamp precision RANGE:4",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2266,7 +2215,7 @@
       {
         "defun": "no log timestamp precision",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2308,7 +2257,7 @@
       {
         "defun": "banner motd file (WORD:4.0|)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2345,7 +2294,7 @@
       {
         "defun": "banner motd default",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2382,7 +2331,7 @@
       {
         "defun": "no banner motd",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {

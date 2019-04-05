@@ -16,7 +16,7 @@
       {
         "defun": "description [WORD:2]",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -48,7 +48,7 @@
       {
         "defun": "no description",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -85,7 +85,7 @@
       {
         "defun": "interface WORD:2",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "IFNAME = WORD:2"
@@ -93,7 +93,7 @@
         "action": [
           {
             "mode": {
-              "name": "INTERFACE-NODE",
+              "name": "CONFIG-IF-MODE",
               "params": [
                 "IFNAME"
               ]

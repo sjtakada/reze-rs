@@ -51,7 +51,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) IPV4-ADDR:4 IPV4-ADDR:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -118,7 +118,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) IPV4-ADDR:4",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -191,7 +191,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) host IPV4-ADDR:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -259,7 +259,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -337,7 +337,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) IPV4-ADDR:4 IPV4-ADDR:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -406,7 +406,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) IPV4-ADDR:4",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -481,7 +481,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) host IPV4-ADDR:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -551,7 +551,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -636,7 +636,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip IPV4-ADDR:5 IPV4-ADDR:6 IPV4-ADDR:7 IPV4-ADDR:8",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -713,7 +713,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip IPV4-ADDR:5 IPV4-ADDR:6 any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -790,7 +790,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip any IPV4-ADDR:6 IPV4-ADDR:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -857,7 +857,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip any any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -939,7 +939,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip IPV4-ADDR:5 IPV4-ADDR:6 host IPV4-ADDR:8",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1021,7 +1021,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip host IPV4-ADDR:6 IPV4-ADDR:7 IPV4-ADDR:8",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1098,7 +1098,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip host IPV4-ADDR:6 host IPV4-ADDR:8",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1175,7 +1175,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip any host IPV4-ADDR:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1252,7 +1252,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip host IPV4-ADDR:6 any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1339,7 +1339,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip IPV4-ADDR:5 IPV4-ADDR:6 IPV4-ADDR:7 IPV4-ADDR:8",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1421,7 +1421,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip IPV4-ADDR:5 IPV4-ADDR:6 any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1503,7 +1503,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip any IPV4-ADDR:6 IPV4-ADDR:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1575,7 +1575,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip any any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1662,7 +1662,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip IPV4-ADDR:5 IPV4-ADDR:6 host IPV4-ADDR:8",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1749,7 +1749,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip host IPV4-ADDR:6 IPV4-ADDR:7 IPV4-ADDR:8",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1831,7 +1831,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip host IPV4-ADDR:6 host IPV4-ADDR:8",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1913,7 +1913,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip any host IPV4-ADDR:7",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -1995,7 +1995,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1) (deny|permit) ip host IPV4-ADDR:6 any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2044,7 +2044,7 @@
       {
         "defun": "access-list WORD:2 (deny|permit) IPV4-PREFIX:4",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2098,7 +2098,7 @@
       {
         "defun": "access-list WORD:2 (deny|permit) IPV4-PREFIX:4 exact-match",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2147,7 +2147,7 @@
       {
         "defun": "access-list WORD:2 (deny|permit) any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2201,7 +2201,7 @@
       {
         "defun": "no access-list WORD:2 (deny|permit) IPV4-PREFIX:4",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2260,7 +2260,7 @@
       {
         "defun": "no access-list WORD:2 (deny|permit) IPV4-PREFIX:4 exact-match",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2314,7 +2314,7 @@
       {
         "defun": "no access-list WORD:2 (deny|permit) any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2387,7 +2387,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1|RANGE:2.2|RANGE:2.3|WORD:2.4)",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -2467,7 +2467,7 @@
       {
         "defun": "access-list (RANGE:2.0|RANGE:2.1|RANGE:2.2|RANGE:2.3|WORD:2.4) remark [WORD:4]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "if RANGE:2.0 do ACL-NUM = RANGE:2.0",
@@ -2550,7 +2550,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1|RANGE:2.2|RANGE:2.3|WORD:2.4) remark",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2633,7 +2633,7 @@
       {
         "defun": "no access-list (RANGE:2.0|RANGE:2.1|RANGE:2.2|RANGE:2.3|WORD:2.4) remark [WORD:4]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2687,7 +2687,7 @@
       {
         "defun": "ipv6 access-list WORD:3 (deny|permit) IPV6-PREFIX:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2746,7 +2746,7 @@
       {
         "defun": "ipv6 access-list WORD:3 (deny|permit) IPV6-PREFIX:5 exact-match",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2800,7 +2800,7 @@
       {
         "defun": "ipv6 access-list WORD:3 (deny|permit) any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2859,7 +2859,7 @@
       {
         "defun": "no ipv6 access-list WORD:3 (deny|permit) IPV6-PREFIX:5",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2923,7 +2923,7 @@
       {
         "defun": "no ipv6 access-list WORD:3 (deny|permit) IPV6-PREFIX:5 exact-match",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -2982,7 +2982,7 @@
       {
         "defun": "no ipv6 access-list WORD:3 (deny|permit) any",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3024,7 +3024,7 @@
       {
         "defun": "no ipv6 access-list WORD:3",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3071,7 +3071,7 @@
       {
         "defun": "ipv6 access-list WORD:3 remark [WORD:5]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3118,7 +3118,7 @@
       {
         "defun": "no ipv6 access-list WORD:3 remark",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3170,7 +3170,7 @@
       {
         "defun": "no ipv6 access-list WORD:3 remark [WORD:5]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -3207,7 +3207,7 @@
       {
         "defun": "show ip access-list",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3285,7 +3285,7 @@
       {
         "defun": "show ip access-list (RANGE:4.0|RANGE:4.1|RANGE:4.2|RANGE:4.3|WORD:4.4)",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3322,7 +3322,7 @@
       {
         "defun": "show ipv6 access-list",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -3364,7 +3364,7 @@
       {
         "defun": "show ipv6 access-list WORD:4",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

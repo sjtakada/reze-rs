@@ -26,7 +26,7 @@
       {
         "defun": "match peer (IPV4-ADDR:3.0|IPV6-ADDR:3.1)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -63,7 +63,7 @@
       {
         "defun": "match peer local",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -100,7 +100,7 @@
       {
         "defun": "no match peer",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -147,7 +147,7 @@
       {
         "defun": "no match peer (IPV4-ADDR:3.0|IPV6-ADDR:3.1)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -189,7 +189,7 @@
       {
         "defun": "no match peer local",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -249,7 +249,7 @@
       {
         "defun": "match ip address (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -291,7 +291,7 @@
       {
         "defun": "no match ip address",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -356,7 +356,7 @@
       {
         "defun": "no match ip address (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -416,7 +416,7 @@
       {
         "defun": "match ip next-hop (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -458,7 +458,7 @@
       {
         "defun": "no match ip next-hop",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -523,7 +523,7 @@
       {
         "defun": "no match ip next-hop (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -564,7 +564,7 @@
       {
         "defun": "match probability RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -601,7 +601,7 @@
       {
         "defun": "no match probability",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -647,7 +647,7 @@
       {
         "defun": "no match probability RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -707,7 +707,7 @@
       {
         "defun": "match ip route-source (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -749,7 +749,7 @@
       {
         "defun": "no match ip route-source",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -814,7 +814,7 @@
       {
         "defun": "no match ip route-source (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -861,7 +861,7 @@
       {
         "defun": "match ip address prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -908,7 +908,7 @@
       {
         "defun": "no match ip address prefix-list",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -960,7 +960,7 @@
       {
         "defun": "no match ip address prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1007,7 +1007,7 @@
       {
         "defun": "match ip next-hop prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1054,7 +1054,7 @@
       {
         "defun": "no match ip next-hop prefix-list",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1106,7 +1106,7 @@
       {
         "defun": "no match ip next-hop prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1153,7 +1153,7 @@
       {
         "defun": "match ip route-source prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1200,7 +1200,7 @@
       {
         "defun": "no match ip route-source prefix-list",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1252,7 +1252,7 @@
       {
         "defun": "no match ip route-source prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1293,7 +1293,7 @@
       {
         "defun": "match metric RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1330,7 +1330,7 @@
       {
         "defun": "no match metric",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1376,7 +1376,7 @@
       {
         "defun": "no match metric RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1431,7 +1431,7 @@
       {
         "defun": "match community (RANGE:3.0|RANGE:3.1|WORD:3.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1491,7 +1491,7 @@
       {
         "defun": "match community (RANGE:3.0|RANGE:3.1|WORD:3.2) exact-match",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1528,7 +1528,7 @@
       {
         "defun": "no match community",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1588,7 +1588,7 @@
       {
         "defun": "no match community (RANGE:3.0|RANGE:3.1|WORD:3.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1653,7 +1653,7 @@
       {
         "defun": "no match community (RANGE:3.0|RANGE:3.1|WORD:3.2) exact-match",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1708,7 +1708,7 @@
       {
         "defun": "match extcommunity (RANGE:3.0|RANGE:3.1|WORD:3.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1745,7 +1745,7 @@
       {
         "defun": "no match extcommunity",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1805,7 +1805,7 @@
       {
         "defun": "no match extcommunity (RANGE:3.0|RANGE:3.1|WORD:3.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1842,7 +1842,7 @@
       {
         "defun": "match as-path WORD:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1880,7 +1880,7 @@
       {
         "defun": "no match as-path",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1922,7 +1922,7 @@
       {
         "defun": "no match as-path WORD:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -1972,7 +1972,7 @@
       {
         "defun": "match origin (egp|igp|incomplete)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2009,7 +2009,7 @@
       {
         "defun": "no match origin",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2064,7 +2064,7 @@
       {
         "defun": "no match origin (egp|igp|incomplete)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2106,7 +2106,7 @@
       {
         "defun": "set ip next-hop IPV4-ADDR:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2148,7 +2148,7 @@
       {
         "defun": "set ip next-hop peer-address",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2190,7 +2190,7 @@
       {
         "defun": "no set ip next-hop",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2237,7 +2237,7 @@
       {
         "defun": "no set ip next-hop IPV4-ADDR:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2278,7 +2278,7 @@
       {
         "defun": "set metric RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2315,7 +2315,7 @@
       {
         "defun": "set metric METRIC-OFFSET:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2352,7 +2352,7 @@
       {
         "defun": "no set metric",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2398,7 +2398,7 @@
       {
         "defun": "no set metric RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2439,7 +2439,7 @@
       {
         "defun": "set local-preference RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2476,7 +2476,7 @@
       {
         "defun": "no set local-preference",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2522,7 +2522,7 @@
       {
         "defun": "no set local-preference RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2563,7 +2563,7 @@
       {
         "defun": "set weight RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2600,7 +2600,7 @@
       {
         "defun": "no set weight",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2646,7 +2646,7 @@
       {
         "defun": "no set weight RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2692,7 +2692,7 @@
       {
         "defun": "set as-path prepend [RANGE:4]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2734,7 +2734,7 @@
       {
         "defun": "no set as-path prepend",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2785,7 +2785,7 @@
       {
         "defun": "no set as-path prepend [RANGE:4]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2831,7 +2831,7 @@
       {
         "defun": "set as-path exclude [RANGE:4]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2873,7 +2873,7 @@
       {
         "defun": "no set as-path exclude",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2924,7 +2924,7 @@
       {
         "defun": "no set as-path exclude [RANGE:4]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2961,7 +2961,7 @@
       {
         "defun": "set community [COMMUNITY:3]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -2998,7 +2998,7 @@
       {
         "defun": "set community none",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3035,7 +3035,7 @@
       {
         "defun": "no set community",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3077,7 +3077,7 @@
       {
         "defun": "no set community [COMMUNITY:3]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3119,7 +3119,7 @@
       {
         "defun": "no set community none",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3179,7 +3179,7 @@
       {
         "defun": "set comm-list (RANGE:3.0|RANGE:3.1|WORD:3.2) delete",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3216,7 +3216,7 @@
       {
         "defun": "no set comm-list",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3281,7 +3281,7 @@
       {
         "defun": "no set comm-list (RANGE:3.0|RANGE:3.1|WORD:3.2) delete",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3323,7 +3323,7 @@
       {
         "defun": "set extcommunity rt [WORD:4]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3365,7 +3365,7 @@
       {
         "defun": "no set extcommunity rt",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3412,7 +3412,7 @@
       {
         "defun": "no set extcommunity rt [WORD:4]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3454,7 +3454,7 @@
       {
         "defun": "set extcommunity soo [WORD:4]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3496,7 +3496,7 @@
       {
         "defun": "no set extcommunity soo",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3543,7 +3543,7 @@
       {
         "defun": "no set extcommunity soo [WORD:4]",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3593,7 +3593,7 @@
       {
         "defun": "set origin (egp|igp|incomplete)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3630,7 +3630,7 @@
       {
         "defun": "no set origin",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3685,7 +3685,7 @@
       {
         "defun": "no set origin (egp|igp|incomplete)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3717,7 +3717,7 @@
       {
         "defun": "set atomic-aggregate",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3754,7 +3754,7 @@
       {
         "defun": "no set atomic-aggregate",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3805,7 +3805,7 @@
       {
         "defun": "set aggregator as RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3847,7 +3847,7 @@
       {
         "defun": "no set aggregator as",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3903,7 +3903,7 @@
       {
         "defun": "no set aggregator as RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3945,7 +3945,7 @@
       {
         "defun": "match ipv6 address WORD:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -3992,7 +3992,7 @@
       {
         "defun": "no match ipv6 address WORD:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4034,7 +4034,7 @@
       {
         "defun": "match ipv6 next-hop IPV6-ADDR:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4081,7 +4081,7 @@
       {
         "defun": "no match ipv6 next-hop IPV6-ADDR:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4128,7 +4128,7 @@
       {
         "defun": "match ipv6 address prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4180,7 +4180,7 @@
       {
         "defun": "no match ipv6 address prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4227,7 +4227,7 @@
       {
         "defun": "set ipv6 next-hop global IPV6-ADDR:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4274,7 +4274,7 @@
       {
         "defun": "no set ipv6 next-hop global",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4326,7 +4326,7 @@
       {
         "defun": "no set ipv6 next-hop global IPV6-ADDR:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4373,7 +4373,7 @@
       {
         "defun": "set ipv6 next-hop local IPV6-ADDR:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4420,7 +4420,7 @@
       {
         "defun": "no set ipv6 next-hop local",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4472,7 +4472,7 @@
       {
         "defun": "no set ipv6 next-hop local IPV6-ADDR:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4514,7 +4514,7 @@
       {
         "defun": "set vpnv4 next-hop IPV4-ADDR:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4556,7 +4556,7 @@
       {
         "defun": "no set vpnv4 next-hop",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4603,7 +4603,7 @@
       {
         "defun": "no set vpnv4 next-hop IPV4-ADDR:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4640,7 +4640,7 @@
       {
         "defun": "set originator-id IPV4-ADDR:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4677,7 +4677,7 @@
       {
         "defun": "no set originator-id",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4719,7 +4719,7 @@
       {
         "defun": "no set originator-id IPV4-ADDR:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4770,7 +4770,7 @@
       {
         "defun": "no set pathlimit ttl RANGE:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -4821,7 +4821,7 @@
       {
         "defun": "no match pathlimit as RANGE:4",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {

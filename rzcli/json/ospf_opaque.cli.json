@@ -16,7 +16,7 @@
       {
         "defun": "capability opaque",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -49,7 +49,7 @@
       {
         "defun": "ospf opaque-lsa",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -87,7 +87,7 @@
       {
         "defun": "no capability opaque",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -125,7 +125,7 @@
       {
         "defun": "no ospf opaque-lsa",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {

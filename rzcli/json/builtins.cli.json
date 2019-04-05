@@ -16,7 +16,7 @@
       {
         "defun": "debug cli",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -50,7 +50,7 @@
       {
         "defun": "no debug cli",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -81,8 +81,7 @@
       {
         "defun": "show result",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -111,8 +110,7 @@
       {
         "defun": "write result",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

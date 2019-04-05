@@ -43,7 +43,7 @@
       {
         "defun": "ip as-path access-list WORD:4 (deny|permit) [WORD:6]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -107,7 +107,7 @@
       {
         "defun": "no ip as-path access-list WORD:4 (deny|permit) [WORD:6]",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -154,7 +154,7 @@
       {
         "defun": "no ip as-path access-list WORD:4",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "action": [
           {
@@ -196,8 +196,7 @@
       {
         "defun": "show ip as-path-access-list WORD:4",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -234,8 +233,7 @@
       {
         "defun": "show ip as-path-access-list",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

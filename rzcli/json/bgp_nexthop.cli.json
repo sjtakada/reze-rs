@@ -25,7 +25,7 @@
       {
         "defun": "bgp scan-time RANGE:3",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -62,7 +62,7 @@
       {
         "defun": "no bgp scan-time",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -108,7 +108,7 @@
       {
         "defun": "no bgp scan-time RANGE:3",
         "mode": [
-          "BGP-NODE"
+          "CONFIG-BGP-MODE"
         ],
         "action": [
           {
@@ -150,9 +150,7 @@
       {
         "defun": "show ip bgp scan",
         "mode": [
-          "VIEW-NODE",
-          "RESTRICTED-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -199,8 +197,7 @@
       {
         "defun": "show ip bgp scan detail",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

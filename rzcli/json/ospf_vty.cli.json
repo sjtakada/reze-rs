@@ -16,7 +16,7 @@
       {
         "defun": "router ospf",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "PROCESS-ID = 1"
@@ -24,7 +24,7 @@
         "action": [
           {
             "mode": {
-              "name": "OSPF-NODE",
+              "name": "CONFIG-OSPF-MODE",
               "params": [
                 "PROCESS-ID"
               ]
@@ -60,7 +60,7 @@
       {
         "defun": "no router ospf",
         "mode": [
-          "CONFIG-NODE"
+          "CONFIG-MODE"
         ],
         "bind": [
           "PROCESS-ID = 1"
@@ -98,7 +98,7 @@
       {
         "defun": "ospf router-id IPV4-ADDR:3",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -131,7 +131,7 @@
       {
         "defun": "router-id IPV4-ADDR:2",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -168,7 +168,7 @@
       {
         "defun": "no ospf router-id",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -200,7 +200,7 @@
       {
         "defun": "no router-id",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -237,7 +237,7 @@
       {
         "defun": "passive-interface WORD:2 IPV4-ADDR:3",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -269,7 +269,7 @@
       {
         "defun": "passive-interface WORD:2",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -301,7 +301,7 @@
       {
         "defun": "passive-interface default",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -343,7 +343,7 @@
       {
         "defun": "no passive-interface WORD:2 IPV4-ADDR:3",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -380,7 +380,7 @@
       {
         "defun": "no passive-interface WORD:2",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -417,7 +417,7 @@
       {
         "defun": "no passive-interface default",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -468,7 +468,7 @@
       {
         "defun": "network IPV4-PREFIX:2 area (IPV4-ADDR:4.0|RANGE:4.1)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if IPV4-PREFIX:2 do ADDRESS, MASKLEN = ipv4prefix2address_masklen (IPV4-PREFIX:2)",
@@ -536,7 +536,7 @@
       {
         "defun": "no network IPV4-PREFIX:2 area (IPV4-ADDR:4.0|RANGE:4.1)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if IPV4-PREFIX:2 do ADDRESS, MASKLEN = ipv4prefix2address_masklen (IPV4-PREFIX:2)",
@@ -591,7 +591,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -647,7 +647,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 advertise",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -712,7 +712,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 cost RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -782,7 +782,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 advertise cost RANGE:7",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -838,7 +838,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 not-advertise",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -894,7 +894,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -962,7 +962,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 (advertise|not-advertise)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -1032,7 +1032,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 cost RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -1107,7 +1107,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 advertise cost RANGE:7",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -1168,7 +1168,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 substitute IPV4-PREFIX:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -1234,7 +1234,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 substitute IPV4-PREFIX:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -1285,7 +1285,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -1343,7 +1343,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -1429,7 +1429,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -1514,7 +1514,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -1612,7 +1612,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -1698,7 +1698,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -1806,7 +1806,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:8 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:10",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -1893,7 +1893,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2011,7 +2011,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:8 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:10 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:12",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2099,7 +2099,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2176,7 +2176,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest|null)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2238,7 +2238,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2305,7 +2305,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2386,7 +2386,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (message-digest-key) RANGE:6 md5 WORD:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2462,7 +2462,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (message-digest-key) RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2526,7 +2526,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication-key) WORD:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2593,7 +2593,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication-key)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -2678,7 +2678,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest|null) (authentication-key) WORD:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -2746,7 +2746,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (authentication-key) WORD:7",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -2814,7 +2814,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (authentication-key)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -2908,7 +2908,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest|null) (message-digest-key) RANGE:8 md5 WORD:10",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -2990,7 +2990,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest-key) RANGE:7 md5 WORD:9",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -3058,7 +3058,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest-key)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -3122,7 +3122,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) shortcut (default|enable|disable)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3191,7 +3191,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) shortcut (enable|disable)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3242,7 +3242,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) stub",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3299,7 +3299,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) stub no-summary",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3357,7 +3357,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) stub",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3419,7 +3419,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) stub no-summary",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3493,7 +3493,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) nssa (translate-candidate|translate-never|translate-always) no-summary",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3563,7 +3563,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) nssa (translate-candidate|translate-never|translate-always)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3614,7 +3614,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) nssa",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3667,7 +3667,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) nssa no-summary",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3723,7 +3723,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) nssa",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3781,7 +3781,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) nssa no-summary",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3841,7 +3841,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) default-cost RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3907,7 +3907,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) default-cost RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -3963,7 +3963,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) export-list WORD:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -4025,7 +4025,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) export-list WORD:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -4081,7 +4081,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) import-list WORD:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -4143,7 +4143,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) import-list WORD:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -4216,7 +4216,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) filter-list prefix WORD:5 (in|out)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -4307,7 +4307,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) filter-list prefix WORD:5 (in|out)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -4374,7 +4374,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) authentication message-digest",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -4426,7 +4426,7 @@
       {
         "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) authentication",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -4483,7 +4483,7 @@
       {
         "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) authentication",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
@@ -4544,7 +4544,7 @@
       {
         "defun": "ospf abr-type (cisco|ibm|shortcut|standard)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4605,7 +4605,7 @@
       {
         "defun": "no ospf abr-type (cisco|ibm|shortcut|standard)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4632,7 +4632,7 @@
       {
         "defun": "log-adjacency-changes",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4665,7 +4665,7 @@
       {
         "defun": "log-adjacency-changes detail",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4698,7 +4698,7 @@
       {
         "defun": "no log-adjacency-changes",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4736,7 +4736,7 @@
       {
         "defun": "no log-adjacency-changes detail",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4769,7 +4769,7 @@
       {
         "defun": "compatible rfc1583",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4807,7 +4807,7 @@
       {
         "defun": "no compatible rfc1583",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4840,7 +4840,7 @@
       {
         "defun": "ospf rfc1583compatibility",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4878,7 +4878,7 @@
       {
         "defun": "no ospf rfc1583compatibility",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4943,7 +4943,7 @@
       {
         "defun": "timers throttle spf RANGE:4 RANGE:5 RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -4988,7 +4988,7 @@
       {
         "defun": "no timers throttle spf",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5023,7 +5023,7 @@
       {
         "defun": "neighbor IPV4-ADDR:2",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5081,7 +5081,7 @@
       {
         "defun": "neighbor IPV4-ADDR:2 priority RANGE:4 poll-interval RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5129,7 +5129,7 @@
       {
         "defun": "neighbor IPV4-ADDR:2 priority RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5176,7 +5176,7 @@
       {
         "defun": "neighbor IPV4-ADDR:2 poll-interval RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5237,7 +5237,7 @@
       {
         "defun": "neighbor IPV4-ADDR:2 poll-interval RANGE:4 priority RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5276,7 +5276,7 @@
       {
         "defun": "no neighbor IPV4-ADDR:2",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5325,7 +5325,7 @@
       {
         "defun": "no neighbor IPV4-ADDR:2 priority RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5377,7 +5377,7 @@
       {
         "defun": "no neighbor IPV4-ADDR:2 poll-interval RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5483,7 +5483,7 @@
       {
         "defun": "refresh timer RANGE:3",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5529,7 +5529,7 @@
       {
         "defun": "no refresh timer RANGE:3",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5566,7 +5566,7 @@
       {
         "defun": "no refresh timer",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5607,7 +5607,7 @@
       {
         "defun": "auto-cost reference-bandwidth RANGE:3",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5645,7 +5645,7 @@
       {
         "defun": "no auto-cost reference-bandwidth",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -5683,8 +5683,7 @@
       {
         "defun": "show ip ospf",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5731,8 +5730,7 @@
       {
         "defun": "show ip ospf interface (WORD:5.0|)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5774,8 +5772,7 @@
       {
         "defun": "show ip ospf neighbor",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5822,8 +5819,7 @@
       {
         "defun": "show ip ospf neighbor all",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5870,8 +5866,7 @@
       {
         "defun": "show ip ospf neighbor WORD:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5918,8 +5913,7 @@
       {
         "defun": "show ip ospf neighbor IPV4-ADDR:5",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -5966,8 +5960,7 @@
       {
         "defun": "show ip ospf neighbor detail",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6019,8 +6012,7 @@
       {
         "defun": "show ip ospf neighbor detail all",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6072,8 +6064,7 @@
       {
         "defun": "show ip ospf neighbor WORD:5 detail",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6115,8 +6106,7 @@
       {
         "defun": "show ip ospf database",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6224,8 +6214,7 @@
       {
         "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as|max-age|self-originate)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6326,8 +6315,7 @@
       {
         "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) IPV4-ADDR:6",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6438,8 +6426,7 @@
       {
         "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) IPV4-ADDR:6 adv-router IPV4-ADDR:8",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6546,8 +6533,7 @@
       {
         "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) IPV4-ADDR:6 (self-originate)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6653,8 +6639,7 @@
       {
         "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) adv-router IPV4-ADDR:7",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6756,8 +6741,7 @@
       {
         "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) (self-originate)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -6811,7 +6795,7 @@
       {
         "defun": "ip ospf authentication (null|message-digest) IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -6861,7 +6845,7 @@
       {
         "defun": "ip ospf authentication (null|message-digest)",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -6904,7 +6888,7 @@
       {
         "defun": "ip ospf authentication IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -6942,7 +6926,7 @@
       {
         "defun": "ip ospf authentication",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -6990,7 +6974,7 @@
       {
         "defun": "no ip ospf authentication IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7033,7 +7017,7 @@
       {
         "defun": "no ip ospf authentication",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7081,7 +7065,7 @@
       {
         "defun": "ip ospf authentication-key WORD:4 IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7124,7 +7108,7 @@
       {
         "defun": "ip ospf authentication-key WORD:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7162,7 +7146,7 @@
       {
         "defun": "ospf authentication-key WORD:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7209,7 +7193,7 @@
       {
         "defun": "no ip ospf authentication-key IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7252,7 +7236,7 @@
       {
         "defun": "no ip ospf authentication-key",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7290,7 +7274,7 @@
       {
         "defun": "no ospf authentication-key",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7351,7 +7335,7 @@
       {
         "defun": "ip ospf message-digest-key RANGE:4 md5 WORD:6 IPV4-ADDR:7",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7408,7 +7392,7 @@
       {
         "defun": "ip ospf message-digest-key RANGE:4 md5 WORD:6",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7460,7 +7444,7 @@
       {
         "defun": "ospf message-digest-key RANGE:3 md5 WORD:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7516,7 +7500,7 @@
       {
         "defun": "no ip ospf message-digest-key RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7565,7 +7549,7 @@
       {
         "defun": "no ip ospf message-digest-key RANGE:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7609,7 +7593,7 @@
       {
         "defun": "no ospf message-digest-key RANGE:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7660,7 +7644,7 @@
       {
         "defun": "ip ospf cost RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7707,7 +7691,7 @@
       {
         "defun": "ip ospf cost RANGE:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7749,7 +7733,7 @@
       {
         "defun": "ospf cost RANGE:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7795,7 +7779,7 @@
       {
         "defun": "ospf cost RANGE:3 IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7842,7 +7826,7 @@
       {
         "defun": "no ip ospf cost IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7885,7 +7869,7 @@
       {
         "defun": "no ip ospf cost",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7923,7 +7907,7 @@
       {
         "defun": "no ospf cost",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -7965,7 +7949,7 @@
       {
         "defun": "no ospf cost IPV4-ADDR:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8016,7 +8000,7 @@
       {
         "defun": "no ip ospf cost RANGE:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8063,7 +8047,7 @@
       {
         "defun": "no ospf cost RANGE:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8119,7 +8103,7 @@
       {
         "defun": "no ip ospf cost RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8171,7 +8155,7 @@
       {
         "defun": "no ospf cost RANGE:3 IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8222,7 +8206,7 @@
       {
         "defun": "ip ospf dead-interval RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8269,7 +8253,7 @@
       {
         "defun": "ip ospf dead-interval RANGE:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8311,7 +8295,7 @@
       {
         "defun": "ospf dead-interval RANGE:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8372,7 +8356,7 @@
       {
         "defun": "ip ospf dead-interval minimal hello-multiplier RANGE:6 IPV4-ADDR:7",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8428,7 +8412,7 @@
       {
         "defun": "ip ospf dead-interval minimal hello-multiplier RANGE:6",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8475,7 +8459,7 @@
       {
         "defun": "no ip ospf dead-interval IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8518,7 +8502,7 @@
       {
         "defun": "no ip ospf dead-interval",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8556,7 +8540,7 @@
       {
         "defun": "no ospf dead-interval",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8607,7 +8591,7 @@
       {
         "defun": "ip ospf hello-interval RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8654,7 +8638,7 @@
       {
         "defun": "ip ospf hello-interval RANGE:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8696,7 +8680,7 @@
       {
         "defun": "ospf hello-interval RANGE:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8743,7 +8727,7 @@
       {
         "defun": "no ip ospf hello-interval IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8786,7 +8770,7 @@
       {
         "defun": "no ip ospf hello-interval",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8824,7 +8808,7 @@
       {
         "defun": "no ospf hello-interval",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8885,7 +8869,7 @@
       {
         "defun": "ip ospf network (broadcast|non-broadcast|point-to-multipoint|point-to-point)",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8942,7 +8926,7 @@
       {
         "defun": "ospf network (broadcast|non-broadcast|point-to-multipoint|point-to-point)",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -8984,7 +8968,7 @@
       {
         "defun": "no ip ospf network",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9022,7 +9006,7 @@
       {
         "defun": "no ospf network",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9073,7 +9057,7 @@
       {
         "defun": "ip ospf priority RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9120,7 +9104,7 @@
       {
         "defun": "ip ospf priority RANGE:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9162,7 +9146,7 @@
       {
         "defun": "ospf priority RANGE:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9209,7 +9193,7 @@
       {
         "defun": "no ip ospf priority IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9252,7 +9236,7 @@
       {
         "defun": "no ip ospf priority",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9290,7 +9274,7 @@
       {
         "defun": "no ospf priority",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9341,7 +9325,7 @@
       {
         "defun": "ip ospf retransmit-interval RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9388,7 +9372,7 @@
       {
         "defun": "ip ospf retransmit-interval RANGE:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9430,7 +9414,7 @@
       {
         "defun": "ospf retransmit-interval RANGE:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9477,7 +9461,7 @@
       {
         "defun": "no ip ospf retransmit-interval IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9520,7 +9504,7 @@
       {
         "defun": "no ip ospf retransmit-interval",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9558,7 +9542,7 @@
       {
         "defun": "no ospf retransmit-interval",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9609,7 +9593,7 @@
       {
         "defun": "ip ospf transmit-delay RANGE:4 IPV4-ADDR:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9656,7 +9640,7 @@
       {
         "defun": "ip ospf transmit-delay RANGE:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9698,7 +9682,7 @@
       {
         "defun": "ospf transmit-delay RANGE:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9745,7 +9729,7 @@
       {
         "defun": "no ip ospf transmit-delay IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9788,7 +9772,7 @@
       {
         "defun": "no ip ospf transmit-delay",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9826,7 +9810,7 @@
       {
         "defun": "no ospf transmit-delay",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -9936,7 +9920,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel) metric RANGE:4 metric-type (1|2) route-map WORD:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10039,7 +10023,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel) metric RANGE:4 metric-type (1|2)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10124,7 +10108,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel) metric RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10235,7 +10219,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel) metric-type (1|2) metric RANGE:6 route-map WORD:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10338,7 +10322,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel) metric-type (1|2) metric RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10426,7 +10410,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel) metric-type (1|2)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10496,7 +10480,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10587,7 +10571,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel) metric RANGE:4 route-map WORD:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10685,7 +10669,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel) metric-type (1|2) route-map WORD:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10766,7 +10750,7 @@
       {
         "defun": "redistribute (kernel|connected|static|rip|isis|bgp|babel) route-map WORD:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10841,7 +10825,7 @@
       {
         "defun": "no redistribute (kernel|connected|static|rip|isis|bgp|babel)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -10918,7 +10902,7 @@
       {
         "defun": "distribute-list WORD:2 out (kernel|connected|static|rip|isis|bgp|babel)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11003,7 +10987,7 @@
       {
         "defun": "no distribute-list WORD:2 out (kernel|connected|static|rip|isis|bgp|babel)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11074,7 +11058,7 @@
       {
         "defun": "default-information originate metric RANGE:4 metric-type (1|2) route-map WORD:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11137,7 +11121,7 @@
       {
         "defun": "default-information originate metric RANGE:4 metric-type (1|2)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11183,7 +11167,7 @@
       {
         "defun": "default-information originate metric RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11215,7 +11199,7 @@
       {
         "defun": "default-information originate",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11271,7 +11255,7 @@
       {
         "defun": "default-information originate metric RANGE:4 route-map WORD:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11313,7 +11297,7 @@
       {
         "defun": "default-information originate route-map WORD:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11386,7 +11370,7 @@
       {
         "defun": "default-information originate metric-type (1|2) metric RANGE:6 route-map WORD:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11449,7 +11433,7 @@
       {
         "defun": "default-information originate metric-type (1|2) metric RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11498,7 +11482,7 @@
       {
         "defun": "default-information originate metric-type (1|2)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11557,7 +11541,7 @@
       {
         "defun": "default-information originate metric-type (1|2) route-map WORD:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11635,7 +11619,7 @@
       {
         "defun": "default-information originate always metric RANGE:5 metric-type (1|2) route-map WORD:9",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11703,7 +11687,7 @@
       {
         "defun": "default-information originate always metric RANGE:5 metric-type (1|2)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11754,7 +11738,7 @@
       {
         "defun": "default-information originate always metric RANGE:5",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11791,7 +11775,7 @@
       {
         "defun": "default-information originate always",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11852,7 +11836,7 @@
       {
         "defun": "default-information originate always metric RANGE:5 route-map WORD:7",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11899,7 +11883,7 @@
       {
         "defun": "default-information originate always route-map WORD:5",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -11977,7 +11961,7 @@
       {
         "defun": "default-information originate always metric-type (1|2) metric RANGE:7 route-map WORD:9",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12045,7 +12029,7 @@
       {
         "defun": "default-information originate always metric-type (1|2) metric RANGE:7",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12099,7 +12083,7 @@
       {
         "defun": "default-information originate always metric-type (1|2)",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12163,7 +12147,7 @@
       {
         "defun": "default-information originate always metric-type (1|2) route-map WORD:7",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12200,7 +12184,7 @@
       {
         "defun": "no default-information originate",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12236,7 +12220,7 @@
       {
         "defun": "default-metric RANGE:2",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12269,7 +12253,7 @@
       {
         "defun": "no default-metric",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12311,7 +12295,7 @@
       {
         "defun": "no default-metric RANGE:2",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12348,7 +12332,7 @@
       {
         "defun": "distance RANGE:2",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12390,7 +12374,7 @@
       {
         "defun": "no distance RANGE:2",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12428,7 +12412,7 @@
       {
         "defun": "no distance ospf",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12477,7 +12461,7 @@
       {
         "defun": "distance ospf intra-area RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12538,7 +12522,7 @@
       {
         "defun": "distance ospf intra-area RANGE:4 inter-area RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12600,7 +12584,7 @@
       {
         "defun": "distance ospf intra-area RANGE:4 external RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12676,7 +12660,7 @@
       {
         "defun": "distance ospf intra-area RANGE:4 inter-area RANGE:6 external RANGE:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12753,7 +12737,7 @@
       {
         "defun": "distance ospf intra-area RANGE:4 external RANGE:6 inter-area RANGE:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12802,7 +12786,7 @@
       {
         "defun": "distance ospf inter-area RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12863,7 +12847,7 @@
       {
         "defun": "distance ospf inter-area RANGE:4 intra-area RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -12925,7 +12909,7 @@
       {
         "defun": "distance ospf inter-area RANGE:4 external RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13001,7 +12985,7 @@
       {
         "defun": "distance ospf inter-area RANGE:4 intra-area RANGE:6 external RANGE:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13078,7 +13062,7 @@
       {
         "defun": "distance ospf inter-area RANGE:4 external RANGE:6 intra-area RANGE:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13127,7 +13111,7 @@
       {
         "defun": "distance ospf external RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13188,7 +13172,7 @@
       {
         "defun": "distance ospf external RANGE:4 intra-area RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13250,7 +13234,7 @@
       {
         "defun": "distance ospf external RANGE:4 inter-area RANGE:6",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13326,7 +13310,7 @@
       {
         "defun": "distance ospf external RANGE:4 intra-area RANGE:6 inter-area RANGE:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13403,7 +13387,7 @@
       {
         "defun": "distance ospf external RANGE:4 inter-area RANGE:6 intra-area RANGE:8",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13620,7 +13604,7 @@
       {
         "defun": "ip ospf mtu-ignore IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -13658,7 +13642,7 @@
       {
         "defun": "ip ospf mtu-ignore",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -13706,7 +13690,7 @@
       {
         "defun": "no ip ospf mtu-ignore IPV4-ADDR:4",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -13749,7 +13733,7 @@
       {
         "defun": "no ip ospf mtu-ignore",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -13787,7 +13771,7 @@
       {
         "defun": "max-metric router-lsa administrative",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13829,7 +13813,7 @@
       {
         "defun": "no max-metric router-lsa administrative",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13875,7 +13859,7 @@
       {
         "defun": "max-metric router-lsa on-startup RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13918,7 +13902,7 @@
       {
         "defun": "no max-metric router-lsa on-startup",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -13965,7 +13949,7 @@
       {
         "defun": "max-metric router-lsa on-shutdown RANGE:4",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -14008,7 +13992,7 @@
       {
         "defun": "no max-metric router-lsa on-shutdown",
         "mode": [
-          "OSPF-NODE"
+          "CONFIG-OSPF-MODE"
         ],
         "action": [
           {
@@ -14051,8 +14035,7 @@
       {
         "defun": "show ip ospf border-routers",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -14094,8 +14077,7 @@
       {
         "defun": "show ip ospf route",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

@@ -21,8 +21,7 @@
       {
         "defun": "debug bgp as4",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -64,8 +63,7 @@
       {
         "defun": "no debug bgp as4",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -102,7 +100,7 @@
       {
         "defun": "undebug bgp as4",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -144,8 +142,7 @@
       {
         "defun": "debug bgp as4 segment",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -192,8 +189,7 @@
       {
         "defun": "no debug bgp as4 segment",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -235,7 +231,7 @@
       {
         "defun": "undebug bgp as4 segment",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -272,8 +268,7 @@
       {
         "defun": "debug bgp fsm",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -315,8 +310,7 @@
       {
         "defun": "no debug bgp fsm",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -353,7 +347,7 @@
       {
         "defun": "undebug bgp fsm",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -390,8 +384,7 @@
       {
         "defun": "debug bgp events",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -433,8 +426,7 @@
       {
         "defun": "no debug bgp events",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -471,7 +463,7 @@
       {
         "defun": "undebug bgp events",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -508,8 +500,7 @@
       {
         "defun": "debug bgp filters",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -551,8 +542,7 @@
       {
         "defun": "no debug bgp filters",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -589,7 +579,7 @@
       {
         "defun": "undebug bgp filters",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -626,8 +616,7 @@
       {
         "defun": "debug bgp keepalives",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -669,8 +658,7 @@
       {
         "defun": "no debug bgp keepalives",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -707,7 +695,7 @@
       {
         "defun": "undebug bgp keepalives",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -744,8 +732,7 @@
       {
         "defun": "debug bgp updates",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -794,8 +781,7 @@
       {
         "defun": "debug bgp updates (in|out)",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -837,8 +823,7 @@
       {
         "defun": "no debug bgp updates",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -875,7 +860,7 @@
       {
         "defun": "undebug bgp updates",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -907,8 +892,7 @@
       {
         "defun": "debug bgp",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -945,8 +929,7 @@
       {
         "defun": "no debug bgp",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -978,7 +961,7 @@
       {
         "defun": "undebug bgp",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1015,8 +998,7 @@
       {
         "defun": "debug bgp zebra",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1058,8 +1040,7 @@
       {
         "defun": "no debug bgp zebra",
         "mode": [
-          "ENABLE-NODE",
-          "CONFIG-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1096,7 +1077,7 @@
       {
         "defun": "undebug bgp zebra",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1138,7 +1119,7 @@
       {
         "defun": "no debug all bgp",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1175,7 +1156,7 @@
       {
         "defun": "undebug all bgp",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -1212,7 +1193,7 @@
       {
         "defun": "show debugging bgp",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {

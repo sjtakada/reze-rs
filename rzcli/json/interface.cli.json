@@ -21,8 +21,7 @@
       {
         "defun": "show interface (WORD:3.0|)",
         "mode": [
-          "VIEW-NODE",
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -59,7 +58,7 @@
       {
         "defun": "show interface description",
         "mode": [
-          "ENABLE-NODE"
+          "EXEC-MODE"
         ],
         "action": [
           {
@@ -86,7 +85,7 @@
       {
         "defun": "multicast",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -118,7 +117,7 @@
       {
         "defun": "no multicast",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -145,7 +144,7 @@
       {
         "defun": "link-detect",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -177,7 +176,7 @@
       {
         "defun": "no link-detect",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -204,7 +203,7 @@
       {
         "defun": "shutdown",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -236,7 +235,7 @@
       {
         "defun": "no shutdown",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -272,7 +271,7 @@
       {
         "defun": "bandwidth RANGE:2",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -304,7 +303,7 @@
       {
         "defun": "no bandwidth",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -345,7 +344,7 @@
       {
         "defun": "no bandwidth RANGE:2",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -382,7 +381,7 @@
       {
         "defun": "ip address IPV4-PREFIX:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -424,7 +423,7 @@
       {
         "defun": "no ip address IPV4-PREFIX:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -471,7 +470,7 @@
       {
         "defun": "ip address IPV4-PREFIX:3 label WORD:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -523,7 +522,7 @@
       {
         "defun": "no ip address IPV4-PREFIX:3 label WORD:5",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -560,7 +559,7 @@
       {
         "defun": "ipv6 address IPV6-PREFIX:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {
@@ -602,7 +601,7 @@
       {
         "defun": "no ipv6 address IPV6-PREFIX:3",
         "mode": [
-          "INTERFACE-NODE"
+          "CONFIG-IF-MODE"
         ],
         "action": [
           {

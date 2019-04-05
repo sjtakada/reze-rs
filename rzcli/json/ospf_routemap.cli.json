@@ -44,7 +44,7 @@
       {
         "defun": "match ip next-hop (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -86,7 +86,7 @@
       {
         "defun": "no match ip next-hop",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -151,7 +151,7 @@
       {
         "defun": "no match ip next-hop (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -198,7 +198,7 @@
       {
         "defun": "match ip next-hop prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -245,7 +245,7 @@
       {
         "defun": "no match ip next-hop prefix-list",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -297,7 +297,7 @@
       {
         "defun": "no match ip next-hop prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -357,7 +357,7 @@
       {
         "defun": "match ip address (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -399,7 +399,7 @@
       {
         "defun": "no match ip address",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -464,7 +464,7 @@
       {
         "defun": "no match ip address (RANGE:4.0|RANGE:4.1|WORD:4.2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -511,7 +511,7 @@
       {
         "defun": "match ip address prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -558,7 +558,7 @@
       {
         "defun": "no match ip address prefix-list",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -610,7 +610,7 @@
       {
         "defun": "no match ip address prefix-list WORD:5",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -647,7 +647,7 @@
       {
         "defun": "match interface WORD:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -684,7 +684,7 @@
       {
         "defun": "no match interface",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -726,7 +726,7 @@
       {
         "defun": "no match interface WORD:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -767,7 +767,7 @@
       {
         "defun": "set metric RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -804,7 +804,7 @@
       {
         "defun": "no set metric",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -850,7 +850,7 @@
       {
         "defun": "no set metric RANGE:3",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -894,7 +894,7 @@
       {
         "defun": "set metric-type (type-1|type-2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -931,7 +931,7 @@
       {
         "defun": "no set metric-type",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
@@ -980,7 +980,7 @@
       {
         "defun": "no set metric-type (type-1|type-2)",
         "mode": [
-          "RMAP-NODE"
+          "CONFIG-ROUTEMAP-MODE"
         ],
         "action": [
           {
