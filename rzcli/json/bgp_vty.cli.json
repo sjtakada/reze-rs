@@ -426,7 +426,7 @@
         "type": "keyword",
         "help": "Override configured router identifier"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "Manually configured router identifier"
@@ -434,7 +434,7 @@
     },
     "command": [
       {
-        "defun": "bgp router-id IPV4-ADDR:3",
+        "defun": "bgp router-id IPV4-ADDRESS:3",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -444,7 +444,7 @@
               "method": "POST",
               "path": "bgps/:AS-NUM",
               "params": {
-                "router-id": "IPV4-ADDR:3"
+                "router-id": "IPV4-ADDRESS:3"
               }
             }
           }
@@ -507,7 +507,7 @@
         "type": "keyword",
         "help": "Override configured router identifier"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "Manually configured router identifier"
@@ -515,7 +515,7 @@
     },
     "command": [
       {
-        "defun": "no bgp router-id IPV4-ADDR:3",
+        "defun": "no bgp router-id IPV4-ADDRESS:3",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -544,7 +544,7 @@
         "type": "keyword",
         "help": "Configure Route-Reflector Cluster-id"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "Route-Reflector Cluster-id in IP address format"
@@ -552,7 +552,7 @@
     },
     "command": [
       {
-        "defun": "bgp cluster-id IPV4-ADDR:3",
+        "defun": "bgp cluster-id IPV4-ADDRESS:3",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -664,7 +664,7 @@
         "type": "keyword",
         "help": "Configure Route-Reflector Cluster-id"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "Route-Reflector Cluster-id in IP address format"
@@ -672,7 +672,7 @@
     },
     "command": [
       {
-        "defun": "no bgp cluster-id IPV4-ADDR:3",
+        "defun": "no bgp cluster-id IPV4-ADDRESS:3",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -2801,12 +2801,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -2833,7 +2833,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) remote-as RANGE:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) remote-as RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -2899,12 +2899,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -2917,7 +2917,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) ",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) ",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -2946,12 +2946,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -2973,7 +2973,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) remote-as RANGE:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) remote-as RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3090,12 +3090,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3122,7 +3122,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) local-as RANGE:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) local-as RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3146,12 +3146,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3183,7 +3183,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) local-as RANGE:4 no-prepend",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) local-as RANGE:4 no-prepend",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3207,12 +3207,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3249,7 +3249,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) local-as RANGE:4 no-prepend replace-as",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) local-as RANGE:4 no-prepend replace-as",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3278,12 +3278,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3301,7 +3301,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) local-as",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) local-as",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3330,12 +3330,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3362,7 +3362,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) local-as RANGE:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) local-as RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3391,12 +3391,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3428,7 +3428,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) local-as RANGE:4 no-prepend",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) local-as RANGE:4 no-prepend",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3457,12 +3457,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3499,7 +3499,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) local-as RANGE:4 no-prepend replace-as",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) local-as RANGE:4 no-prepend replace-as",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3523,12 +3523,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3551,7 +3551,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) password WORD:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) password WORD:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3580,12 +3580,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3603,7 +3603,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) password",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) password",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3627,12 +3627,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3650,7 +3650,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) activate",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) activate",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -3684,12 +3684,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3707,7 +3707,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) activate",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) activate",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -3736,12 +3736,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -3759,7 +3759,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) peer-group WORD:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) peer-group WORD:4",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -3793,12 +3793,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -3816,7 +3816,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) peer-group WORD:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) peer-group WORD:4",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -3845,12 +3845,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3868,7 +3868,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) passive",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) passive",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3897,12 +3897,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3920,7 +3920,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) passive",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) passive",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3944,12 +3944,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -3967,7 +3967,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) shutdown",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) shutdown",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -3996,12 +3996,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4019,7 +4019,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) shutdown",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) shutdown",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -4043,12 +4043,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4071,7 +4071,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) capability dynamic",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) capability dynamic",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -4100,12 +4100,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4128,7 +4128,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) capability dynamic",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) capability dynamic",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -4152,12 +4152,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4175,7 +4175,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) dont-capability-negotiate",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) dont-capability-negotiate",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -4204,12 +4204,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4227,7 +4227,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) dont-capability-negotiate",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) dont-capability-negotiate",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -4251,12 +4251,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4302,7 +4302,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) capability orf prefix-list (both|send|receive)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) capability orf prefix-list (both|send|receive)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4335,12 +4335,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4386,7 +4386,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) capability orf prefix-list (both|send|receive)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) capability orf prefix-list (both|send|receive)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4414,12 +4414,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4437,7 +4437,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) next-hop-self",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) next-hop-self",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4471,12 +4471,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4494,7 +4494,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) next-hop-self",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) next-hop-self",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4523,12 +4523,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4546,7 +4546,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) remove-private-AS",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) remove-private-AS",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4580,12 +4580,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4603,7 +4603,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) remove-private-AS",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) remove-private-AS",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4632,12 +4632,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4655,7 +4655,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) send-community",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) send-community",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4689,12 +4689,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4712,7 +4712,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) send-community",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) send-community",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4741,12 +4741,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4782,7 +4782,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) send-community (both|extended|standard)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) send-community (both|extended|standard)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4816,12 +4816,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4857,7 +4857,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) send-community (both|extended|standard)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) send-community (both|extended|standard)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4886,12 +4886,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4914,7 +4914,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) soft-reconfiguration inbound",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) soft-reconfiguration inbound",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -4948,12 +4948,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -4976,7 +4976,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) soft-reconfiguration inbound",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) soft-reconfiguration inbound",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5005,12 +5005,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5028,7 +5028,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) route-reflector-client",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) route-reflector-client",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5062,12 +5062,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5085,7 +5085,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) route-reflector-client",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) route-reflector-client",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5114,12 +5114,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5137,7 +5137,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) route-server-client",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) route-server-client",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5171,12 +5171,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5194,7 +5194,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) route-server-client",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) route-server-client",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5223,12 +5223,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5251,7 +5251,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) nexthop-local unchanged",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) nexthop-local unchanged",
         "mode": [
           "BGP-IPV6-MODE"
         ],
@@ -5280,12 +5280,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5308,7 +5308,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) nexthop-local unchanged",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) nexthop-local unchanged",
         "mode": [
           "BGP-IPV6-MODE"
         ],
@@ -5332,12 +5332,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5355,7 +5355,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5384,12 +5384,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5425,7 +5425,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged (as-path|next-hop|med)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged (as-path|next-hop|med)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5454,12 +5454,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5494,7 +5494,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged as-path (next-hop|med)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged as-path (next-hop|med)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5523,12 +5523,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5563,7 +5563,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged next-hop (as-path|med)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged next-hop (as-path|med)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5592,12 +5592,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5632,7 +5632,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged med (as-path|next-hop)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged med (as-path|next-hop)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5661,12 +5661,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5699,7 +5699,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged as-path next-hop med",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged as-path next-hop med",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5728,12 +5728,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5766,7 +5766,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged as-path med next-hop",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged as-path med next-hop",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5795,12 +5795,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5833,7 +5833,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged next-hop med as-path",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged next-hop med as-path",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5862,12 +5862,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5900,7 +5900,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged next-hop as-path med",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged next-hop as-path med",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5929,12 +5929,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -5967,7 +5967,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged med next-hop as-path",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged med next-hop as-path",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -5996,12 +5996,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6034,7 +6034,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged med as-path next-hop",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged med as-path next-hop",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6068,12 +6068,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6091,7 +6091,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6125,12 +6125,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6166,7 +6166,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged (as-path|next-hop|med)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged (as-path|next-hop|med)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6200,12 +6200,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6240,7 +6240,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged as-path (next-hop|med)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged as-path (next-hop|med)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6274,12 +6274,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6314,7 +6314,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged next-hop (as-path|med)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged next-hop (as-path|med)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6348,12 +6348,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6388,7 +6388,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged med (as-path|next-hop)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged med (as-path|next-hop)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6422,12 +6422,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6460,7 +6460,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged as-path next-hop med",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged as-path next-hop med",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6494,12 +6494,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6532,7 +6532,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged as-path med next-hop",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged as-path med next-hop",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6566,12 +6566,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6604,7 +6604,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged next-hop med as-path",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged next-hop med as-path",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6638,12 +6638,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6676,7 +6676,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged next-hop as-path med",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged next-hop as-path med",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6710,12 +6710,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6748,7 +6748,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged med next-hop as-path",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged med next-hop as-path",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6782,12 +6782,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6820,7 +6820,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) attribute-unchanged med as-path next-hop",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) attribute-unchanged med as-path next-hop",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -6849,12 +6849,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6872,7 +6872,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) ebgp-multihop",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) ebgp-multihop",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -6896,12 +6896,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6928,7 +6928,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) ebgp-multihop RANGE:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) ebgp-multihop RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -6957,12 +6957,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -6980,7 +6980,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) ebgp-multihop",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) ebgp-multihop",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7009,12 +7009,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7041,7 +7041,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) ebgp-multihop RANGE:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) ebgp-multihop RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7065,12 +7065,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7088,7 +7088,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) disable-connected-check",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) disable-connected-check",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7117,12 +7117,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7140,7 +7140,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) disable-connected-check",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) disable-connected-check",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7164,12 +7164,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7187,7 +7187,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) enforce-multihop",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) enforce-multihop",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7216,12 +7216,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7239,7 +7239,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) enforce-multihop",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) enforce-multihop",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7263,12 +7263,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7291,7 +7291,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) description [WORD:4]",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) description [WORD:4]",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7320,12 +7320,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7343,7 +7343,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) description",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) description",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7372,12 +7372,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7400,7 +7400,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) description [WORD:4]",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) description [WORD:4]",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7424,12 +7424,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7444,12 +7444,12 @@
         "type": "keyword",
         "help": "Source of routing updates"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "IPv4 address"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -7462,7 +7462,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) update-source (IPV4-ADDR:4.0|IPV6-ADDR:4.1|WORD:4.2)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) update-source (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1|WORD:4.2)",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7491,12 +7491,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7514,7 +7514,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) update-source",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) update-source",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7538,12 +7538,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7561,7 +7561,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) default-originate",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) default-originate",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -7589,12 +7589,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7622,7 +7622,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) default-originate route-map WORD:5",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) default-originate route-map WORD:5",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -7655,12 +7655,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7678,7 +7678,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) default-originate",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) default-originate",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -7711,12 +7711,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7744,7 +7744,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) default-originate route-map WORD:5",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) default-originate route-map WORD:5",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -7772,12 +7772,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -7799,7 +7799,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) port RANGE:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) port RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7828,12 +7828,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -7846,7 +7846,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) port",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) port",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7875,12 +7875,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -7902,7 +7902,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) port RANGE:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) port RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7926,12 +7926,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -7958,7 +7958,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) weight RANGE:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) weight RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -7987,12 +7987,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -8010,7 +8010,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) weight",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) weight",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8039,12 +8039,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -8071,7 +8071,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) weight RANGE:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) weight RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8095,12 +8095,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -8118,7 +8118,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) override-capability",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) override-capability",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8147,12 +8147,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -8170,7 +8170,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) override-capability",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) override-capability",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8194,12 +8194,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8212,7 +8212,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) strict-capability-match",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) strict-capability-match",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8241,12 +8241,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8259,7 +8259,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) strict-capability-match",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) strict-capability-match",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8283,12 +8283,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -8324,7 +8324,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) timers RANGE:4 RANGE:5",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) timers RANGE:4 RANGE:5",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8353,12 +8353,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -8376,7 +8376,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) timers",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) timers",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8400,12 +8400,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8432,7 +8432,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) timers connect RANGE:5",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) timers connect RANGE:5",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8461,12 +8461,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8484,7 +8484,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) timers connect",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) timers connect",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8513,12 +8513,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8545,7 +8545,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) timers connect RANGE:5",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) timers connect RANGE:5",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8569,12 +8569,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8596,7 +8596,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) advertisement-interval RANGE:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) advertisement-interval RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8625,12 +8625,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8643,7 +8643,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) advertisement-interval",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) advertisement-interval",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8672,12 +8672,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8699,7 +8699,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) advertisement-interval RANGE:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) advertisement-interval RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8723,12 +8723,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8746,7 +8746,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) interface WORD:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) interface WORD:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8775,12 +8775,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "IPv6 address"
@@ -8798,7 +8798,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1) interface WORD:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1) interface WORD:4",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -8822,12 +8822,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -8880,7 +8880,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) distribute-list (RANGE:4.0|RANGE:4.1|WORD:4.2) (in|out)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) distribute-list (RANGE:4.0|RANGE:4.1|WORD:4.2) (in|out)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -8914,12 +8914,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -8972,7 +8972,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) distribute-list (RANGE:4.0|RANGE:4.1|WORD:4.2) (in|out)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) distribute-list (RANGE:4.0|RANGE:4.1|WORD:4.2) (in|out)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9001,12 +9001,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9041,7 +9041,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) prefix-list WORD:4 (in|out)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) prefix-list WORD:4 (in|out)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9075,12 +9075,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9115,7 +9115,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) prefix-list WORD:4 (in|out)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) prefix-list WORD:4 (in|out)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9144,12 +9144,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9184,7 +9184,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) filter-list WORD:4 (in|out)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) filter-list WORD:4 (in|out)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9218,12 +9218,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9258,7 +9258,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) filter-list WORD:4 (in|out)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) filter-list WORD:4 (in|out)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9287,12 +9287,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9339,7 +9339,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) route-map WORD:4 (in|out|import|export)",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) route-map WORD:4 (in|out|import|export)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9373,12 +9373,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9425,7 +9425,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) route-map WORD:4 (in|out|import|export)",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) route-map WORD:4 (in|out|import|export)",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9454,12 +9454,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9482,7 +9482,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) unsuppress-map WORD:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) unsuppress-map WORD:4",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9516,12 +9516,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9544,7 +9544,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) unsuppress-map WORD:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) unsuppress-map WORD:4",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9573,12 +9573,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9605,7 +9605,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9634,12 +9634,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9675,7 +9675,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9704,12 +9704,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9741,7 +9741,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 warning-only",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 warning-only",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9770,12 +9770,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9816,7 +9816,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5 warning-only",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5 warning-only",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9845,12 +9845,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9891,7 +9891,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 restart RANGE:6",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 restart RANGE:6",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -9920,12 +9920,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -9975,7 +9975,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5 restart RANGE:7",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5 restart RANGE:7",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10009,12 +10009,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10032,7 +10032,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10066,12 +10066,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10098,7 +10098,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10132,12 +10132,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10169,7 +10169,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 warning-only",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 warning-only",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10203,12 +10203,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10240,7 +10240,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 warning-only",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 warning-only",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10274,12 +10274,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10320,7 +10320,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5 warning-only",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5 warning-only",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10354,12 +10354,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10400,7 +10400,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 restart RANGE:6",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 restart RANGE:6",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10434,12 +10434,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10489,7 +10489,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5 restart RANGE:7",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) maximum-prefix RANGE:4 RANGE:5 restart RANGE:7",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10518,12 +10518,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10541,7 +10541,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) allowas-in",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) allowas-in",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10570,12 +10570,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10602,7 +10602,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) allowas-in RANGE:4",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) allowas-in RANGE:4",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10636,12 +10636,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10659,7 +10659,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) allowas-in",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) allowas-in",
         "mode": [
           "CONFIG-BGP-MODE",
           "BGP-IPV4-MODE",
@@ -10688,12 +10688,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10725,7 +10725,7 @@
     },
     "command": [
       {
-        "defun": "neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) ttl-security hops RANGE:5",
+        "defun": "neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) ttl-security hops RANGE:5",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -10754,12 +10754,12 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Neighbor address"
       },
-      "IPV6-ADDR:2.1": {
+      "IPV6-ADDRESS:2.1": {
         "id": "2.1",
         "type": "ipv6address",
         "help": "Neighbor IPv6 address"
@@ -10791,7 +10791,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor (IPV4-ADDR:2.0|IPV6-ADDR:2.1|WORD:2.2) ttl-security hops RANGE:5",
+        "defun": "no neighbor (IPV4-ADDRESS:2.0|IPV6-ADDRESS:2.1|WORD:2.2) ttl-security hops RANGE:5",
         "mode": [
           "CONFIG-BGP-MODE"
         ],
@@ -11297,12 +11297,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor IP address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -11310,7 +11310,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp (IPV4-ADDR:4.0|IPV6-ADDR:4.1)",
+        "defun": "clear ip bgp (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -11339,12 +11339,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:3.0": {
+      "IPV4-ADDRESS:3.0": {
         "id": "3.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:3.1": {
+      "IPV6-ADDRESS:3.1": {
         "id": "3.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -11352,7 +11352,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp (IPV4-ADDR:3.0|IPV6-ADDR:3.1)",
+        "defun": "clear bgp (IPV4-ADDRESS:3.0|IPV6-ADDRESS:3.1)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -11386,12 +11386,12 @@
         "type": "keyword",
         "help": "Address family"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -11399,7 +11399,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp ipv6 (IPV4-ADDR:4.0|IPV6-ADDR:4.1)",
+        "defun": "clear bgp ipv6 (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -12560,7 +12560,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -12578,7 +12578,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 soft out",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 soft out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -12612,7 +12612,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -12625,7 +12625,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 out",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -12659,7 +12659,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -12694,7 +12694,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 ipv4 (unicast|multicast) soft out",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 ipv4 (unicast|multicast) soft out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -12728,7 +12728,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -12758,7 +12758,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 ipv4 (unicast|multicast) out",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 ipv4 (unicast|multicast) out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -12792,7 +12792,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -12820,7 +12820,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 vpnv4 unicast soft out",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 vpnv4 unicast soft out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -12854,7 +12854,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -12877,7 +12877,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 vpnv4 unicast out",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 vpnv4 unicast out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -12906,12 +12906,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:3.0": {
+      "IPV4-ADDRESS:3.0": {
         "id": "3.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:3.1": {
+      "IPV6-ADDRESS:3.1": {
         "id": "3.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -12929,7 +12929,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp (IPV4-ADDR:3.0|IPV6-ADDR:3.1) soft out",
+        "defun": "clear bgp (IPV4-ADDRESS:3.0|IPV6-ADDRESS:3.1) soft out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -12963,12 +12963,12 @@
         "type": "keyword",
         "help": "Address family"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -12986,7 +12986,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp ipv6 (IPV4-ADDR:4.0|IPV6-ADDR:4.1) soft out",
+        "defun": "clear bgp ipv6 (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1) soft out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -13015,12 +13015,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:3.0": {
+      "IPV4-ADDRESS:3.0": {
         "id": "3.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:3.1": {
+      "IPV6-ADDRESS:3.1": {
         "id": "3.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -13033,7 +13033,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp (IPV4-ADDR:3.0|IPV6-ADDR:3.1) out",
+        "defun": "clear bgp (IPV4-ADDRESS:3.0|IPV6-ADDRESS:3.1) out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -13067,12 +13067,12 @@
         "type": "keyword",
         "help": "Address family"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -13085,7 +13085,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp ipv6 (IPV4-ADDR:4.0|IPV6-ADDR:4.1) out",
+        "defun": "clear bgp ipv6 (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1) out",
         "mode": [
           "EXEC-MODE"
         ],
@@ -15681,7 +15681,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -15699,7 +15699,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 soft in",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 soft in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -15733,7 +15733,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -15746,7 +15746,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 in",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -15780,7 +15780,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -15798,7 +15798,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 in prefix-filter",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 in prefix-filter",
         "mode": [
           "EXEC-MODE"
         ],
@@ -15832,7 +15832,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -15867,7 +15867,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 ipv4 (unicast|multicast) soft in",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 ipv4 (unicast|multicast) soft in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -15901,7 +15901,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -15931,7 +15931,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 ipv4 (unicast|multicast) in",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 ipv4 (unicast|multicast) in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -15965,7 +15965,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -16000,7 +16000,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 ipv4 (unicast|multicast) in prefix-filter",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 ipv4 (unicast|multicast) in prefix-filter",
         "mode": [
           "EXEC-MODE"
         ],
@@ -16034,7 +16034,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -16062,7 +16062,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 vpnv4 unicast soft in",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 vpnv4 unicast soft in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -16096,7 +16096,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -16119,7 +16119,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 vpnv4 unicast in",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 vpnv4 unicast in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -16148,12 +16148,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:3.0": {
+      "IPV4-ADDRESS:3.0": {
         "id": "3.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:3.1": {
+      "IPV6-ADDRESS:3.1": {
         "id": "3.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -16171,7 +16171,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp (IPV4-ADDR:3.0|IPV6-ADDR:3.1) soft in",
+        "defun": "clear bgp (IPV4-ADDRESS:3.0|IPV6-ADDRESS:3.1) soft in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -16205,12 +16205,12 @@
         "type": "keyword",
         "help": "Address family"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -16228,7 +16228,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp ipv6 (IPV4-ADDR:4.0|IPV6-ADDR:4.1) soft in",
+        "defun": "clear bgp ipv6 (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1) soft in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -16257,12 +16257,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:3.0": {
+      "IPV4-ADDRESS:3.0": {
         "id": "3.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:3.1": {
+      "IPV6-ADDRESS:3.1": {
         "id": "3.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -16275,7 +16275,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp (IPV4-ADDR:3.0|IPV6-ADDR:3.1) in",
+        "defun": "clear bgp (IPV4-ADDRESS:3.0|IPV6-ADDRESS:3.1) in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -16309,12 +16309,12 @@
         "type": "keyword",
         "help": "Address family"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -16327,7 +16327,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp ipv6 (IPV4-ADDR:4.0|IPV6-ADDR:4.1) in",
+        "defun": "clear bgp ipv6 (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1) in",
         "mode": [
           "EXEC-MODE"
         ],
@@ -16356,12 +16356,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:3.0": {
+      "IPV4-ADDRESS:3.0": {
         "id": "3.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:3.1": {
+      "IPV6-ADDRESS:3.1": {
         "id": "3.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -16379,7 +16379,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp (IPV4-ADDR:3.0|IPV6-ADDR:3.1) in prefix-filter",
+        "defun": "clear bgp (IPV4-ADDRESS:3.0|IPV6-ADDRESS:3.1) in prefix-filter",
         "mode": [
           "EXEC-MODE"
         ],
@@ -16413,12 +16413,12 @@
         "type": "keyword",
         "help": "Address family"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -16436,7 +16436,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp ipv6 (IPV4-ADDR:4.0|IPV6-ADDR:4.1) in prefix-filter",
+        "defun": "clear bgp ipv6 (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1) in prefix-filter",
         "mode": [
           "EXEC-MODE"
         ],
@@ -19070,7 +19070,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -19083,7 +19083,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 soft",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 soft",
         "mode": [
           "EXEC-MODE"
         ],
@@ -19117,7 +19117,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -19147,7 +19147,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 ipv4 (unicast|multicast) soft",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 ipv4 (unicast|multicast) soft",
         "mode": [
           "EXEC-MODE"
         ],
@@ -19181,7 +19181,7 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
@@ -19204,7 +19204,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp IPV4-ADDR:4 vpnv4 unicast soft",
+        "defun": "clear ip bgp IPV4-ADDRESS:4 vpnv4 unicast soft",
         "mode": [
           "EXEC-MODE"
         ],
@@ -19233,12 +19233,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:3.0": {
+      "IPV4-ADDRESS:3.0": {
         "id": "3.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:3.1": {
+      "IPV6-ADDRESS:3.1": {
         "id": "3.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -19251,7 +19251,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp (IPV4-ADDR:3.0|IPV6-ADDR:3.1) soft",
+        "defun": "clear bgp (IPV4-ADDRESS:3.0|IPV6-ADDRESS:3.1) soft",
         "mode": [
           "EXEC-MODE"
         ],
@@ -19285,12 +19285,12 @@
         "type": "keyword",
         "help": "Address family"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -19303,7 +19303,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp ipv6 (IPV4-ADDR:4.0|IPV6-ADDR:4.1) soft",
+        "defun": "clear bgp ipv6 (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1) soft",
         "mode": [
           "EXEC-MODE"
         ],
@@ -20331,12 +20331,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:3.0": {
+      "IPV4-ADDRESS:3.0": {
         "id": "3.0",
         "type": "ipv4address",
         "help": "BGP neighbor IP address to clear"
       },
-      "IPV6-ADDR:3.1": {
+      "IPV6-ADDRESS:3.1": {
         "id": "3.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -20349,7 +20349,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp (IPV4-ADDR:3.0|IPV6-ADDR:3.1) rsclient",
+        "defun": "clear bgp (IPV4-ADDRESS:3.0|IPV6-ADDRESS:3.1) rsclient",
         "mode": [
           "EXEC-MODE"
         ],
@@ -20383,12 +20383,12 @@
         "type": "keyword",
         "help": "Address family"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor IP address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -20401,7 +20401,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp ipv6 (IPV4-ADDR:4.0|IPV6-ADDR:4.1) rsclient",
+        "defun": "clear bgp ipv6 (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1) rsclient",
         "mode": [
           "EXEC-MODE"
         ],
@@ -20440,12 +20440,12 @@
         "type": "string",
         "help": "view name"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "BGP neighbor IP address to clear"
       },
-      "IPV6-ADDR:5.1": {
+      "IPV6-ADDRESS:5.1": {
         "id": "5.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -20458,7 +20458,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp view WORD:4 (IPV4-ADDR:5.0|IPV6-ADDR:5.1) rsclient",
+        "defun": "clear bgp view WORD:4 (IPV4-ADDRESS:5.0|IPV6-ADDRESS:5.1) rsclient",
         "mode": [
           "EXEC-MODE"
         ],
@@ -20502,12 +20502,12 @@
         "type": "string",
         "help": "view name"
       },
-      "IPV4-ADDR:6.0": {
+      "IPV4-ADDRESS:6.0": {
         "id": "6.0",
         "type": "ipv4address",
         "help": "BGP neighbor IP address to clear"
       },
-      "IPV6-ADDR:6.1": {
+      "IPV6-ADDRESS:6.1": {
         "id": "6.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -20520,7 +20520,7 @@
     },
     "command": [
       {
-        "defun": "clear bgp ipv6 view WORD:5 (IPV4-ADDR:6.0|IPV6-ADDR:6.1) rsclient",
+        "defun": "clear bgp ipv6 view WORD:5 (IPV4-ADDRESS:6.0|IPV6-ADDRESS:6.1) rsclient",
         "mode": [
           "EXEC-MODE"
         ],
@@ -20554,12 +20554,12 @@
         "type": "keyword",
         "help": "BGP information"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "BGP neighbor IP address to clear"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -20572,7 +20572,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp (IPV4-ADDR:4.0|IPV6-ADDR:4.1) rsclient",
+        "defun": "clear ip bgp (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1) rsclient",
         "mode": [
           "EXEC-MODE"
         ],
@@ -20616,12 +20616,12 @@
         "type": "string",
         "help": "view name"
       },
-      "IPV4-ADDR:6.0": {
+      "IPV4-ADDRESS:6.0": {
         "id": "6.0",
         "type": "ipv4address",
         "help": "BGP neighbor IP address to clear"
       },
-      "IPV6-ADDR:6.1": {
+      "IPV6-ADDRESS:6.1": {
         "id": "6.1",
         "type": "ipv6address",
         "help": "BGP IPv6 neighbor to clear"
@@ -20634,7 +20634,7 @@
     },
     "command": [
       {
-        "defun": "clear ip bgp view WORD:5 (IPV4-ADDR:6.0|IPV6-ADDR:6.1) rsclient",
+        "defun": "clear ip bgp view WORD:5 (IPV4-ADDRESS:6.0|IPV6-ADDRESS:6.1) rsclient",
         "mode": [
           "EXEC-MODE"
         ],
@@ -21873,12 +21873,12 @@
         "type": "keyword",
         "help": "Detailed information on TCP and BGP neighbor connections"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "Neighbor to display information about"
       },
-      "IPV6-ADDR:5.1": {
+      "IPV6-ADDRESS:5.1": {
         "id": "5.1",
         "type": "ipv6address",
         "help": "Neighbor to display information about"
@@ -21886,7 +21886,7 @@
     },
     "command": [
       {
-        "defun": "show ip bgp neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1)",
+        "defun": "show ip bgp neighbors (IPV4-ADDRESS:5.0|IPV6-ADDRESS:5.1)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -21942,12 +21942,12 @@
         "type": "keyword",
         "help": "Detailed information on TCP and BGP neighbor connections"
       },
-      "IPV4-ADDR:7.0": {
+      "IPV4-ADDRESS:7.0": {
         "id": "7.0",
         "type": "ipv4address",
         "help": "Neighbor to display information about"
       },
-      "IPV6-ADDR:7.1": {
+      "IPV6-ADDRESS:7.1": {
         "id": "7.1",
         "type": "ipv6address",
         "help": "Neighbor to display information about"
@@ -21955,7 +21955,7 @@
     },
     "command": [
       {
-        "defun": "show ip bgp ipv4 (unicast|multicast) neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1)",
+        "defun": "show ip bgp ipv4 (unicast|multicast) neighbors (IPV4-ADDRESS:7.0|IPV6-ADDRESS:7.1)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -22004,7 +22004,7 @@
         "type": "keyword",
         "help": "Detailed information on TCP and BGP neighbor connections"
       },
-      "IPV4-ADDR:7": {
+      "IPV4-ADDRESS:7": {
         "id": "7",
         "type": "ipv4address",
         "help": "Neighbor to display information about"
@@ -22012,7 +22012,7 @@
     },
     "command": [
       {
-        "defun": "show ip bgp vpnv4 all neighbors IPV4-ADDR:7",
+        "defun": "show ip bgp vpnv4 all neighbors IPV4-ADDRESS:7",
         "mode": [
           "EXEC-MODE"
         ],
@@ -22066,7 +22066,7 @@
         "type": "keyword",
         "help": "Neighbor to display information about"
       },
-      "IPV4-ADDR:8": {
+      "IPV4-ADDRESS:8": {
         "id": "8",
         "type": "ipv4address",
         "help": "*MISSING-HELP*"
@@ -22074,7 +22074,7 @@
     },
     "command": [
       {
-        "defun": "show ip bgp vpnv4 rd WORD:6 neighbors IPV4-ADDR:8",
+        "defun": "show ip bgp vpnv4 rd WORD:6 neighbors IPV4-ADDRESS:8",
         "mode": [
           "EXEC-MODE"
         ],
@@ -22108,12 +22108,12 @@
         "type": "keyword",
         "help": "Detailed information on TCP and BGP neighbor connections"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "Neighbor to display information about"
       },
-      "IPV6-ADDR:4.1": {
+      "IPV6-ADDRESS:4.1": {
         "id": "4.1",
         "type": "ipv6address",
         "help": "Neighbor to display information about"
@@ -22121,7 +22121,7 @@
     },
     "command": [
       {
-        "defun": "show bgp neighbors (IPV4-ADDR:4.0|IPV6-ADDR:4.1)",
+        "defun": "show bgp neighbors (IPV4-ADDRESS:4.0|IPV6-ADDRESS:4.1)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -22160,12 +22160,12 @@
         "type": "keyword",
         "help": "Detailed information on TCP and BGP neighbor connections"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "Neighbor to display information about"
       },
-      "IPV6-ADDR:5.1": {
+      "IPV6-ADDRESS:5.1": {
         "id": "5.1",
         "type": "ipv6address",
         "help": "Neighbor to display information about"
@@ -22173,7 +22173,7 @@
     },
     "command": [
       {
-        "defun": "show bgp ipv6 neighbors (IPV4-ADDR:5.0|IPV6-ADDR:5.1)",
+        "defun": "show bgp ipv6 neighbors (IPV4-ADDRESS:5.0|IPV6-ADDRESS:5.1)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -22376,12 +22376,12 @@
         "type": "keyword",
         "help": "Detailed information on TCP and BGP neighbor connections"
       },
-      "IPV4-ADDR:7.0": {
+      "IPV4-ADDRESS:7.0": {
         "id": "7.0",
         "type": "ipv4address",
         "help": "Neighbor to display information about"
       },
-      "IPV6-ADDR:7.1": {
+      "IPV6-ADDRESS:7.1": {
         "id": "7.1",
         "type": "ipv6address",
         "help": "Neighbor to display information about"
@@ -22389,7 +22389,7 @@
     },
     "command": [
       {
-        "defun": "show ip bgp view WORD:5 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1)",
+        "defun": "show ip bgp view WORD:5 neighbors (IPV4-ADDRESS:7.0|IPV6-ADDRESS:7.1)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -22433,12 +22433,12 @@
         "type": "keyword",
         "help": "Detailed information on TCP and BGP neighbor connections"
       },
-      "IPV4-ADDR:6.0": {
+      "IPV4-ADDRESS:6.0": {
         "id": "6.0",
         "type": "ipv4address",
         "help": "Neighbor to display information about"
       },
-      "IPV6-ADDR:6.1": {
+      "IPV6-ADDRESS:6.1": {
         "id": "6.1",
         "type": "ipv6address",
         "help": "Neighbor to display information about"
@@ -22446,7 +22446,7 @@
     },
     "command": [
       {
-        "defun": "show bgp view WORD:4 neighbors (IPV4-ADDR:6.0|IPV6-ADDR:6.1)",
+        "defun": "show bgp view WORD:4 neighbors (IPV4-ADDRESS:6.0|IPV6-ADDRESS:6.1)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -22495,12 +22495,12 @@
         "type": "keyword",
         "help": "Detailed information on TCP and BGP neighbor connections"
       },
-      "IPV4-ADDR:7.0": {
+      "IPV4-ADDRESS:7.0": {
         "id": "7.0",
         "type": "ipv4address",
         "help": "Neighbor to display information about"
       },
-      "IPV6-ADDR:7.1": {
+      "IPV6-ADDRESS:7.1": {
         "id": "7.1",
         "type": "ipv6address",
         "help": "Neighbor to display information about"
@@ -22508,7 +22508,7 @@
     },
     "command": [
       {
-        "defun": "show bgp view WORD:4 ipv6 neighbors (IPV4-ADDR:7.0|IPV6-ADDR:7.1)",
+        "defun": "show bgp view WORD:4 ipv6 neighbors (IPV4-ADDRESS:7.0|IPV6-ADDRESS:7.1)",
         "mode": [
           "EXEC-MODE"
         ],

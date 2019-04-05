@@ -88,7 +88,7 @@
         "type": "keyword",
         "help": "router-id for the OSPF process"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "OSPF router-id in IP address format"
@@ -96,7 +96,7 @@
     },
     "command": [
       {
-        "defun": "ospf router-id IPV4-ADDR:3",
+        "defun": "ospf router-id IPV4-ADDRESS:3",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -106,7 +106,7 @@
               "method": "POST",
               "path": "ospfv2s/:PROCESS-ID",
               "params": {
-                "router_id": "IPV4-ADDR:3"
+                "router_id": "IPV4-ADDRESS:3"
               }
             }
           }
@@ -121,7 +121,7 @@
         "type": "keyword",
         "help": "router-id for the OSPF process"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "OSPF router-id in IP address format"
@@ -129,7 +129,7 @@
     },
     "command": [
       {
-        "defun": "router-id IPV4-ADDR:2",
+        "defun": "router-id IPV4-ADDRESS:2",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -227,7 +227,7 @@
         "type": "string",
         "help": "Interface's name"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "*MISSING-HELP*"
@@ -235,7 +235,7 @@
     },
     "command": [
       {
-        "defun": "passive-interface WORD:2 IPV4-ADDR:3",
+        "defun": "passive-interface WORD:2 IPV4-ADDRESS:3",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -333,7 +333,7 @@
         "type": "string",
         "help": "Interface's name"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "*MISSING-HELP*"
@@ -341,7 +341,7 @@
     },
     "command": [
       {
-        "defun": "no passive-interface WORD:2 IPV4-ADDR:3",
+        "defun": "no passive-interface WORD:2 IPV4-ADDRESS:3",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -449,7 +449,7 @@
         "type": "keyword",
         "help": "Set the OSPF area ID"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -466,7 +466,7 @@
     },
     "command": [
       {
-        "defun": "network IPV4-PREFIX:2 area (IPV4-ADDR:4.0|RANGE:4.1)",
+        "defun": "network IPV4-PREFIX:2 area (IPV4-ADDRESS:4.0|RANGE:4.1)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -474,7 +474,7 @@
           "if IPV4-PREFIX:2 do ADDRESS, MASKLEN = ipv4prefix2address_masklen (IPV4-PREFIX:2)",
           "if IPV4-PREFIX:2 do ADDRESS = apply_mask_ipv4 (ADDRESS, MASKLEN)",
           "if RANGE:4.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:4.1)",
-          "if IPV4-ADDR:4.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:4.0, NULL)"
+          "if IPV4-ADDRESS:4.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:4.0, NULL)"
         ],
         "action": [
           {
@@ -517,7 +517,7 @@
         "type": "keyword",
         "help": "Set the OSPF area ID"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -534,7 +534,7 @@
     },
     "command": [
       {
-        "defun": "no network IPV4-PREFIX:2 area (IPV4-ADDR:4.0|RANGE:4.1)",
+        "defun": "no network IPV4-PREFIX:2 area (IPV4-ADDRESS:4.0|RANGE:4.1)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -542,7 +542,7 @@
           "if IPV4-PREFIX:2 do ADDRESS, MASKLEN = ipv4prefix2address_masklen (IPV4-PREFIX:2)",
           "if IPV4-PREFIX:2 do ADDRESS = apply_mask_ipv4 (ADDRESS, MASKLEN)",
           "if RANGE:4.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:4.1)",
-          "if IPV4-ADDR:4.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:4.0, NULL)"
+          "if IPV4-ADDRESS:4.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:4.0, NULL)"
         ],
         "action": [
           {
@@ -562,7 +562,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -589,7 +589,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -613,7 +613,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -645,7 +645,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 advertise",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4 advertise",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -669,7 +669,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -710,7 +710,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 cost RANGE:6",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4 cost RANGE:6",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -734,7 +734,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -780,7 +780,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 advertise cost RANGE:7",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4 advertise cost RANGE:7",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -804,7 +804,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -836,7 +836,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 not-advertise",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4 not-advertise",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -865,7 +865,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -892,7 +892,7 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -921,7 +921,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -960,7 +960,7 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 (advertise|not-advertise)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4 (advertise|not-advertise)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -989,7 +989,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1030,7 +1030,7 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 cost RANGE:6",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4 cost RANGE:6",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -1059,7 +1059,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1105,7 +1105,7 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 advertise cost RANGE:7",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4 advertise cost RANGE:7",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -1129,7 +1129,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1166,7 +1166,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 substitute IPV4-PREFIX:6",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4 substitute IPV4-PREFIX:6",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -1195,7 +1195,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1232,7 +1232,7 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) range IPV4-PREFIX:4 substitute IPV4-PREFIX:6",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) range IPV4-PREFIX:4 substitute IPV4-PREFIX:6",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -1256,7 +1256,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1275,7 +1275,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -1283,19 +1283,19 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "PUT",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4"
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4"
             }
           }
         ]
@@ -1314,7 +1314,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1333,7 +1333,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -1341,19 +1341,19 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "DELETE",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4"
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4"
             }
           }
         ]
@@ -1367,7 +1367,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1386,7 +1386,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -1427,19 +1427,19 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "ENUM:5": "RANGE:6"
               }
@@ -1461,7 +1461,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1480,7 +1480,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -1512,19 +1512,19 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "ENUM:5": null
               }
@@ -1541,7 +1541,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1560,7 +1560,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -1610,19 +1610,19 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:8",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:8",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "ENUM:5": "RANGE:6",
                 "ENUM:7": "RANGE:8"
@@ -1645,7 +1645,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1664,7 +1664,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -1696,19 +1696,19 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "ENUM:5": null,
                 "ENUM:6": null
@@ -1726,7 +1726,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1745,7 +1745,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -1804,19 +1804,19 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:8 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:10",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:8 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:10",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "ENUM:5": "RANGE:6",
                 "ENUM:7": "RANGE:8",
@@ -1840,7 +1840,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1859,7 +1859,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -1891,19 +1891,19 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "ENUM:5": null,
                 "ENUM:6": null,
@@ -1922,7 +1922,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -1941,7 +1941,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2009,19 +2009,19 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:8 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:10 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:12",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:6 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:8 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:10 (hello-interval|retransmit-interval|transmit-delay|dead-interval) RANGE:12",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "ENUM:5": "RANGE:6",
                 "ENUM:7": "RANGE:8",
@@ -2046,7 +2046,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2065,7 +2065,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2097,19 +2097,19 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "ENUM:5": null,
                 "ENUM:6": null,
@@ -2129,7 +2129,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2148,7 +2148,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2174,19 +2174,19 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest|null)",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest|null)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "authentication": "ENUM:6"
               }
@@ -2203,7 +2203,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2222,7 +2222,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2236,19 +2236,19 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication)",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "authentication": ""
               }
@@ -2270,7 +2270,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2289,7 +2289,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2303,19 +2303,19 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "authentication": null
               }
@@ -2332,7 +2332,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2351,7 +2351,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2384,19 +2384,19 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (message-digest-key) RANGE:6 md5 WORD:8",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (message-digest-key) RANGE:6 md5 WORD:8",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4/md5_keys/:RANGE:6",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4/md5_keys/:RANGE:6",
               "params": {
                 "key-string": "WORD:8"
               }
@@ -2418,7 +2418,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2437,7 +2437,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2460,19 +2460,19 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (message-digest-key) RANGE:6",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (message-digest-key) RANGE:6",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "DELETE",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4/md5_keys/:RANGE:6"
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4/md5_keys/:RANGE:6"
             }
           }
         ]
@@ -2486,7 +2486,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2505,7 +2505,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2524,19 +2524,19 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication-key) WORD:6",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication-key) WORD:6",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "authentication-key": "WORD:6"
               }
@@ -2558,7 +2558,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2577,7 +2577,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2591,19 +2591,19 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication-key)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication-key)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDR:4",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
               "params": {
                 "authentication-key": null
               }
@@ -2620,7 +2620,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2639,7 +2639,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2676,7 +2676,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest|null) (authentication-key) WORD:8",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest|null) (authentication-key) WORD:8",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -2700,7 +2700,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2719,7 +2719,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2744,7 +2744,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (authentication-key) WORD:7",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (authentication-key) WORD:7",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -2773,7 +2773,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2792,7 +2792,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2812,7 +2812,7 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (authentication-key)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (authentication-key)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -2836,7 +2836,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2855,7 +2855,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2906,7 +2906,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest|null) (message-digest-key) RANGE:8 md5 WORD:10",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest|null) (message-digest-key) RANGE:8 md5 WORD:10",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -2930,7 +2930,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -2949,7 +2949,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -2988,7 +2988,7 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest-key) RANGE:7 md5 WORD:9",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest-key) RANGE:7 md5 WORD:9",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -3017,7 +3017,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3036,7 +3036,7 @@
         "type": "keyword",
         "help": "Configure a virtual link"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Router ID of the remote ABR"
@@ -3056,7 +3056,7 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) virtual-link IPV4-ADDR:4 (authentication) (message-digest-key)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest-key)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -3080,7 +3080,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3120,13 +3120,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) shortcut (default|enable|disable)",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) shortcut (default|enable|disable)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3155,7 +3155,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3189,13 +3189,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) shortcut (enable|disable)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) shortcut (enable|disable)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3218,7 +3218,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3240,13 +3240,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) stub",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) stub",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3270,7 +3270,7 @@
         "type": "keyword",
         "help": "OSPF stub parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3297,13 +3297,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) stub no-summary",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) stub no-summary",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3333,7 +3333,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3355,13 +3355,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) stub",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) stub",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3390,7 +3390,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3417,13 +3417,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) stub no-summary",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) stub no-summary",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3446,7 +3446,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3491,13 +3491,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) nssa (translate-candidate|translate-never|translate-always) no-summary",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) nssa (translate-candidate|translate-never|translate-always) no-summary",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3521,7 +3521,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3561,13 +3561,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) nssa (translate-candidate|translate-never|translate-always)",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) nssa (translate-candidate|translate-never|translate-always)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3590,7 +3590,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3612,13 +3612,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) nssa",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) nssa",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3638,7 +3638,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3665,13 +3665,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) nssa no-summary",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) nssa no-summary",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3699,7 +3699,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3721,13 +3721,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) nssa",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) nssa",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3752,7 +3752,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3779,13 +3779,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) nssa no-summary",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) nssa no-summary",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3808,7 +3808,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3839,13 +3839,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) default-cost RANGE:4",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) default-cost RANGE:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3874,7 +3874,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3905,13 +3905,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) default-cost RANGE:4",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) default-cost RANGE:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3934,7 +3934,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -3961,13 +3961,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) export-list WORD:4",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) export-list WORD:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -3996,7 +3996,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -4023,13 +4023,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) export-list WORD:4",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) export-list WORD:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -4052,7 +4052,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -4079,13 +4079,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) import-list WORD:4",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) import-list WORD:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -4114,7 +4114,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -4141,13 +4141,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) import-list WORD:4",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) import-list WORD:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -4170,7 +4170,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -4214,13 +4214,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) filter-list prefix WORD:5 (in|out)",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) filter-list prefix WORD:5 (in|out)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -4261,7 +4261,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -4305,13 +4305,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) filter-list prefix WORD:5 (in|out)",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) filter-list prefix WORD:5 (in|out)",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -4345,7 +4345,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "Enable authentication"
@@ -4372,13 +4372,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) authentication message-digest",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) authentication message-digest",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -4402,7 +4402,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -4424,13 +4424,13 @@
     },
     "command": [
       {
-        "defun": "area (IPV4-ADDR:2.0|RANGE:2.1) authentication",
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) authentication",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -4459,7 +4459,7 @@
         "type": "keyword",
         "help": "OSPF area parameters"
       },
-      "IPV4-ADDR:2.0": {
+      "IPV4-ADDRESS:2.0": {
         "id": "2.0",
         "type": "ipv4address",
         "help": "OSPF area ID in IP address format"
@@ -4481,13 +4481,13 @@
     },
     "command": [
       {
-        "defun": "no area (IPV4-ADDR:2.0|RANGE:2.1) authentication",
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) authentication",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
         "bind": [
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
-          "if IPV4-ADDR:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDR:2.0, NULL)"
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
         "action": [
           {
@@ -5013,7 +5013,7 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "Neighbor IP address"
@@ -5021,7 +5021,7 @@
     },
     "command": [
       {
-        "defun": "neighbor IPV4-ADDR:2",
+        "defun": "neighbor IPV4-ADDRESS:2",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -5029,7 +5029,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDR:2"
+              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDRESS:2"
             }
           }
         ]
@@ -5043,7 +5043,7 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "Neighbor IP address"
@@ -5079,7 +5079,7 @@
     },
     "command": [
       {
-        "defun": "neighbor IPV4-ADDR:2 priority RANGE:4 poll-interval RANGE:6",
+        "defun": "neighbor IPV4-ADDRESS:2 priority RANGE:4 poll-interval RANGE:6",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -5087,7 +5087,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDR:2",
+              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDRESS:2",
               "params": {
                 "priority": "RANGE:4",
                 "poll-interval": "RANGE:6"
@@ -5105,7 +5105,7 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "Neighbor IP address"
@@ -5127,7 +5127,7 @@
     },
     "command": [
       {
-        "defun": "neighbor IPV4-ADDR:2 priority RANGE:4",
+        "defun": "neighbor IPV4-ADDRESS:2 priority RANGE:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -5135,7 +5135,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDR:2",
+              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDRESS:2",
               "params": {
                 "priority": "RANGE:4"
               }
@@ -5152,7 +5152,7 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "Neighbor IP address"
@@ -5174,7 +5174,7 @@
     },
     "command": [
       {
-        "defun": "neighbor IPV4-ADDR:2 poll-interval RANGE:4",
+        "defun": "neighbor IPV4-ADDRESS:2 poll-interval RANGE:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -5182,7 +5182,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDR:2",
+              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDRESS:2",
               "params": {
                 "poll-interval": "RANGE:4"
               }
@@ -5199,7 +5199,7 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "Neighbor address"
@@ -5235,7 +5235,7 @@
     },
     "command": [
       {
-        "defun": "neighbor IPV4-ADDR:2 poll-interval RANGE:4 priority RANGE:6",
+        "defun": "neighbor IPV4-ADDRESS:2 poll-interval RANGE:4 priority RANGE:6",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -5243,7 +5243,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDR:2",
+              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDRESS:2",
               "params": {
                 "poll-interval": "RANGE:4",
                 "priority": "RANGE:6"
@@ -5266,7 +5266,7 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "Neighbor IP address"
@@ -5274,7 +5274,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor IPV4-ADDR:2",
+        "defun": "no neighbor IPV4-ADDRESS:2",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -5282,7 +5282,7 @@
           {
             "http": {
               "method": "DELETE",
-              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDR:2"
+              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDRESS:2"
             }
           }
         ]
@@ -5301,7 +5301,7 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "Neighbor IP address"
@@ -5323,7 +5323,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor IPV4-ADDR:2 priority RANGE:4",
+        "defun": "no neighbor IPV4-ADDRESS:2 priority RANGE:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -5331,7 +5331,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDR:2",
+              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDRESS:2",
               "params": {
                 "priority": null
               }
@@ -5353,7 +5353,7 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "Neighbor IP address"
@@ -5375,7 +5375,7 @@
     },
     "command": [
       {
-        "defun": "no neighbor IPV4-ADDR:2 poll-interval RANGE:4",
+        "defun": "no neighbor IPV4-ADDRESS:2 poll-interval RANGE:4",
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
@@ -5383,7 +5383,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDR:2",
+              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDRESS:2",
               "params": {
                 "poll-interval": null
               }
@@ -5405,7 +5405,7 @@
         "type": "keyword",
         "help": "Specify neighbor router"
       },
-      "IPV4-ADDR:2": {
+      "IPV4-ADDRESS:2": {
         "id": "2",
         "type": "ipv4address",
         "help": "Neighbor IP address"
@@ -5441,12 +5441,12 @@
     },
     "command": [
       {
-        "defun": "no neighbor IPV4-ADDR:2 priority RANGE:4 poll-interval RANGE:6",
+        "defun": "no neighbor IPV4-ADDRESS:2 priority RANGE:4 poll-interval RANGE:6",
         "action": [
           {
             "http": {
               "method": "POST",
-              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDR:2",
+              "path": "ospfv2s/:PROCESS-ID/neighbors/:IPV4-ADDRESS:2",
               "params": {
                 "poll-interval": null,
                 "priority": null
@@ -5903,7 +5903,7 @@
         "type": "keyword",
         "help": "Neighbor list"
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Neighbor ID"
@@ -5911,7 +5911,7 @@
     },
     "command": [
       {
-        "defun": "show ip ospf neighbor IPV4-ADDR:5",
+        "defun": "show ip ospf neighbor IPV4-ADDRESS:5",
         "mode": [
           "EXEC-MODE"
         ],
@@ -6305,7 +6305,7 @@
         "help": "Link AS Opaque-LSA",
         "enum": "ENUM:5"
       },
-      "IPV4-ADDR:6": {
+      "IPV4-ADDRESS:6": {
         "id": "6",
         "type": "ipv4address",
         "help": "Link State ID (as an IP address)"
@@ -6313,7 +6313,7 @@
     },
     "command": [
       {
-        "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) IPV4-ADDR:6",
+        "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) IPV4-ADDRESS:6",
         "mode": [
           "EXEC-MODE"
         ],
@@ -6406,7 +6406,7 @@
         "help": "Link AS Opaque-LSA",
         "enum": "ENUM:5"
       },
-      "IPV4-ADDR:6": {
+      "IPV4-ADDRESS:6": {
         "id": "6",
         "type": "ipv4address",
         "help": "Link State ID (as an IP address)"
@@ -6416,7 +6416,7 @@
         "type": "keyword",
         "help": "Advertising Router link states"
       },
-      "IPV4-ADDR:8": {
+      "IPV4-ADDRESS:8": {
         "id": "8",
         "type": "ipv4address",
         "help": "Advertising Router (as an IP address)"
@@ -6424,7 +6424,7 @@
     },
     "command": [
       {
-        "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) IPV4-ADDR:6 adv-router IPV4-ADDR:8",
+        "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) IPV4-ADDRESS:6 adv-router IPV4-ADDRESS:8",
         "mode": [
           "EXEC-MODE"
         ],
@@ -6517,7 +6517,7 @@
         "help": "Link AS Opaque-LSA",
         "enum": "ENUM:5"
       },
-      "IPV4-ADDR:6": {
+      "IPV4-ADDRESS:6": {
         "id": "6",
         "type": "ipv4address",
         "help": "Link State ID (as an IP address)"
@@ -6531,7 +6531,7 @@
     },
     "command": [
       {
-        "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) IPV4-ADDR:6 (self-originate)",
+        "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) IPV4-ADDRESS:6 (self-originate)",
         "mode": [
           "EXEC-MODE"
         ],
@@ -6629,7 +6629,7 @@
         "type": "keyword",
         "help": "Advertising Router link states"
       },
-      "IPV4-ADDR:7": {
+      "IPV4-ADDRESS:7": {
         "id": "7",
         "type": "ipv4address",
         "help": "Advertising Router (as an IP address)"
@@ -6637,7 +6637,7 @@
     },
     "command": [
       {
-        "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) adv-router IPV4-ADDR:7",
+        "defun": "show ip ospf database (asbr-summary|external|network|router|summary|nssa-external|opaque-link|opaque-area|opaque-as) adv-router IPV4-ADDRESS:7",
         "mode": [
           "EXEC-MODE"
         ],
@@ -6785,7 +6785,7 @@
         "help": "Use message-digest authentication",
         "enum": "ENUM:4"
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -6793,7 +6793,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf authentication (null|message-digest) IPV4-ADDR:5",
+        "defun": "ip ospf authentication (null|message-digest) IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -6801,7 +6801,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5",
               "params": {
                 "authentication": "ENUM:4"
               }
@@ -6878,7 +6878,7 @@
         "type": "keyword",
         "help": "Enable authentication on this interface"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -6886,7 +6886,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf authentication IPV4-ADDR:4",
+        "defun": "ip ospf authentication IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -6894,7 +6894,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "authentication": ""
               }
@@ -6964,7 +6964,7 @@
         "type": "keyword",
         "help": "Enable authentication on this interface"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -6972,7 +6972,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf authentication IPV4-ADDR:4",
+        "defun": "no ip ospf authentication IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -6980,7 +6980,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "authentication": null
               }
@@ -7055,7 +7055,7 @@
         "type": "string",
         "help": "The OSPF password (key)"
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -7063,7 +7063,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf authentication-key WORD:4 IPV4-ADDR:5",
+        "defun": "ip ospf authentication-key WORD:4 IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -7071,7 +7071,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5",
               "params": {
                 "authentication-key": "WORD:4"
               }
@@ -7183,7 +7183,7 @@
         "type": "keyword",
         "help": "Authentication password (key)"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -7191,7 +7191,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf authentication-key IPV4-ADDR:4",
+        "defun": "no ip ospf authentication-key IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -7199,7 +7199,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "authentication-key": null
               }
@@ -7325,7 +7325,7 @@
         "type": "string",
         "help": "The OSPF password (key)Address of interface"
       },
-      "IPV4-ADDR:7": {
+      "IPV4-ADDRESS:7": {
         "id": "7",
         "type": "ipv4address",
         "help": "*MISSING-HELP*"
@@ -7333,7 +7333,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf message-digest-key RANGE:4 md5 WORD:6 IPV4-ADDR:7",
+        "defun": "ip ospf message-digest-key RANGE:4 md5 WORD:6 IPV4-ADDRESS:7",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -7341,7 +7341,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:7/md5_keys/:RANGE:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:7/md5_keys/:RANGE:4",
               "params": {
                 "key-string": "WORD:6"
               }
@@ -7490,7 +7490,7 @@
           255
         ]
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -7498,7 +7498,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf message-digest-key RANGE:4 IPV4-ADDR:5",
+        "defun": "no ip ospf message-digest-key RANGE:4 IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -7506,7 +7506,7 @@
           {
             "http": {
               "method": "DELETE",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5/md5_keys/:RANGE:4"
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5/md5_keys/:RANGE:4"
             }
           }
         ]
@@ -7634,7 +7634,7 @@
           65535
         ]
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -7642,7 +7642,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf cost RANGE:4 IPV4-ADDR:5",
+        "defun": "ip ospf cost RANGE:4 IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -7650,7 +7650,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5",
               "params": {
                 "cost": "RANGE:4"
               }
@@ -7769,7 +7769,7 @@
           65535
         ]
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -7777,7 +7777,7 @@
     },
     "command": [
       {
-        "defun": "ospf cost RANGE:3 IPV4-ADDR:4",
+        "defun": "ospf cost RANGE:3 IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -7816,7 +7816,7 @@
         "type": "keyword",
         "help": "Interface cost"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -7824,7 +7824,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf cost IPV4-ADDR:4",
+        "defun": "no ip ospf cost IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -7832,7 +7832,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "cost": null
               }
@@ -7939,7 +7939,7 @@
         "type": "keyword",
         "help": "Interface cost"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -7947,7 +7947,7 @@
     },
     "command": [
       {
-        "defun": "no ospf cost IPV4-ADDR:3",
+        "defun": "no ospf cost IPV4-ADDRESS:3",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -8093,7 +8093,7 @@
           65535
         ]
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -8101,7 +8101,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf cost RANGE:4 IPV4-ADDR:5",
+        "defun": "no ip ospf cost RANGE:4 IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -8109,7 +8109,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5",
               "params": {
                 "cost": null
               }
@@ -8145,7 +8145,7 @@
           65535
         ]
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -8153,7 +8153,7 @@
     },
     "command": [
       {
-        "defun": "no ospf cost RANGE:3 IPV4-ADDR:4",
+        "defun": "no ospf cost RANGE:3 IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -8196,7 +8196,7 @@
           65535
         ]
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -8204,7 +8204,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf dead-interval RANGE:4 IPV4-ADDR:5",
+        "defun": "ip ospf dead-interval RANGE:4 IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -8212,7 +8212,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5",
               "params": {
                 "dead-interval": "RANGE:4"
               }
@@ -8346,7 +8346,7 @@
           10
         ]
       },
-      "IPV4-ADDR:7": {
+      "IPV4-ADDRESS:7": {
         "id": "7",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -8354,7 +8354,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf dead-interval minimal hello-multiplier RANGE:6 IPV4-ADDR:7",
+        "defun": "ip ospf dead-interval minimal hello-multiplier RANGE:6 IPV4-ADDRESS:7",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -8449,7 +8449,7 @@
         "type": "keyword",
         "help": "Interval after which a neighbor is declared dead"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -8457,7 +8457,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf dead-interval IPV4-ADDR:4",
+        "defun": "no ip ospf dead-interval IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -8465,7 +8465,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "dead-interval": null
               }
@@ -8581,7 +8581,7 @@
           65535
         ]
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -8589,7 +8589,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf hello-interval RANGE:4 IPV4-ADDR:5",
+        "defun": "ip ospf hello-interval RANGE:4 IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -8597,7 +8597,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5",
               "params": {
                 "hello-interval": "RANGE:4"
               }
@@ -8717,7 +8717,7 @@
         "type": "keyword",
         "help": "Time between HELLO packets"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -8725,7 +8725,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf hello-interval IPV4-ADDR:4",
+        "defun": "no ip ospf hello-interval IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -8733,7 +8733,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "hello-interval": null
               }
@@ -9047,7 +9047,7 @@
           255
         ]
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -9055,7 +9055,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf priority RANGE:4 IPV4-ADDR:5",
+        "defun": "ip ospf priority RANGE:4 IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -9063,7 +9063,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5",
               "params": {
                 "network": "RANGE:4"
               }
@@ -9183,7 +9183,7 @@
         "type": "keyword",
         "help": "Router priority"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -9191,7 +9191,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf priority IPV4-ADDR:4",
+        "defun": "no ip ospf priority IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -9199,7 +9199,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "network": null
               }
@@ -9315,7 +9315,7 @@
           65535
         ]
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -9323,7 +9323,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf retransmit-interval RANGE:4 IPV4-ADDR:5",
+        "defun": "ip ospf retransmit-interval RANGE:4 IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -9331,7 +9331,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5",
               "params": {
                 "priority": "RANGE:4"
               }
@@ -9451,7 +9451,7 @@
         "type": "keyword",
         "help": "Time between retransmitting lost link state advertisements"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -9459,7 +9459,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf retransmit-interval IPV4-ADDR:4",
+        "defun": "no ip ospf retransmit-interval IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -9467,7 +9467,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "retransmit-interval": null
               }
@@ -9583,7 +9583,7 @@
           65535
         ]
       },
-      "IPV4-ADDR:5": {
+      "IPV4-ADDRESS:5": {
         "id": "5",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -9591,7 +9591,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf transmit-delay RANGE:4 IPV4-ADDR:5",
+        "defun": "ip ospf transmit-delay RANGE:4 IPV4-ADDRESS:5",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -9599,7 +9599,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:5",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:5",
               "params": {
                 "transmit-delay": "RANGE:4"
               }
@@ -9719,7 +9719,7 @@
         "type": "keyword",
         "help": "Link state transmit delay"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -9727,7 +9727,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf transmit-delay IPV4-ADDR:4",
+        "defun": "no ip ospf transmit-delay IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -9735,7 +9735,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "transmit-delay": null
               }
@@ -13594,7 +13594,7 @@
         "type": "keyword",
         "help": "Disable mtu mismatch detection"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Address of interface"
@@ -13602,7 +13602,7 @@
     },
     "command": [
       {
-        "defun": "ip ospf mtu-ignore IPV4-ADDR:4",
+        "defun": "ip ospf mtu-ignore IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -13610,7 +13610,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "mtu-ignore": true
               }
@@ -13680,7 +13680,7 @@
         "type": "keyword",
         "help": "Address of interface"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "*MISSING-HELP*"
@@ -13688,7 +13688,7 @@
     },
     "command": [
       {
-        "defun": "no ip ospf mtu-ignore IPV4-ADDR:4",
+        "defun": "no ip ospf mtu-ignore IPV4-ADDRESS:4",
         "mode": [
           "CONFIG-IF-MODE"
         ],
@@ -13696,7 +13696,7 @@
           {
             "http": {
               "method": "POST",
-              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDR:4",
+              "path": "interfaces/:IFNAME/ospfv2_ifs/:IPV4-ADDRESS:4",
               "params": {
                 "mtu-ignore": null
               }

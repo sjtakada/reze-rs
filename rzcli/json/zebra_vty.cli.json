@@ -16,7 +16,7 @@
         "type": "ipv4prefix",
         "help": "IP destination prefix (e.g. 10.0.0.0/8)"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -35,7 +35,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1|null0)",
+        "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDRESS:4.0|WORD:4.1|null0)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -46,9 +46,9 @@
           {
             "http": {
               "method": "PUT",
-              "path": "ipv4_routes/:ADDRESS/:MASKLEN/nexthop_ipv4s/:IPV4-ADDR:4.0"
+              "path": "ipv4_routes/:ADDRESS/:MASKLEN/nexthop_ipv4s/:IPV4-ADDRESS:4.0"
             },
-            "cond": "IPV4-ADDR:4.0"
+            "cond": "IPV4-ADDRESS:4.0"
           },
           {
             "http": {
@@ -78,7 +78,7 @@
         "type": "ipv4prefix",
         "help": "IP destination prefix (e.g. 10.0.0.0/8)"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -103,7 +103,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1) (reject|blackhole)",
+        "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDRESS:4.0|WORD:4.1) (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -181,17 +181,17 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -210,7 +210,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1|null0)",
+        "defun": "ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (IPV4-ADDRESS:5.0|WORD:5.1|null0)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -239,17 +239,17 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -274,7 +274,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1) (reject|blackhole)",
+        "defun": "ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (IPV4-ADDRESS:5.0|WORD:5.1) (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -303,12 +303,12 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
@@ -328,7 +328,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (reject|blackhole)",
+        "defun": "ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -362,7 +362,7 @@
         "type": "ipv4prefix",
         "help": "IP destination prefix (e.g. 10.0.0.0/8)"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -390,7 +390,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1|null0) RANGE:5",
+        "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDRESS:4.0|WORD:4.1|null0) RANGE:5",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -424,7 +424,7 @@
         "type": "ipv4prefix",
         "help": "IP destination prefix (e.g. 10.0.0.0/8)"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -458,7 +458,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
+        "defun": "ip route IPV4-PREFIX:3 (IPV4-ADDRESS:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -545,17 +545,17 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -583,7 +583,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1|null0) RANGE:6",
+        "defun": "ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (IPV4-ADDRESS:5.0|WORD:5.1|null0) RANGE:6",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -612,17 +612,17 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -656,7 +656,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1) (reject|blackhole) RANGE:7",
+        "defun": "ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (IPV4-ADDRESS:5.0|WORD:5.1) (reject|blackhole) RANGE:7",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -685,12 +685,12 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
@@ -719,7 +719,7 @@
     },
     "command": [
       {
-        "defun": "ip route IPV4-ADDR:3 IPV4-ADDR:4 (reject|blackhole) RANGE:6",
+        "defun": "ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (reject|blackhole) RANGE:6",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -758,7 +758,7 @@
         "type": "ipv4prefix",
         "help": "IP destination prefix (e.g. 10.0.0.0/8)"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -777,7 +777,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1|null0)",
+        "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDRESS:4.0|WORD:4.1|null0)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -788,9 +788,9 @@
           {
             "http": {
               "method": "DELETE",
-              "path": "ipv4_routes/:ADDRESS/:MASKLEN/nexthop_ipv4s/:IPV4-ADDR:4.0"
+              "path": "ipv4_routes/:ADDRESS/:MASKLEN/nexthop_ipv4s/:IPV4-ADDRESS:4.0"
             },
-            "cond": "IPV4-ADDR:4.0"
+            "cond": "IPV4-ADDRESS:4.0"
           },
           {
             "http": {
@@ -825,7 +825,7 @@
         "type": "ipv4prefix",
         "help": "IP destination prefix (e.g. 10.0.0.0/8)"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -850,7 +850,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1) (reject|blackhole)",
+        "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDRESS:4.0|WORD:4.1) (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -938,17 +938,17 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -967,7 +967,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1|null0)",
+        "defun": "no ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (IPV4-ADDRESS:5.0|WORD:5.1|null0)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -1001,17 +1001,17 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -1036,7 +1036,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1) (reject|blackhole)",
+        "defun": "no ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (IPV4-ADDRESS:5.0|WORD:5.1) (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -1070,12 +1070,12 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
@@ -1095,7 +1095,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (reject|blackhole)",
+        "defun": "no ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -1134,7 +1134,7 @@
         "type": "ipv4prefix",
         "help": "IP destination prefix (e.g. 10.0.0.0/8)"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -1162,7 +1162,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1|null0) RANGE:5",
+        "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDRESS:4.0|WORD:4.1|null0) RANGE:5",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -1201,7 +1201,7 @@
         "type": "ipv4prefix",
         "help": "IP destination prefix (e.g. 10.0.0.0/8)"
       },
-      "IPV4-ADDR:4.0": {
+      "IPV4-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -1235,7 +1235,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDR:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
+        "defun": "no ip route IPV4-PREFIX:3 (IPV4-ADDRESS:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -1332,17 +1332,17 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -1370,7 +1370,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1|null0) RANGE:6",
+        "defun": "no ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (IPV4-ADDRESS:5.0|WORD:5.1|null0) RANGE:6",
         "action": [
           {
             "http": {
@@ -1401,17 +1401,17 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
       },
-      "IPV4-ADDR:5.0": {
+      "IPV4-ADDRESS:5.0": {
         "id": "5.0",
         "type": "ipv4address",
         "help": "IP gateway address"
@@ -1445,7 +1445,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (IPV4-ADDR:5.0|WORD:5.1) (reject|blackhole) RANGE:7",
+        "defun": "no ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (IPV4-ADDRESS:5.0|WORD:5.1) (reject|blackhole) RANGE:7",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -1479,12 +1479,12 @@
         "type": "keyword",
         "help": "Establish static routes"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "IP destination prefix"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "IP destination prefix mask"
@@ -1513,7 +1513,7 @@
     },
     "command": [
       {
-        "defun": "no ip route IPV4-ADDR:3 IPV4-ADDR:4 (reject|blackhole) RANGE:6",
+        "defun": "no ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (reject|blackhole) RANGE:6",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -1847,7 +1847,7 @@
         "type": "keyword",
         "help": "IP routing table"
       },
-      "IPV4-ADDR:4": {
+      "IPV4-ADDRESS:4": {
         "id": "4",
         "type": "ipv4address",
         "help": "Network in the IP routing table to display"
@@ -1855,7 +1855,7 @@
     },
     "command": [
       {
-        "defun": "show ip route IPV4-ADDR:4",
+        "defun": "show ip route IPV4-ADDRESS:4",
         "mode": [
           "EXEC-MODE"
         ],
@@ -2047,7 +2047,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4.0": {
+      "IPV6-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2060,7 +2060,7 @@
     },
     "command": [
       {
-        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1)",
+        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2094,7 +2094,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4.0": {
+      "IPV6-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2119,7 +2119,7 @@
     },
     "command": [
       {
-        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) (reject|blackhole)",
+        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2153,7 +2153,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4": {
+      "IPV6-ADDRESS:4": {
         "id": "4",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2166,7 +2166,7 @@
     },
     "command": [
       {
-        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5",
+        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2200,7 +2200,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4": {
+      "IPV6-ADDRESS:4": {
         "id": "4",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2225,7 +2225,7 @@
     },
     "command": [
       {
-        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 (reject|blackhole)",
+        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2259,7 +2259,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4.0": {
+      "IPV6-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2281,7 +2281,7 @@
     },
     "command": [
       {
-        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) RANGE:5",
+        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) RANGE:5",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2315,7 +2315,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4.0": {
+      "IPV6-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2349,7 +2349,7 @@
     },
     "command": [
       {
-        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
+        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2383,7 +2383,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4": {
+      "IPV6-ADDRESS:4": {
         "id": "4",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2405,7 +2405,7 @@
     },
     "command": [
       {
-        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 RANGE:6",
+        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 RANGE:6",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2439,7 +2439,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4": {
+      "IPV6-ADDRESS:4": {
         "id": "4",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2473,7 +2473,7 @@
     },
     "command": [
       {
-        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 (reject|blackhole) RANGE:7",
+        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 (reject|blackhole) RANGE:7",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2512,7 +2512,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4.0": {
+      "IPV6-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2525,7 +2525,7 @@
     },
     "command": [
       {
-        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1)",
+        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2564,7 +2564,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4.0": {
+      "IPV6-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2589,7 +2589,7 @@
     },
     "command": [
       {
-        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) (reject|blackhole)",
+        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2628,7 +2628,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4": {
+      "IPV6-ADDRESS:4": {
         "id": "4",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2641,7 +2641,7 @@
     },
     "command": [
       {
-        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5",
+        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2680,7 +2680,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4": {
+      "IPV6-ADDRESS:4": {
         "id": "4",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2705,7 +2705,7 @@
     },
     "command": [
       {
-        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 (reject|blackhole)",
+        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 (reject|blackhole)",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2744,7 +2744,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4.0": {
+      "IPV6-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2766,7 +2766,7 @@
     },
     "command": [
       {
-        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) RANGE:5",
+        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) RANGE:5",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2805,7 +2805,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4.0": {
+      "IPV6-ADDRESS:4.0": {
         "id": "4.0",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2839,7 +2839,7 @@
     },
     "command": [
       {
-        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDR:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
+        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2878,7 +2878,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4": {
+      "IPV6-ADDRESS:4": {
         "id": "4",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2900,7 +2900,7 @@
     },
     "command": [
       {
-        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 RANGE:6",
+        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 RANGE:6",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -2939,7 +2939,7 @@
         "type": "ipv6prefix",
         "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
       },
-      "IPV6-ADDR:4": {
+      "IPV6-ADDRESS:4": {
         "id": "4",
         "type": "ipv6address",
         "help": "IPv6 gateway address"
@@ -2973,7 +2973,7 @@
     },
     "command": [
       {
-        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDR:4 WORD:5 (reject|blackhole) RANGE:7",
+        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 (reject|blackhole) RANGE:7",
         "mode": [
           "CONFIG-MODE"
         ],
@@ -3176,7 +3176,7 @@
         "type": "keyword",
         "help": "IPv6 routing table"
       },
-      "IPV6-ADDR:4": {
+      "IPV6-ADDRESS:4": {
         "id": "4",
         "type": "ipv6address",
         "help": "IPv6 Address"
@@ -3184,7 +3184,7 @@
     },
     "command": [
       {
-        "defun": "show ipv6 route IPV6-ADDR:4",
+        "defun": "show ipv6 route IPV6-ADDRESS:4",
         "mode": [
           "EXEC-MODE"
         ],

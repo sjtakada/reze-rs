@@ -753,7 +753,7 @@
         "type": "keyword",
         "help": "src address for route"
       },
-      "IPV4-ADDR:3": {
+      "IPV4-ADDRESS:3": {
         "id": "3",
         "type": "ipv4address",
         "help": "src address"
@@ -761,7 +761,7 @@
     },
     "command": [
       {
-        "defun": "set src IPV4-ADDR:3",
+        "defun": "set src IPV4-ADDRESS:3",
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
@@ -832,7 +832,7 @@
         "type": "keyword",
         "help": "src address for route"
       },
-      "IPV4-ADDR:3.0": {
+      "IPV4-ADDRESS:3.0": {
         "id": "3.0",
         "type": "ipv4address",
         "help": "src address"
@@ -840,7 +840,7 @@
     },
     "command": [
       {
-        "defun": "no set src (IPV4-ADDR:3.0)",
+        "defun": "no set src (IPV4-ADDRESS:3.0)",
         "action": [
           {
             "http": {
