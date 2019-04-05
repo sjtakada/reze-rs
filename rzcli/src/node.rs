@@ -5,16 +5,16 @@
 // CLI Node.
 //
 
-use std::char;
+//use std::char;
 use std::rc::Rc;
 use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefMut;
 use std::cell::RefCell;
-use std::collections::HashMap;
-use std::cmp::Ordering;
+//use std::collections::HashMap;
+//use std::cmp::Ordering;
 
-use super::tree;
+//use super::tree;
 use super::collate::*;
 
 const CLI_TOKEN_IPV4_ADDRESS: &str = "A.B.C.D";
@@ -22,7 +22,7 @@ const CLI_TOKEN_IPV4_PREFIX: &str = "A.B.C.D/M";
 const CLI_TOKEN_IPV6_ADDRESS: &str = "X:X::X:X";
 const CLI_TOKEN_IPV6_PREFIX: &str = "X:X::X:X/M";
 const CLI_TOKEN_WORD: &str = "WORD";
-const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
+//const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
 
 pub type CliNodeVec = Vec<Rc<CliNode>>;
 
@@ -145,7 +145,7 @@ impl CliNode for CliNodeDummy {
         self.inner.borrow()
     }
 
-    fn collate(&self, input: &str) -> MatchResult {
+    fn collate(&self, _input: &str) -> MatchResult {
         MatchResult::Failure(0)
     }
 }
@@ -292,7 +292,6 @@ impl CliNode for CliNodeIPv4Prefix {
             Digit,
             Dot,
             Slash,
-            Unknown,
         }
 
         let mut pos: usize = 0;
@@ -406,7 +405,6 @@ impl CliNode for CliNodeIPv4Address {
         enum Token {
             Digit,
             Dot,
-            Unknown,
         }
 
         let mut pos: usize = 0;
@@ -525,7 +523,7 @@ impl CliNode for CliNodeIPv6Prefix {
         let mut plen: u32 = 0;
 
         for c in input.chars() {
-            let mut next_state = state;
+            let next_state;
             let token = match state {
                 State::Slash | State::PrefixLen => {
                     match c {
@@ -662,7 +660,7 @@ impl CliNode for CliNodeIPv6Address {
         let mut state = State::Init;
 
         for c in input.chars() {
-            let mut next_state = state;
+            let next_state;
             let token = match c {
                 '0' ... '9' | 'a' ... 'f' | 'A' ... 'F'
                     => Token::Xdigit,
@@ -766,7 +764,7 @@ impl CliNode for CliNodeWord {
         self.inner.borrow()
     }
 
-    fn collate(&self, input: &str) -> MatchResult {
+    fn collate(&self, _input: &str) -> MatchResult {
         MatchResult::Success(MatchFlag::Incomplete)
     }
 }

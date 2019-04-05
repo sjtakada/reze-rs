@@ -6,7 +6,7 @@
 //
 
 use std::env;
-use std::io;
+//use std::io;
 use std::io::BufReader;
 use std::io::Read;
 use std::fs;
@@ -14,7 +14,7 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 use std::collections::HashMap;
-use std::cell::RefCell;
+//use std::cell::RefCell;
 use std::rc::Rc;
 
 use mio_uds::UnixStream;
@@ -43,12 +43,13 @@ impl Cli {
         // TBD: Terminal init
 
         // Initialize CLI modes.
-        self.init_cli_modes()?;
+        let path = PathBuf::from("../json/reze.cli_mode.json");
+        self.init_cli_modes(&path)?;
 
         // Initialize build-in commands.
 
         // Initialize CLI definitions.
-        let mut path = PathBuf::from("../json");
+        let path = PathBuf::from("../json");
         self.init_cli_commands(&path);
 
         // TBD: Connect server or send.
@@ -126,9 +127,8 @@ impl Cli {
     }
 
     // Initialize CLI modes.
-    fn init_cli_modes(&mut self) -> Result<(), CliError> {
-        let pathbuf = PathBuf::from("../json/reze.cli_mode.json");
-        match self.json_read(pathbuf.as_path()) {
+    fn init_cli_modes(&mut self, path: &Path) -> Result<(), CliError> {
+        match self.json_read(path) {
             Some(root) => {
                 if root.is_object() {
                     self.build_mode(&root, None);
@@ -199,7 +199,7 @@ impl Cli {
     }
 
     fn init_cli_commands(&mut self, dir: &Path) -> Result<(), CliError> {
-        let suffix = "cli.json";
+        // let suffix = "cli.json";
 
         if dir.is_dir() {
             for entry in fs::read_dir(dir).expect("Unable to get directory entry") {

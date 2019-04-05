@@ -7,7 +7,7 @@
 
 use std::collections::HashMap;
 use std::cell::RefCell;
-use std::cell::Cell;
+//use std::cell::Cell;
 use std::rc::Rc;
 
 use rustyline::completion::Completer;
@@ -45,7 +45,7 @@ impl<'a> CliCompleter<'a> {
 impl<'a> Completer for CliCompleter<'a> {
     type Candidate = String;
 
-    fn complete(&self, line: &str, pos: usize, ctx: &Context<'_>) -> rustyline::Result<(usize, Vec<String>)> {
+    fn complete(&self, line: &str, _pos: usize, _ctx: &Context<'_>) -> rustyline::Result<(usize, Vec<String>)> {
         let mut candidate: Vec<String> = Vec::new();
         let line = line.trim_start();
 
@@ -69,12 +69,11 @@ impl<'a> Completer for CliCompleter<'a> {
         line.replace(start..end, elected)
     }
 
-    fn custom(&self, line: &str, pos: usize, ctx: &Context<'_>, c: char) -> rustyline::Result<()> {
-        let mut candidate: Vec<String> = Vec::new();
+    fn custom(&self, line: &str, _pos: usize, _ctx: &Context<'_>, _c: char) -> rustyline::Result<()> {
         let line = line.trim_start();
 
         // TBD: where am I?   should keep which mode I am.
-        let tree = &self.trees["VIEW-NODE"];
+        let tree = &self.trees["EXEC-MODE"];
         let mut parser = self.parser.borrow_mut();
 
         parser.set_line(&line);
@@ -108,15 +107,18 @@ pub struct CliReadline<'a> {
     // CLI completer.
     editor: RefCell<Editor<CliCompleter<'a>>>,
 
+    // Current CLI mode.
+    mode: String,
+
     // Completion matched string vector.
     //matched_strvec: Vec<&str>,
-    matched_index: usize,
+    //matched_index: usize,
 }
 
 impl<'a> CliReadline<'a> {
     pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliReadline<'a> {
         // Set configuration.
-        let mut config = config::Builder::new()
+        let config = config::Builder::new()
             .completion_type(config::CompletionType::List)
             .build();
 
@@ -130,7 +132,8 @@ impl<'a> CliReadline<'a> {
         CliReadline::<'a> {
             trees: trees,
             editor: RefCell::new(editor),
-            matched_index: 0,
+            mode: String::from("EXEC-MODE"),
+            //matched_index: 0,
         }
     }
 

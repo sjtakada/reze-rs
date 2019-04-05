@@ -11,7 +11,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::node::*;
-use super::collate;
+//use super::collate;
 
 // Token Type.
 #[derive(PartialEq)]
@@ -211,8 +211,8 @@ impl CliTree {
     // Parse string to return:
     //   TokenType, token and remainder of string.
     fn get_cli_token(s: &mut String) -> (TokenType, Option<String>) {
-        let mut offset = 0;
-        let mut token_type = TokenType::Undef;
+        let offset;
+        let token_type;
 
         // trim whitespaces at beginning.
         let len = s.trim_start().len();

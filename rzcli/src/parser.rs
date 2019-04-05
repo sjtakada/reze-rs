@@ -7,22 +7,22 @@
 
 use std::fmt;
 use std::cell::Cell;
-use std::cell::RefMut;
+//use std::cell::RefMut;
 use std::rc::Rc;
-use std::collections::HashMap;
+//use std::collections::HashMap;
 
 use serde_json;
 
 use super::error::CliError;
-use super::tree::CliTree;
+//use super::tree::CliTree;
 use super::node::CliNode;
 use super::collate::*;
 
 //
 type CliNodeMatchStateTuple = (Rc<CliNode>, MatchResult);
 type CliNodeMatchStateVec = Vec<CliNodeMatchStateTuple>;
-type CliNodeTokenTuple = (Rc<CliNode>, String);
-type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
+//type CliNodeTokenTuple = (Rc<CliNode>, String);
+//type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
 
 //
 #[derive(PartialEq, Copy, Clone)]
@@ -218,7 +218,6 @@ impl CliParser {
     // try match shorter string in line.
     fn match_shorter(&mut self, curr: Rc<CliNode>, token: String) {
         let mut len = token.len();
-        let parsed_len = self.input.len() - self.line.len();
 
         while len > 0 {
             let sub_token = &token[..len];

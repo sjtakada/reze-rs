@@ -5,12 +5,9 @@
       {
         "privilege": 1,
         "prompt": ">"
-      },
-      {
-        "privilege": [2, 15],
-        "prompt": "#"
       }
     ],
+    "prompt": "#",
     "exit-to-quit": true
   },
   "CONFIG-MODE": {
