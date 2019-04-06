@@ -11,7 +11,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::node::*;
-//use super::collate;
 
 // Token Type.
 #[derive(PartialEq)]
@@ -188,7 +187,7 @@ impl CliTree {
                         };
 
                         // TBD: hidden
-                        
+
                         curr.clear();
                         curr.push(next.clone());
                         
@@ -197,6 +196,25 @@ impl CliTree {
                             is_head = false;
                         }
                     }
+                }
+            }
+        }
+
+        // TBD: bind value to variables.
+        //
+
+        let actions = &command["action"];
+        if actions.is_object() {
+            for (key, obj) in actions.as_object().unwrap().iter() {
+                match key.as_ref() {
+                    "mode" => {
+                        //obj["name"]
+                    },
+                    "http" => {
+                    },
+                    "build-in" => {
+                    },
+                    _ => {}
                 }
             }
         }

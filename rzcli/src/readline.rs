@@ -139,7 +139,6 @@ impl<'a> CliReadline<'a> {
         match readline {
             Ok(line) => {
                 editor.add_history_entry(line.as_ref());
-                println!("Line: {}", line);
                 Ok(line)
             },
             Err(err) => Err(err)

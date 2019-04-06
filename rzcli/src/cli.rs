@@ -70,6 +70,7 @@ impl Cli {
             // TODO, we'll get API URL and parameters here to send to server.
             match readline.gets() {
                 Ok(line) => {
+                    println!("LINE: {}", line);
                     // exec
                 },
                 Err(ReadlineError::Interrupted) => {
