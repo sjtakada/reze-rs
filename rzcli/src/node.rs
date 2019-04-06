@@ -39,6 +39,11 @@ pub trait CliNode {
         self.inner().set_executable();
     }
 
+    // Is node executable?
+    fn is_executable(&self) -> bool {
+        self.inner().is_executable()
+    }
+
     // Sort next nodes recursively.
     fn sort_recursive(&self) {
         self.inner().sort_recursive();

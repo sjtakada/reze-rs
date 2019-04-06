@@ -34,7 +34,7 @@ impl fmt::Debug for MatchFlag {
 // Match result:
 //   If it succeeds, it will return either Full, Partial or incomplete, depending on the type of node.
 //   If it fails, it will return position where the match fails.
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub enum MatchResult {
     Failure(usize),
     Success(MatchFlag),

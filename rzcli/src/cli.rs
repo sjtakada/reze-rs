@@ -318,7 +318,8 @@ mod tests {
   }
 } "##;
 
-        let ret = cli.init_cli_modes();
+        let path = PathBuf::from("../json/reze.cli_mode.json");
+        let ret = cli.init_cli_modes(&path);
         let json = serde_json::from_str(&mode_json_str).unwrap();
         let ret = cli.build_mode(&json, None);
         let mode = &cli.trees["BGP-AF-MODE"];

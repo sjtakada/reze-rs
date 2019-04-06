@@ -29,7 +29,7 @@ const CLI_INITIAL_MODE: &str = "CONFIG-MODE";
 
 pub struct CliCompleter<'a> {
     // Reference to CLI command tree map.
-    trees: &'a HashMap<String, Rc<CliTree>>,
+    _trees: &'a HashMap<String, Rc<CliTree>>,
 
     // Current tree.
     current: Rc<CliTree>,
@@ -41,7 +41,7 @@ pub struct CliCompleter<'a> {
 impl<'a> CliCompleter<'a> {
     pub fn new(trees: &'a HashMap<String, Rc<CliTree>>, mode: &str) -> CliCompleter<'a> {
         CliCompleter::<'a> {
-            trees: trees,
+            _trees: trees,
             current: trees[mode].clone(),
             parser: RefCell::new(CliParser::new()),
         }
@@ -56,7 +56,7 @@ impl<'a> Completer for CliCompleter<'a> {
         let mut parser = self.parser.borrow_mut();
         let line = line.trim_start();
 
-        parser.set_line(&line);
+        parser.init(&line);
         parser.parse(self.current.top());
 
         let vec = parser.matched_vec(); 
@@ -76,7 +76,7 @@ impl<'a> Completer for CliCompleter<'a> {
         let line = line.trim_start();
         let mut parser = self.parser.borrow_mut();
 
-        parser.set_line(&line);
+        parser.init(&line);
         parser.parse(self.current.top());
 
         let vec = parser.matched_vec(); 
@@ -102,7 +102,7 @@ impl<'a> Hinter for CliCompleter<'a> {}
 
 pub struct CliReadline<'a> {
     // CLI mode to tree map.
-    trees: &'a HashMap<String, Rc<CliTree>>,
+    _trees: &'a HashMap<String, Rc<CliTree>>,
 
     // CLI completer.
     editor: RefCell<Editor<CliCompleter<'a>>>,
@@ -126,7 +126,7 @@ impl<'a> CliReadline<'a> {
 
 
         CliReadline::<'a> {
-            trees: trees,
+            _trees: trees,
             editor: RefCell::new(editor),
             mode: Cell::new(String::from(CLI_INITIAL_MODE)),
         }

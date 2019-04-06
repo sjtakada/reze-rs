@@ -14,9 +14,9 @@ pub trait CliAction {
 
 // Action mode.
 pub struct CliActionMode {
-    name: String,
-    up: u64,
-    params: Vec<String>,
+    _name: String,
+    _up: u64,
+    _params: Vec<String>,
 }
 
 impl CliActionMode {
@@ -26,9 +26,9 @@ impl CliActionMode {
         let params = value["params"].as_object();
 
         CliActionMode {
-            name: String::from(name),
-            up: up,
-            params: Vec::new(),
+            _name: String::from(name),
+            _up: up,
+            _params: Vec::new(),
         }
     }
 }
