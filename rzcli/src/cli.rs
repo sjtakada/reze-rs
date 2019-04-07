@@ -14,7 +14,8 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 use std::collections::HashMap;
-use std::cell::Cell;
+//use std::cell::RefCell;
+//use std::cell::Cell;
 use std::rc::Rc;
 
 use mio_uds::UnixStream;
@@ -28,20 +29,25 @@ use super::tree::CliTree;
 // Constants.
 const CLI_INITIAL_MODE: &str = "EXEC-MODE";
 
-
+//
+// Main container of CLI
+//
 pub struct Cli {
     // HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
 
+    // Current mode name
+    mode: String,
+
     // Current CLI Tree.
-    current: Cell<Option<Rc<CliTree>>>,
+//    current: Option<RefCell<Rc<CliTree>>>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
-            current: Cell::new(None),
+            mode: String::new(),
         }
     }
 
@@ -65,7 +71,7 @@ impl Cli {
         //self.init_server_connect()?;
 
         // Init readline.
-        let readline = CliReadline::new(&self, &self.trees);
+        let readline = CliReadline::new(&self);
 
         // Start CLI.
         self.run(readline);
@@ -108,15 +114,23 @@ impl Cli {
         }
     }
 
-    fn set_mode(&mut self, mode: &str) -> Result<(), CliError> {
-        match self.trees.get(mode) {
-            Some(tree) => {
-                self.current.get_mut().replace(tree.clone());
-            },
-            None => {
-                return Err(CliError::SetModeError(String::from(mode)))
-            }
+    pub fn trees(&self) -> &HashMap<String, Rc<CliTree>> {
+        &self.trees
+    }
+
+    pub fn mode(&self) -> &str {
+        &self.mode
+    }
+
+    pub fn current(&self) -> Option<Rc<CliTree>> {
+        match self.trees.get(&self.mode) {
+            Some(tree) => Some(tree.clone()),
+            None => None,
         }
+    }
+
+    fn set_mode(&mut self, mode: &str) -> Result<(), CliError> {
+        self.mode = String::from(mode);
 
         Ok(())
     }

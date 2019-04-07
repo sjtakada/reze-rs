@@ -5,7 +5,7 @@
 // Readline, rustyline integration.
 //
 
-use std::collections::HashMap;
+//use std::collections::HashMap;
 use std::cell::RefCell;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -26,24 +26,19 @@ use super::cli::Cli;
 use super::tree::CliTree;
 use super::parser::*;
 
-const CLI_INITIAL_MODE: &str = "CONFIG-MODE";
-
+//
 pub struct CliCompleter<'a> {
-    // Reference to CLI command tree map.
-    _trees: &'a HashMap<String, Rc<CliTree>>,
-
-    // Current tree.
-    current: Rc<CliTree>,
+    // Reference to CLI.
+    cli: &'a Cli,
 
     // CLI parser.
     parser: RefCell<CliParser>,
 }
 
 impl<'a> CliCompleter<'a> {
-    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>, mode: &str) -> CliCompleter<'a> {
+    pub fn new(cli: &'a Cli) -> CliCompleter<'a> {
         CliCompleter::<'a> {
-            _trees: trees,
-            current: trees[mode].clone(),
+            cli: cli,
             parser: RefCell::new(CliParser::new()),
         }
     }
@@ -56,9 +51,10 @@ impl<'a> Completer for CliCompleter<'a> {
         let mut candidate: Vec<String> = Vec::new();
         let mut parser = self.parser.borrow_mut();
         let line = line.trim_start();
+        let current = self.cli.current().unwrap();
 
         parser.init(&line);
-        parser.parse(self.current.top());
+        parser.parse(current.top());
 
         let vec = parser.matched_vec(); 
         for n in vec {
@@ -76,9 +72,10 @@ impl<'a> Completer for CliCompleter<'a> {
     fn custom(&self, line: &str, _pos: usize, _ctx: &Context<'_>, _c: char) -> rustyline::Result<()> {
         let line = line.trim_start();
         let mut parser = self.parser.borrow_mut();
+        let current = self.cli.current().unwrap();
 
         parser.init(&line);
-        parser.parse(self.current.top());
+        parser.parse(current.top());
 
         let vec = parser.matched_vec(); 
         if vec.len() > 0 {
@@ -100,30 +97,26 @@ impl<'a> Completer for CliCompleter<'a> {
 
 impl<'a> Hinter for CliCompleter<'a> {}
 
-
+// CLI readline
+//   Abstruction of rustyline.
+//
 pub struct CliReadline<'a> {
     // CLI
     _cli: &'a Cli,
 
-    // CLI mode to tree map.
-    _trees: &'a HashMap<String, Rc<CliTree>>,
-
     // CLI completer.
     editor: RefCell<Editor<CliCompleter<'a>>>,
-
-    // Current CLI mode.
-    mode: Cell<String>,
 }
 
 impl<'a> CliReadline<'a> {
-    pub fn new(cli: &'a Cli, trees: &'a HashMap<String, Rc<CliTree>>) -> CliReadline<'a> {
+    pub fn new(cli: &'a Cli) -> CliReadline<'a> {
         // Set configuration.
         let config = config::Builder::new()
             .completion_type(config::CompletionType::List)
             .build();
 
         let mut editor = Editor::<CliCompleter>::with_config(config);
-        editor.set_helper(Some(CliCompleter::new(trees, CLI_INITIAL_MODE)));
+        editor.set_helper(Some(CliCompleter::new(cli)));
 
         // Bind '?' as hint.
         editor.bind_sequence(KeyPress::Char('?'), Cmd::Custom('?'));
@@ -131,9 +124,7 @@ impl<'a> CliReadline<'a> {
 
         CliReadline::<'a> {
             _cli: cli,
-            _trees: trees,
             editor: RefCell::new(editor),
-            mode: Cell::new(String::from(CLI_INITIAL_MODE)),
         }
     }
 

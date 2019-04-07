@@ -397,8 +397,7 @@ impl CliParser {
             else {
                 return ExecResult::Complete
             }
-
-            break;
+//            break;
         }
 
         if executable {
