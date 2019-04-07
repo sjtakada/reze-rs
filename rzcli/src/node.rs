@@ -5,16 +5,13 @@
 // CLI Node.
 //
 
-//use std::char;
 use std::rc::Rc;
 use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefMut;
 use std::cell::RefCell;
 //use std::collections::HashMap;
-//use std::cmp::Ordering;
 
-//use super::tree;
 use super::collate::*;
 
 const CLI_TOKEN_IPV4_ADDRESS: &str = "A.B.C.D";

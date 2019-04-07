@@ -22,6 +22,7 @@ use rustyline::Context;
 use rustyline::KeyPress;
 use rustyline::config;
 
+use super::cli::Cli;
 use super::tree::CliTree;
 use super::parser::*;
 
@@ -101,6 +102,9 @@ impl<'a> Hinter for CliCompleter<'a> {}
 
 
 pub struct CliReadline<'a> {
+    // CLI
+    _cli: &'a Cli,
+
     // CLI mode to tree map.
     _trees: &'a HashMap<String, Rc<CliTree>>,
 
@@ -112,7 +116,7 @@ pub struct CliReadline<'a> {
 }
 
 impl<'a> CliReadline<'a> {
-    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliReadline<'a> {
+    pub fn new(cli: &'a Cli, trees: &'a HashMap<String, Rc<CliTree>>) -> CliReadline<'a> {
         // Set configuration.
         let config = config::Builder::new()
             .completion_type(config::CompletionType::List)
@@ -126,6 +130,7 @@ impl<'a> CliReadline<'a> {
 
 
         CliReadline::<'a> {
+            _cli: cli,
             _trees: trees,
             editor: RefCell::new(editor),
             mode: Cell::new(String::from(CLI_INITIAL_MODE)),
@@ -135,6 +140,7 @@ impl<'a> CliReadline<'a> {
     pub fn gets(&self) -> Result<String, ReadlineError> {
         let mut editor = self.editor.borrow_mut();
 
+        // TBD: prompt.
         let readline = editor.readline("Router>");
         match readline {
             Ok(line) => {
@@ -142,6 +148,30 @@ impl<'a> CliReadline<'a> {
                 Ok(line)
             },
             Err(err) => Err(err)
+        }
+    }
+
+    pub fn execute(&self, line: String) {
+        if line.trim().len() > 0 {
+            let mut parser = CliParser::new();
+            parser.init(&line);
+
+            /*
+            match parser.parse_execute(top) {
+                ExecResult::Complete => {
+                    println!("execute {}", line);
+                },
+                ExecResult::Incomplete => {
+                    println!("% Incomplete command");
+                },
+                ExecResult::Ambiguous => {
+                    println!("% Ambiguous command");
+                },
+                ExecResult::Unrecognized => {
+                    println!("% Invalid input detected at");
+                },
+            }
+*/
         }
     }
 }

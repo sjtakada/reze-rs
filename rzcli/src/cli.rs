@@ -14,7 +14,7 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 use std::collections::HashMap;
-//use std::cell::RefCell;
+use std::cell::Cell;
 use std::rc::Rc;
 
 use mio_uds::UnixStream;
@@ -25,15 +25,23 @@ use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
 
+// Constants.
+const CLI_INITIAL_MODE: &str = "EXEC-MODE";
+
+
 pub struct Cli {
     // HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
+
+    // Current CLI Tree.
+    current: Cell<Option<Rc<CliTree>>>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
+            current: Cell::new(None),
         }
     }
 
@@ -48,15 +56,16 @@ impl Cli {
 
         // Initialize build-in commands.
 
-        // Initialize CLI definitions.
+        // Initialize CLI comand definitions.
         let path = PathBuf::from("../json");
         self.init_cli_commands(&path)?;
+        self.set_mode(CLI_INITIAL_MODE);
 
         // TBD: Connect server or send.
         //self.init_server_connect()?;
 
         // Init readline.
-        let readline = CliReadline::new(&self.trees);
+        let readline = CliReadline::new(&self, &self.trees);
 
         // Start CLI.
         self.run(readline);
@@ -65,13 +74,14 @@ impl Cli {
         Ok(())
     }
 
+    // Run command loop.
     pub fn run(&self, readline: CliReadline) {
         loop {
             // TODO, we'll get API URL and parameters here to send to server.
             match readline.gets() {
                 Ok(line) => {
-                    println!("LINE: {}", line);
-                    // exec
+                    //println!("LINE: {}", line);
+                    readline.execute(line);
                 },
                 Err(ReadlineError::Interrupted) => {
                     println!("CTRL-C");
@@ -96,6 +106,19 @@ impl Cli {
             stream.flush();
              */
         }
+    }
+
+    fn set_mode(&mut self, mode: &str) -> Result<(), CliError> {
+        match self.trees.get(mode) {
+            Some(tree) => {
+                self.current.get_mut().replace(tree.clone());
+            },
+            None => {
+                return Err(CliError::SetModeError(String::from(mode)))
+            }
+        }
+
+        Ok(())
     }
 
     // Read and return JSON, if it fails, return None.
