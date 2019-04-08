@@ -11,6 +11,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::node::*;
+use super::action::*;
 
 // Token Type.
 #[derive(PartialEq)]
@@ -200,23 +201,28 @@ impl CliTree {
             }
         }
 
-        // TBD: bind value to variables.
         //
+        for node in curr.iter() {
+            // Set executable.
+            node.set_executable();
 
-        let actions = &command["action"];
-        if actions.is_object() {
-            for (key, obj) in actions.as_object().unwrap().iter() {
-                match key.as_ref() {
-                    "mode" => {
-                        //obj["name"]
-                    },
-                    "http" => {
-                    },
-                    "build-in" => {
-                    },
-                    _ => {}
+            let actions = &command["action"];
+            if actions.is_object() {
+                for (key, obj) in actions.as_object().unwrap().iter() {
+                    match key.as_ref() {
+                        "mode" => {
+                            let action = CliActionMode::new(obj);
+                            node.inner().push_action(Rc::new(action));
+                        },
+                        "http" => {
+                        },
+                        "built-in" => {
+                        },
+                        _ => {}
+                    }
                 }
             }
+
         }
 
         for n in curr {

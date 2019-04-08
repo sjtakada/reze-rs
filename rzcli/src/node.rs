@@ -13,6 +13,7 @@ use std::cell::RefCell;
 //use std::collections::HashMap;
 
 use super::collate::*;
+use super::action::CliAction;
 
 const CLI_TOKEN_IPV4_ADDRESS: &str = "A.B.C.D";
 const CLI_TOKEN_IPV4_PREFIX: &str = "A.B.C.D/M";
@@ -72,6 +73,9 @@ pub struct CliNodeInner {
 
     // Next candidate.
     next: RefCell<CliNodeVec>,
+
+    // Actions.
+    actions: RefCell<Vec<Rc<CliAction>>>,
 }
 
 //
@@ -86,6 +90,7 @@ impl CliNodeInner {
             executable: Cell::new(false),
             hidden: Cell::new(false),
             next: RefCell::new(Vec::new()),
+            actions: RefCell::new(Vec::new()),
         }
     }
 
@@ -115,6 +120,14 @@ impl CliNodeInner {
 
     pub fn is_executable(&self) -> bool {
         self.executable.get()
+    }
+
+    pub fn push_action(&self, action: Rc<CliAction>) {
+        self.actions.borrow_mut().push(action);
+    }
+
+    pub fn actions(&self) -> RefMut<Vec<Rc<CliAction>>> {
+        self.actions.borrow_mut()
     }
 
     pub fn sort_recursive(&self) {

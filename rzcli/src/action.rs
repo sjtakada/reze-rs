@@ -5,11 +5,13 @@
 // CLI Action.
 //
 
+use super::cli::Cli;
 use super::readline::*;
+use super::error::CliError;
 
 // Action trait.
 pub trait CliAction {
-    fn handle(&self) -> bool;
+    fn handle(&self, cli: &Cli) -> Result<(), CliError>;
 }
 
 // Action mode.
@@ -34,9 +36,9 @@ impl CliActionMode {
 }
 
 impl CliAction for CliActionMode {
-    fn handle(&self) -> bool {
-        
+    fn handle(&self, cli: &Cli) -> Result<(), CliError> {
+        println!("** action mode");
 
-        true
+        Ok(())
     }
 }

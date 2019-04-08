@@ -201,6 +201,11 @@ impl CliParser {
         self.token.len()
     }
 
+    // Take node token_vec.
+    pub fn node_token_vec(&self) -> CliNodeTokenVec {
+        self.node_token_vec.take()
+    }
+
     // Select matched nodes with MatchFlag smaller than or equal to 'limit'.
     // Among matched nodes with the same MatchFlag and the smallest MatchFlag.
     fn filter_matched(&mut self, limit: MatchFlag) {

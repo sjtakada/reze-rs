@@ -38,9 +38,6 @@ pub struct Cli {
 
     // Current mode name
     mode: String,
-
-    // Current CLI Tree.
-//    current: Option<RefCell<Rc<CliTree>>>,
 }
 
 impl Cli {

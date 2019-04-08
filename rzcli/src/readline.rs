@@ -25,6 +25,10 @@ use rustyline::config;
 use super::cli::Cli;
 use super::tree::CliTree;
 use super::parser::*;
+use super::node::CliNode;
+
+type CliNodeTokenTuple = (Rc<CliNode>, String);
+type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
 
 //
 pub struct CliCompleter<'a> {
@@ -102,7 +106,7 @@ impl<'a> Hinter for CliCompleter<'a> {}
 //
 pub struct CliReadline<'a> {
     // CLI
-    _cli: &'a Cli,
+    cli: &'a Cli,
 
     // CLI completer.
     editor: RefCell<Editor<CliCompleter<'a>>>,
@@ -123,7 +127,7 @@ impl<'a> CliReadline<'a> {
 
 
         CliReadline::<'a> {
-            _cli: cli,
+            cli: cli,
             editor: RefCell::new(editor),
         }
     }
@@ -145,11 +149,13 @@ impl<'a> CliReadline<'a> {
     pub fn execute(&self, line: String) {
         if line.trim().len() > 0 {
             let mut parser = CliParser::new();
+            let current = self.cli.current().unwrap();
+
             parser.init(&line);
 
-            /*
-            match parser.parse_execute(top) {
+            match parser.parse_execute(current.top()) {
                 ExecResult::Complete => {
+                    self.handle_actions(parser.node_token_vec());
                     println!("execute {}", line);
                 },
                 ExecResult::Incomplete => {
@@ -162,7 +168,14 @@ impl<'a> CliReadline<'a> {
                     println!("% Invalid input detected at");
                 },
             }
-*/
+        }
+    }
+
+    fn handle_actions(&self, node_token_vec: CliNodeTokenVec) {
+        let (node, token) = node_token_vec.last().unwrap();
+
+        for action in node.inner().actions().iter() {
+            action.handle(&self.cli);
         }
     }
 }

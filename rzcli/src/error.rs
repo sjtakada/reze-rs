@@ -26,5 +26,10 @@ quick_error! {
             description("Command not found")
             display(r#"The command "{}" could not be found"#, s)
         }
+        //
+        ActionError(s: String) {
+            description("Action error")
+            display(r#"Could not handle action {}"#, s)
+        }
     }
 }
