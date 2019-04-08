@@ -611,6 +611,20 @@ mod tests {
         let inner = n32.inner();
         let next = inner.next();
         assert_eq!(next.len(), 4);
+
+        let n40 = &next[0];
+        assert_eq!(n40.inner().token(), "e");
+
+        let n41 = &next[1];
+        assert_eq!(n41.inner().token(), "f");
+
+        let n42 = &next[2];
+        assert_eq!(n42.inner().token(), "g");
+        assert_eq!(n42.inner().is_executable(), false);
+
+        let n43 = &next[3];
+        assert_eq!(n43.inner().token(), "x");
+        assert_eq!(n43.inner().is_executable(), true);
     }
 }
 

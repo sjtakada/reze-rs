@@ -435,17 +435,17 @@ mod tests {
         assert_eq!(token, Some(String::from("show")));
         assert_eq!(p.line(), String::from(" ip ospf interface"));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("ip")));
         assert_eq!(p.line(), String::from(" ospf interface"));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("ospf")));
         assert_eq!(p.line(), String::from(" interface"));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("interface")));
         assert_eq!(p.line(), String::from(""));
@@ -466,17 +466,17 @@ mod tests {
         assert_eq!(token, Some(String::from("show")));
         assert_eq!(p.line(), String::from("   ip ospf "));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("ip")));
         assert_eq!(p.line(), String::from(" ospf "));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("ospf")));
         assert_eq!(p.line(), String::from(" "));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, None);
         assert_eq!(p.line(), String::from(""));
