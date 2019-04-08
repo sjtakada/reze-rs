@@ -31,5 +31,9 @@ quick_error! {
             description("Action error")
             display(r#"Could not handle action {}"#, s)
         }
+        NoActionDefined {
+            description("No action defined")
+            display(r#"No action defined"#)
+        }
     }
 }

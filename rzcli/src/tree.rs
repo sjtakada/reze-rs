@@ -206,27 +206,29 @@ impl CliTree {
             // Set executable.
             node.set_executable();
 
-            let actions = &command["action"];
-            if actions.is_object() {
-                for (key, obj) in actions.as_object().unwrap().iter() {
-                    match key.as_ref() {
-                        "mode" => {
-                            let action = CliActionMode::new(obj);
-                            node.inner().push_action(Rc::new(action));
-                        },
-                        "http" => {
-                        },
-                        "built-in" => {
-                        },
-                        _ => {}
+            let actions = &command["actions"];
+            if actions.is_array() {
+                for action in actions.as_array().unwrap() {
+                    if action.is_object() {
+                        for (key, obj) in action.as_object().unwrap().iter() {
+                            match key.as_ref() {
+                                "mode" => {
+                                    let action = CliActionMode::new(obj);
+                                    node.inner().push_action(Rc::new(action));
+                                },
+                                "http" => {
+                                },
+                                "built-in" => {
+                                },
+                                _ => {
+                                    println!("Unknown action");
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-        }
-
-        for n in curr {
-            n.set_executable();
         }
 
         TokenType::Undef

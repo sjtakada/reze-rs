@@ -26,6 +26,7 @@ use super::cli::Cli;
 use super::tree::CliTree;
 use super::parser::*;
 use super::node::CliNode;
+use super::error::CliError;
 
 type CliNodeTokenTuple = (Rc<CliNode>, String);
 type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
@@ -155,8 +156,16 @@ impl<'a> CliReadline<'a> {
 
             match parser.parse_execute(current.top()) {
                 ExecResult::Complete => {
-                    self.handle_actions(parser.node_token_vec());
-                    println!("execute {}", line);
+                    match self.handle_actions(parser.node_token_vec()) {
+                        Err(CliError::NoActionDefined) => {
+                            println!("% No action defined");
+                        }
+                        Err(_) => {
+                        }
+                        Ok(()) => {
+                            //println!("execute {}", line);
+                        }
+                    }
                 },
                 ExecResult::Incomplete => {
                     println!("% Incomplete command");
@@ -171,11 +180,20 @@ impl<'a> CliReadline<'a> {
         }
     }
 
-    fn handle_actions(&self, node_token_vec: CliNodeTokenVec) {
+    fn handle_actions(&self, node_token_vec: CliNodeTokenVec) -> Result<(), CliError> {
         let (node, token) = node_token_vec.last().unwrap();
 
-        for action in node.inner().actions().iter() {
-            action.handle(&self.cli);
+        if node.inner().actions().len() > 0 {
+
+            for action in node.inner().actions().iter() {
+                println!("handle_actions {}", token);
+                action.handle(&self.cli);
+            }
+
+            Ok(())
+        }
+        else {
+            Err(CliError::NoActionDefined)
         }
     }
 }

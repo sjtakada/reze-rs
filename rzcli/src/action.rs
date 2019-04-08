@@ -16,7 +16,7 @@ pub trait CliAction {
 
 // Action mode.
 pub struct CliActionMode {
-    _name: String,
+    name: String,
     _up: u64,
     _params: Vec<String>,
 }
@@ -28,7 +28,7 @@ impl CliActionMode {
         let params = value["params"].as_object();
 
         CliActionMode {
-            _name: String::from(name),
+            name: String::from(name),
             _up: up,
             _params: Vec::new(),
         }
@@ -37,7 +37,7 @@ impl CliActionMode {
 
 impl CliAction for CliActionMode {
     fn handle(&self, cli: &Cli) -> Result<(), CliError> {
-        println!("** action mode");
+        cli.set_mode(&self.name);
 
         Ok(())
     }

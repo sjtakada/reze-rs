@@ -14,8 +14,8 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 use std::collections::HashMap;
-//use std::cell::RefCell;
-//use std::cell::Cell;
+use std::cell::Cell;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 use mio_uds::UnixStream;
@@ -37,14 +37,14 @@ pub struct Cli {
     trees: HashMap<String, Rc<CliTree>>,
 
     // Current mode name
-    mode: String,
+    mode: RefCell<String>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
-            mode: String::new(),
+            mode: RefCell::new(String::new()),
         }
     }
 
@@ -115,19 +115,20 @@ impl Cli {
         &self.trees
     }
 
-    pub fn mode(&self) -> &str {
-        &self.mode
+    pub fn mode(&self) -> String {
+        let mut mode = self.mode.borrow_mut();
+        String::from(mode.as_ref())
     }
 
     pub fn current(&self) -> Option<Rc<CliTree>> {
-        match self.trees.get(&self.mode) {
+        match self.trees.get(&self.mode()) {
             Some(tree) => Some(tree.clone()),
             None => None,
         }
     }
 
-    fn set_mode(&mut self, mode: &str) -> Result<(), CliError> {
-        self.mode = String::from(mode);
+    pub fn set_mode(&self, mode: &str) -> Result<(), CliError> {
+        self.mode.replace(String::from(mode));
 
         Ok(())
     }
