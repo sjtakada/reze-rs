@@ -83,14 +83,17 @@ impl Cli {
             // TODO, we'll get API URL and parameters here to send to server.
             match readline.gets() {
                 Ok(line) => {
-                    //println!("LINE: {}", line);
                     readline.execute(line);
                 },
                 Err(ReadlineError::Interrupted) => {
-                    println!("CTRL-C");
+                    // do nothing
                 },
                 Err(ReadlineError::Eof) => {
                     println!("CTRL-D");
+                    break;
+                },
+                Err(ReadlineError::Suspended) => {
+                    println!("CTRL-Z");
                     break;
                 },
                 Err(err) => {
