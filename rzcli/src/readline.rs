@@ -145,9 +145,11 @@ impl<'a> CliReadline<'a> {
 
     pub fn gets(&self) -> Result<String, ReadlineError> {
         let mut editor = self.editor.borrow_mut();
+        let current = self.cli.current().unwrap();
+        let mut prompt = String::from("Router");
+        prompt.push_str(current.prompt());
 
-        // TBD: prompt.
-        let readline = editor.readline("Router>");
+        let readline = editor.readline(&prompt);
         match readline {
             Ok(line) => {
                 editor.add_history_entry(line.as_ref());
