@@ -80,7 +80,7 @@ impl<'a> Completer for CliCompleter<'a> {
         let current = self.cli.current().unwrap();
 
         parser.init(&line);
-        parser.parse(current.top());
+        let result = parser.parse(current.top());
 
         let vec = parser.matched_vec(); 
         if vec.len() > 0 {
@@ -88,8 +88,11 @@ impl<'a> Completer for CliCompleter<'a> {
                 for n in vec {
                     println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
                 }
-            }
 
+                if result == ExecResult::Complete {
+                    println!("  {:width$}  <cr>", "<cr>", width = max);
+                }
+            }
             println!("");
         }
         else {
