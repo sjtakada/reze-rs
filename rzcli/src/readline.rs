@@ -62,8 +62,15 @@ impl<'a> Completer for CliCompleter<'a> {
         parser.parse(current.top());
 
         let vec = parser.matched_vec(); 
-        for n in vec {
-            candidate.push(n.0.inner().token().to_string());
+        if vec.len() == 1 {
+            let mut str = vec[0].0.inner().token().to_string();
+            str.push(' ');
+            candidate.push(str);
+        }
+        else {
+            for n in vec {
+                candidate.push(n.0.inner().token().to_string());
+            }
         }
 
         Ok((parser.current_pos() - parser.token_len(), candidate))
