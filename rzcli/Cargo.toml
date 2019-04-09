@@ -13,3 +13,4 @@ rustyline = { path = "/home/toshiaki/git/rustyline" }
 serde_json = "1.0.38"
 mio = "0.6.16"
 mio-uds = "0.6.7"
+#signal-hook = "0.1.8"

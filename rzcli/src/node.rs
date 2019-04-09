@@ -743,22 +743,26 @@ impl CliNode for CliNodeIPv6Address {
         match state {
             State::Init | State::FirstColon =>
                 MatchResult::Success(MatchFlag::Incomplete),
-            State::Xdigit if xdigits == 4 && (double_colon || xdigits_count == 8) =>
+            State::Colon => 
+                MatchResult::Success(MatchFlag::Incomplete),
+            State::DoubleColon if xdigits_count < 7 => 
+                MatchResult::Success(MatchFlag::Partial),
+            State::DoubleColon => // xdigits_count == 7
                 MatchResult::Success(MatchFlag::Full),
-            State::Xdigit if double_colon && xdigits < 4 =>
+
+            State::Xdigit if xdigits_count == 8 && xdigits == 4 =>
+                MatchResult::Success(MatchFlag::Full),
+            State::Xdigit if double_colon && xdigits_count == 7 && xdigits == 4 =>
+                MatchResult::Success(MatchFlag::Full),
+            State::Xdigit if double_colon =>
                 MatchResult::Success(MatchFlag::Partial),
             State::Xdigit if xdigits_count < 8 =>
                 MatchResult::Success(MatchFlag::Incomplete),
             State::Xdigit if xdigits == 4 =>
                 MatchResult::Success(MatchFlag::Full),
-            State::Xdigit =>
+            State::Xdigit => // xdigits_count == 8 && xdigits < 4
                 MatchResult::Success(MatchFlag::Partial),
-            State::Colon => 
-                MatchResult::Success(MatchFlag::Incomplete),
-            State::DoubleColon if xdigits_count == 7 =>
-                MatchResult::Success(MatchFlag::Full),
-            State::DoubleColon =>
-                MatchResult::Success(MatchFlag::Incomplete),
+
             State::Unknown =>
                 MatchResult::Failure(pos),
         }
@@ -954,7 +958,7 @@ mod tests {
         let node = CliNodeIPv6Address::new("ipv6addr", "IPV6-ADDRESS", "help");
 
         let result = node.collate("::");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("::1");
         assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
@@ -963,7 +967,7 @@ mod tests {
         assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("2001::1234");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("2001:::1234");
         assert_eq!(result, MatchResult::Failure(6));
@@ -1008,7 +1012,7 @@ mod tests {
         assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
 
         let result = node.collate("1:2:3:4:5:6::");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("1:2:3:4:5:6:7::");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
