@@ -96,7 +96,7 @@ impl Cli {
                     break;
                 },
                 Err(ReadlineError::Suspended) => {
-                    println!("CTRL-Z");
+                    self.config_end();
                 },
                 Err(err) => {
                     println!("Error: {:?}", err);
@@ -114,6 +114,10 @@ impl Cli {
             stream.flush();
              */
         }
+    }
+
+    fn config_end(&self) {
+        self.set_mode(CLI_INITIAL_MODE);
     }
 
     pub fn trees(&self) -> &HashMap<String, Rc<CliTree>> {
