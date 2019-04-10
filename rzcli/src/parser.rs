@@ -27,16 +27,16 @@ pub enum ExecResult {
     Complete,
     Incomplete,
     Ambiguous,
-    Unrecognized,
+    Unrecognized(usize),
 }
 
 impl ExecResult {
-    pub fn to_string(&self) -> &str {
+    pub fn to_string(&self) -> String {
         match *self {
-            ExecResult::Complete => "Complete",
-            ExecResult::Incomplete => "Incomplete",
-            ExecResult::Ambiguous => "Ambiguous",
-            ExecResult::Unrecognized => "Unrecognized",
+            ExecResult::Complete => "Complete".to_string(),
+            ExecResult::Incomplete => "Incomplete".to_string(),
+            ExecResult::Ambiguous => "Ambiguous".to_string(),
+            ExecResult::Unrecognized(pos) => format!("Unrecognized at {}", pos),
         }
     }
 }
@@ -264,7 +264,7 @@ impl CliParser {
             len -= 1;
         }
 
-        self.matched_len = self.current_pos() + len;
+        self.matched_len = self.current_pos() - token.len() + len;
     }
 
     // Parse line and match current node for completion.
@@ -298,7 +298,7 @@ impl CliParser {
                         self.matched_len += 1;
                     }
 
-                    return ExecResult::Unrecognized;
+                    return ExecResult::Unrecognized(self.matched_len)
                 }
 
                 // Matched more than one, ambiguous.
@@ -325,7 +325,7 @@ impl CliParser {
                     self.matched_len += 1;
                 }
 
-                return ExecResult::Unrecognized
+                return ExecResult::Unrecognized(self.matched_len)
             }
             else if self.num_matched() == 1 {
                 curr = self.get_candidate();
@@ -359,7 +359,7 @@ impl CliParser {
                 }
 
                 self.matched_len = self.current_pos();
-                return ExecResult::Unrecognized
+                return ExecResult::Unrecognized(self.matched_len)
             }
 
             self.set_matched_vec(curr.clone());
@@ -375,7 +375,7 @@ impl CliParser {
 
             if self.num_matched() == 0 {
                 self.match_shorter(curr.clone(), token.clone());
-                return ExecResult::Unrecognized
+                return ExecResult::Unrecognized(self.matched_len)
             }
             else if self.num_matched() > 1 {
                 return ExecResult::Ambiguous
@@ -553,12 +553,12 @@ mod tests {
         //let mut p = CliParser::new("show x");
         p.init("show x");
         let result = p.parse(tree.top());
-        assert_eq!(result, ExecResult::Unrecognized);
+        assert_eq!(result, ExecResult::Unrecognized(5));
 
         //let mut p = CliParser::new("show ip xy");
         p.init("show ip xy");
         let result = p.parse(tree.top());
-        assert_eq!(result, ExecResult::Unrecognized);
+        assert_eq!(result, ExecResult::Unrecognized(8));
 
         //let mut p = CliParser::new("s i o i");
         p.init("s i o i");

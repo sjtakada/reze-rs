@@ -150,6 +150,15 @@ impl Cli {
         }
     }
 
+    // TODO: hostname, consider return reference.
+    pub fn prompt(&self) -> String {
+        let mut prompt = String::from("Router");
+        let current = self.current().unwrap();
+        prompt.push_str(current.prompt());
+
+        prompt
+    }
+
     pub fn set_mode(&self, mode: &str) -> Result<(), CliError> {
         self.mode.replace(String::from(mode));
 

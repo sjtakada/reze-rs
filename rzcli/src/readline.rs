@@ -145,11 +145,7 @@ impl<'a> CliReadline<'a> {
 
     pub fn gets(&self) -> Result<String, ReadlineError> {
         let mut editor = self.editor.borrow_mut();
-        let current = self.cli.current().unwrap();
-        let mut prompt = String::from("Router");
-        prompt.push_str(current.prompt());
-
-        let readline = editor.readline(&prompt);
+        let readline = editor.readline(&self.cli.prompt());
         match readline {
             Ok(line) => {
                 editor.add_history_entry(line.as_ref());
@@ -185,7 +181,10 @@ impl<'a> CliReadline<'a> {
                 ExecResult::Ambiguous => {
                     println!("% Ambiguous command");
                 },
-                ExecResult::Unrecognized => {
+                ExecResult::Unrecognized(pos) => {
+                    let pos = pos + self.cli.prompt().len();
+
+                    println!("{:>width$}^", "", width = pos);
                     println!("% Invalid input detected at '^' marker.");
                 },
             }
