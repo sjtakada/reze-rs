@@ -25,6 +25,7 @@ use rustyline::error::ReadlineError;
 use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
+use super::signal;
 
 // Constants.
 const CLI_INITIAL_MODE: &str = "EXEC-MODE";
@@ -50,7 +51,9 @@ impl Cli {
 
     // Entry point of shell initialization.
     pub fn init(&mut self) -> Result<(), CliError> {
-        // TBD: Signal init
+        // Initlaize signals.
+        self.init_signals()?;
+        
         // TBD: Terminal init
 
         // Initialize CLI modes.
@@ -94,7 +97,6 @@ impl Cli {
                 },
                 Err(ReadlineError::Suspended) => {
                     println!("CTRL-Z");
-                    break;
                 },
                 Err(err) => {
                     println!("Error: {:?}", err);
@@ -272,6 +274,13 @@ impl Cli {
             Err(_) => return Err(CliError::ConnectError),
         };
         
+        Ok(())
+    }
+
+    fn init_signals(&self) -> Result<(), CliError> {
+        // Ignore TSTP suspend signal.
+        signal::ignore_sigtstp_handler();
+
         Ok(())
     }
 }

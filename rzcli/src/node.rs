@@ -623,6 +623,8 @@ impl CliNode for CliNodeIPv6Prefix {
         match state {
             State::PrefixLen if plen >= 13 || plen == 0 =>
                 MatchResult::Success(MatchFlag::Full),
+            State::PrefixLen =>
+                MatchResult::Success(MatchFlag::Partial),
             State::Unknown =>
                 MatchResult::Failure(pos),
             _ => 
@@ -1080,7 +1082,7 @@ mod tests {
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
 
         let result = node.collate("1:2:3:4:5:6:7::/12");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("1:2:3:4:5:6:7::/13");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
