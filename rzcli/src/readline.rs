@@ -88,22 +88,28 @@ impl<'a> Completer for CliCompleter<'a> {
 
         parser.init(&line);
         let result = parser.parse(current.top());
+        match result {
+            ExecResult::Unrecognized(pos) => {
+                println!("% Unrecognized command");
+            },
+            _ => {
 
-        let vec = parser.matched_vec(); 
-        if vec.len() > 0 {
-            if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
-                for n in vec {
-                    println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+                let vec = parser.matched_vec(); 
+                let mut width_max = 0;
+                if vec.len() > 0 {
+                    if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
+                        width_max = max;
+                        for n in vec {
+                            println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+                        }
+                    }
                 }
 
                 if result == ExecResult::Complete {
-                    println!("  {:width$}  <cr>", "<cr>", width = max);
+                    println!("  {:width$}  <cr>", "<cr>", width = width_max);
                 }
+                println!("");
             }
-            println!("");
-        }
-        else {
-            println!("% Unrecognized command");
         }
 
         Ok(())
