@@ -6,7 +6,7 @@
 //
 
 use std::env;
-use std::io;
+//use std::io;
 use std::io::BufReader;
 use std::io::Read;
 use std::fs;
@@ -14,6 +14,7 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 use std::collections::HashMap;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -24,42 +25,53 @@ use rustyline::error::ReadlineError;
 use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
+use super::signal;
 
+// Constants.
+const CLI_INITIAL_MODE: &str = "EXEC-MODE";
+
+//
+// Main container of CLI
+//
 pub struct Cli {
     // HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
 
-    // Readline.
-//    readline: RefCell<Option<CliReadline<'a>>>,
+    // Current mode name
+    mode: RefCell<String>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
-//            readline: RefCell::new(None),
+            mode: RefCell::new(String::new()),
         }
     }
 
     // Entry point of shell initialization.
     pub fn init(&mut self) -> Result<(), CliError> {
-        // TBD: Signal init
+        // Initlaize signals.
+        self.init_signals()?;
+        
         // TBD: Terminal init
 
         // Initialize CLI modes.
-        self.init_cli_modes()?;
+        let path = PathBuf::from("../json/reze.cli_mode.json");
+        self.init_cli_modes(&path)?;
 
         // Initialize build-in commands.
 
-        // Initialize CLI definitions.
-        let mut path = PathBuf::from("../json");
-        self.init_cli_commands(&path);
+        // Initialize CLI comand definitions.
+        let path = PathBuf::from("../json");
+        self.init_cli_commands(&path)?;
+        self.set_mode(CLI_INITIAL_MODE);
 
         // TBD: Connect server or send.
-        self.init_server_connect()?;
+        //self.init_server_connect()?;
 
         // Init readline.
-        let readline = CliReadline::new(&self.trees);
+        let readline = CliReadline::new(&self);
 
         // Start CLI.
         self.run(readline);
@@ -68,19 +80,27 @@ impl Cli {
         Ok(())
     }
 
+    // Run command loop.
     pub fn run(&self, readline: CliReadline) {
         loop {
             // TODO, we'll get API URL and parameters here to send to server.
             match readline.gets() {
                 Ok(line) => {
-                    // exec
+                    readline.execute(line);
                 },
                 Err(ReadlineError::Interrupted) => {
-                    println!("CTRL-C");
+                    // do nothing
                 },
                 Err(ReadlineError::Eof) => {
-                    println!("CTRL-D");
-                    break;
+                    if self.can_exit() {
+                        break
+                    }
+
+                    // TBD: should be exit
+                    readline.execute(String::from("end"));
+                },
+                Err(ReadlineError::Suspended) => {
+                    self.config_end();
                 },
                 Err(err) => {
                     println!("Error: {:?}", err);
@@ -98,6 +118,51 @@ impl Cli {
             stream.flush();
              */
         }
+    }
+
+    fn can_exit(&self) -> bool {
+        let mut mode = self.mode.borrow_mut();
+        if String::from(mode.as_ref()) == CLI_INITIAL_MODE {
+            true
+        }
+        else {
+            false
+        }
+    }
+
+    fn config_end(&self) {
+        self.set_mode(CLI_INITIAL_MODE);
+    }
+
+    pub fn trees(&self) -> &HashMap<String, Rc<CliTree>> {
+        &self.trees
+    }
+
+    pub fn mode(&self) -> String {
+        let mut mode = self.mode.borrow_mut();
+        String::from(mode.as_ref())
+    }
+
+    pub fn current(&self) -> Option<Rc<CliTree>> {
+        match self.trees.get(&self.mode()) {
+            Some(tree) => Some(tree.clone()),
+            None => None,
+        }
+    }
+
+    // TODO: hostname, consider return reference.
+    pub fn prompt(&self) -> String {
+        let mut prompt = String::from("Router");
+        let current = self.current().unwrap();
+        prompt.push_str(current.prompt());
+
+        prompt
+    }
+
+    pub fn set_mode(&self, mode: &str) -> Result<(), CliError> {
+        self.mode.replace(String::from(mode));
+
+        Ok(())
     }
 
     // Read and return JSON, if it fails, return None.
@@ -130,12 +195,11 @@ impl Cli {
     }
 
     // Initialize CLI modes.
-    fn init_cli_modes(&mut self) -> Result<(), CliError> {
-        let pathbuf = PathBuf::from("../json/reze.cli_mode.json");
-        match self.json_read(pathbuf.as_path()) {
+    fn init_cli_modes(&mut self, path: &Path) -> Result<(), CliError> {
+        match self.json_read(path) {
             Some(root) => {
                 if root.is_object() {
-                    self.build_mode(&root, None);
+                    self.build_mode(&root, None)?;
                 }
             },
             None => return Err(CliError::InitModeError),
@@ -159,7 +223,7 @@ impl Cli {
                 self.trees.insert(name.to_string(), tree.clone());
 
                 if children.is_object() {
-                    self.build_mode(&children, Some(tree.clone()));
+                    self.build_mode(&children, Some(tree.clone()))?;
                 }
             }
         }
@@ -203,7 +267,7 @@ impl Cli {
     }
 
     fn init_cli_commands(&mut self, dir: &Path) -> Result<(), CliError> {
-        let suffix = "cli.json";
+        // let suffix = "cli.json";
 
         if dir.is_dir() {
             for entry in fs::read_dir(dir).expect("Unable to get directory entry") {
@@ -218,10 +282,11 @@ impl Cli {
                     }
                 }
             }
-        }
 
-        // TBD
-        panic!("hoge");
+            for tree in self.trees.values() {
+                tree.sort();
+            }
+        }
 
         Ok(())
     }
@@ -236,6 +301,13 @@ impl Cli {
             Err(_) => return Err(CliError::ConnectError),
         };
         
+        Ok(())
+    }
+
+    fn init_signals(&self) -> Result<(), CliError> {
+        // Ignore TSTP suspend signal.
+        signal::ignore_sigtstp_handler();
+
         Ok(())
     }
 }
@@ -320,9 +392,10 @@ mod tests {
   }
 } "##;
 
-        let ret = cli.init_cli_modes();
+        let path = PathBuf::from("../json/reze.cli_mode.json");
+        let _ret = cli.init_cli_modes(&path);
         let json = serde_json::from_str(&mode_json_str).unwrap();
-        let ret = cli.build_mode(&json, None);
+        let _ret = cli.build_mode(&json, None);
         let mode = &cli.trees["BGP-AF-MODE"];
         let mode = mode.parent().unwrap();
         assert_eq!(mode.name(), "BGP-MODE");

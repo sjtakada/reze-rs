@@ -11,16 +11,29 @@ quick_error! {
     #[derive(Debug)]
     pub enum CliError {
         InitModeError {
-            description("Could not initialize CLI modes")
+            description("Init mode error")
             display(r#"Could not initialize CLI modes"#)
         }
+        SetModeError(mode: String) {
+            description("Set mode error")
+            display(r#"Could not set CLI mode '{}'"#, mode)
+        }
         ConnectError {
-            description("Could not connect to the server")
+            description("Connect error")
             display(r#"Could not connect to the server"#)
         }
         CommandNotFound(s: String) {
-            description("The command could not be found")
+            description("Command not found")
             display(r#"The command "{}" could not be found"#, s)
+        }
+        //
+        ActionError(s: String) {
+            description("Action error")
+            display(r#"Could not handle action {}"#, s)
+        }
+        NoActionDefined {
+            description("No action defined")
+            display(r#"No action defined"#)
         }
     }
 }

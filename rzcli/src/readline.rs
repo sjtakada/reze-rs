@@ -5,8 +5,9 @@
 // Readline, rustyline integration.
 //
 
-use std::collections::HashMap;
+//use std::collections::HashMap;
 use std::cell::RefCell;
+use std::cell::Cell;
 use std::rc::Rc;
 
 use rustyline::completion::Completer;
@@ -14,20 +15,36 @@ use rustyline::hint::Hinter;
 use rustyline::highlight::Highlighter;
 use rustyline::line_buffer::LineBuffer;
 use rustyline::error::ReadlineError;
+use rustyline::Cmd;
 use rustyline::Helper;
 use rustyline::Editor;
+use rustyline::Context;
 use rustyline::KeyPress;
+use rustyline::config;
 
+use super::cli::Cli;
 use super::tree::CliTree;
+use super::parser::*;
+use super::node::CliNode;
+use super::error::CliError;
 
+type CliNodeTokenTuple = (Rc<CliNode>, String);
+type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
+
+//
 pub struct CliCompleter<'a> {
-    trees: &'a HashMap<String, Rc<CliTree>>,
+    // Reference to CLI.
+    cli: &'a Cli,
+
+    // CLI parser.
+    parser: RefCell<CliParser>,
 }
 
 impl<'a> CliCompleter<'a> {
-    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliCompleter<'a> {
+    pub fn new(cli: &'a Cli) -> CliCompleter<'a> {
         CliCompleter::<'a> {
-            trees: trees
+            cli: cli,
+            parser: RefCell::new(CliParser::new()),
         }
     }
 }
@@ -35,83 +52,158 @@ impl<'a> CliCompleter<'a> {
 impl<'a> Completer for CliCompleter<'a> {
     type Candidate = String;
 
-    fn complete(&self, line: &str, pos: usize) -> rustyline::Result<(usize, Vec<String>)> {
+    fn complete(&self, line: &str, _pos: usize, _ctx: &Context<'_>) -> rustyline::Result<(usize, Vec<String>)> {
         let mut candidate: Vec<String> = Vec::new();
+        let mut parser = self.parser.borrow_mut();
         let line = line.trim_start();
+        let current = self.cli.current().unwrap();
 
-        match line.chars().next() {
-            Some(c) => {
-                match c {
-                    'u' => candidate.push("udon".to_string()),
-                    'r' => candidate.push("ramen".to_string()),
-                    's' => candidate.push("soba".to_string()),
-                    _ => {}
-                }
-            },
-            None => {
+        parser.init(&line);
+        parser.parse(current.top());
+
+        let vec = parser.matched_vec(); 
+        if vec.len() == 1 {
+            let mut str = vec[0].0.inner().token().to_string();
+            str.push(' ');
+            candidate.push(str);
+        }
+        else {
+            for n in vec {
+                candidate.push(n.0.inner().token().to_string());
             }
         }
 
-//        println!("");
-//        for i in candidate.iter() {
-//            println!("{}", i);
-//        }
-
-        Ok((0, candidate))
+        Ok((parser.current_pos() - parser.token_len(), candidate))
     }
 
     fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {
         let end = line.pos();
         line.replace(start..end, elected)
     }
-}
 
-impl<'a> Hinter for CliCompleter<'a> {
-    fn hint(&self, _line: &str, _pos: usize) -> Option<String> {
-//        Some("hoge".to_string())
-        None
+    fn custom(&self, line: &str, _pos: usize, _ctx: &Context<'_>, _c: char) -> rustyline::Result<()> {
+        let line = line.trim_start();
+        let mut parser = self.parser.borrow_mut();
+        let current = self.cli.current().unwrap();
+
+        parser.init(&line);
+        let result = parser.parse(current.top());
+
+        let vec = parser.matched_vec(); 
+        if vec.len() > 0 {
+            if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
+                for n in vec {
+                    println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+                }
+
+                if result == ExecResult::Complete {
+                    println!("  {:width$}  <cr>", "<cr>", width = max);
+                }
+            }
+            println!("");
+        }
+        else {
+            println!("% Unrecognized command");
+        }
+
+        Ok(())
     }
 }
 
+impl<'a> Hinter for CliCompleter<'a> {}
 
+// CLI readline
+//   Abstruction of rustyline.
+//
 pub struct CliReadline<'a> {
-    // CLI mode to tree map.
-    trees: &'a HashMap<String, Rc<CliTree>>,
+    // CLI
+    cli: &'a Cli,
 
     // CLI completer.
     editor: RefCell<Editor<CliCompleter<'a>>>,
-
-    // Readline buffer.
-    //buf: [u8; 1024],
-
-    // Completion matched string vector.
-    //matched_strvec: Vec<&str>,
-    matched_index: usize,
 }
 
 impl<'a> CliReadline<'a> {
-    pub fn new(trees: &'a HashMap<String, Rc<CliTree>>) -> CliReadline<'a> {
-        let mut editor = Editor::<CliCompleter>::new();
-        editor.set_helper(Some(CliCompleter::new(trees)));
+    pub fn new(cli: &'a Cli) -> CliReadline<'a> {
+        // Set configuration.
+        let config = config::Builder::new()
+            .completion_type(config::CompletionType::List)
+            .build();
+
+        let mut editor = Editor::<CliCompleter>::with_config(config);
+        editor.set_helper(Some(CliCompleter::new(cli)));
+
+        // Bind '?' as hint.
+        editor.bind_sequence(KeyPress::Char('?'), Cmd::Custom('?'));
+
 
         CliReadline::<'a> {
-            trees: trees,
+            cli: cli,
             editor: RefCell::new(editor),
-            matched_index: 0,
         }
     }
 
     pub fn gets(&self) -> Result<String, ReadlineError> {
         let mut editor = self.editor.borrow_mut();
-
-        let readline = editor.readline("Router>");
+        let readline = editor.readline(&self.cli.prompt());
         match readline {
             Ok(line) => {
                 editor.add_history_entry(line.as_ref());
-                println!("Line: {}", line);
                 Ok(line)
             },
             Err(err) => Err(err)
+        }
+    }
+
+    pub fn execute(&self, line: String) {
+        if line.trim().len() > 0 {
+            let mut parser = CliParser::new();
+            let current = self.cli.current().unwrap();
+
+            parser.init(&line);
+
+            match parser.parse_execute(current.top()) {
+                ExecResult::Complete => {
+                    match self.handle_actions(parser.node_token_vec()) {
+                        Err(CliError::NoActionDefined) => {
+                            println!("% No action defined");
+                        }
+                        Err(_) => {
+                        }
+                        Ok(()) => {
+                            //println!("execute {}", line);
+                        }
+                    }
+                },
+                ExecResult::Incomplete => {
+                    println!("% Incomplete command");
+                },
+                ExecResult::Ambiguous => {
+                    println!("% Ambiguous command");
+                },
+                ExecResult::Unrecognized(pos) => {
+                    let pos = pos + self.cli.prompt().len();
+
+                    println!("{:>width$}^", "", width = pos);
+                    println!("% Invalid input detected at '^' marker.");
+                },
+            }
+        }
+    }
+
+    fn handle_actions(&self, node_token_vec: CliNodeTokenVec) -> Result<(), CliError> {
+        let (node, token) = node_token_vec.last().unwrap();
+
+        if node.inner().actions().len() > 0 {
+
+            for action in node.inner().actions().iter() {
+                action.handle(&self.cli);
+            }
+
+            Ok(())
+        }
+        else {
+            Err(CliError::NoActionDefined)
         }
     }
 }

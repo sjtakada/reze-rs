@@ -5,23 +5,22 @@
 // CLI Node.
 //
 
-use std::char;
 use std::rc::Rc;
 use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefMut;
 use std::cell::RefCell;
-use std::collections::HashMap;
+//use std::collections::HashMap;
 
-use super::tree;
 use super::collate::*;
+use super::action::CliAction;
 
 const CLI_TOKEN_IPV4_ADDRESS: &str = "A.B.C.D";
 const CLI_TOKEN_IPV4_PREFIX: &str = "A.B.C.D/M";
 const CLI_TOKEN_IPV6_ADDRESS: &str = "X:X::X:X";
 const CLI_TOKEN_IPV6_PREFIX: &str = "X:X::X:X/M";
 const CLI_TOKEN_WORD: &str = "WORD";
-const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
+//const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
 
 pub type CliNodeVec = Vec<Rc<CliNode>>;
 
@@ -36,6 +35,16 @@ pub trait CliNode {
     // Set executable.
     fn set_executable(&self) {
         self.inner().set_executable();
+    }
+
+    // Is node executable?
+    fn is_executable(&self) -> bool {
+        self.inner().is_executable()
+    }
+
+    // Sort next nodes recursively.
+    fn sort_recursive(&self) {
+        self.inner().sort_recursive();
     }
 }
 
@@ -54,18 +63,22 @@ pub struct CliNodeInner {
     token: String,
 
     // Node vector is sorted.
-    sorted: bool,
+    sorted: Cell<bool>,
 
     // Executable command node.
     executable: Cell<bool>,
 
     // Hidden flag.
-    hidden: bool,
+    hidden: Cell<bool>,
 
     // Next candidate.
     next: RefCell<CliNodeVec>,
+
+    // Actions.
+    actions: RefCell<Vec<Rc<CliAction>>>,
 }
 
+//
 impl CliNodeInner {
     pub fn new(id: &str, defun: &str, help: &str, token: &str) -> CliNodeInner {
         CliNodeInner {
@@ -73,10 +86,11 @@ impl CliNodeInner {
             defun: String::from(defun),
             help: String::from(help),
             token: String::from(token),
-            sorted: false,
+            sorted: Cell::new(false),
             executable: Cell::new(false),
-            hidden: false,
+            hidden: Cell::new(false),
             next: RefCell::new(Vec::new()),
+            actions: RefCell::new(Vec::new()),
         }
     }
 
@@ -97,7 +111,7 @@ impl CliNodeInner {
     }
 
     pub fn is_hidden(&self) -> bool {
-        self.hidden
+        self.hidden.get()
     }
 
     pub fn set_executable(&self) {
@@ -107,6 +121,24 @@ impl CliNodeInner {
     pub fn is_executable(&self) -> bool {
         self.executable.get()
     }
+
+    pub fn push_action(&self, action: Rc<CliAction>) {
+        self.actions.borrow_mut().push(action);
+    }
+
+    pub fn actions(&self) -> RefMut<Vec<Rc<CliAction>>> {
+        self.actions.borrow_mut()
+    }
+
+    pub fn sort_recursive(&self) {
+        self.next.borrow_mut().sort_by(|a, b| a.inner().token().partial_cmp(b.inner().token()).unwrap());
+        self.sorted.set(true);
+
+        for n in self.next.borrow_mut().iter() {
+            n.sort_recursive();
+        }
+    }
+
 }
 
 // CLI dummy node:
@@ -128,7 +160,7 @@ impl CliNode for CliNodeDummy {
         self.inner.borrow()
     }
 
-    fn collate(&self, input: &str) -> MatchResult {
+    fn collate(&self, _input: &str) -> MatchResult {
         MatchResult::Failure(0)
     }
 }
@@ -275,7 +307,6 @@ impl CliNode for CliNodeIPv4Prefix {
             Digit,
             Dot,
             Slash,
-            Unknown,
         }
 
         let mut pos: usize = 0;
@@ -348,7 +379,7 @@ impl CliNode for CliNodeIPv4Prefix {
             State::Unknown =>
                 MatchResult::Failure(pos),
             State::Plen if plen >= 1 && plen <= 3 =>
-                MatchResult::Success(MatchFlag::Incomplete),
+                MatchResult::Success(MatchFlag::Partial),
             State::Plen =>
                 MatchResult::Success(MatchFlag::Full),
             _ =>
@@ -389,7 +420,6 @@ impl CliNode for CliNodeIPv4Address {
         enum Token {
             Digit,
             Dot,
-            Unknown,
         }
 
         let mut pos: usize = 0;
@@ -451,7 +481,7 @@ impl CliNode for CliNodeIPv4Address {
             MatchResult::Success(MatchFlag::Incomplete)
         }
         else if octets == 4 && (val != 0 && val <= 25) {
-            MatchResult::Success(MatchFlag::Incomplete)
+            MatchResult::Success(MatchFlag::Partial)
         }
         else {
             MatchResult::Success(MatchFlag::Full)
@@ -508,7 +538,7 @@ impl CliNode for CliNodeIPv6Prefix {
         let mut plen: u32 = 0;
 
         for c in input.chars() {
-            let mut next_state = state;
+            let next_state;
             let token = match state {
                 State::Slash | State::PrefixLen => {
                     match c {
@@ -593,6 +623,8 @@ impl CliNode for CliNodeIPv6Prefix {
         match state {
             State::PrefixLen if plen >= 13 || plen == 0 =>
                 MatchResult::Success(MatchFlag::Full),
+            State::PrefixLen =>
+                MatchResult::Success(MatchFlag::Partial),
             State::Unknown =>
                 MatchResult::Failure(pos),
             _ => 
@@ -645,7 +677,7 @@ impl CliNode for CliNodeIPv6Address {
         let mut state = State::Init;
 
         for c in input.chars() {
-            let mut next_state = state;
+            let next_state;
             let token = match c {
                 '0' ... '9' | 'a' ... 'f' | 'A' ... 'F'
                     => Token::Xdigit,
@@ -713,16 +745,26 @@ impl CliNode for CliNodeIPv6Address {
         match state {
             State::Init | State::FirstColon =>
                 MatchResult::Success(MatchFlag::Incomplete),
-            State::Xdigit if xdigits == 4 && (double_colon || xdigits_count == 8) =>
-                MatchResult::Success(MatchFlag::Full),
-            State::Xdigit =>
-                MatchResult::Success(MatchFlag::Incomplete),
             State::Colon => 
                 MatchResult::Success(MatchFlag::Incomplete),
-            State::DoubleColon if xdigits_count == 7 =>
+            State::DoubleColon if xdigits_count < 7 => 
+                MatchResult::Success(MatchFlag::Partial),
+            State::DoubleColon => // xdigits_count == 7
                 MatchResult::Success(MatchFlag::Full),
-            State::DoubleColon =>
+
+            State::Xdigit if xdigits_count == 8 && xdigits == 4 =>
+                MatchResult::Success(MatchFlag::Full),
+            State::Xdigit if double_colon && xdigits_count == 7 && xdigits == 4 =>
+                MatchResult::Success(MatchFlag::Full),
+            State::Xdigit if double_colon =>
+                MatchResult::Success(MatchFlag::Partial),
+            State::Xdigit if xdigits_count < 8 =>
                 MatchResult::Success(MatchFlag::Incomplete),
+            State::Xdigit if xdigits == 4 =>
+                MatchResult::Success(MatchFlag::Full),
+            State::Xdigit => // xdigits_count == 8 && xdigits < 4
+                MatchResult::Success(MatchFlag::Partial),
+
             State::Unknown =>
                 MatchResult::Failure(pos),
         }
@@ -749,7 +791,7 @@ impl CliNode for CliNodeWord {
         self.inner.borrow()
     }
 
-    fn collate(&self, input: &str) -> MatchResult {
+    fn collate(&self, _input: &str) -> MatchResult {
         MatchResult::Success(MatchFlag::Incomplete)
     }
 }
@@ -842,7 +884,7 @@ mod tests {
         assert_eq!(result, MatchResult::Failure(8));
 
         let result = node.collate("1.1.1.25");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("1.1.1.26");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
@@ -898,13 +940,13 @@ mod tests {
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
 
         let result = node.collate("10.10.10.10/1");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("10.10.10.10/2");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("10.10.10.10/3");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("10.10.10.10/32");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
@@ -918,13 +960,16 @@ mod tests {
         let node = CliNodeIPv6Address::new("ipv6addr", "IPV6-ADDRESS", "help");
 
         let result = node.collate("::");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("::1");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
+
+        let result = node.collate("2001::123");
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("2001::1234");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Full));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("2001:::1234");
         assert_eq!(result, MatchResult::Failure(6));
@@ -942,7 +987,7 @@ mod tests {
         assert_eq!(result, MatchResult::Failure(39));
 
         let result = node.collate("1:2:3:4:5:6:7:8");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("1:2:3:4:5:6:7:8888");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
@@ -951,7 +996,7 @@ mod tests {
         assert_eq!(result, MatchResult::Failure(15));
 
         let result = node.collate("1:2:3:4:5:6::8");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("1:2:3:4:5:6::8888");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
@@ -969,7 +1014,7 @@ mod tests {
         assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
 
         let result = node.collate("1:2:3:4:5:6::");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("1:2:3:4:5:6:7::");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
@@ -1037,7 +1082,7 @@ mod tests {
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
 
         let result = node.collate("1:2:3:4:5:6:7::/12");
-        assert_eq!(result, MatchResult::Success(MatchFlag::Incomplete));
+        assert_eq!(result, MatchResult::Success(MatchFlag::Partial));
 
         let result = node.collate("1:2:3:4:5:6:7::/13");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));

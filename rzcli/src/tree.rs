@@ -11,7 +11,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::node::*;
-use super::collate;
+use super::action::*;
 
 // Token Type.
 #[derive(PartialEq)]
@@ -172,11 +172,14 @@ impl CliTree {
                     }
                     return token_type
                 },
+                TokenType::Undef => {
+                    println!("Undefined token type");
+                },
                 _ => {
                     let token = token.unwrap();
 
                     if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, &token) {
-                        let next = match CliTree::find_next_by_same_token(curr, &token) {
+                        let next = match CliTree::find_next_by_node(curr, new_node.clone()) {
                             None => {
                                 CliTree::vector_add_node_each(curr, new_node.clone());
                                 new_node
@@ -185,7 +188,7 @@ impl CliTree {
                         };
 
                         // TBD: hidden
-                        
+
                         curr.clear();
                         curr.push(next.clone());
                         
@@ -198,8 +201,34 @@ impl CliTree {
             }
         }
 
-        for n in curr {
-            n.set_executable();
+        //
+        for node in curr.iter() {
+            // Set executable.
+            node.set_executable();
+
+            let actions = &command["actions"];
+            if actions.is_array() {
+                for action in actions.as_array().unwrap() {
+                    if action.is_object() {
+                        for (key, obj) in action.as_object().unwrap().iter() {
+                            match key.as_ref() {
+                                "mode" => {
+                                    let action = CliActionMode::new(obj);
+                                    node.inner().push_action(Rc::new(action));
+                                },
+                                "http" => {
+                                },
+                                "built-in" => {
+                                },
+                                _ => {
+                                    println!("Unknown action");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         TokenType::Undef
@@ -208,8 +237,8 @@ impl CliTree {
     // Parse string to return:
     //   TokenType, token and remainder of string.
     fn get_cli_token(s: &mut String) -> (TokenType, Option<String>) {
-        let mut offset = 0;
-        let mut token_type = TokenType::Undef;
+        let offset;
+        let token_type;
 
         // trim whitespaces at beginning.
         let len = s.trim_start().len();
@@ -249,16 +278,16 @@ impl CliTree {
                         token_type = TokenType::RightBrace;
                     },
                     _ => {
-                        offset = match s.find(|c: char|
-                                              c == '(' || c == ')' ||
-                                              c == '{' || c == '}' ||
-                                              c == '[' || c == '[' ||
-                                              c == '|' || c == ' ') {
-                            Some(i) => i,
-                            None => s.len()
-                        };
+                        offset = s.find(|c: char|
+                                        c == '(' || c == ')' ||
+                                        c == '{' || c == '}' ||
+                                        c == '[' || c == '[' ||
+                                        c == '|' || c == ' ').unwrap_or(s.len());
 
-                        match &s[0..offset] {
+                        let word = &s[..offset];
+                        let p = word.find(':').unwrap_or(word.len());
+
+                        match &s[..p] {
                             "IPV4-PREFIX" => {
                                 token_type = TokenType::IPv4Prefix;
                             },
@@ -380,18 +409,23 @@ impl CliTree {
         }
     }
 
-    fn find_next_by_same_token(curr: &CliNodeVec, token: &str) -> Option<Rc<CliNode>> {
+    fn find_next_by_node(curr: &CliNodeVec, node: Rc<CliNode>) -> Option<Rc<CliNode>> {
         for c in curr {
             let inner = c.inner();
             let next = inner.next();
             for m in next.iter() {
-                if m.inner().token() == token {
+                if m.inner().token() == node.inner().token() {
                     return Some(m.clone());
                 }
             }
         }
 
         None
+    }
+
+    pub fn sort(&self) {
+        let top = self.top.borrow().clone();
+        top.sort_recursive();
     }
 }
 
@@ -406,8 +440,8 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_get_cli_token_1() {
-        let mut s = String::from("ip route IPV4-PREFIX IPV4-ADDRESS");
+    pub fn test_tree_get_cli_token_1() {
+        let mut s = String::from("ip route IPV4-PREFIX:1 IPV4-ADDRESS:2");
 
         let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
@@ -419,17 +453,17 @@ mod tests {
 
         let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::IPv4Prefix);
-        assert_eq!(token.unwrap(), "IPV4-PREFIX");
+        assert_eq!(token.unwrap(), "IPV4-PREFIX:1");
 
         let (t, token) = CliTree::get_cli_token(&mut s);
         assert_eq!(t, TokenType::IPv4Address);
-        assert_eq!(token.unwrap(), "IPV4-ADDRESS");
+        assert_eq!(token.unwrap(), "IPV4-ADDRESS:2");
 
         assert_eq!(s.len(), 0);
     }
 
     #[test]
-    pub fn test_get_cli_token_2() {
+    pub fn test_tree_getcli_token_2() {
         let mut s = String::from("show (ip|ipv6) route");
 
         let (t, token) = CliTree::get_cli_token(&mut s);
@@ -464,7 +498,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_build_recursive() {
+    pub fn test_tree_build_recursive() {
         let json_str = r##"
 {
   "dummy-cmd": {
@@ -579,6 +613,20 @@ mod tests {
         let inner = n32.inner();
         let next = inner.next();
         assert_eq!(next.len(), 4);
+
+        let n40 = &next[0];
+        assert_eq!(n40.inner().token(), "e");
+
+        let n41 = &next[1];
+        assert_eq!(n41.inner().token(), "f");
+
+        let n42 = &next[2];
+        assert_eq!(n42.inner().token(), "g");
+        assert_eq!(n42.inner().is_executable(), false);
+
+        let n43 = &next[3];
+        assert_eq!(n43.inner().token(), "x");
+        assert_eq!(n43.inner().is_executable(), true);
     }
 }
 

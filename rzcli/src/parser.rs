@@ -2,48 +2,46 @@
 // ReZe.Rs - ReZe CLI
 //   Copyright (C) 2018,2019 Toshiaki Takada
 //
-// CLI Parser
+// CLI Parser.
 //
 
 use std::fmt;
 use std::cell::Cell;
 use std::rc::Rc;
-use std::collections::HashMap;
 
 use serde_json;
 
 use super::error::CliError;
-use super::tree::CliTree;
 use super::node::CliNode;
 use super::collate::*;
 
-//
+// Type aliases.
 type CliNodeMatchStateTuple = (Rc<CliNode>, MatchResult);
 type CliNodeMatchStateVec = Vec<CliNodeMatchStateTuple>;
 type CliNodeTokenTuple = (Rc<CliNode>, String);
 type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
 
-//
+// CLI Execution Result.
 #[derive(PartialEq, Copy, Clone)]
-enum CliExecResult {
+pub enum ExecResult {
     Complete,
     Incomplete,
     Ambiguous,
-    Unrecognized,
+    Unrecognized(usize),
 }
 
-impl CliExecResult {
-    pub fn to_string(&self) -> &str {
+impl ExecResult {
+    pub fn to_string(&self) -> String {
         match *self {
-            CliExecResult::Complete => "Complete",
-            CliExecResult::Incomplete => "Incomplete",
-            CliExecResult::Ambiguous => "Ambiguous",
-            CliExecResult::Unrecognized => "Unrecognized",
+            ExecResult::Complete => "Complete".to_string(),
+            ExecResult::Incomplete => "Incomplete".to_string(),
+            ExecResult::Ambiguous => "Ambiguous".to_string(),
+            ExecResult::Unrecognized(pos) => format!("Unrecognized at {}", pos),
         }
     }
 }
 
-impl fmt::Debug for CliExecResult {
+impl fmt::Debug for ExecResult {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.to_string())
     }
@@ -53,11 +51,8 @@ impl fmt::Debug for CliExecResult {
 //   Store intermediate state of parser.
 //
 pub struct CliParser {
-    // Initial input string TB removed
+    // Initial input string.
     input: String,
-
-    // Input length.
-    input_len: usize,
 
     // Current input string.
     line: String,
@@ -71,27 +66,59 @@ pub struct CliParser {
     // Vector of pair of CliNode and MatchState.
     matched_vec: Cell<CliNodeMatchStateVec>,
 
+    // Vecot of pair of CliNode and input token.
+    node_token_vec: Cell<CliNodeTokenVec>,
+
     // Return value, whether or not it hits executable command.
-    command: bool,
+    executable: bool,
 }
 
 impl CliParser {
-    pub fn new(buf: &str) -> CliParser {
-        let input = String::from(buf);
-        let mut line = String::from(" ");
-        line.push_str(buf);
-
+    // Constructor.
+    pub fn new() -> CliParser {
         CliParser {
-            input,
-            input_len: buf.len(),
-            line,
+            input: String::new(),
+            line: String::new(),
             token: String::new(),
             matched_len: 0usize,
             matched_vec: Cell::new(Vec::new()),
-            command: false,
+            node_token_vec: Cell::new(Vec::new()),
+            executable: false,
         }
     }
 
+    // Set input and reset state.
+    pub fn init(&mut self, input: &str) {
+        self.input = String::from(input);
+        self.reset_line();
+    }
+
+    // Reset line and other parser state.
+    pub fn reset_line(&mut self) {
+        self.line = String::from(" ");
+        self.line.push_str(&self.input);
+        self.matched_len = 0;
+        self.matched_vec.replace(Vec::new());
+        self.node_token_vec.replace(Vec::new());
+        self.executable = false;
+    }
+
+    // Return current parser position.
+    pub fn current_pos(&self) -> usize {
+        self.input.len() - self.line.len()
+    }
+
+    // Return current matched vec and set it empty.
+    pub fn matched_vec(&self) -> CliNodeMatchStateVec {
+        self.matched_vec.replace(Vec::new())
+    }
+
+    // Return current matched string len.
+    pub fn matched_len(&self) -> usize {
+        self.matched_len
+    }
+
+    // Return reference to current remaining line string.
     fn line(&self) -> &str {
         &self.line
     }
@@ -101,13 +128,28 @@ impl CliParser {
         self.matched_vec.get_mut().len()
     }
 
-    // Return next node in matched.
-    fn get_next(&mut self) -> Rc<CliNode> {
+    // Return candidate in matched.
+    fn get_candidate(&mut self) -> Rc<CliNode> {
         assert!(self.num_matched() == 1);
 
         self.matched_vec.get_mut()[0].0.clone()
     }
 
+    // Return candidate's MatchResult.
+    fn get_candidate_result(&mut self) -> MatchResult {
+        assert!(self.num_matched() == 1);
+
+        self.matched_vec.get_mut()[0].1.clone()
+    }
+
+    // Return true if candidate is executable.
+    fn is_candidate_executable(&mut self) -> bool {
+        assert!(self.num_matched() == 1);
+        
+        self.matched_vec.get_mut()[0].0.is_executable()
+    }
+
+    // Fill matched vec with next nodes from current node.
     fn set_matched_vec(&mut self, node: Rc<CliNode>) {
         self.matched_vec.replace(
             node.inner().next().iter()
@@ -115,6 +157,7 @@ impl CliParser {
                 .collect());
     }
 
+    // Remove hidden node from matched.
     fn filter_hidden(&mut self) {
         self.matched_vec.get_mut().retain(|n| !n.0.inner().is_hidden());
     }
@@ -153,7 +196,18 @@ impl CliParser {
         self.token = String::from(token);
     }
 
-    //
+    // Saved token size.
+    pub fn token_len(&self) -> usize {
+        self.token.len()
+    }
+
+    // Take node token_vec.
+    pub fn node_token_vec(&self) -> CliNodeTokenVec {
+        self.node_token_vec.take()
+    }
+
+    // Select matched nodes with MatchFlag smaller than or equal to 'limit'.
+    // Among matched nodes with the same MatchFlag and the smallest MatchFlag.
     fn filter_matched(&mut self, limit: MatchFlag) {
         let min = self.matched_vec.get_mut().iter()
             .filter_map(|n|
@@ -192,10 +246,9 @@ impl CliParser {
                 .collect());
     }
 
-    // try match shorter string in line.
+    // Try match shorter string in line.
     fn match_shorter(&mut self, curr: Rc<CliNode>, token: String) {
         let mut len = token.len();
-        let parsed_len = self.input.len() - self.line.len();
 
         while len > 0 {
             let sub_token = &token[..len];
@@ -211,10 +264,11 @@ impl CliParser {
             len -= 1;
         }
 
-        self.matched_len = parsed_len + len;
+        self.matched_len = self.current_pos() - token.len() + len;
     }
 
-    fn parse(&mut self, curr: Rc<CliNode>) -> CliExecResult {
+    // Parse line and match current node for completion.
+    pub fn parse(&mut self, curr: Rc<CliNode>) -> ExecResult {
         let mut curr = curr;
 
         loop {
@@ -232,7 +286,6 @@ impl CliParser {
 
             self.save_token(&token);
             self.match_token(&token, curr.clone());
-            println!(" match_token {}", self.matched_vec.get_mut().len());
 
             // Not yet at the end of input.
             if !self.line.is_empty()  {
@@ -245,22 +298,22 @@ impl CliParser {
                         self.matched_len += 1;
                     }
 
-                    return CliExecResult::Unrecognized;
+                    return ExecResult::Unrecognized(self.matched_len)
                 }
 
                 // Matched more than one, ambiguous.
                 if self.num_matched() > 1 {
                     self.filter_matched(MatchFlag::Full);
                     if self.num_matched() == 1 {
-                        let next = self.get_next();
+                        let next = self.get_candidate();
                         return self.parse(next);
                     }
 
-                    return CliExecResult::Ambiguous
+                    return ExecResult::Ambiguous
                 }
                 // Matched one, move to next node.
                 else {
-                    let next = self.get_next();
+                    let next = self.get_candidate();
                     return self.parse(next);
                 }
             }
@@ -272,21 +325,91 @@ impl CliParser {
                     self.matched_len += 1;
                 }
 
-                return CliExecResult::Unrecognized
+                return ExecResult::Unrecognized(self.matched_len)
             }
             else if self.num_matched() == 1 {
-                curr = self.get_next();
+                curr = self.get_candidate();
             }
 
             break;
         }
 
-        self.command = curr.inner().is_executable();
-        if self.command {
-            CliExecResult::Complete
+        self.matched_len = self.current_pos();
+        self.executable = curr.inner().is_executable();
+        if self.executable {
+            ExecResult::Complete
         }
         else {
-            CliExecResult::Incomplete
+            ExecResult::Incomplete
+        }
+    }
+
+    // Parse line and match current node for execution.
+    pub fn parse_execute(&mut self, curr: Rc<CliNode>) -> ExecResult {
+        let mut executable = curr.is_executable();
+
+        loop {
+            if !self.trim_start() {
+                break;
+            }
+
+            if curr.inner().next().len() == 0 {
+                if self.line().trim().len() == 0 {
+                    break;
+                }
+
+                self.matched_len = self.current_pos();
+                return ExecResult::Unrecognized(self.matched_len)
+            }
+
+            self.set_matched_vec(curr.clone());
+
+            let token = match self.get_token() {
+                Some(token) => token,
+                None => break,
+            };
+
+            self.save_token(&token);
+            self.match_token(&token, curr.clone());
+            self.filter_matched(MatchFlag::Partial);
+
+            if self.num_matched() == 0 {
+                self.match_shorter(curr.clone(), token.clone());
+                return ExecResult::Unrecognized(self.matched_len)
+            }
+            else if self.num_matched() > 1 {
+                return ExecResult::Ambiguous
+            }
+
+            // Candidate is only one at this point.
+            let tuple: CliNodeTokenTuple = (self.get_candidate(), token.clone());
+            self.node_token_vec.get_mut().push(tuple);
+
+            // Line is still remaining, move forward.
+            if !self.line().is_empty() {
+                let next = self.get_candidate();
+                return self.parse_execute(next)
+            }
+
+            // No more line, make decision.
+            if self.get_candidate_result() == MatchResult::Success(MatchFlag::Incomplete) {
+                return ExecResult::Incomplete
+            }
+
+            if !self.is_candidate_executable() {
+                return ExecResult::Incomplete
+            }
+            else {
+                return ExecResult::Complete
+            }
+//            break;
+        }
+
+        if executable {
+            ExecResult::Complete
+        }
+        else {
+            ExecResult::Incomplete
         }
     }
 }
@@ -294,11 +417,13 @@ impl CliParser {
 
 #[cfg(test)]
 mod tests {
+    use super::super::tree::*;
     use super::*;
 
     #[test]
     pub fn test_get_token() {
-        let mut p = CliParser::new("show ip ospf interface");
+        let mut p = CliParser::new();
+        p.init("show ip ospf interface");
 
         let ret = p.trim_start();
         assert_eq!(ret, true);
@@ -310,17 +435,17 @@ mod tests {
         assert_eq!(token, Some(String::from("show")));
         assert_eq!(p.line(), String::from(" ip ospf interface"));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("ip")));
         assert_eq!(p.line(), String::from(" ospf interface"));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("ospf")));
         assert_eq!(p.line(), String::from(" interface"));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("interface")));
         assert_eq!(p.line(), String::from(""));
@@ -328,7 +453,8 @@ mod tests {
 
     #[test]
     pub fn test_get_token_space() {
-        let mut p = CliParser::new(" show   ip ospf ");
+        let mut p = CliParser::new();
+        p.init(" show   ip ospf ");
 
         let ret = p.trim_start();
         assert_eq!(ret, true);
@@ -340,17 +466,17 @@ mod tests {
         assert_eq!(token, Some(String::from("show")));
         assert_eq!(p.line(), String::from("   ip ospf "));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("ip")));
         assert_eq!(p.line(), String::from(" ospf "));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, Some(String::from("ospf")));
         assert_eq!(p.line(), String::from(" "));
 
-        let ret = p.trim_start();
+        let _ret = p.trim_start();
         let token = p.get_token();
         assert_eq!(token, None);
         assert_eq!(p.line(), String::from(""));
@@ -419,28 +545,34 @@ mod tests {
         }
 
 
-        let mut p = CliParser::new("show ip ospf");
+        let mut p = CliParser::new();
+        p.init("show ip ospf");
         let result = p.parse(tree.top());
-        assert_eq!(result, CliExecResult::Incomplete);
+        assert_eq!(result, ExecResult::Incomplete);
 
-        let mut p = CliParser::new("show x");
+        //let mut p = CliParser::new("show x");
+        p.init("show x");
         let result = p.parse(tree.top());
-        assert_eq!(result, CliExecResult::Unrecognized);
+        assert_eq!(result, ExecResult::Unrecognized(5));
 
-        let mut p = CliParser::new("show ip xy");
+        //let mut p = CliParser::new("show ip xy");
+        p.init("show ip xy");
         let result = p.parse(tree.top());
-        assert_eq!(result, CliExecResult::Unrecognized);
+        assert_eq!(result, ExecResult::Unrecognized(8));
 
-        let mut p = CliParser::new("s i o i");
+        //let mut p = CliParser::new("s i o i");
+        p.init("s i o i");
         let result = p.parse(tree.top());
-        assert_eq!(result, CliExecResult::Ambiguous);
+        assert_eq!(result, ExecResult::Ambiguous);
 
-        let mut p = CliParser::new("s ip o i");
+        //let mut p = CliParser::new("s ip o i");
+        p.init("s ip o i");
         let result = p.parse(tree.top());
-        assert_eq!(result, CliExecResult::Complete);
+        assert_eq!(result, ExecResult::Complete);
 
-        let mut p = CliParser::new("s ipv o i");
+        //let mut p = CliParser::new("s ipv o i");
+        p.init("s ipv o i");
         let result = p.parse(tree.top());
-        assert_eq!(result, CliExecResult::Complete);
+        assert_eq!(result, ExecResult::Complete);
     }
 }
