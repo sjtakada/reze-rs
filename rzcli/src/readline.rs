@@ -186,7 +186,7 @@ impl<'a> CliReadline<'a> {
                     println!("% Ambiguous command");
                 },
                 ExecResult::Unrecognized => {
-                    println!("% Invalid input detected at");
+                    println!("% Invalid input detected at '^' marker.");
                 },
             }
         }
@@ -198,7 +198,6 @@ impl<'a> CliReadline<'a> {
         if node.inner().actions().len() > 0 {
 
             for action in node.inner().actions().iter() {
-                println!("handle_actions {}", token);
                 action.handle(&self.cli);
             }
 

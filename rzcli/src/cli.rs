@@ -92,8 +92,12 @@ impl Cli {
                     // do nothing
                 },
                 Err(ReadlineError::Eof) => {
-                    println!("CTRL-D");
-                    break;
+                    if self.can_exit() {
+                        break
+                    }
+
+                    // TBD: should be exit
+                    readline.execute(String::from("end"));
                 },
                 Err(ReadlineError::Suspended) => {
                     self.config_end();
@@ -113,6 +117,16 @@ impl Cli {
             stream.write(buffer.as_ref());
             stream.flush();
              */
+        }
+    }
+
+    fn can_exit(&self) -> bool {
+        let mut mode = self.mode.borrow_mut();
+        if String::from(mode.as_ref()) == CLI_INITIAL_MODE {
+            true
+        }
+        else {
+            false
         }
     }
 
