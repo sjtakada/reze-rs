@@ -14,7 +14,7 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 use std::collections::HashMap;
-use std::cell::Cell;
+//use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -65,7 +65,7 @@ impl Cli {
         // Initialize CLI comand definitions.
         let path = PathBuf::from("../json");
         self.init_cli_commands(&path)?;
-        self.set_mode(CLI_INITIAL_MODE);
+        self.set_mode(CLI_INITIAL_MODE)?;
 
         // TBD: Connect server or send.
         //self.init_server_connect()?;
@@ -131,7 +131,7 @@ impl Cli {
     }
 
     fn config_end(&self) {
-        self.set_mode(CLI_INITIAL_MODE);
+        self.set_mode(CLI_INITIAL_MODE).expect("Failed to set mode");
     }
 
     pub fn trees(&self) -> &HashMap<String, Rc<CliTree>> {

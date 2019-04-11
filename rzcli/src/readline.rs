@@ -7,7 +7,7 @@
 
 //use std::collections::HashMap;
 use std::cell::RefCell;
-use std::cell::Cell;
+//use std::cell::Cell;
 use std::rc::Rc;
 
 use rustyline::completion::Completer;
@@ -23,7 +23,7 @@ use rustyline::KeyPress;
 use rustyline::config;
 
 use super::cli::Cli;
-use super::tree::CliTree;
+//use super::tree::CliTree;
 use super::parser::*;
 use super::node::CliNode;
 use super::error::CliError;
@@ -203,7 +203,12 @@ impl<'a> CliReadline<'a> {
         if node.inner().actions().len() > 0 {
 
             for action in node.inner().actions().iter() {
-                action.handle(&self.cli);
+                match action.handle(&self.cli) {
+                    Ok(_) => {
+                    },
+                    Err(_err) => {
+                    }
+                }
             }
 
             Ok(())

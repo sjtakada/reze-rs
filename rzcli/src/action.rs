@@ -6,7 +6,7 @@
 //
 
 use super::cli::Cli;
-use super::readline::*;
+//use super::readline::*;
 use super::error::CliError;
 
 // Action trait.
@@ -37,7 +37,7 @@ impl CliActionMode {
 
 impl CliAction for CliActionMode {
     fn handle(&self, cli: &Cli) -> Result<(), CliError> {
-        cli.set_mode(&self.name);
+        cli.set_mode(&self.name)?;
 
         Ok(())
     }
