@@ -185,6 +185,7 @@ impl<'a> CliReadline<'a> {
                     println!("% Incomplete command");
                 },
                 ExecResult::Ambiguous => {
+                    println!("hoge");
                     println!("% Ambiguous command");
                 },
                 ExecResult::Unrecognized(pos) => {
