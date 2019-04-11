@@ -381,7 +381,6 @@ impl CliParser {
                 return ExecResult::Unrecognized(self.matched_len)
             }
             else if self.num_matched() > 1 {
-                println!("*** amb {}", self.num_matched());
                 return ExecResult::Ambiguous
             }
 
