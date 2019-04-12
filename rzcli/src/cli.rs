@@ -267,16 +267,17 @@ impl Cli {
     }
 
     fn init_cli_commands(&mut self, dir: &Path) -> Result<(), CliError> {
-        // let suffix = "cli.json";
-
+        // Right now only read
+        //   filename does not start with '_' and
+        //   filename ends with '.cli.json'.
         if dir.is_dir() {
             for entry in fs::read_dir(dir).expect("Unable to get directory entry") {
                 let entry = entry.expect("Unable to get an entry");
                 let path = entry.path();
 
-                if path.is_file() {
-                    if let Some(path_str) = path.to_str() {
-                        if path_str.ends_with(".cli.json") {
+                if let Some(filename) = path.file_name() {
+                    if let Some(filename_str) = filename.to_str() {
+                        if !filename_str.starts_with("_") && filename_str.ends_with(".cli.json") {
                             self.load_cli_json(&path);
                         }
                     }
