@@ -25,6 +25,7 @@ use rustyline::error::ReadlineError;
 use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
+use super::builtins;
 use super::signal;
 
 // Constants.
@@ -37,8 +38,11 @@ pub struct Cli {
     // HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
 
-    // Current mode name
+    // Current mode name.
     mode: RefCell<String>,
+
+    // Built-in functions.
+    builtins: HashMap<String, Box<dyn Fn(&Cli, &Vec<String>) -> Result<(), CliError>>>
 }
 
 impl Cli {
@@ -46,6 +50,7 @@ impl Cli {
         Cli {
             trees: HashMap::new(),
             mode: RefCell::new(String::new()),
+            builtins: HashMap::new(),
         }
     }
 
@@ -61,6 +66,7 @@ impl Cli {
         self.init_cli_modes(&path)?;
 
         // Initialize build-in commands.
+        self.init_builtins()?;
 
         // Initialize CLI comand definitions.
         let path = PathBuf::from("../json");
@@ -118,6 +124,26 @@ impl Cli {
             stream.flush();
              */
         }
+    }
+
+    fn init_builtins(&mut self) -> Result<(), CliError> {
+        self.builtins.insert("help".to_string(), Box::new(builtins::help));
+        self.builtins.insert("exit".to_string(), Box::new(builtins::exit));
+
+        Ok(())
+    }
+
+    pub fn call_builtin(&self, func: &str, params: &Vec<String>) -> Result<(), CliError> {
+        match self.builtins.get(func) {
+            Some(func) => {
+                func(self, params);
+            },
+            None => {
+                // some error
+            }
+        }
+
+        Ok(())
     }
 
     fn can_exit(&self) -> bool {

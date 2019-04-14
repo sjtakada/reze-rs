@@ -218,7 +218,11 @@ impl CliTree {
                                 },
                                 "http" => {
                                 },
+                                "shell" => {
+                                },
                                 "built-in" => {
+                                    let action = CliActionBuiltin::new(obj);
+                                    node.inner().push_action(Rc::new(action));
                                 },
                                 _ => {
                                     println!("Unknown action");

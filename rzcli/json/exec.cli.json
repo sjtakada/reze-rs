@@ -138,6 +138,30 @@
       }
     ]
   },
+  "help-cmd": {
+    "token": {
+      "help": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Description of the interactive help system"
+      }
+    },
+    "command": [
+      {
+        "defun": "help",
+        "mode": [
+          "EXEC-MODE"
+        ],
+        "actions": [
+          {
+            "built-in": {
+              "func": "help"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "list-cmd": {
     "token": {
       "list": {
