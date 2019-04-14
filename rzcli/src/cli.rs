@@ -14,7 +14,7 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 use std::collections::HashMap;
-//use std::cell::Cell;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -38,19 +38,27 @@ pub struct Cli {
     // HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
 
+    // Built-in functions.
+    builtins: HashMap<String, Box<dyn Fn(&Cli, &Vec<String>) -> Result<(), CliError>>>,
+
     // Current mode name.
     mode: RefCell<String>,
 
-    // Built-in functions.
-    builtins: HashMap<String, Box<dyn Fn(&Cli, &Vec<String>) -> Result<(), CliError>>>
+    // Prompt.
+    prompt: RefCell<String>,
+
+    // Current privilege.
+    privilege: Cell<u8>,
 }
 
 impl Cli {
     pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
-            mode: RefCell::new(String::new()),
             builtins: HashMap::new(),
+            mode: RefCell::new(String::new()),
+            prompt: RefCell::new(String::new()),
+            privilege: Cell::new(1),
         }
     }
 
@@ -126,9 +134,13 @@ impl Cli {
         }
     }
 
+    // TBD: probably should be initialized in builtins.rs.
     fn init_builtins(&mut self) -> Result<(), CliError> {
         self.builtins.insert("help".to_string(), Box::new(builtins::help));
         self.builtins.insert("exit".to_string(), Box::new(builtins::exit));
+        self.builtins.insert("enable".to_string(), Box::new(builtins::enable));
+        self.builtins.insert("disable".to_string(), Box::new(builtins::disable));
+        self.builtins.insert("show_privilege".to_string(), Box::new(builtins::show_privilege));
 
         Ok(())
     }
@@ -169,6 +181,14 @@ impl Cli {
         String::from(mode.as_ref())
     }
 
+    pub fn set_privilege(&self, privilege: u8) {
+        self.privilege.set(privilege);
+    }
+
+    pub fn privilege(&self) -> u8 {
+        self.privilege.get()
+    }
+
     pub fn current(&self) -> Option<Rc<CliTree>> {
         match self.trees.get(&self.mode()) {
             Some(tree) => Some(tree.clone()),
@@ -177,16 +197,29 @@ impl Cli {
     }
 
     // TODO: hostname, consider return reference.
-    pub fn prompt(&self) -> String {
+    pub fn set_prompt(&self) {
         let mut prompt = String::from("Router");
         let current = self.current().unwrap();
-        prompt.push_str(current.prompt());
+        if current.prompt().len() > 0 {
+            prompt.push_str(current.prompt());
+        }
+        if self.privilege.get() > 1 {
+            prompt.push_str("#");
+        }
+        else {
+            prompt.push_str(">");
+        }
 
-        prompt
+        self.prompt.replace(prompt);
+    }
+
+    pub fn prompt(&self) -> String {
+        self.prompt.borrow_mut().clone()
     }
 
     pub fn set_mode(&self, mode: &str) -> Result<(), CliError> {
         self.mode.replace(String::from(mode));
+        self.set_prompt();
 
         Ok(())
     }
@@ -242,7 +275,7 @@ impl Cli {
                 let prompt = if mode["prompt"].is_string() {
                     &mode["prompt"].as_str().unwrap()
                 } else {
-                    ">"
+                    ""
                 };
                 let children = &mode["children"];
                 let tree = Rc::new(CliTree::new(name.to_string(), prompt.to_string(), parent.clone()));

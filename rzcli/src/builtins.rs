@@ -28,3 +28,21 @@ pub fn exit(cli: &Cli, _params: &Vec<String>) -> Result<(), CliError> {
     Ok(())
 }
 
+pub fn enable(cli: &Cli, _params: &Vec<String>) -> Result<(), CliError> {
+    cli.set_privilege(15);
+    cli.set_prompt();
+
+    Ok(())
+}
+
+pub fn disable(cli: &Cli, _params: &Vec<String>) -> Result<(), CliError> {
+    cli.set_privilege(1);
+    cli.set_prompt();
+
+    Ok(())
+}
+
+pub fn show_privilege(cli: &Cli, _params: &Vec<String>) -> Result<(), CliError> {
+    println!("Current privilege level is {}", cli.privilege());
+    Ok(())
+}

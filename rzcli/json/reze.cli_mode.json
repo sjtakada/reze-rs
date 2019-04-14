@@ -1,54 +1,47 @@
 {
   "EXEC-MODE": {
     "type": "exec",
-    "prompts": [
-      {
-        "privilege": 1,
-        "prompt": ">"
-      }
-    ],
-    "prompt": "#",
     "exit-to-quit": true
   },
   "CONFIG-MODE": {
     "type": "config",
-    "prompt": "(config)#",
+    "prompt": "(config)",
     "exit-to-end": true,
     "children": {
       "CONFIG-IF-MODE": {
-        "prompt": "(config-if)#"
+        "prompt": "(config-if)"
       },
       "CONFIG-LINE-VTY-MODE": {
-        "prompt": "(config-line)#"
+        "prompt": "(config-line)"
       },
       "CONFIG-OSPF-MODE": {
-        "prompt": "(config-router)#"
+        "prompt": "(config-router)"
       },
       "CONFIG-BGP-MODE": {
-        "prompt": "(config-router)#",
+        "prompt": "(config-router)",
         "children": {
           "CONFIG-BGP-IPV4-MODE": {
-            "prompt": "(config-router-af)#"
+            "prompt": "(config-router-af)"
           },
           "CONFIG-BGP-IPV4M-MODE": {
-            "prompt": "(config-router-af)#"
+            "prompt": "(config-router-af)"
           },
           "CONFIG-BGP-IPV6-MODE": {
-            "prompt": "(config-router-af)#"
+            "prompt": "(config-router-af)"
           },
           "CONFIG-BGP-IPV6M-MODE": {
-            "prompt": "(config-router-af)#"
+            "prompt": "(config-router-af)"
           }
         }
       },
       "CONFIG-RIP-MODE": {
-        "prompt": "(config-router)#"
+        "prompt": "(config-router)"
       },
       "CONFIG-RIPNG-MODE": {
-        "prompt": "(config-router)#"
+        "prompt": "(config-router)"
       },
       "CONFIG-ROUTEMAP-MODE": {
-        "prompt": "(config-route-map)#"
+        "prompt": "(config-route-map)"
       }
     }
   }

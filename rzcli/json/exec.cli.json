@@ -44,8 +44,8 @@
         ],
         "actions": [
           {
-            "mode": {
-              "name": "EXEC-MODE"
+            "built-in": {
+              "func": "enable"
             }
           }
         ]
@@ -68,8 +68,8 @@
         ],
         "actions": [
           {
-            "mode": {
-              "name": "EXEC-MODE"
+            "built-in": {
+              "func": "disable"
             }
           }
         ]
@@ -479,7 +479,6 @@
       {
         "defun": "show logging",
         "mode": [
-          "EXEC-MODE",
           "EXEC-MODE"
         ],
         "actions": [
@@ -489,6 +488,35 @@
               "path": "",
               "params": {
               }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "show-privilege-cmd": {
+    "token": {
+      "show": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Show running system information"
+      },
+      "privilege": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Show current privilege level"
+      }
+    },
+    "command": [
+      {
+        "defun": "show privilege",
+        "mode": [
+          "EXEC-MODE"
+        ],
+        "actions": [
+          {
+            "built-in": {
+              "func": "show_privilege"
             }
           }
         ]
