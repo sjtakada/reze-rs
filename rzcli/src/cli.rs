@@ -30,6 +30,7 @@ use super::signal;
 
 // Constants.
 const CLI_INITIAL_MODE: &str = "EXEC-MODE";
+const CLI_MODE_FILE: &str = "reze.cli_mode.json";
 
 //
 // Main container of CLI
@@ -52,6 +53,7 @@ pub struct Cli {
 }
 
 impl Cli {
+    // Constructor.
     pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
@@ -63,21 +65,22 @@ impl Cli {
     }
 
     // Entry point of shell initialization.
-    pub fn init(&mut self) -> Result<(), CliError> {
+    pub fn init(&mut self, json_dir: &str) -> Result<(), CliError> {
         // Initlaize signals.
         self.init_signals()?;
         
         // TBD: Terminal init
 
         // Initialize CLI modes.
-        let path = PathBuf::from("../json/reze.cli_mode.json");
+        let mut path = PathBuf::from(json_dir);
+        path.push(CLI_MODE_FILE);
         self.init_cli_modes(&path)?;
 
         // Initialize build-in commands.
         self.init_builtins()?;
 
         // Initialize CLI comand definitions.
-        let path = PathBuf::from("../json");
+        let path = PathBuf::from(json_dir);
         self.init_cli_commands(&path)?;
         self.set_mode(CLI_INITIAL_MODE)?;
 

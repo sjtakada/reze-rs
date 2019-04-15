@@ -49,6 +49,11 @@ fn main() {
         }
     };
 
+    let json_dir = match matches.opt_str("j") {
+        Some(dir) => dir,
+        None => ".".to_string(),
+    };
+
     if matches.opt_present("h") {
         print_help(&program, opts);
         return;
@@ -60,7 +65,7 @@ fn main() {
     }
 
     let mut cli = Cli::new();
-    match cli.init() {
+    match cli.init(&json_dir) {
         Ok(_) => {},
         Err(err) => panic!("CLI Init error: {}", err),
     };
