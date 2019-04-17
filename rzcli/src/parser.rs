@@ -15,6 +15,9 @@ use super::error::CliError;
 use super::node::CliNode;
 use super::collate::*;
 
+// Constants.
+const CLI_DEFAULT_PARSER_PRIVILEGE: u8 = 1;
+
 // Type aliases.
 type CliNodeMatchStateTuple = (Rc<CliNode>, MatchResult);
 type CliNodeMatchStateVec = Vec<CliNodeMatchStateTuple>;
@@ -69,6 +72,9 @@ pub struct CliParser {
     // Vecot of pair of CliNode and input token.
     node_token_vec: Cell<CliNodeTokenVec>,
 
+    // Current privilege level.
+    privilege: u8,
+
     // Return value, whether or not it hits executable command.
     executable: bool,
 }
@@ -83,13 +89,15 @@ impl CliParser {
             matched_len: 0usize,
             matched_vec: Cell::new(Vec::new()),
             node_token_vec: Cell::new(Vec::new()),
+            privilege: CLI_DEFAULT_PARSER_PRIVILEGE,
             executable: false,
         }
     }
 
     // Set input and reset state.
-    pub fn init(&mut self, input: &str) {
+    pub fn init(&mut self, input: &str, privilege: u8) {
         self.input = String::from(input);
+        self.privilege = privilege;
         self.reset_line();
     }
 
@@ -162,6 +170,12 @@ impl CliParser {
         self.matched_vec.get_mut().retain(|n| !n.0.inner().is_hidden());
     }
 
+    // Remove node with prvilege greater than current privilege level.
+    fn filter_privilege(&mut self) {
+        let privilege = self.privilege;
+        self.matched_vec.get_mut().retain(|n| n.0.inner().privilege() <= privilege);
+    }
+
     // Return true if space exists at the beginning and trim it, or return false.
     fn trim_start(&mut self) -> bool {
         let s = &self.line;
@@ -209,27 +223,30 @@ impl CliParser {
     // Select matched nodes with MatchFlag smaller than or equal to 'limit'.
     // Among matched nodes with the same MatchFlag and the smallest MatchFlag.
     fn filter_matched(&mut self, limit: MatchFlag) {
-        let min = self.matched_vec.get_mut().iter()
-            .filter_map(|n|
-                        match n.1 {
-                            MatchResult::Success(flag) => Some(flag),                            
-                            _ => None
-                        })
-            .min();
+        let mut limit = limit;
+        let mut vec = self.matched_vec.replace(Vec::new());
 
-        if let Some(min) = min {
-            let min = if min < limit {
-                min
+        loop {
+            if let Some(n) = vec.pop() {
+                match n.1 {
+                    MatchResult::Success(flag) => {
+                        if flag > limit {
+                            continue;
+                        }
+                        else if flag < limit {
+                            self.matched_vec.get_mut().clear();
+                            limit = flag;
+                        }
+
+                        self.matched_vec.get_mut().push(n);
+                    },
+                    _ => {}
+                }
             }
             else {
-                limit
-            };
-            
-            self.matched_vec.get_mut().retain(|n| match n.1 {
-                MatchResult::Success(flag) if flag <= limit => true,
-                _ => false
-            });
-        };
+                break;
+            }
+        }
     }
 
     // Given input on current CliNode, update matched_vec.
@@ -278,6 +295,7 @@ impl CliParser {
 
             self.set_matched_vec(curr.clone());
             self.filter_hidden();
+            self.filter_privilege();
 
             let token = match self.get_token() {
                 Some(token) => token,
@@ -550,27 +568,22 @@ mod tests {
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Incomplete);
 
-        //let mut p = CliParser::new("show x");
         p.init("show x");
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Unrecognized(5));
 
-        //let mut p = CliParser::new("show ip xy");
         p.init("show ip xy");
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Unrecognized(8));
 
-        //let mut p = CliParser::new("s i o i");
         p.init("s i o i");
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Ambiguous);
 
-        //let mut p = CliParser::new("s ip o i");
         p.init("s ip o i");
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Complete);
 
-        //let mut p = CliParser::new("s ipv o i");
         p.init("s ipv o i");
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Complete);

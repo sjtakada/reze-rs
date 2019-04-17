@@ -7,7 +7,7 @@
 
 //use std::collections::HashMap;
 use std::cell::RefCell;
-use std::cell::Cell;
+//use std::cell::Cell;
 use std::rc::Rc;
 
 use rustyline::completion::Completer;
@@ -23,7 +23,7 @@ use rustyline::KeyPress;
 use rustyline::config;
 
 use super::cli::Cli;
-use super::tree::CliTree;
+//use super::tree::CliTree;
 use super::parser::*;
 use super::node::CliNode;
 use super::error::CliError;
@@ -58,7 +58,7 @@ impl<'a> Completer for CliCompleter<'a> {
         let line = line.trim_start();
         let current = self.cli.current().unwrap();
 
-        parser.init(&line);
+        parser.init(&line, self.cli.privilege());
         parser.parse(current.top());
 
         let vec = parser.matched_vec(); 
@@ -86,24 +86,30 @@ impl<'a> Completer for CliCompleter<'a> {
         let mut parser = self.parser.borrow_mut();
         let current = self.cli.current().unwrap();
 
-        parser.init(&line);
+        parser.init(&line, self.cli.privilege());
         let result = parser.parse(current.top());
+        match result {
+            ExecResult::Unrecognized(pos) => {
+                println!("% Unrecognized command");
+            },
+            _ => {
 
-        let vec = parser.matched_vec(); 
-        if vec.len() > 0 {
-            if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
-                for n in vec {
-                    println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+                let vec = parser.matched_vec(); 
+                let mut width_max = 0;
+                if vec.len() > 0 {
+                    if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
+                        width_max = max;
+                        for n in vec {
+                            println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+                        }
+                    }
                 }
 
                 if result == ExecResult::Complete {
-                    println!("  {:width$}  <cr>", "<cr>", width = max);
+                    println!("  {:width$}  <cr>", "<cr>", width = width_max);
                 }
+                println!("");
             }
-            println!("");
-        }
-        else {
-            println!("% Unrecognized command");
         }
 
         Ok(())
@@ -160,7 +166,7 @@ impl<'a> CliReadline<'a> {
             let mut parser = CliParser::new();
             let current = self.cli.current().unwrap();
 
-            parser.init(&line);
+            parser.init(&line, self.cli.privilege());
 
             match parser.parse_execute(current.top()) {
                 ExecResult::Complete => {
@@ -197,7 +203,12 @@ impl<'a> CliReadline<'a> {
         if node.inner().actions().len() > 0 {
 
             for action in node.inner().actions().iter() {
-                action.handle(&self.cli);
+                match action.handle(&self.cli) {
+                    Ok(_) => {
+                    },
+                    Err(_err) => {
+                    }
+                }
             }
 
             Ok(())

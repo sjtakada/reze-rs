@@ -15,12 +15,14 @@ use std::cell::RefCell;
 use super::collate::*;
 use super::action::CliAction;
 
+// Constants.
 const CLI_TOKEN_IPV4_ADDRESS: &str = "A.B.C.D";
 const CLI_TOKEN_IPV4_PREFIX: &str = "A.B.C.D/M";
 const CLI_TOKEN_IPV6_ADDRESS: &str = "X:X::X:X";
 const CLI_TOKEN_IPV6_PREFIX: &str = "X:X::X:X/M";
 const CLI_TOKEN_WORD: &str = "WORD";
 //const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
+pub const CLI_DEFAULT_NODE_PRIVILEGE: u8 = 15;
 
 pub type CliNodeVec = Vec<Rc<CliNode>>;
 
@@ -68,6 +70,9 @@ pub struct CliNodeInner {
     // Executable command node.
     executable: Cell<bool>,
 
+    // Privilege level.
+    privilege: Cell<u8>,
+
     // Hidden flag.
     hidden: Cell<bool>,
 
@@ -88,6 +93,7 @@ impl CliNodeInner {
             token: String::from(token),
             sorted: Cell::new(false),
             executable: Cell::new(false),
+            privilege: Cell::new(CLI_DEFAULT_NODE_PRIVILEGE),
             hidden: Cell::new(false),
             next: RefCell::new(Vec::new()),
             actions: RefCell::new(Vec::new()),
@@ -108,6 +114,14 @@ impl CliNodeInner {
 
     pub fn next(&self) -> RefMut<CliNodeVec> {
         self.next.borrow_mut()
+    }
+
+    pub fn privilege(&self) -> u8 {
+        self.privilege.get()
+    }
+
+    pub fn set_privilege(&self, privilege: u8) {
+        self.privilege.set(privilege);
     }
 
     pub fn is_hidden(&self) -> bool {

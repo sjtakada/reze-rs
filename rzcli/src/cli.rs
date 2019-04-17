@@ -25,10 +25,12 @@ use rustyline::error::ReadlineError;
 use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
+use super::builtins;
 use super::signal;
 
 // Constants.
 const CLI_INITIAL_MODE: &str = "EXEC-MODE";
+const CLI_MODE_FILE: &str = "reze.cli_mode.json";
 
 //
 // Main container of CLI
@@ -37,35 +39,50 @@ pub struct Cli {
     // HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
 
-    // Current mode name
+    // Built-in functions.
+    builtins: HashMap<String, Box<dyn Fn(&Cli, &Vec<String>) -> Result<(), CliError>>>,
+
+    // Current mode name.
     mode: RefCell<String>,
+
+    // Prompt.
+    prompt: RefCell<String>,
+
+    // Current privilege.
+    privilege: Cell<u8>,
 }
 
 impl Cli {
+    // Constructor.
     pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
+            builtins: HashMap::new(),
             mode: RefCell::new(String::new()),
+            prompt: RefCell::new(String::new()),
+            privilege: Cell::new(1),
         }
     }
 
     // Entry point of shell initialization.
-    pub fn init(&mut self) -> Result<(), CliError> {
+    pub fn init(&mut self, json_dir: &str) -> Result<(), CliError> {
         // Initlaize signals.
         self.init_signals()?;
         
         // TBD: Terminal init
 
         // Initialize CLI modes.
-        let path = PathBuf::from("../json/reze.cli_mode.json");
+        let mut path = PathBuf::from(json_dir);
+        path.push(CLI_MODE_FILE);
         self.init_cli_modes(&path)?;
 
         // Initialize build-in commands.
+        self.init_builtins()?;
 
         // Initialize CLI comand definitions.
-        let path = PathBuf::from("../json");
+        let path = PathBuf::from(json_dir);
         self.init_cli_commands(&path)?;
-        self.set_mode(CLI_INITIAL_MODE);
+        self.set_mode(CLI_INITIAL_MODE)?;
 
         // TBD: Connect server or send.
         //self.init_server_connect()?;
@@ -120,6 +137,30 @@ impl Cli {
         }
     }
 
+    // TBD: probably should be initialized in builtins.rs.
+    fn init_builtins(&mut self) -> Result<(), CliError> {
+        self.builtins.insert("help".to_string(), Box::new(builtins::help));
+        self.builtins.insert("exit".to_string(), Box::new(builtins::exit));
+        self.builtins.insert("enable".to_string(), Box::new(builtins::enable));
+        self.builtins.insert("disable".to_string(), Box::new(builtins::disable));
+        self.builtins.insert("show_privilege".to_string(), Box::new(builtins::show_privilege));
+
+        Ok(())
+    }
+
+    pub fn call_builtin(&self, func: &str, params: &Vec<String>) -> Result<(), CliError> {
+        match self.builtins.get(func) {
+            Some(func) => {
+                func(self, params);
+            },
+            None => {
+                // some error
+            }
+        }
+
+        Ok(())
+    }
+
     fn can_exit(&self) -> bool {
         let mut mode = self.mode.borrow_mut();
         if String::from(mode.as_ref()) == CLI_INITIAL_MODE {
@@ -131,7 +172,7 @@ impl Cli {
     }
 
     fn config_end(&self) {
-        self.set_mode(CLI_INITIAL_MODE);
+        self.set_mode(CLI_INITIAL_MODE).expect("Failed to set mode");
     }
 
     pub fn trees(&self) -> &HashMap<String, Rc<CliTree>> {
@@ -143,6 +184,14 @@ impl Cli {
         String::from(mode.as_ref())
     }
 
+    pub fn set_privilege(&self, privilege: u8) {
+        self.privilege.set(privilege);
+    }
+
+    pub fn privilege(&self) -> u8 {
+        self.privilege.get()
+    }
+
     pub fn current(&self) -> Option<Rc<CliTree>> {
         match self.trees.get(&self.mode()) {
             Some(tree) => Some(tree.clone()),
@@ -151,16 +200,29 @@ impl Cli {
     }
 
     // TODO: hostname, consider return reference.
-    pub fn prompt(&self) -> String {
+    pub fn set_prompt(&self) {
         let mut prompt = String::from("Router");
         let current = self.current().unwrap();
-        prompt.push_str(current.prompt());
+        if current.prompt().len() > 0 {
+            prompt.push_str(current.prompt());
+        }
+        if self.privilege.get() > 1 {
+            prompt.push_str("#");
+        }
+        else {
+            prompt.push_str(">");
+        }
 
-        prompt
+        self.prompt.replace(prompt);
+    }
+
+    pub fn prompt(&self) -> String {
+        self.prompt.borrow_mut().clone()
     }
 
     pub fn set_mode(&self, mode: &str) -> Result<(), CliError> {
         self.mode.replace(String::from(mode));
+        self.set_prompt();
 
         Ok(())
     }
@@ -216,7 +278,7 @@ impl Cli {
                 let prompt = if mode["prompt"].is_string() {
                     &mode["prompt"].as_str().unwrap()
                 } else {
-                    ">"
+                    ""
                 };
                 let children = &mode["children"];
                 let tree = Rc::new(CliTree::new(name.to_string(), prompt.to_string(), parent.clone()));
@@ -267,16 +329,17 @@ impl Cli {
     }
 
     fn init_cli_commands(&mut self, dir: &Path) -> Result<(), CliError> {
-        // let suffix = "cli.json";
-
+        // Right now only read
+        //   filename does not start with '_' and
+        //   filename ends with '.cli.json'.
         if dir.is_dir() {
             for entry in fs::read_dir(dir).expect("Unable to get directory entry") {
                 let entry = entry.expect("Unable to get an entry");
                 let path = entry.path();
 
-                if path.is_file() {
-                    if let Some(path_str) = path.to_str() {
-                        if path_str.ends_with(".cli.json") {
+                if let Some(filename) = path.file_name() {
+                    if let Some(filename_str) = filename.to_str() {
+                        if !filename_str.starts_with("_") && filename_str.ends_with(".cli.json") {
                             self.load_cli_json(&path);
                         }
                     }

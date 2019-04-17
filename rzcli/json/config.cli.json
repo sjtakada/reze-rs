@@ -1,0 +1,552 @@
+{
+  "config-exit-cmd": {
+    "comment": "TBD",
+    "token": {
+      "exit": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Exit current mode and down to previous mode"
+      }
+    },
+    "command": [
+      {
+        "defun": "exit",
+        "mode": [
+          "CONFIG-MODE",
+          "CONFIG-IF-MODE",
+          "CONFIG-OSPF-MODE",
+          "CONFIG-BGP-MODE",
+          "CONFIG-RIP-MODE",
+          "CONFIG-RIPNG-MODE"
+        ],
+        "actions": [
+          {
+            "built-in": {
+              "func": "exit"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "config-end-cmd": {
+    "comment": "TBD equivalent to ^Z",
+    "token": {
+      "end": {
+        "id": "1",
+        "type": "keyword",
+        "help": "End current mode and change to enable mode."
+      }
+    },
+    "command": [
+      {
+        "defun": "end",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "mode": {
+              "name": "EXEC-MODE"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "config-help-cmd": {
+    "token": {
+      "help": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Description of the interactive help system"
+      }
+    },
+    "command": [
+      {
+        "defun": "help",
+        "mode": [
+          "EXEC-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "config-list-cmd": {
+    "token": {
+      "list": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Print command list"
+      }
+    },
+    "command": [
+      {
+        "defun": "list",
+        "mode": [
+          "EXEC-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "hostname-cmd": {
+    "token": {
+      "hostname": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Set system's network name"
+      },
+      "WORD:2": {
+        "id": "2",
+        "type": "string",
+        "help": "This system's network name"
+      }
+    },
+    "command": [
+      {
+        "defun": "hostname WORD:2",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-hostname-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "hostname": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Reset system's network name"
+      },
+      "WORD:2.0": {
+        "id": "2.0",
+        "type": "string",
+        "help": "Host name of this router"
+      }
+    },
+    "command": [
+      {
+        "defun": "no hostname (WORD:2.0|)",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "password-cmd": {
+    "token": {
+      "password": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Assign the terminal connection password"
+      },
+      "8": {
+        "id": "2.0",
+        "type": "keyword",
+        "help": "Specifies a HIDDEN password will follow",
+        "enum": "ENUM:2"
+      },
+      "WORD:3": {
+        "id": "3",
+        "type": "string",
+        "help": "dummy string "
+      }
+    },
+    "command": [
+      {
+        "defun": "password (8) WORD:3",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "password-text-cmd": {
+    "token": {
+      "password": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Assign the terminal connection password"
+      },
+      "WORD:2": {
+        "id": "2",
+        "type": "string",
+        "help": "The UNENCRYPTED (cleartext) line password"
+      }
+    },
+    "command": [
+      {
+        "defun": "password WORD:2",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "enable-password-cmd": {
+    "token": {
+      "enable": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Modify enable password parameters"
+      },
+      "password": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Assign the privileged level password"
+      },
+      "8": {
+        "id": "3.0",
+        "type": "keyword",
+        "help": "Specifies a HIDDEN password will follow",
+        "enum": "ENUM:3"
+      },
+      "WORD:4": {
+        "id": "4",
+        "type": "string",
+        "help": "dummy string "
+      }
+    },
+    "command": [
+      {
+        "defun": "enable password (8) WORD:4",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "enable-password-text-cmd": {
+    "token": {
+      "enable": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Modify enable password parameters"
+      },
+      "password": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Assign the privileged level password"
+      },
+      "WORD:3": {
+        "id": "3",
+        "type": "string",
+        "help": "The UNENCRYPTED (cleartext) 'enable' password"
+      }
+    },
+    "command": [
+      {
+        "defun": "enable password WORD:3",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-enable-password-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "enable": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Modify enable password parameters"
+      },
+      "password": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Assign the privileged level password"
+      }
+    },
+    "command": [
+      {
+        "defun": "no enable password",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "service-password-encrypt-cmd": {
+    "token": {
+      "service": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Set up miscellaneous service"
+      },
+      "password-encryption": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Enable encrypted passwords"
+      }
+    },
+    "command": [
+      {
+        "defun": "service password-encryption",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-service-password-encrypt-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "service": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Set up miscellaneous service"
+      },
+      "password-encryption": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Enable encrypted passwords"
+      }
+    },
+    "command": [
+      {
+        "defun": "no service password-encryption",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "banner-motd-file-cmd": {
+    "token": {
+      "banner": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Set banner"
+      },
+      "motd": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Banner for motd"
+      },
+      "file": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Banner from a file"
+      },
+      "WORD:4.0": {
+        "id": "4.0",
+        "type": "string",
+        "help": "Filename"
+      }
+    },
+    "command": [
+      {
+        "defun": "banner motd file (WORD:4.0|)",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "banner-motd-default-cmd": {
+    "token": {
+      "banner": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Set banner string"
+      },
+      "motd": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Strings for motd"
+      },
+      "default": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Default string"
+      }
+    },
+    "command": [
+      {
+        "defun": "banner motd default",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-banner-motd-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "banner": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Set banner string"
+      },
+      "motd": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Strings for motd"
+      }
+    },
+    "command": [
+      {
+        "defun": "no banner motd",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -6,7 +6,6 @@
 //
 
 use super::cli::Cli;
-use super::readline::*;
 use super::error::CliError;
 
 // Action trait.
@@ -37,8 +36,34 @@ impl CliActionMode {
 
 impl CliAction for CliActionMode {
     fn handle(&self, cli: &Cli) -> Result<(), CliError> {
-        cli.set_mode(&self.name);
+        cli.set_mode(&self.name)?;
 
         Ok(())
     }
 }
+
+// Action built-in.
+pub struct CliActionBuiltin {
+    func: String,
+    params: Vec<String>,
+}
+
+impl CliActionBuiltin {
+    pub fn new(value: &serde_json::Value) -> CliActionBuiltin {
+        let func = value["func"].as_str().unwrap();
+
+        CliActionBuiltin {
+            func: String::from(func),
+            params: Vec::new(),
+        }
+    }
+}
+
+impl CliAction for CliActionBuiltin {
+    fn handle(&self, cli: &Cli) -> Result<(), CliError> {
+        cli.call_builtin(&self.func, &self.params)?;
+
+        Ok(())
+    }
+}
+
