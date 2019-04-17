@@ -18,6 +18,7 @@
         "mode": [
           "EXEC-MODE"
         ],
+        "privilege": 15,
         "actions": [
           {
             "mode": {
@@ -42,6 +43,7 @@
         "mode": [
           "EXEC-MODE"
         ],
+        "privilege": 1,
         "actions": [
           {
             "built-in": {

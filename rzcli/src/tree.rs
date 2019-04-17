@@ -119,6 +119,7 @@ impl CliTree {
                          command: &serde_json::Value) {
         let defun = &command["defun"];
         if defun.is_string() {
+            let privilege = command["privilege"].as_i64().unwrap_or(CLI_DEFAULT_NODE_PRIVILEGE as i64) as u8;
             let mut s = String::from(defun.as_str().unwrap());
             let mut cv: CliNodeVec = Vec::new();
             let mut hv: CliNodeVec = Vec::new();
@@ -127,13 +128,14 @@ impl CliTree {
             cv.push(self.top.borrow().clone());
 
             CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
-                                     &mut s, tokens, command);
+                                     &mut s, tokens, command, privilege);
         }
     }
 
     fn build_recursive(curr: &mut CliNodeVec, head: &mut CliNodeVec,
                        tail: &mut CliNodeVec, s: &mut String,
-                       tokens: &serde_json::Value, command: &serde_json::Value) -> TokenType {
+                       tokens: &serde_json::Value, command: &serde_json::Value,
+                       privilege: u8) -> TokenType {
         let mut is_head = true;
 
         while s.len() > 0 {
@@ -150,7 +152,7 @@ impl CliTree {
                     while {
                         let mut cv = curr.clone();
                         token_type = CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
-                                                                  s, tokens, command);
+                                                                  s, tokens, command, privilege);
                         token_type == TokenType::VerticalBar
                     } { }
 
@@ -186,6 +188,11 @@ impl CliTree {
                             },
                             Some(next) => next,
                         };
+
+                        // Set privilege
+                        if privilege < next.inner().privilege() {
+                            next.inner().set_privilege(privilege);
+                        }
 
                         // TBD: hidden
 

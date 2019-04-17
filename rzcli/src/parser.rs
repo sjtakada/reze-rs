@@ -15,6 +15,9 @@ use super::error::CliError;
 use super::node::CliNode;
 use super::collate::*;
 
+// Constants.
+const CLI_DEFAULT_PARSER_PRIVILEGE: u8 = 1;
+
 // Type aliases.
 type CliNodeMatchStateTuple = (Rc<CliNode>, MatchResult);
 type CliNodeMatchStateVec = Vec<CliNodeMatchStateTuple>;
@@ -69,6 +72,9 @@ pub struct CliParser {
     // Vecot of pair of CliNode and input token.
     node_token_vec: Cell<CliNodeTokenVec>,
 
+    // Current privilege level.
+    privilege: u8,
+
     // Return value, whether or not it hits executable command.
     executable: bool,
 }
@@ -83,13 +89,15 @@ impl CliParser {
             matched_len: 0usize,
             matched_vec: Cell::new(Vec::new()),
             node_token_vec: Cell::new(Vec::new()),
+            privilege: CLI_DEFAULT_PARSER_PRIVILEGE,
             executable: false,
         }
     }
 
     // Set input and reset state.
-    pub fn init(&mut self, input: &str) {
+    pub fn init(&mut self, input: &str, privilege: u8) {
         self.input = String::from(input);
+        self.privilege = privilege;
         self.reset_line();
     }
 
@@ -160,6 +168,12 @@ impl CliParser {
     // Remove hidden node from matched.
     fn filter_hidden(&mut self) {
         self.matched_vec.get_mut().retain(|n| !n.0.inner().is_hidden());
+    }
+
+    // Remove node with prvilege greater than current privilege level.
+    fn filter_privilege(&mut self) {
+        let privilege = self.privilege;
+        self.matched_vec.get_mut().retain(|n| n.0.inner().privilege() <= privilege);
     }
 
     // Return true if space exists at the beginning and trim it, or return false.
@@ -281,6 +295,7 @@ impl CliParser {
 
             self.set_matched_vec(curr.clone());
             self.filter_hidden();
+            self.filter_privilege();
 
             let token = match self.get_token() {
                 Some(token) => token,

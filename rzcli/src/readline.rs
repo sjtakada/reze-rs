@@ -58,7 +58,7 @@ impl<'a> Completer for CliCompleter<'a> {
         let line = line.trim_start();
         let current = self.cli.current().unwrap();
 
-        parser.init(&line);
+        parser.init(&line, self.cli.privilege());
         parser.parse(current.top());
 
         let vec = parser.matched_vec(); 
@@ -86,7 +86,7 @@ impl<'a> Completer for CliCompleter<'a> {
         let mut parser = self.parser.borrow_mut();
         let current = self.cli.current().unwrap();
 
-        parser.init(&line);
+        parser.init(&line, self.cli.privilege());
         let result = parser.parse(current.top());
         match result {
             ExecResult::Unrecognized(pos) => {
@@ -166,7 +166,7 @@ impl<'a> CliReadline<'a> {
             let mut parser = CliParser::new();
             let current = self.cli.current().unwrap();
 
-            parser.init(&line);
+            parser.init(&line, self.cli.privilege());
 
             match parser.parse_execute(current.top()) {
                 ExecResult::Complete => {
