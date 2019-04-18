@@ -154,6 +154,7 @@
         "mode": [
           "EXEC-MODE"
         ],
+        "privilege": 1,
         "actions": [
           {
             "built-in": {

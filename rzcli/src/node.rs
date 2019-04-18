@@ -26,10 +26,27 @@ pub const CLI_DEFAULT_NODE_PRIVILEGE: u8 = 15;
 
 pub type CliNodeVec = Vec<Rc<CliNode>>;
 
+#[derive(PartialEq)]
+pub enum NodeType {
+    IPv4Prefix,
+    IPv4Address,
+    IPv6Prefix,
+    IPv6Address,
+    Range,
+    Word,
+    Community,
+    Array,
+    Keyword,
+    Dummy,
+}
+
 // CLI Node trait: Base interface for various type of CliNode.
 pub trait CliNode {
     // Return inner.
     fn inner(&self) -> Ref<CliNodeInner>;
+
+    // Return node type.
+    fn node_type(&self) -> NodeType;
 
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
@@ -174,6 +191,10 @@ impl CliNode for CliNodeDummy {
         self.inner.borrow()
     }
 
+    fn node_type(&self) -> NodeType {
+        NodeType::Dummy
+    }
+
     fn collate(&self, _input: &str) -> MatchResult {
         MatchResult::Failure(0)
     }
@@ -206,6 +227,10 @@ impl CliNodeKeyword {
 impl CliNode for CliNodeKeyword {
     fn inner(&self) -> Ref<CliNodeInner> {
         self.inner.borrow()
+    }
+
+    fn node_type(&self) -> NodeType {
+        NodeType::Keyword
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -270,6 +295,10 @@ impl CliNode for CliNodeRange {
         self.inner.borrow()
     }
 
+    fn node_type(&self) -> NodeType {
+        NodeType::Range
+    }
+
     fn collate(&self, input: &str) -> MatchResult {
         let pos = 0;
 
@@ -303,6 +332,10 @@ impl CliNodeIPv4Prefix {
 impl CliNode for CliNodeIPv4Prefix {
     fn inner(&self) -> Ref<CliNodeInner> {
         self.inner.borrow()
+    }
+
+    fn node_type(&self) -> NodeType {
+        NodeType::IPv4Prefix
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -421,6 +454,10 @@ impl CliNode for CliNodeIPv4Address {
         self.inner.borrow()
     }
 
+    fn node_type(&self) -> NodeType {
+        NodeType::IPv4Address
+    }
+
     fn collate(&self, input: &str) -> MatchResult {
         #[derive(Copy, Clone, PartialEq)]
         enum State {
@@ -520,6 +557,10 @@ impl CliNodeIPv6Prefix {
 impl CliNode for CliNodeIPv6Prefix {
     fn inner(&self) -> Ref<CliNodeInner> {
         self.inner.borrow()
+    }
+
+    fn node_type(&self) -> NodeType {
+        NodeType::IPv6Prefix
     }
 
     fn collate(&self, input: &str) -> MatchResult {
@@ -667,6 +708,10 @@ impl CliNode for CliNodeIPv6Address {
         self.inner.borrow()
     }
 
+    fn node_type(&self) -> NodeType {
+        NodeType::IPv6Address
+    }
+
     fn collate(&self, input: &str) -> MatchResult {
         #[derive(Copy, Clone, PartialEq)]
         enum State {
@@ -803,6 +848,10 @@ impl CliNodeWord {
 impl CliNode for CliNodeWord {
     fn inner(&self) -> Ref<CliNodeInner> {
         self.inner.borrow()
+    }
+
+    fn node_type(&self) -> NodeType {
+        NodeType::Word
     }
 
     fn collate(&self, _input: &str) -> MatchResult {

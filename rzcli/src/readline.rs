@@ -26,6 +26,7 @@ use super::cli::Cli;
 //use super::tree::CliTree;
 use super::parser::*;
 use super::node::CliNode;
+use super::node::NodeType;
 use super::error::CliError;
 
 type CliNodeTokenTuple = (Rc<CliNode>, String);
@@ -61,15 +62,22 @@ impl<'a> Completer for CliCompleter<'a> {
         parser.init(&line, self.cli.privilege());
         parser.parse(current.top());
 
+        // TODO: define tab twice to do short help
         let vec = parser.matched_vec(); 
         if vec.len() == 1 {
-            let mut str = vec[0].0.inner().token().to_string();
-            str.push(' ');
-            candidate.push(str);
+            let node = &vec[0].0;
+            if node.node_type() == NodeType::Keyword {
+                let mut str = node.inner().token().to_string();
+                str.push(' ');
+                candidate.push(str);
+            }
         }
         else {
             for n in vec {
-                candidate.push(n.0.inner().token().to_string());
+                let node = &n.0;
+                if node.node_type() == NodeType::Keyword {
+                    candidate.push(node.inner().token().to_string());
+                }
             }
         }
 
