@@ -1,5 +1,5 @@
 [package]
-name = "rzcli"
+name = "cli"
 version = "0.1.0"
 authors = ["Toshiaki Takada <toshiaki.takada@gmail.com>"]
 edition = "2018"

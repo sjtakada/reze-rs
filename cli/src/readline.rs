@@ -62,7 +62,6 @@ impl<'a> Completer for CliCompleter<'a> {
         parser.init(&line, self.cli.privilege());
         parser.parse(current.top());
 
-        // TODO: define tab twice to do short help
         let vec = parser.matched_vec(); 
         if vec.len() == 1 {
             let node = &vec[0].0;
@@ -122,6 +121,68 @@ impl<'a> Completer for CliCompleter<'a> {
 
         Ok(())
     }
+
+    fn short_help(&self, line: &str, _pos: usize, _ctx: &Context<'_>) -> rustyline::Result<Vec<String>> {
+        let mut candidate: Vec<String> = Vec::new();
+        let mut parser = self.parser.borrow_mut();
+        let line = line.trim_start();
+        let current = self.cli.current().unwrap();
+
+        parser.init(&line, self.cli.privilege());
+        parser.parse(current.top());
+
+        let vec = parser.matched_vec(); 
+        if vec.len() == 1 {
+            let node = &vec[0].0;
+            let mut str = node.inner().token().to_string();
+            str.push(' ');
+            candidate.push(str);
+        }
+        else {
+            for n in vec {
+                let node = &n.0;
+                candidate.push(node.inner().token().to_string());
+            }
+        }
+
+        Ok(candidate)
+    }
+
+/*
+    fn short_help(&self, line: &str, _pos: usize, _ctx: &Context<'_>) -> rustyline::Result<()> {
+        let line = line.trim_start();
+        let mut parser = self.parser.borrow_mut();
+        let current = self.cli.current().unwrap();
+
+        parser.init(&line, self.cli.privilege());
+        let result = parser.parse(current.top());
+        match result {
+            ExecResult::Unrecognized(pos) => {
+                println!("% Unrecognized command");
+            },
+            _ => {
+
+                let vec = parser.matched_vec(); 
+                let mut width_max = 0;
+                if vec.len() > 0 {
+                    if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
+                        width_max = max;
+                        for n in vec {
+                            println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+                        }
+                    }
+                }
+
+                if result == ExecResult::Complete {
+                    println!("  {:width$}  <cr>", "<cr>", width = width_max);
+                }
+                println!("");
+            }
+        }
+
+        Ok(())
+    }
+*/
 }
 
 impl<'a> Hinter for CliCompleter<'a> {}
@@ -142,6 +203,8 @@ impl<'a> CliReadline<'a> {
         // Set configuration.
         let config = config::Builder::new()
             .completion_type(config::CompletionType::List)
+            .allow_suspend(false)
+            .short_help(true)
             .build();
 
         let mut editor = Editor::<CliCompleter>::with_config(config);

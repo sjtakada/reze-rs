@@ -8,8 +8,8 @@
 use std::env;
 use getopts::Options;
 
-use rzcli::cli::Cli;
-use rzcli::error::CliError;
+use cli::cli::Cli;
+use cli::error::CliError;
 
 
 const CLI_VERSION: &str = "1.0";

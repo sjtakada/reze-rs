@@ -9,9 +9,9 @@ use std::sync::Arc;
 use log::info;
 use simplelog::*;
 
-use rzrtd::core::event::*;
-use rzrtd::core::nexus::*;
-use rzrtd::core::uds_server::*;
+use routerd::core::event::*;
+use routerd::core::nexus::*;
+use routerd::core::uds_server::*;
 
 // Global entry point of ReZe Router Daemon.
 fn main() {
@@ -37,7 +37,7 @@ fn main() {
 fn start() {
     // Create Unix Domain Socket to accept commands.
     let mut path = env::temp_dir();
-    path.push("rzrtd.cli");
+    path.push("routerd.cli");
 
     // Prepare some objects.
     let event_manager = Arc::new(EventManager::new());

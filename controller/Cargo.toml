@@ -1,5 +1,5 @@
 [package]
-name = "rzctld"
+name = "controller"
 version = "0.1.0"
 authors = ["Toshiaki Takada <toshiaki.takada@gmail.com>"]
 
