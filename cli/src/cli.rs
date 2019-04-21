@@ -113,7 +113,6 @@ impl Cli {
                         break
                     }
 
-                    // TBD: should be exit
                     readline.execute(String::from("end"));
                 },
                 Err(ReadlineError::Suspended) => {
