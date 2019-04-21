@@ -13,7 +13,7 @@ pub trait CliAction {
     fn handle(&self, cli: &Cli) -> Result<(), CliError>;
 }
 
-// Action mode.
+// Mode action.
 pub struct CliActionMode {
     name: String,
     _up: u64,
@@ -42,7 +42,7 @@ impl CliAction for CliActionMode {
     }
 }
 
-// Action built-in.
+// Built-in action.
 pub struct CliActionBuiltin {
     func: String,
     params: Vec<String>,
@@ -61,9 +61,7 @@ impl CliActionBuiltin {
 
 impl CliAction for CliActionBuiltin {
     fn handle(&self, cli: &Cli) -> Result<(), CliError> {
-        cli.call_builtin(&self.func, &self.params)?;
-
-        Ok(())
+        cli.call_builtin(&self.func, &self.params)
     }
 }
 

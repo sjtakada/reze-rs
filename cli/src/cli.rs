@@ -152,13 +152,12 @@ impl Cli {
         match self.builtins.get(func) {
             Some(func) => {
                 func(self, params);
+                Ok(())
             },
             None => {
-                // some error
+                Err(CliError::ActionError(format!("builtin '{}'", func)))
             }
         }
-
-        Ok(())
     }
 
     fn can_exit(&self) -> bool {

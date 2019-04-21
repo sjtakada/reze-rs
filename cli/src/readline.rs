@@ -245,12 +245,16 @@ impl<'a> CliReadline<'a> {
                     match self.handle_actions(parser.node_token_vec()) {
                         Err(CliError::NoActionDefined) => {
                             println!("% No action defined");
-                        }
+                        },
+                        Err(CliError::ActionError(msg)) => {
+                            println!("% Action error: {}", msg);
+                        },
                         Err(_) => {
-                        }
+                            println!("% Unknown action error");
+                        },
                         Ok(()) => {
                             //println!("execute {}", line);
-                        }
+                        },
                     }
                 },
                 ExecResult::Incomplete => {
@@ -286,7 +290,7 @@ impl<'a> CliReadline<'a> {
                         println!("% No action defined");
                     }
                     Err(_) => {
-                        // Other error if there may be.
+                        println!("% Unknown action error in parent node");
                     }
                     Ok(()) => {
                         self.cli.set_mode(current.name());
@@ -316,14 +320,8 @@ impl<'a> CliReadline<'a> {
         let (node, token) = node_token_vec.last().unwrap();
 
         if node.inner().actions().len() > 0 {
-
             for action in node.inner().actions().iter() {
-                match action.handle(&self.cli) {
-                    Ok(_) => {
-                    },
-                    Err(_err) => {
-                    }
-                }
+                action.handle(&self.cli)?;
             }
 
             Ok(())
