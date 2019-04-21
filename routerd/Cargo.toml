@@ -1,0 +1,22 @@
+[package]
+name = "routerd"
+version = "0.1.0"
+authors = ["Toshiaki Takada <toshiaki.takada@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+log = "0.4.6"
+simplelog = "0.5.3"
+quick-error = "1.2.2"
+mio = "0.6.16"
+mio-uds = "0.6.7"
+thread-id = "3.3.0"
+
+# maybe not used
+#tempdir = "0.3.7"
+#lazycell = "1.2.1"
+#tokio = "0.1.11"
+#futures = "0.1.25"
+
+[features]
+#with-deprecated = []

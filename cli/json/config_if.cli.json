@@ -1,0 +1,139 @@
+{
+  "interface-desc-cmd": {
+    "token": {
+      "description": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Interface specific description"
+      },
+      "WORD:2": {
+        "id": "2",
+        "type": "string",
+        "help": "Characters describing this interface"
+      }
+    },
+    "command": [
+      {
+        "defun": "description [WORD:2]",
+        "mode": [
+          "CONFIG-IF-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-interface-desc-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "description": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Interface specific description"
+      }
+    },
+    "command": [
+      {
+        "defun": "no description",
+        "mode": [
+          "CONFIG-IF-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "interface-cmd": {
+    "token": {
+      "interface": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Select an interface to configure"
+      },
+      "WORD:2": {
+        "id": "2",
+        "type": "string",
+        "help": "Interface's name",
+        "update": {
+          "on": "boot",
+          "path": "show/interfaces",
+          "as": "candidate"
+        }
+      }
+    },
+    "command": [
+      {
+        "defun": "interface WORD:2",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "bind": [
+          "IFNAME = WORD:2"
+        ],
+        "actions": [
+          {
+            "mode": {
+              "name": "CONFIG-IF-MODE",
+              "params": [
+                "IFNAME"
+              ]
+            },
+            "http": {
+              "method": "PUT",
+              "path": "interfaces/:IFNAME"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "show-address-cmd": {
+    "token": {
+      "show": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Show running system information"
+      },
+      "address": {
+        "id": "2",
+        "type": "keyword",
+        "help": "address"
+      }
+    },
+    "command": [
+      {
+        "defun": "show address",
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "debug-cli": {
+    "token": {
+      "debug": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Debug command"
+      },
+      "cli": {
+        "id": "1",
+        "type": "keyword",
+        "help": "CLI"
+      }
+    },
+    "command": [
+      {
+        "defun": "debug cli",
+        "mode": [
+          "EXEC-MODE"
+        ],
+        "actions": [
+          {
+            "built-in": {
+              "func": "debug-cli"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-debug-cli": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "debug": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Debug command"
+      },
+      "cli": {
+        "id": "2",
+        "type": "keyword",
+        "help": "CLI"
+      }
+    },
+    "command": [
+      {
+        "defun": "no debug cli",
+        "mode": [
+          "EXEC-MODE"
+        ],
+        "actions": [
+          {
+            "built-in": {
+              "func": "no-debug-cli"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "show-result": {
+    "token": {
+      "show": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Show running system information",
+        "hidden": true
+      },
+      "result": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Result of previous command",
+        "hidden": true
+      }
+    },
+    "command": [
+      {
+        "defun": "show result",
+        "mode": [
+          "EXEC-MODE"
+        ],
+        "actions": [
+          {
+            "built-in": {
+              "func": "show-result"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "write-result": {
+    "token": {
+      "write": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Write running system information"
+      },
+      "result": {
+        "id": "1",
+        "type": "keyword",
+        "help": "Result of previous command"
+      }
+    },
+    "command": [
+      {
+        "defun": "write result",
+        "mode": [
+          "EXEC-MODE"
+        ],
+        "actions": [
+          {
+            "built-in": {
+              "func": "write-result"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
