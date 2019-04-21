@@ -18,7 +18,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "built-in": {
               "func": "debug-cli"
@@ -52,7 +52,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "built-in": {
               "func": "no-debug-cli"
@@ -83,7 +83,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "built-in": {
               "func": "show-result"
@@ -112,7 +112,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "built-in": {
               "func": "write-result"

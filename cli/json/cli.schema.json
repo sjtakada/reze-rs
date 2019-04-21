@@ -71,7 +71,7 @@
                   "type": "string"
                 }
               },
-              "action": {
+              "actions": {
                 "type": "array",
                 "items": {
                   "type": "object",

@@ -231,8 +231,10 @@ impl CliTree {
                                     let action = CliActionBuiltin::new(obj);
                                     node.inner().push_action(Rc::new(action));
                                 },
+                                "cond" => {
+                                },
                                 _ => {
-                                    println!("Unknown action");
+                                    println!("Unknown action {}", key);
                                 }
                             }
                         }

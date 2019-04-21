@@ -23,7 +23,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -60,7 +60,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -102,7 +102,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -162,7 +162,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -204,7 +204,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -269,7 +269,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -316,7 +316,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -363,7 +363,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -415,7 +415,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -475,7 +475,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -517,7 +517,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -582,7 +582,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -629,7 +629,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -676,7 +676,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -728,7 +728,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -765,7 +765,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -802,7 +802,7 @@
         "mode": [
           "CONFIG-ROUTEMAP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -841,7 +841,7 @@
     "command": [
       {
         "defun": "no set src (IPV4-ADDRESS:3.0)",
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",

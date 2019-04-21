@@ -27,7 +27,7 @@
         "mode": [
           "CONFIG-BGP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -64,7 +64,7 @@
         "mode": [
           "CONFIG-BGP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -110,7 +110,7 @@
         "mode": [
           "CONFIG-BGP-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -152,7 +152,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -199,7 +199,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",

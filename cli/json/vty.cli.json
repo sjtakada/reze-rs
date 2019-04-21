@@ -13,7 +13,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -45,7 +45,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -81,7 +81,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -126,7 +126,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -158,7 +158,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -190,7 +190,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -227,7 +227,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -264,7 +264,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -306,7 +306,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -333,7 +333,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -365,7 +365,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -397,7 +397,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -434,7 +434,7 @@
         "mode": [
           "CONFIG-LINE-VTY-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -466,7 +466,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -503,7 +503,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -535,7 +535,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -572,7 +572,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -609,7 +609,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -641,7 +641,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",

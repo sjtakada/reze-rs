@@ -42,7 +42,7 @@
         "bind": [
           "if IPV4-PREFIX:3 do ADDRESS, MASKLEN = ipv4prefix2address_masklen (IPV4-PREFIX:3)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "PUT",
@@ -107,7 +107,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -156,7 +156,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -214,7 +214,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -278,7 +278,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -332,7 +332,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -394,7 +394,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -462,7 +462,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -520,7 +520,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -587,7 +587,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -660,7 +660,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -723,7 +723,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -784,7 +784,7 @@
         "bind": [
           "if IPV4-PREFIX:3 do ADDRESS, MASKLEN = ipv4prefix2address_masklen (IPV4-PREFIX:3)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -854,7 +854,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -908,7 +908,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -971,7 +971,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1040,7 +1040,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1099,7 +1099,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1166,7 +1166,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1239,7 +1239,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1302,7 +1302,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1371,7 +1371,7 @@
     "command": [
       {
         "defun": "no ip route IPV4-ADDRESS:3 IPV4-ADDRESS:4 (IPV4-ADDRESS:5.0|WORD:5.1|null0) RANGE:6",
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1449,7 +1449,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1517,7 +1517,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1564,7 +1564,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1606,7 +1606,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1643,7 +1643,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1690,7 +1690,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1732,7 +1732,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1817,7 +1817,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1859,7 +1859,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1901,7 +1901,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1943,7 +1943,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1980,7 +1980,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2017,7 +2017,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2064,7 +2064,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2123,7 +2123,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2170,7 +2170,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2229,7 +2229,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2285,7 +2285,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2353,7 +2353,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2409,7 +2409,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2477,7 +2477,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2529,7 +2529,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2593,7 +2593,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2645,7 +2645,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2709,7 +2709,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2770,7 +2770,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2843,7 +2843,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2904,7 +2904,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2977,7 +2977,7 @@
         "mode": [
           "CONFIG-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -3014,7 +3014,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -3061,7 +3061,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -3146,7 +3146,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -3188,7 +3188,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -3230,7 +3230,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -3272,7 +3272,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -3309,7 +3309,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",

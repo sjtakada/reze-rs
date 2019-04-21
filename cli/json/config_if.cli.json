@@ -18,7 +18,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -50,7 +50,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -90,7 +90,7 @@
         "bind": [
           "IFNAME = WORD:2"
         ],
-        "action": [
+        "actions": [
           {
             "mode": {
               "name": "CONFIG-IF-MODE",
@@ -123,7 +123,7 @@
     "command": [
       {
         "defun": "show address",
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",

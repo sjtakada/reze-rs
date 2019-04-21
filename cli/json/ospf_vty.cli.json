@@ -21,7 +21,7 @@
         "bind": [
           "PROCESS-ID = 1"
         ],
-        "action": [
+        "actions": [
           {
             "mode": {
               "name": "CONFIG-OSPF-MODE",
@@ -65,7 +65,7 @@
         "bind": [
           "PROCESS-ID = 1"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -100,7 +100,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -133,7 +133,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -170,7 +170,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -202,7 +202,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -239,7 +239,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -271,7 +271,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -303,7 +303,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -345,7 +345,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -382,7 +382,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -419,7 +419,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -476,7 +476,7 @@
           "if RANGE:4.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:4.1)",
           "if IPV4-ADDRESS:4.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:4.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -544,7 +544,7 @@
           "if RANGE:4.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:4.1)",
           "if IPV4-ADDRESS:4.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:4.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -593,7 +593,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -649,7 +649,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -714,7 +714,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -784,7 +784,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -840,7 +840,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -896,7 +896,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -964,7 +964,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1034,7 +1034,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1109,7 +1109,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1170,7 +1170,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1236,7 +1236,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -1291,7 +1291,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "PUT",
@@ -1349,7 +1349,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -1435,7 +1435,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -1520,7 +1520,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -1618,7 +1618,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -1704,7 +1704,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -1812,7 +1812,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -1899,7 +1899,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -2017,7 +2017,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -2105,7 +2105,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -2182,7 +2182,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -2244,7 +2244,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -2311,7 +2311,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -2392,7 +2392,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -2468,7 +2468,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -2532,7 +2532,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -2599,7 +2599,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -2680,7 +2680,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2748,7 +2748,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2816,7 +2816,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2910,7 +2910,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -2992,7 +2992,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -3060,7 +3060,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -3128,7 +3128,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3197,7 +3197,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3248,7 +3248,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3305,7 +3305,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3363,7 +3363,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3425,7 +3425,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3499,7 +3499,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3569,7 +3569,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3620,7 +3620,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3673,7 +3673,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3729,7 +3729,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -3787,7 +3787,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3847,7 +3847,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3913,7 +3913,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -3969,7 +3969,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4031,7 +4031,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4087,7 +4087,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4149,7 +4149,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4222,7 +4222,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4313,7 +4313,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4380,7 +4380,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4432,7 +4432,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4489,7 +4489,7 @@
           "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
           "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4546,7 +4546,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -4607,7 +4607,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -4634,7 +4634,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4667,7 +4667,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4700,7 +4700,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4738,7 +4738,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4771,7 +4771,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4809,7 +4809,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4842,7 +4842,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4880,7 +4880,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4945,7 +4945,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -4990,7 +4990,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5025,7 +5025,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5083,7 +5083,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5131,7 +5131,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5178,7 +5178,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5239,7 +5239,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5278,7 +5278,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -5327,7 +5327,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5379,7 +5379,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5442,7 +5442,7 @@
     "command": [
       {
         "defun": "no neighbor IPV4-ADDRESS:2 priority RANGE:4 poll-interval RANGE:6",
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5485,7 +5485,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -5531,7 +5531,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -5568,7 +5568,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -5609,7 +5609,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5647,7 +5647,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -5685,7 +5685,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -5732,7 +5732,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -5774,7 +5774,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -5821,7 +5821,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -5868,7 +5868,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -5915,7 +5915,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -5962,7 +5962,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6014,7 +6014,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6066,7 +6066,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6108,7 +6108,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6216,7 +6216,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6317,7 +6317,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6428,7 +6428,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6535,7 +6535,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6641,7 +6641,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6743,7 +6743,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -6797,7 +6797,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -6847,7 +6847,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -6890,7 +6890,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -6928,7 +6928,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -6976,7 +6976,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7019,7 +7019,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7067,7 +7067,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7110,7 +7110,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7148,7 +7148,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -7195,7 +7195,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7238,7 +7238,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7276,7 +7276,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -7337,7 +7337,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7394,7 +7394,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7446,7 +7446,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -7502,7 +7502,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -7551,7 +7551,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -7595,7 +7595,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -7646,7 +7646,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7693,7 +7693,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7735,7 +7735,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -7781,7 +7781,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -7828,7 +7828,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7871,7 +7871,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -7909,7 +7909,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -7951,7 +7951,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8002,7 +8002,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8049,7 +8049,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8105,7 +8105,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8157,7 +8157,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8208,7 +8208,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8255,7 +8255,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8297,7 +8297,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8358,7 +8358,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8414,7 +8414,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8461,7 +8461,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8504,7 +8504,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8542,7 +8542,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8593,7 +8593,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8640,7 +8640,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8682,7 +8682,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8729,7 +8729,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8772,7 +8772,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8810,7 +8810,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8871,7 +8871,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -8928,7 +8928,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -8970,7 +8970,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9008,7 +9008,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -9059,7 +9059,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9106,7 +9106,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9148,7 +9148,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -9195,7 +9195,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9238,7 +9238,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9276,7 +9276,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -9327,7 +9327,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9374,7 +9374,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9416,7 +9416,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -9463,7 +9463,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9506,7 +9506,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9544,7 +9544,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -9595,7 +9595,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9642,7 +9642,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9684,7 +9684,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -9731,7 +9731,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9774,7 +9774,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -9812,7 +9812,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -9922,7 +9922,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10025,7 +10025,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10110,7 +10110,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10221,7 +10221,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10324,7 +10324,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10412,7 +10412,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10482,7 +10482,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10573,7 +10573,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10671,7 +10671,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10752,7 +10752,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10827,7 +10827,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -10904,7 +10904,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -10989,7 +10989,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "DELETE",
@@ -11060,7 +11060,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11123,7 +11123,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11169,7 +11169,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11201,7 +11201,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11257,7 +11257,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11299,7 +11299,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11372,7 +11372,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11435,7 +11435,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11484,7 +11484,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11543,7 +11543,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11621,7 +11621,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11689,7 +11689,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11740,7 +11740,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11777,7 +11777,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11838,7 +11838,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11885,7 +11885,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -11963,7 +11963,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -12031,7 +12031,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -12085,7 +12085,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -12149,7 +12149,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -12186,7 +12186,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -12222,7 +12222,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12255,7 +12255,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12297,7 +12297,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12334,7 +12334,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12376,7 +12376,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12414,7 +12414,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12463,7 +12463,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12524,7 +12524,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12586,7 +12586,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12662,7 +12662,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12739,7 +12739,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12788,7 +12788,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12849,7 +12849,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12911,7 +12911,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -12987,7 +12987,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13064,7 +13064,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13113,7 +13113,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13174,7 +13174,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13236,7 +13236,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13312,7 +13312,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13389,7 +13389,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13430,7 +13430,7 @@
     "command": [
       {
         "defun": "distance RANGE:2 IPV4-PREFIX:3",
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -13473,7 +13473,7 @@
     "command": [
       {
         "defun": "no distance RANGE:2 IPV4-PREFIX:3",
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -13516,7 +13516,7 @@
     "command": [
       {
         "defun": "distance RANGE:2 IPV4-PREFIX:3 WORD:4",
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -13564,7 +13564,7 @@
     "command": [
       {
         "defun": "no distance RANGE:2 IPV4-PREFIX:3 WORD:4",
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -13606,7 +13606,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13644,7 +13644,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13692,7 +13692,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13735,7 +13735,7 @@
         "mode": [
           "CONFIG-IF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13773,7 +13773,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -13815,7 +13815,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -13861,7 +13861,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13904,7 +13904,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13951,7 +13951,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -13994,7 +13994,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -14037,7 +14037,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",
@@ -14079,7 +14079,7 @@
         "mode": [
           "EXEC-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "NOP",

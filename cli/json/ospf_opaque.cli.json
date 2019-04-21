@@ -18,7 +18,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -51,7 +51,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -89,7 +89,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
@@ -127,7 +127,7 @@
         "mode": [
           "CONFIG-OSPF-MODE"
         ],
-        "action": [
+        "actions": [
           {
             "http": {
               "method": "POST",
