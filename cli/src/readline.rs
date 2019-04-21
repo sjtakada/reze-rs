@@ -23,7 +23,7 @@ use rustyline::KeyPress;
 use rustyline::config;
 
 use super::cli::Cli;
-//use super::tree::CliTree;
+use super::tree::CliTree;
 use super::parser::*;
 use super::node::CliNode;
 use super::node::NodeType;
@@ -239,7 +239,8 @@ impl<'a> CliReadline<'a> {
 
             parser.init(&line, self.cli.privilege());
 
-            match parser.parse_execute(current.top()) {
+            let mut result = parser.parse_execute(current.top());
+            match result {
                 ExecResult::Complete => {
                     match self.handle_actions(parser.node_token_vec()) {
                         Err(CliError::NoActionDefined) => {
@@ -261,11 +262,54 @@ impl<'a> CliReadline<'a> {
                 ExecResult::Unrecognized(pos) => {
                     let pos = pos + self.cli.prompt().len();
 
-                    println!("{:>width$}^", "", width = pos);
-                    println!("% Invalid input detected at '^' marker.");
+                    if let Some(parent) = current.parent() {
+                        result = self.execute_parent(&mut parser, parent);
+                    }
+
+                    if result != ExecResult::Complete {
+                        println!("{:>width$}^", "", width = pos);
+                        println!("% Invalid input detected at '^' marker.");
+                    }
                 },
             }
         }
+    }
+
+    fn execute_parent(&self, parser: &mut CliParser, current: Rc<CliTree>) -> ExecResult {
+        parser.reset_line();
+
+        let mut result = parser.parse_execute(current.top());
+        match result {
+            ExecResult::Complete => {
+                match self.handle_actions(parser.node_token_vec()) {
+                    Err(CliError::NoActionDefined) => {
+                        println!("% No action defined");
+                    }
+                    Err(_) => {
+                        // Other error if there may be.
+                    }
+                    Ok(()) => {
+                        self.cli.set_mode(current.name());
+                        //println!("execute {}", line);
+                    }
+                }
+
+                // We set mode up, if the command exists.
+                self.cli.set_mode(current.name());
+            }
+            _ => {
+                match current.parent() {
+                    Some(parent) => {
+                        result = self.execute_parent(parser, parent);
+                    },
+                    None => {
+                        // follow through
+                    }
+                }
+            }
+        }
+
+        result
     }
 
     fn handle_actions(&self, node_token_vec: CliNodeTokenVec) -> Result<(), CliError> {

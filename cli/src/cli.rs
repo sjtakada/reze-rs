@@ -220,6 +220,13 @@ impl Cli {
         self.prompt.borrow_mut().clone()
     }
 
+    pub fn has_parent(&self) -> bool {
+        match self.current().unwrap().parent() {
+            Some(_parent) => true,
+            None => false
+        }
+    }
+
     pub fn set_mode(&self, mode: &str) -> Result<(), CliError> {
         self.mode.replace(String::from(mode));
         self.set_prompt();
