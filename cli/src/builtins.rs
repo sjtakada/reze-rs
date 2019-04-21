@@ -25,6 +25,8 @@ Two styles of help are provided:
 }
 
 pub fn exit(cli: &Cli, _params: &Vec<String>) -> Result<(), CliError> {
+    cli.set_mode_up()?;
+
     Ok(())
 }
 

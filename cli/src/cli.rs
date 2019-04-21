@@ -227,6 +227,15 @@ impl Cli {
         Ok(())
     }
 
+    pub fn set_mode_up(&self) -> Result<(), CliError> {
+        let current = self.current().unwrap();
+        if let Some(parent) = current.parent() {
+            self.set_mode(parent.name());
+        }
+
+        Ok(())
+    }
+
     // Read and return JSON, if it fails, return None.
     fn json_read(&self, path: &Path) -> Option<serde_json::Value> {
         let file = match File::open(path) {

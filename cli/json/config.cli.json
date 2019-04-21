@@ -42,7 +42,12 @@
       {
         "defun": "end",
         "mode": [
-          "CONFIG-MODE"
+          "CONFIG-MODE",
+          "CONFIG-IF-MODE",
+          "CONFIG-OSPF-MODE",
+          "CONFIG-BGP-MODE",
+          "CONFIG-RIP-MODE",
+          "CONFIG-RIPNG-MODE"
         ],
         "actions": [
           {
