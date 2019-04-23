@@ -22,6 +22,7 @@ use mio_uds::UnixStream;
 use serde_json;
 use rustyline::error::ReadlineError;
 
+use super::config::Config;
 use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
@@ -65,14 +66,14 @@ impl Cli {
     }
 
     // Entry point of shell initialization.
-    pub fn init(&mut self, json_dir: &str) -> Result<(), CliError> {
+    pub fn init(&mut self, config: Config) -> Result<(), CliError> {
         // Initlaize signals.
         self.init_signals()?;
         
         // TBD: Terminal init
 
         // Initialize CLI modes.
-        let mut path = PathBuf::from(json_dir);
+        let mut path = PathBuf::from(config.json().unwrap());
         path.push(CLI_MODE_FILE);
         self.init_cli_modes(&path)?;
 
@@ -80,7 +81,7 @@ impl Cli {
         self.init_builtins()?;
 
         // Initialize CLI comand definitions.
-        let path = PathBuf::from(json_dir);
+        let path = PathBuf::from(config.json().unwrap());
         self.init_cli_commands(&path)?;
         self.set_mode(CLI_INITIAL_MODE)?;
 
