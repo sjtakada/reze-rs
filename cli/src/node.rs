@@ -855,7 +855,7 @@ impl CliNode for CliNodeWord {
     }
 
     fn collate(&self, _input: &str) -> MatchResult {
-        MatchResult::Success(MatchFlag::Incomplete)
+        MatchResult::Success(MatchFlag::Partial)
     }
 }
 
