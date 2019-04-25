@@ -162,14 +162,15 @@ impl CliNodeInner {
     }
 
     pub fn sort_recursive(&self) {
-        self.next.borrow_mut().sort_by(|a, b| a.inner().token().partial_cmp(b.inner().token()).unwrap());
-        self.sorted.set(true);
+        if !self.sorted.get() {
+            self.next.borrow_mut().sort_by(|a, b| a.inner().token().partial_cmp(b.inner().token()).unwrap());
+            self.sorted.set(true);
 
-        for n in self.next.borrow_mut().iter() {
-            n.sort_recursive();
+            for n in self.next.borrow_mut().iter() {
+                n.sort_recursive();
+            }
         }
     }
-
 }
 
 // CLI dummy node:
