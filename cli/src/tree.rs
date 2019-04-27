@@ -427,7 +427,7 @@ impl CliTree {
             let inner = c.inner();
             let next = inner.next();
             for m in next.iter() {
-                if m.inner().token() == node.inner().token() {
+                if m.inner().display() == node.inner().display() {
                     return Some(m.clone());
                 }
             }
@@ -588,23 +588,23 @@ mod tests {
         assert_eq!(next.len(), 1);
 
         let n0 = &next[0];
-        assert_eq!(n0.inner().token(), "a");
+        assert_eq!(n0.inner().display(), "a");
 
         let inner = n0.inner();
         let next = inner.next();
         assert_eq!(next.len(), 1);
 
         let n1 = &next[0];
-        assert_eq!(n1.inner().token(), "b");
+        assert_eq!(n1.inner().display(), "b");
 
         let inner = n1.inner();
         let next = inner.next();
         assert_eq!(next.len(), 2);
 
         let n20 = &next[0];
-        assert_eq!(n20.inner().token(), "c");
+        assert_eq!(n20.inner().display(), "c");
         let n21 = &next[1];
-        assert_eq!(n21.inner().token(), "d");
+        assert_eq!(n21.inner().display(), "d");
 
         let inner = n20.inner();
         let next = inner.next();
@@ -615,30 +615,30 @@ mod tests {
         assert_eq!(next.len(), 3);
 
         let n30 = &next[0];
-        assert_eq!(n30.inner().token(), "e");
+        assert_eq!(n30.inner().display(), "e");
 
         let n31 = &next[1];
-        assert_eq!(n31.inner().token(), "f");
+        assert_eq!(n31.inner().display(), "f");
 
         let n32 = &next[2];
-        assert_eq!(n32.inner().token(), "g");
+        assert_eq!(n32.inner().display(), "g");
 
         let inner = n32.inner();
         let next = inner.next();
         assert_eq!(next.len(), 4);
 
         let n40 = &next[0];
-        assert_eq!(n40.inner().token(), "e");
+        assert_eq!(n40.inner().display(), "e");
 
         let n41 = &next[1];
-        assert_eq!(n41.inner().token(), "f");
+        assert_eq!(n41.inner().display(), "f");
 
         let n42 = &next[2];
-        assert_eq!(n42.inner().token(), "g");
+        assert_eq!(n42.inner().display(), "g");
         assert_eq!(n42.inner().is_executable(), false);
 
         let n43 = &next[3];
-        assert_eq!(n43.inner().token(), "x");
+        assert_eq!(n43.inner().display(), "x");
         assert_eq!(n43.inner().is_executable(), true);
     }
 }

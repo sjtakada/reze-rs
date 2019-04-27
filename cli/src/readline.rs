@@ -66,7 +66,7 @@ impl<'a> Completer for CliCompleter<'a> {
         if vec.len() == 1 {
             let node = &vec[0].0;
             if node.node_type() == NodeType::Keyword {
-                let mut str = node.inner().token().to_string();
+                let mut str = node.inner().display().to_string();
                 str.push(' ');
                 candidate.push(str);
             }
@@ -75,7 +75,7 @@ impl<'a> Completer for CliCompleter<'a> {
             for n in vec {
                 let node = &n.0;
                 if node.node_type() == NodeType::Keyword {
-                    candidate.push(node.inner().token().to_string());
+                    candidate.push(node.inner().display().to_string());
                 }
             }
         }
@@ -104,10 +104,10 @@ impl<'a> Completer for CliCompleter<'a> {
                 let vec = parser.matched_vec(); 
                 let mut width_max = 0;
                 if vec.len() > 0 {
-                    if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
+                    if let Some(max) = vec.iter().map(|n| n.0.inner().display().len()).max() {
                         width_max = max;
                         for n in vec {
-                            println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+                            println!("  {:width$}  {}", n.0.inner().display(), n.0.inner().help(), width = max);
                         }
                     }
                 }
@@ -134,14 +134,14 @@ impl<'a> Completer for CliCompleter<'a> {
         let vec = parser.matched_vec(); 
         if vec.len() == 1 {
             let node = &vec[0].0;
-            let mut str = node.inner().token().to_string();
+            let mut str = node.inner().display().to_string();
             str.push(' ');
             candidate.push(str);
         }
         else {
             for n in vec {
                 let node = &n.0;
-                candidate.push(node.inner().token().to_string());
+                candidate.push(node.inner().display().to_string());
             }
         }
 

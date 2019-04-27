@@ -42,6 +42,8 @@ pub enum NodeType {
 
 // CLI Node trait: Base interface for various type of CliNode.
 pub trait CliNode {
+    // Trait functions.
+
     // Return inner.
     fn inner(&self) -> Ref<CliNodeInner>;
 
@@ -50,6 +52,8 @@ pub trait CliNode {
 
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
+
+    // Setter/getter for inner.
 
     // Set executable.
     fn set_executable(&self) {
@@ -75,11 +79,11 @@ pub struct CliNodeInner {
     // Defun token.
     defun: String,
 
-    // Help string.
+    // Long help.
     help: String,
 
-    // CLI token.
-    token: String,
+    // Display token for short help.
+    display: String,
 
     // Node vector is sorted.
     sorted: Cell<bool>,
@@ -102,12 +106,12 @@ pub struct CliNodeInner {
 
 //
 impl CliNodeInner {
-    pub fn new(id: &str, defun: &str, help: &str, token: &str) -> CliNodeInner {
+    pub fn new(id: &str, defun: &str, help: &str, display: &str) -> CliNodeInner {
         CliNodeInner {
             id: String::from(id),
             defun: String::from(defun),
             help: String::from(help),
-            token: String::from(token),
+            display: String::from(display),
             sorted: Cell::new(false),
             executable: Cell::new(false),
             privilege: Cell::new(CLI_DEFAULT_NODE_PRIVILEGE),
@@ -125,8 +129,8 @@ impl CliNodeInner {
         &self.help
     }
 
-    pub fn token(&self) -> &str {
-        &self.token
+    pub fn display(&self) -> &str {
+        &self.display
     }
 
     pub fn next(&self) -> RefMut<CliNodeVec> {
@@ -163,7 +167,7 @@ impl CliNodeInner {
 
     pub fn sort_recursive(&self) {
         if !self.sorted.get() {
-            self.next.borrow_mut().sort_by(|a, b| a.inner().token().partial_cmp(b.inner().token()).unwrap());
+            self.next.borrow_mut().sort_by(|a, b| a.inner().display().partial_cmp(b.inner().display()).unwrap());
             self.sorted.set(true);
 
             for n in self.next.borrow_mut().iter() {
@@ -236,31 +240,31 @@ impl CliNode for CliNodeKeyword {
 
     fn collate(&self, input: &str) -> MatchResult {
         let input_len = input.len();
-        let token_len = self.inner().token.len();
+        let display_len = self.inner().display.len();
         let mut pos;
 
-        if input_len == token_len {
-            if input == self.inner().token {
+        if input_len == display_len {
+            if input == self.inner().display {
                 return MatchResult::Success(MatchFlag::Full)
             }
 
             pos = input_len;
         }
-        else if input_len < token_len {
-            if self.inner().token.starts_with(input) {
+        else if input_len < display_len {
+            if self.inner().display.starts_with(input) {
                 return MatchResult::Success(MatchFlag::Partial)
             }
 
             pos = input_len;
         }
-        else /* if input_len > token_len */ {
-            pos = token_len + 1;
+        else /* if input_len > display_len */ {
+            pos = display_len + 1;
         }
 
         while pos > 0 {
             pos -= 1;
             let input = &input[..pos];
-            if self.inner().token.starts_with(input) {
+            if self.inner().display.starts_with(input) {
                 return MatchResult::Failure(pos)
             }
         }
@@ -894,7 +898,7 @@ mod tests {
     pub fn test_node_range_1() {
         let node = CliNodeRange::new("range", "RANGE", "help", 100i64, 9999i64);
 
-        assert_eq!(node.inner().token(), "<100-9999>");
+        assert_eq!(node.inner().display(), "<100-9999>");
 
         let result = node.collate("100");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
@@ -913,7 +917,7 @@ mod tests {
     pub fn test_node_range_2() {
         let node = CliNodeRange::new("range", "RANGE", "help", 1i64, 4294967295i64);
 
-        assert_eq!(node.inner().token(), "<1-4294967295>");
+        assert_eq!(node.inner().display(), "<1-4294967295>");
 
         let result = node.collate("0");
         assert_eq!(result, MatchResult::Failure(0));

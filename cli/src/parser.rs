@@ -17,6 +17,7 @@ use super::collate::*;
 
 // Constants.
 const CLI_DEFAULT_PARSER_PRIVILEGE: u8 = 1;
+const CLI_MAX_PARSER_PRIVILEGE: u8 = 15;
 
 // Type aliases.
 type CliNodeMatchStateTuple = (Rc<CliNode>, MatchResult);
@@ -441,7 +442,7 @@ mod tests {
     #[test]
     pub fn test_get_token() {
         let mut p = CliParser::new();
-        p.init("show ip ospf interface");
+        p.init("show ip ospf interface", CLI_MAX_PARSER_PRIVILEGE);
 
         let ret = p.trim_start();
         assert_eq!(ret, true);
@@ -472,7 +473,7 @@ mod tests {
     #[test]
     pub fn test_get_token_space() {
         let mut p = CliParser::new();
-        p.init(" show   ip ospf ");
+        p.init(" show   ip ospf ", CLI_MAX_PARSER_PRIVILEGE);
 
         let ret = p.trim_start();
         assert_eq!(ret, true);
@@ -564,27 +565,27 @@ mod tests {
 
 
         let mut p = CliParser::new();
-        p.init("show ip ospf");
+        p.init("show ip ospf", CLI_MAX_PARSER_PRIVILEGE);
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Incomplete);
 
-        p.init("show x");
+        p.init("show x", CLI_MAX_PARSER_PRIVILEGE);
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Unrecognized(5));
 
-        p.init("show ip xy");
+        p.init("show ip xy", CLI_MAX_PARSER_PRIVILEGE);
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Unrecognized(8));
 
-        p.init("s i o i");
+        p.init("s i o i", CLI_MAX_PARSER_PRIVILEGE);
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Ambiguous);
 
-        p.init("s ip o i");
+        p.init("s ip o i", CLI_MAX_PARSER_PRIVILEGE);
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Complete);
 
-        p.init("s ipv o i");
+        p.init("s ipv o i", CLI_MAX_PARSER_PRIVILEGE);
         let result = p.parse(tree.top());
         assert_eq!(result, ExecResult::Complete);
     }
