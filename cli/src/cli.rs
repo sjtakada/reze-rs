@@ -308,25 +308,25 @@ impl Cli {
         Ok(())
     }
 
-    fn parse_defun(&mut self, tokens: &serde_json::Value,
+    fn parse_defun(&mut self, defun_tokens: &serde_json::Value,
                    command: &serde_json::Value) {
         if command["mode"].is_array() {
             for mode in command["mode"].as_array().unwrap() {
                 if let Some(mode) = mode.as_str() {
                     if let Some(tree) = self.trees.get(mode) {
-                        tree.build_command(tokens, command);
+                        tree.build_command(defun_tokens, command);
                     }
                 }
             }
         }
     }
 
-    fn parse_defun_all(&mut self, tokens: &serde_json::Value,
+    fn parse_defun_all(&mut self, defun_tokens: &serde_json::Value,
                        commands: &serde_json::Value) {
-        if tokens.is_object() && commands.is_array() {
+        if defun_tokens.is_object() && commands.is_array() {
             let commands = commands.as_array().unwrap();
             for command in commands {
-                self.parse_defun(&tokens, &command);
+                self.parse_defun(&defun_tokens, &command);
             }
         }
     }

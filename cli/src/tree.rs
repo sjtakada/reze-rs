@@ -115,7 +115,7 @@ impl CliTree {
         &self.prompt
     }
 
-    pub fn build_command(&self, tokens: &serde_json::Value,
+    pub fn build_command(&self, defun_tokens: &serde_json::Value,
                          command: &serde_json::Value) {
         let defun = &command["defun"];
         if defun.is_string() {
@@ -128,13 +128,13 @@ impl CliTree {
             cv.push(self.top.borrow().clone());
 
             CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
-                                     &mut s, tokens, command, privilege);
+                                     &mut s, defun_tokens, command, privilege);
         }
     }
 
     fn build_recursive(curr: &mut CliNodeVec, head: &mut CliNodeVec,
                        tail: &mut CliNodeVec, s: &mut String,
-                       tokens: &serde_json::Value, command: &serde_json::Value,
+                       defun_tokens: &serde_json::Value, command: &serde_json::Value,
                        privilege: u8) -> TokenType {
         let mut is_head = true;
 
@@ -152,7 +152,7 @@ impl CliTree {
                     while {
                         let mut cv = curr.clone();
                         token_type = CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
-                                                                  s, tokens, command, privilege);
+                                                                  s, defun_tokens, command, privilege);
                         token_type == TokenType::VerticalBar
                     } { }
 
@@ -180,7 +180,7 @@ impl CliTree {
                 _ => {
                     let token = token.unwrap();
 
-                    if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, &token) {
+                    if let Some(new_node) = CliTree::new_node_by_type(token_type, defun_tokens, &token) {
                         let next = match CliTree::find_next_by_node(curr, new_node.clone()) {
                             None => {
                                 CliTree::vector_add_node_each(curr, new_node.clone());
@@ -374,51 +374,52 @@ impl CliTree {
     }
 
     // Return CLI Node by TokenType.
-    fn new_node_by_type(token_type: TokenType, tokens: &serde_json::Value, token: &str) -> Option<Rc<CliNode>> {
-        match tokens.get(token) {
-            Some(token_def) if token_def.is_object() => {
+    fn new_node_by_type(token_type: TokenType, defun_tokens: &serde_json::Value, token: &str) -> Option<Rc<CliNode>> {
+        if defun_tokens[token].is_object() {
+            let token_def = defun_tokens[token].as_object().unwrap();
+            let id = CliTree::get_str_or(token_def, "id", "<id>");
+            let help = CliTree::get_str_or(token_def, "help", "<help>");
+            
+            let node: Rc<CliNode> = match token_type {
+                TokenType::IPv4Prefix => Rc::new(CliNodeIPv4Prefix::new(&id, token, &help)),
+                TokenType::IPv4Address => Rc::new(CliNodeIPv4Address::new(&id, token, &help)),
+                TokenType::IPv6Prefix => Rc::new(CliNodeIPv6Prefix::new(&id, token, &help)),
+                TokenType::IPv6Address => Rc::new(CliNodeIPv6Address::new(&id, token, &help)),
+                TokenType::Range => {
+                    if token_def["range"].is_array() {
+                        let range = token_def["range"].as_array().unwrap();
+                        let min = range[0].as_i64().unwrap();
+                        let max = range[1].as_i64().unwrap();
 
-                let token_def = tokens[token].as_object().unwrap();
-                let id = CliTree::get_str_or(token_def, "id", "<id>");
-                let help = CliTree::get_str_or(token_def, "help", "<help>");
-                
-                let node: Rc<CliNode> = match token_type {
-                    TokenType::IPv4Prefix => Rc::new(CliNodeIPv4Prefix::new(&id, token, &help)),
-                    TokenType::IPv4Address => Rc::new(CliNodeIPv4Address::new(&id, token, &help)),
-                    TokenType::IPv6Prefix => Rc::new(CliNodeIPv6Prefix::new(&id, token, &help)),
-                    TokenType::IPv6Address => Rc::new(CliNodeIPv6Address::new(&id, token, &help)),
-                    TokenType::Range => {
-                        if token_def["range"].is_array() {
-                            let range = token_def["range"].as_array().unwrap();
-                            let min = range[0].as_i64().unwrap();
-                            let max = range[1].as_i64().unwrap();
-
-                            Rc::new(CliNodeRange::new(&id, token, &help, min, max))
-                        }
-                        else {
-                            Rc::new(CliNodeRange::new(&id, token, &help, 0, 1))
-                        }
-                    },
-                    TokenType::Word => Rc::new(CliNodeWord::new(&id, token, &help)),
-                    //TokenType::Community => CliNodeCommunity::new(&id, token, &help),
-                    TokenType::Keyword => {
-                        match token_def.get("enum") {
-                            Some(enum_key) => {
-                                Rc::new(CliNodeKeyword::new(&id, token, &help, enum_key.as_str()))
-                            },
-                            None => {
-                                Rc::new(CliNodeKeyword::new(&id, token, &help, None))
-                            }
-                        }
-                    },
-                    _ => {
-                        return None;
+                        Rc::new(CliNodeRange::new(&id, token, &help, min, max))
                     }
-                };
+                    else {
+                        Rc::new(CliNodeRange::new(&id, token, &help, 0, 1))
+                    }
+                },
+                TokenType::Word => Rc::new(CliNodeWord::new(&id, token, &help)),
+                //TokenType::Community => CliNodeCommunity::new(&id, token, &help),
+                TokenType::Keyword => {
+                    match token_def.get("enum") {
+                        Some(enum_key) => {
+                            Rc::new(CliNodeKeyword::new(&id, token, &help, enum_key.as_str()))
+                        },
+                        None => {
+                            Rc::new(CliNodeKeyword::new(&id, token, &help, None))
+                        }
+                    }
+                },
+                _ => {
+                    return None;
+                }
+            };
 
-                Some(node)
-            },
-            _ => None
+            Some(node)
+        }
+        else {
+            // Debug
+            println!("Unknown defun token {}", token);
+            None
         }
     }
 

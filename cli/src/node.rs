@@ -53,7 +53,6 @@ pub trait CliNode {
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
 
-    // Setter/getter for inner.
 
     // Set executable.
     fn set_executable(&self) {
@@ -104,8 +103,10 @@ pub struct CliNodeInner {
     actions: RefCell<Vec<Rc<CliAction>>>,
 }
 
-//
+// CliNodeInner:
+//   Common variable for all type of CliNode.
 impl CliNodeInner {
+    // Constructor.
     pub fn new(id: &str, defun: &str, help: &str, display: &str) -> CliNodeInner {
         CliNodeInner {
             id: String::from(id),
@@ -121,22 +122,41 @@ impl CliNodeInner {
         }
     }
 
+    // Node ID.
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    // Defun tokne.
     pub fn defun(&self) -> &str {
         &self.defun
     }
 
+    // Help string.
     pub fn help(&self) -> &str {
         &self.help
     }
 
+    // Display string.
     pub fn display(&self) -> &str {
         &self.display
     }
 
-    pub fn next(&self) -> RefMut<CliNodeVec> {
-        self.next.borrow_mut()
+    // Sorted flag.
+    pub fn is_sorted(&self) -> bool {
+        self.sorted.get()
     }
 
+    // Executable flag.
+    pub fn is_executable(&self) -> bool {
+        self.executable.get()
+    }
+
+    pub fn set_executable(&self) {
+        self.executable.set(true);
+    }
+
+    // Privilege.
     pub fn privilege(&self) -> u8 {
         self.privilege.get()
     }
@@ -145,17 +165,16 @@ impl CliNodeInner {
         self.privilege.set(privilege);
     }
 
+    // Hidden flag.
     pub fn is_hidden(&self) -> bool {
         self.hidden.get()
     }
 
-    pub fn set_executable(&self) {
-        self.executable.set(true);
+    // Vector of next nodes.
+    pub fn next(&self) -> RefMut<CliNodeVec> {
+        self.next.borrow_mut()
     }
 
-    pub fn is_executable(&self) -> bool {
-        self.executable.get()
-    }
 
     pub fn push_action(&self, action: Rc<CliAction>) {
         self.actions.borrow_mut().push(action);
