@@ -68,6 +68,7 @@ impl<'a> Completer for CliCompleter<'a> {
             if node.node_type() == NodeType::Keyword {
                 let mut str = node.inner().display().to_string();
                 str.push(' ');
+
                 candidate.push(str);
             }
         }
@@ -80,7 +81,7 @@ impl<'a> Completer for CliCompleter<'a> {
             }
         }
 
-        Ok((parser.current_pos() - parser.token_len(), candidate))
+        Ok((parser.last_parsed_len(), candidate))
     }
 
     fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {

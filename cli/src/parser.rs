@@ -64,6 +64,9 @@ pub struct CliParser {
     // Last token.
     token: String,
 
+    // Parsed len.
+    last_parsed_len: usize,
+
     // Matched length.
     matched_len: usize,
 
@@ -87,6 +90,7 @@ impl CliParser {
             input: String::new(),
             line: String::new(),
             token: String::new(),
+            last_parsed_len: 0usize,
             matched_len: 0usize,
             matched_vec: Cell::new(Vec::new()),
             node_token_vec: Cell::new(Vec::new()),
@@ -112,9 +116,14 @@ impl CliParser {
         self.executable = false;
     }
 
-    // Return current parser position.
-    pub fn current_pos(&self) -> usize {
+    // Return length parser parsed.
+    pub fn parsed_len(&self) -> usize {
         self.input.len() - self.line.len()
+    }
+
+    // Return last parsed length.
+    pub fn last_parsed_len(&self) -> usize {
+        self.last_parsed_len
     }
 
     // Return current matched vec and set it empty.
@@ -128,7 +137,7 @@ impl CliParser {
     }
 
     // Return reference to current remaining line string.
-    fn line(&self) -> &str {
+    pub fn line(&self) -> &str {
         &self.line
     }
 
@@ -207,7 +216,7 @@ impl CliParser {
     }
 
     // Save token to state.
-    fn save_token(&mut self, token: &str) {
+    pub fn save_token(&mut self, token: &str) {
         self.token = String::from(token);
     }
 
@@ -282,7 +291,7 @@ impl CliParser {
             len -= 1;
         }
 
-        self.matched_len = self.current_pos() - token.len() + len;
+        self.matched_len = self.parsed_len() - token.len() + len;
     }
 
     // Parse line and match current node for completion.
@@ -298,6 +307,7 @@ impl CliParser {
             self.filter_hidden();
             self.filter_privilege();
 
+            self.last_parsed_len = self.parsed_len();
             let token = match self.get_token() {
                 Some(token) => token,
                 None => break,
@@ -353,7 +363,7 @@ impl CliParser {
             break;
         }
 
-        self.matched_len = self.current_pos();
+        self.matched_len = self.parsed_len();
         self.executable = curr.inner().is_executable();
         if self.executable {
             ExecResult::Complete
@@ -377,7 +387,7 @@ impl CliParser {
                     break;
                 }
 
-                self.matched_len = self.current_pos();
+                self.matched_len = self.parsed_len();
                 return ExecResult::Unrecognized(self.matched_len)
             }
 
