@@ -139,7 +139,7 @@ impl CliTree {
         let mut is_head = true;
 
         while s.len() > 0 {
-            let (token_type, token) = CliTree::get_cli_token(s);
+            let (token_type, token) = CliTree::get_defun_token(s);
 
             match token_type {
                 TokenType::LeftParen |
@@ -249,7 +249,7 @@ impl CliTree {
 
     // Parse string to return:
     //   TokenType, token and remainder of string.
-    fn get_cli_token(s: &mut String) -> (TokenType, Option<String>) {
+    fn get_defun_token(s: &mut String) -> (TokenType, Option<String>) {
         let offset;
         let token_type;
 
@@ -294,7 +294,7 @@ impl CliTree {
                         offset = s.find(|c: char|
                                         c == '(' || c == ')' ||
                                         c == '{' || c == '}' ||
-                                        c == '[' || c == '[' ||
+                                        c == '[' || c == ']' ||
                                         c == '|' || c == ' ').unwrap_or(s.len());
 
                         let word = &s[..offset];
@@ -454,22 +454,22 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_tree_get_cli_token_1() {
+    pub fn test_tree_get_defun_token_1() {
         let mut s = String::from("ip route IPV4-PREFIX:1 IPV4-ADDRESS:2");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "ip");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "route");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::IPv4Prefix);
         assert_eq!(token.unwrap(), "IPV4-PREFIX:1");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::IPv4Address);
         assert_eq!(token.unwrap(), "IPV4-ADDRESS:2");
 
@@ -480,31 +480,31 @@ mod tests {
     pub fn test_tree_getcli_token_2() {
         let mut s = String::from("show (ip|ipv6) route");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "show");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::LeftParen);
         assert_eq!(token.unwrap(), "(");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "ip");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::VerticalBar);
         assert_eq!(token.unwrap(), "|");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "ipv6");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::RightParen);
         assert_eq!(token.unwrap(), ")");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "route");
 
