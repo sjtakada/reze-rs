@@ -246,17 +246,12 @@ pub struct CliNodeKeyword {
 
 impl CliNodeKeyword {
     pub fn new(id: &str, defun: &str, help: &str, enum_key: Option<&str>) -> CliNodeKeyword {
-        match enum_key {
-            Some(enum_key) =>
-                CliNodeKeyword {
-                    inner: RefCell::new(CliNodeInner::new(id, defun, help, defun)),
-                    enum_key: Some(String::from(enum_key)),
-                },
-            None => 
-                CliNodeKeyword {
-                    inner: RefCell::new(CliNodeInner::new(id, defun, help, defun)),
-                    enum_key: None
-                },
+        CliNodeKeyword {
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, defun)),
+            enum_key: match enum_key {
+                Some(enum_key) => Some(String::from(enum_key)),
+                None => None
+            }
         }
     }
 }

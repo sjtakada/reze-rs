@@ -18,7 +18,6 @@ use super::collate::*;
 
 // Constants.
 const CLI_DEFAULT_PARSER_PRIVILEGE: u8 = 1;
-const CLI_MAX_PARSER_PRIVILEGE: u8 = 15;
 
 // Type aliases.
 type CliNodeMatchStateTuple = (Rc<CliNode>, MatchResult);
@@ -190,6 +189,7 @@ impl CliParser {
     fn filter_only_once(&mut self) {
         let mut matched_vec = Vec::new();
 
+        // TODO: refactoring
         for n in self.matched_vec.get_mut() {
             if !self.only_once_set.contains(n.0.inner().id()) {
                 matched_vec.push((n.0.clone(), n.1));
@@ -421,6 +421,9 @@ impl CliParser {
                 None => break,
             };
 
+            self.filter_only_once();
+            self.filter_privilege();
+
             self.save_token(&token);
             self.match_token(&token, curr.clone());
             self.filter_matched(MatchFlag::Partial);
@@ -454,7 +457,6 @@ impl CliParser {
             else {
                 return ExecResult::Complete
             }
-//            break;
         }
 
         if executable {
@@ -471,6 +473,8 @@ impl CliParser {
 mod tests {
     use super::super::tree::*;
     use super::*;
+
+    const CLI_MAX_PARSER_PRIVILEGE: u8 = 15;
 
     #[test]
     pub fn test_get_token() {

@@ -236,7 +236,7 @@ impl Cli {
     pub fn set_mode_up(&self) -> Result<(), CliError> {
         let current = self.current().unwrap();
         if let Some(parent) = current.parent() {
-            self.set_mode(parent.name());
+            self.set_mode(parent.name()).unwrap();
         }
 
         Ok(())

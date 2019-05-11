@@ -81,6 +81,10 @@ fn main() {
         config.set_user_pass(&user);
     }
 
+    if matches.opt_present("d") {
+        config.set_debug(true);
+    }
+
     let mut cli = Cli::new();
     match cli.init(config) {
         Ok(_) => {},

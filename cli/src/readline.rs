@@ -294,13 +294,13 @@ impl<'a> CliReadline<'a> {
                         println!("% Unknown action error in parent node");
                     }
                     Ok(()) => {
-                        self.cli.set_mode(current.name());
+                        self.cli.set_mode(current.name()).unwrap();
                         //println!("execute {}", line);
                     }
                 }
 
                 // We set mode up, if the command exists.
-                self.cli.set_mode(current.name());
+                self.cli.set_mode(current.name()).unwrap();
             }
             _ => {
                 match current.parent() {
