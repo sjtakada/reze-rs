@@ -96,6 +96,9 @@ pub struct CliNodeInner {
     // Hidden flag.
     hidden: Cell<bool>,
 
+    // Can show only once in candidate.
+    only_once: Cell<bool>,
+
     // Next candidate.
     next: RefCell<CliNodeVec>,
 
@@ -117,6 +120,7 @@ impl CliNodeInner {
             executable: Cell::new(false),
             privilege: Cell::new(CLI_DEFAULT_NODE_PRIVILEGE),
             hidden: Cell::new(false),
+            only_once: Cell::new(false),
             next: RefCell::new(Vec::new()),
             actions: RefCell::new(Vec::new()),
         }
@@ -168,6 +172,15 @@ impl CliNodeInner {
     // Hidden flag.
     pub fn is_hidden(&self) -> bool {
         self.hidden.get()
+    }
+
+    // Only once flag.
+    pub fn is_only_once(&self) -> bool {
+        self.only_once.get()
+    }
+
+    pub fn set_only_once(&self) {
+        self.only_once.set(true);
     }
 
     // Vector of next nodes.

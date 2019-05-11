@@ -156,7 +156,13 @@ impl CliTree {
                         token_type == TokenType::VerticalBar
                     } { }
 
-                    if token_type == TokenType::RightBrace || token_type == TokenType::RightBracket {
+                    if token_type == TokenType::RightBrace {
+                        for h in hv {
+                            h.inner().set_only_once();
+                            CliTree::vector_add_node_each(&mut tv, h.clone());
+                        }
+                    }
+                    else if token_type == TokenType::RightBracket {
                         for h in hv {
                             CliTree::vector_add_node_each(&mut tv, h.clone());
                         }

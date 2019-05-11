@@ -1,0 +1,1255 @@
+{
+  "ospf-area-virtual-link-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "PUT",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ospf-area-virtual-link-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      }
+    },
+    "command": [
+      {
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "DELETE",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ospf-area-virtual-link-params-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "hello-interval": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Hello packet interval"
+      },
+      "RANGE:5.1": {
+        "id": "5.1",
+        "type": "integer",
+        "help": "Seconds",
+        "range": [1, 8192]
+      },
+      "dead-interval": {
+        "id": "5.2",
+        "type": "keyword",
+        "help": "Dead router detection time"
+      },
+      "RANGE:5.3": {
+        "id": "5.3",
+        "type": "integer",
+        "help": "Seconds",
+        "range": [1, 8192]
+      },
+      "retransmit-interval": {
+        "id": "5.4",
+        "type": "keyword",
+        "help": "LSA retransmit interval"
+      },
+      "RANGE:5.5": {
+        "id": "5.5",
+        "type": "integer",
+        "help": "Seconds",
+        "range": [1, 8192]
+      },
+      "transmit-delay": {
+        "id": "5.6",
+        "type": "keyword",
+        "help": "LSA transmission delay"
+      },
+      "RANGE:5.7": {
+        "id": "5.7",
+        "type": "integer",
+        "help": "Seconds",
+        "range": [1, 8192]
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 {hello-interval RANGE:5.1|dead-interval RANGE:5.3|retransmit-interval RANGE:5.5|transmit-delay RANGE:5.7}",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "POST",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
+              "params": {
+                "ENUM:5": "RANGE:6",
+                "ENUM:7": "RANGE:8",
+                "ENUM:9": "RANGE:10",
+                "ENUM:11": "RANGE:12"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ospf-area-virtual-link-param4-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "hello-interval": {
+        "id": "8.0",
+        "type": "keyword",
+        "help": "Link state transmit delay",
+        "enum": "ENUM:8"
+      },
+      "retransmit-interval": {
+        "id": "8.1",
+        "type": "keyword",
+        "help": "Interval after which a neighbor is declared dead",
+        "enum": "ENUM:8"
+      },
+      "transmit-delay": {
+        "id": "8.2",
+        "type": "keyword",
+        "help": "Seconds",
+        "enum": "ENUM:8"
+      },
+      "dead-interval": {
+        "id": "8.3",
+        "type": "keyword",
+        "help": "Time between HELLO packets",
+        "enum": "ENUM:8"
+      }
+    },
+    "command": [
+      {
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval) (hello-interval|retransmit-interval|transmit-delay|dead-interval)",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "POST",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
+              "params": {
+                "ENUM:5": null,
+                "ENUM:6": null,
+                "ENUM:7": null,
+                "ENUM:8": null
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ospf-area-virtual-link-authtype-args-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Enable authentication on this virtual link",
+        "enum": "ENUM:5"
+      },
+      "message-digest": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "dummy string ",
+        "enum": "ENUM:6"
+      },
+      "null": {
+        "id": "6.1",
+        "type": "keyword",
+        "help": "Use null authentication",
+        "enum": "ENUM:6"
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest|null)",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "POST",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
+              "params": {
+                "authentication": "ENUM:6"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ospf-area-virtual-link-authtype-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Enable authentication on this virtual link",
+        "enum": "ENUM:5"
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication)",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "POST",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
+              "params": {
+                "authentication": ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ospf-area-virtual-link-authtype-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Enable authentication on this virtual link",
+        "enum": "ENUM:5"
+      }
+    },
+    "command": [
+      {
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication)",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "POST",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
+              "params": {
+                "authentication": null
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ospf-area-virtual-link-md5-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "message-digest-key": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Message digest authentication password (key)",
+        "enum": "ENUM:5"
+      },
+      "RANGE:6": {
+        "id": "6",
+        "type": "integer",
+        "help": "dummy string ",
+        "range": [
+          1,
+          255
+        ]
+      },
+      "md5": {
+        "id": "7",
+        "type": "keyword",
+        "help": "Key ID"
+      },
+      "WORD:8": {
+        "id": "8",
+        "type": "string",
+        "help": "Use MD5 algorithm"
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (message-digest-key) RANGE:6 md5 WORD:8",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "POST",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4/md5_keys/:RANGE:6",
+              "params": {
+                "key-string": "WORD:8"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ospf-area-virtual-link-md5-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "message-digest-key": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Message digest authentication password (key)",
+        "enum": "ENUM:5"
+      },
+      "RANGE:6": {
+        "id": "6",
+        "type": "integer",
+        "help": "dummy string ",
+        "range": [
+          1,
+          255
+        ]
+      }
+    },
+    "command": [
+      {
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (message-digest-key) RANGE:6",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "DELETE",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4/md5_keys/:RANGE:6"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ospf-area-virtual-link-authkey-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication-key": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Authentication password (key)",
+        "enum": "ENUM:5"
+      },
+      "WORD:6": {
+        "id": "6",
+        "type": "string",
+        "help": "The OSPF password (key)"
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication-key) WORD:6",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "POST",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
+              "params": {
+                "authentication-key": "WORD:6"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ospf-area-virtual-link-authkey-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication-key": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Authentication password (key)",
+        "enum": "ENUM:5"
+      }
+    },
+    "command": [
+      {
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication-key)",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "bind": [
+          "if RANGE:2.1     do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (NULL, RANGE:2.1)",
+          "if IPV4-ADDRESS:2.0 do AREA-ID-NUM, AREA-ID-FORMAT = area_id_and_format (IPV4-ADDRESS:2.0, NULL)"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "POST",
+              "path": "ospfv2s/:PROCESS-ID/areas/:AREA-ID-NUM/vlinks/:IPV4-ADDRESS:4",
+              "params": {
+                "authentication-key": null
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ospf-area-virtual-link-authtype-args-authkey-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Enable authentication on this virtual link",
+        "enum": "ENUM:5"
+      },
+      "message-digest": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "dummy string ",
+        "enum": "ENUM:6"
+      },
+      "null": {
+        "id": "6.1",
+        "type": "keyword",
+        "help": "Use null authentication",
+        "enum": "ENUM:6"
+      },
+      "authentication-key": {
+        "id": "7.0",
+        "type": "keyword",
+        "help": "Use message-digest authentication",
+        "enum": "ENUM:7"
+      },
+      "WORD:8": {
+        "id": "8",
+        "type": "string",
+        "help": "Authentication password (key)"
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest|null) (authentication-key) WORD:8",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ospf-area-virtual-link-authtype-authkey-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Enable authentication on this virtual link",
+        "enum": "ENUM:5"
+      },
+      "authentication-key": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "dummy string ",
+        "enum": "ENUM:6"
+      },
+      "WORD:7": {
+        "id": "7",
+        "type": "string",
+        "help": "Authentication password (key)"
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (authentication-key) WORD:7",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ospf-area-virtual-link-authtype-authkey-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Enable authentication on this virtual link",
+        "enum": "ENUM:5"
+      },
+      "authentication-key": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "dummy string ",
+        "enum": "ENUM:6"
+      }
+    },
+    "command": [
+      {
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (authentication-key)",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ospf-area-virtual-link-authtype-args-md5-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Enable authentication on this virtual link",
+        "enum": "ENUM:5"
+      },
+      "message-digest": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "dummy string ",
+        "enum": "ENUM:6"
+      },
+      "null": {
+        "id": "6.1",
+        "type": "keyword",
+        "help": "Use null authentication",
+        "enum": "ENUM:6"
+      },
+      "message-digest-key": {
+        "id": "7.0",
+        "type": "keyword",
+        "help": "Use message-digest authentication",
+        "enum": "ENUM:7"
+      },
+      "RANGE:8": {
+        "id": "8",
+        "type": "integer",
+        "help": "Message digest authentication password (key)",
+        "range": [
+          1,
+          255
+        ]
+      },
+      "md5": {
+        "id": "9",
+        "type": "keyword",
+        "help": "dummy string "
+      },
+      "WORD:10": {
+        "id": "10",
+        "type": "string",
+        "help": "Key ID"
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest|null) (message-digest-key) RANGE:8 md5 WORD:10",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ospf-area-virtual-link-authtype-md5-cmd": {
+    "token": {
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Enable authentication on this virtual link",
+        "enum": "ENUM:5"
+      },
+      "message-digest-key": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "dummy string ",
+        "enum": "ENUM:6"
+      },
+      "RANGE:7": {
+        "id": "7",
+        "type": "integer",
+        "help": "Message digest authentication password (key)",
+        "range": [
+          1,
+          255
+        ]
+      },
+      "md5": {
+        "id": "8",
+        "type": "keyword",
+        "help": "dummy string "
+      },
+      "WORD:9": {
+        "id": "9",
+        "type": "string",
+        "help": "Key ID"
+      }
+    },
+    "command": [
+      {
+        "defun": "area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest-key) RANGE:7 md5 WORD:9",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ospf-area-virtual-link-authtype-md5-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "area": {
+        "id": "1",
+        "type": "keyword",
+        "help": "OSPF area parameters"
+      },
+      "IPV4-ADDRESS:2.0": {
+        "id": "2.0",
+        "type": "ipv4address",
+        "help": "OSPF area ID in IP address format"
+      },
+      "RANGE:2.1": {
+        "id": "2.1",
+        "type": "integer",
+        "help": "OSPF area ID as a decimal value",
+        "range": [
+          0,
+          4294967295
+        ]
+      },
+      "virtual-link": {
+        "id": "3",
+        "type": "keyword",
+        "help": "Configure a virtual link"
+      },
+      "IPV4-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv4address",
+        "help": "Router ID of the remote ABR"
+      },
+      "authentication": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Enable authentication on this virtual link",
+        "enum": "ENUM:5"
+      },
+      "message-digest-key": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "dummy string ",
+        "enum": "ENUM:6"
+      }
+    },
+    "command": [
+      {
+        "defun": "no area (IPV4-ADDRESS:2.0|RANGE:2.1) virtual-link IPV4-ADDRESS:4 (authentication) (message-digest-key)",
+        "mode": [
+          "CONFIG-OSPF-MODE"
+        ],
+        "actions": [
+          {
+            "http": {
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

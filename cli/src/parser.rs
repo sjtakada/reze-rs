@@ -8,6 +8,7 @@
 use std::fmt;
 use std::cell::Cell;
 use std::rc::Rc;
+use std::collections::HashSet;
 
 use serde_json;
 
@@ -76,6 +77,9 @@ pub struct CliParser {
     // Vecot of pair of CliNode and input token.
     node_token_vec: Cell<CliNodeTokenVec>,
 
+    // Record id of node with only once flag.
+    only_once_set: HashSet<String>,
+
     // Current privilege level.
     privilege: u8,
 
@@ -94,6 +98,7 @@ impl CliParser {
             matched_len: 0usize,
             matched_vec: Cell::new(Vec::new()),
             node_token_vec: Cell::new(Vec::new()),
+            only_once_set: HashSet::new(),
             privilege: CLI_DEFAULT_PARSER_PRIVILEGE,
             executable: false,
         }
@@ -113,6 +118,7 @@ impl CliParser {
         self.matched_len = 0;
         self.matched_vec.replace(Vec::new());
         self.node_token_vec.replace(Vec::new());
+        self.only_once_set.clear();
         self.executable = false;
     }
 
@@ -178,6 +184,19 @@ impl CliParser {
     // Remove hidden node from matched.
     fn filter_hidden(&mut self) {
         self.matched_vec.get_mut().retain(|n| !n.0.inner().is_hidden());
+    }
+
+    // Remove the node already appeared with only once flag.
+    fn filter_only_once(&mut self) {
+        let mut matched_vec = Vec::new();
+
+        for n in self.matched_vec.get_mut() {
+            if !self.only_once_set.contains(n.0.inner().id()) {
+                matched_vec.push((n.0.clone(), n.1));
+            }
+        }
+
+        self.matched_vec.replace(matched_vec);
     }
 
     // Remove node with prvilege greater than current privilege level.
@@ -261,7 +280,6 @@ impl CliParser {
 
     // Given input on current CliNode, update matched_vec.
     fn match_token(&mut self, token: &str, curr: Rc<CliNode>) {
-        //let inner = curr.inner();
         self.matched_vec.replace(
             curr.inner().next().iter()
                 .filter_map(|n|
@@ -305,6 +323,7 @@ impl CliParser {
 
             self.set_matched_vec(curr.clone());
             self.filter_hidden();
+            self.filter_only_once();
             self.filter_privilege();
 
             self.last_parsed_len = self.parsed_len();
@@ -315,6 +334,10 @@ impl CliParser {
 
             self.save_token(&token);
             self.match_token(&token, curr.clone());
+
+            if curr.inner().is_only_once() {
+                self.only_once_set.insert(String::from(curr.inner().id()));
+            }
 
             // Not yet at the end of input.
             if !self.line.is_empty()  {
