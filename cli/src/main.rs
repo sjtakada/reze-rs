@@ -9,7 +9,7 @@ use std::env;
 use getopts::Options;
 
 use cli::cli::Cli;
-use cli::error::CliError;
+//use cli::error::CliError;
 
 use cli::config::Config;
 

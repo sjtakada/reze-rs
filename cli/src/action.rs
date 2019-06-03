@@ -24,7 +24,7 @@ impl CliActionMode {
     pub fn new(value: &serde_json::Value) -> CliActionMode {
         let name = value["name"].as_str().unwrap_or("EXEX-MODE");
         let up = value["up"].as_u64().unwrap_or(0);
-        let params = value["params"].as_object();
+        let _params = value["params"].as_object();
 
         CliActionMode {
             name: String::from(name),

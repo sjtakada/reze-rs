@@ -407,8 +407,8 @@ impl CliTree {
                 //TokenType::Community => CliNodeCommunity::new(&id, token, &help),
                 TokenType::Keyword => {
                     match token_def.get("enum") {
-                        Some(enum_key) => {
-                            Rc::new(CliNodeKeyword::new(&id, token, &help, enum_key.as_str()))
+                        Some(key) => {
+                            Rc::new(CliNodeKeyword::new(&id, token, &help, key.as_str()))
                         },
                         None => {
                             Rc::new(CliNodeKeyword::new(&id, token, &help, None))

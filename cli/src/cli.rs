@@ -51,6 +51,9 @@ pub struct Cli {
 
     // Current privilege.
     privilege: Cell<u8>,
+
+    // Debug mode.
+    debug: bool,
 }
 
 impl Cli {
@@ -62,11 +65,14 @@ impl Cli {
             mode: RefCell::new(String::new()),
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
+            debug: false,
         }
     }
 
     // Entry point of shell initialization.
     pub fn init(&mut self, config: Config) -> Result<(), CliError> {
+        self.debug = config.debug();
+
         // Initlaize signals.
         self.init_signals()?;
         
@@ -151,7 +157,7 @@ impl Cli {
     pub fn call_builtin(&self, func: &str, params: &Vec<String>) -> Result<(), CliError> {
         match self.builtins.get(func) {
             Some(func) => {
-                func(self, params);
+                func(self, params).unwrap();
                 Ok(())
             },
             None => {
@@ -161,7 +167,7 @@ impl Cli {
     }
 
     fn can_exit(&self) -> bool {
-        let mut mode = self.mode.borrow_mut();
+        let mode = self.mode.borrow_mut();
         if String::from(mode.as_ref()) == CLI_INITIAL_MODE {
             true
         }
@@ -179,7 +185,7 @@ impl Cli {
     }
 
     pub fn mode(&self) -> String {
-        let mut mode = self.mode.borrow_mut();
+        let mode = self.mode.borrow_mut();
         String::from(mode.as_ref())
     }
 
@@ -189,6 +195,10 @@ impl Cli {
 
     pub fn privilege(&self) -> u8 {
         self.privilege.get()
+    }
+
+    pub fn is_debug(&self) -> bool {
+        self.debug
     }
 
     pub fn current(&self) -> Option<Rc<CliTree>> {
@@ -374,8 +384,8 @@ impl Cli {
         let mut path = env::temp_dir();
         path.push("rzrtd.cli");
 
-        let mut stream = match UnixStream::connect(path) {
-            Ok(mut stream) => stream,
+        let _stream = match UnixStream::connect(path) {
+            Ok(stream) => stream,
             Err(_) => return Err(CliError::ConnectError),
         };
         

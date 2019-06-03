@@ -10,7 +10,7 @@ use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefMut;
 use std::cell::RefCell;
-//use std::collections::HashMap;
+use std::collections::HashMap;
 
 use super::collate::*;
 use super::action::CliAction;
@@ -40,6 +40,13 @@ pub enum NodeType {
     Dummy,
 }
 
+pub enum Value {
+    Number(i64),
+    Bool(bool),
+    String(String),
+    Array(Vec<Value>),
+}
+
 // CLI Node trait: Base interface for various type of CliNode.
 pub trait CliNode {
     // Trait functions.
@@ -53,6 +60,10 @@ pub trait CliNode {
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
 
+    // Capture values into specific key and type.
+    fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
+        storage.insert(String::from(self.inner().defun()), Value::String(String::from(input)));
+    }
 
     // Set executable.
     fn set_executable(&self) {
@@ -241,15 +252,16 @@ impl CliNode for CliNodeDummy {
 //   static literal.
 pub struct CliNodeKeyword {
     inner: RefCell<CliNodeInner>,
-    enum_key: Option<String>,
+
+    key: Option<String>,
 }
 
 impl CliNodeKeyword {
-    pub fn new(id: &str, defun: &str, help: &str, enum_key: Option<&str>) -> CliNodeKeyword {
+    pub fn new(id: &str, defun: &str, help: &str, key: Option<&str>) -> CliNodeKeyword {
         CliNodeKeyword {
             inner: RefCell::new(CliNodeInner::new(id, defun, help, defun)),
-            enum_key: match enum_key {
-                Some(enum_key) => Some(String::from(enum_key)),
+            key: match key {
+                Some(key) => Some(String::from(key)),
                 None => None
             }
         }
@@ -299,6 +311,16 @@ impl CliNode for CliNodeKeyword {
         MatchResult::Failure(pos)
     }
 
+    fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
+        match &self.key {
+            Some(key) => {
+                storage.insert(String::from(&key[..]), Value::String(String::from(input)));
+            },
+            None => {
+                storage.insert(String::from(self.inner().defun()), Value::Bool(true));
+            }
+        }
+    }
 }
 
 // CLI range node:
@@ -344,6 +366,11 @@ impl CliNode for CliNodeRange {
         }
 
         MatchResult::Failure(pos)
+    }
+
+    fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
+        let number = input.parse::<i64>().unwrap();
+        storage.insert(String::from(self.inner().defun()), Value::Number(number));
     }
 }
 

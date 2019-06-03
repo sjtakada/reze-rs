@@ -10,7 +10,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 use std::collections::HashSet;
 
-use serde_json;
+//use serde_json;
 
 use super::error::CliError;
 use super::node::CliNode;
@@ -398,7 +398,7 @@ impl CliParser {
 
     // Parse line and match current node for execution.
     pub fn parse_execute(&mut self, curr: Rc<CliNode>) -> ExecResult {
-        let mut executable = curr.is_executable();
+        let executable = curr.is_executable();
 
         loop {
             if !self.trim_start() {

@@ -97,7 +97,7 @@ impl<'a> Completer for CliCompleter<'a> {
         parser.init(&line, self.cli.privilege());
         let result = parser.parse(current.top());
         match result {
-            ExecResult::Unrecognized(pos) => {
+            ExecResult::Unrecognized(_pos) => {
                 println!("% Unrecognized command");
             },
             _ => {
@@ -318,7 +318,19 @@ impl<'a> CliReadline<'a> {
     }
 
     fn handle_actions(&self, node_token_vec: CliNodeTokenVec) -> Result<(), CliError> {
-        let (node, token) = node_token_vec.last().unwrap();
+        // Populate mode params first.
+
+        println!("** handle_actions");
+
+        // Populate params and keywords.
+        for n in node_token_vec.iter() {
+            let node = n.0.clone();
+
+            if self.cli.is_debug() {
+            }
+        }
+
+        let (node, _token) = node_token_vec.last().unwrap();
 
         if node.inner().actions().len() > 0 {
             for action in node.inner().actions().iter() {
