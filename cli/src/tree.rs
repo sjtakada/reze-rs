@@ -31,6 +31,7 @@ pub enum TokenType {
     IPv6Address,
     Range,
     Word,
+    Line,
     Community,
     Array,
     Keyword,
@@ -54,6 +55,7 @@ impl TokenType {
             TokenType::IPv6Address => "IPv6Address",
             TokenType::Range => "Range",
             TokenType::Word => "Word",
+            TokenType::Line => "Line",
             TokenType::Community => "Community",
             TokenType::Array => "Array",
             TokenType::Keyword => "Keyword",
@@ -325,6 +327,9 @@ impl CliTree {
                             "WORD" => {
                                 token_type = TokenType::Word;
                             },
+                            "LINE" => {
+                                token_type = TokenType::Line;
+                            },
                             "COMMUNITY" => {
                                 token_type = TokenType::Community;
                             },
@@ -404,6 +409,7 @@ impl CliTree {
                     }
                 },
                 TokenType::Word => Rc::new(CliNodeWord::new(&id, token, &help)),
+                TokenType::Line => Rc::new(CliNodeLine::new(&id, token, &help)),
                 //TokenType::Community => CliNodeCommunity::new(&id, token, &help),
                 TokenType::Keyword => {
                     match token_def.get("enum") {

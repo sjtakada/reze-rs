@@ -21,6 +21,7 @@ const CLI_TOKEN_IPV4_PREFIX: &str = "A.B.C.D/M";
 const CLI_TOKEN_IPV6_ADDRESS: &str = "X:X::X:X";
 const CLI_TOKEN_IPV6_PREFIX: &str = "X:X::X:X/M";
 const CLI_TOKEN_WORD: &str = "WORD";
+const CLI_TOKEN_LINE: &str = "LINE";
 //const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
 pub const CLI_DEFAULT_NODE_PRIVILEGE: u8 = 15;
 
@@ -34,6 +35,7 @@ pub enum NodeType {
     IPv6Address,
     Range,
     Word,
+    Line,
     Community,
     Array,
     Keyword,
@@ -911,6 +913,34 @@ impl CliNode for CliNodeWord {
 
     fn node_type(&self) -> NodeType {
         NodeType::Word
+    }
+
+    fn collate(&self, _input: &str) -> MatchResult {
+        MatchResult::Success(MatchFlag::Partial)
+    }
+}
+
+// CLI Line node:
+//   match strings toward the end of line.
+pub struct CliNodeLine {
+    inner: RefCell<CliNodeInner>,
+}
+
+impl CliNodeLine {
+    pub fn new(id: &str, defun: &str, help: &str) -> CliNodeLine {
+        CliNodeLine {
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, CLI_TOKEN_LINE)),
+        }
+    }
+}
+
+impl CliNode for CliNodeLine {
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
+    }
+
+    fn node_type(&self) -> NodeType {
+        NodeType::Line
     }
 
     fn collate(&self, _input: &str) -> MatchResult {
