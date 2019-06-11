@@ -73,7 +73,7 @@ pub struct CliParser {
     // Vector of pair of CliNode and MatchState.
     matched_vec: Cell<CliNodeMatchStateVec>,
 
-    // Vecot of pair of CliNode and input token.
+    // Vector of pair of CliNode and input token.
     node_token_vec: Cell<CliNodeTokenVec>,
 
     // Record id of node with only once flag.
