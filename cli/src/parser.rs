@@ -59,9 +59,6 @@ pub struct CliParser {
     // Initial input string.
     input: String,
 
-    // Current input string.
-    line: String,
-
     // Current position.
     pos: usize,
 
@@ -95,7 +92,6 @@ impl CliParser {
     pub fn new() -> CliParser {
         CliParser {
             input: String::new(),
-            line: String::new(),
             pos: 0usize,
             token: String::new(),
             last_parsed_len: 0usize,
@@ -111,14 +107,14 @@ impl CliParser {
     // Set input and reset state.
     pub fn init(&mut self, input: &str, privilege: u8) {
         self.input = String::from(input);
+        //self.input.push_str(input);
         self.privilege = privilege;
         self.reset_line();
     }
 
     // Reset line and other parser state.
     pub fn reset_line(&mut self) {
-        self.line = String::from(" ");
-        self.line.push_str(&self.input);
+        self.pos = 0;
         self.matched_len.set(0);
         self.matched_vec.replace(Vec::new());
         self.node_token_vec.replace(Vec::new());
@@ -126,9 +122,14 @@ impl CliParser {
         self.executable = false;
     }
 
-    // Return length parser parsed.
+    // Return parser cursor position.
     pub fn parsed_len(&self) -> usize {
-        self.input.len() - self.line.len()
+        self.pos
+    }
+
+    // Return remaining input length.
+    pub fn line_len(&self) -> usize {
+        self.line().len()
     }
 
     // Return last parsed length.
@@ -212,25 +213,27 @@ impl CliParser {
 
     // Return true if space exists at the beginning and trim it, or return false.
     fn trim_start(&mut self) -> bool {
-        let s = &self.line;
-        let len = s.trim_start().len();
-        if len != self.line.len() {
-            self.line.replace_range(..self.line.len() - len, "");
-            return true
-        }
+        let s = self.line().trim_start();
+        let offset = self.line_len() - s.len();
 
-        false
+        if offset > 0 {
+            self.pos += offset;
+            true
+        }
+        else {
+            false
+        }
     }
 
     // Get first token, and update line with remainder.
     fn get_token(&mut self) -> Option<usize> {
-        if self.line.len() == 0 {
+        if self.line_len() == 0 {
             None
         }
         else {
-            match self.line.find(|c: char| c.is_whitespace()) {
+            match self.line().find(|c: char| c.is_whitespace()) {
                 Some(pos) => Some(pos),
-                None => Some(self.line.len()),
+                None => Some(self.line_len()),
             }
         }
     }
@@ -308,23 +311,23 @@ impl CliParser {
         let mut curr = curr;
 
         loop {
-            if !self.trim_start() {
-                break;
-            }
-
+            self.trim_start();
             self.set_matched_vec(curr.clone());
             self.filter_hidden();
             self.filter_only_once();
             self.filter_privilege();
 
+            if self.line_len() == 0 {
+                break;
+            }
+
             self.last_parsed_len = self.parsed_len();
-            let pos = match self.get_token() {
+            self.pos += match self.get_token() {
                 Some(pos) => pos,
                 None => break,
             };
 
-            let token = &self.input[self.pos..pos];
-            self.pos = pos;
+            let token = &self.input[self.last_parsed_len..self.pos];
             self.match_token(token, curr.clone());
 
             if curr.inner().is_only_once() {
@@ -332,7 +335,7 @@ impl CliParser {
             }
 
             // Not yet at the end of input.
-            if !self.line.is_empty()  {
+            if !self.line().is_empty()  {
                 self.filter_matched(MatchFlag::Partial);
 
                 // No match, try shorter to find one.
@@ -393,9 +396,7 @@ impl CliParser {
         let executable = curr.is_executable();
 
         loop {
-            if !self.trim_start() {
-                break;
-            }
+            self.trim_start();
 
             if curr.inner().next().len() == 0 {
                 if self.line().trim().len() == 0 {
@@ -408,13 +409,13 @@ impl CliParser {
 
             self.set_matched_vec(curr.clone());
 
-            let pos = match self.get_token() {
+            self.last_parsed_len = self.parsed_len();
+            self.pos += match self.get_token() {
                 Some(pos) => pos,
                 None => break,
             };
 
-            let token = &self.input[self.pos..pos];
-            self.pos = pos;
+            let token = &self.input[self.last_parsed_len..self.pos];
 
             self.filter_only_once();
             self.filter_privilege();
