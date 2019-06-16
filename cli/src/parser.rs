@@ -7,6 +7,7 @@
 
 use std::fmt;
 use std::cell::Cell;
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::collections::HashSet;
 
@@ -61,6 +62,9 @@ pub struct CliParser {
     // Current input string.
     line: String,
 
+    // Current position.
+    pos: usize,
+
     // Last token.
     token: String,
 
@@ -68,10 +72,10 @@ pub struct CliParser {
     last_parsed_len: usize,
 
     // Matched length.
-    matched_len: usize,
+    matched_len: Cell<usize>,
 
     // Vector of pair of CliNode and MatchState.
-    matched_vec: Cell<CliNodeMatchStateVec>,
+    matched_vec: RefCell<CliNodeMatchStateVec>,
 
     // Vector of pair of CliNode and input token.
     node_token_vec: Cell<CliNodeTokenVec>,
@@ -92,10 +96,11 @@ impl CliParser {
         CliParser {
             input: String::new(),
             line: String::new(),
+            pos: 0usize,
             token: String::new(),
             last_parsed_len: 0usize,
-            matched_len: 0usize,
-            matched_vec: Cell::new(Vec::new()),
+            matched_len: Cell::new(0usize),
+            matched_vec: RefCell::new(Vec::new()),
             node_token_vec: Cell::new(Vec::new()),
             only_once_set: HashSet::new(),
             privilege: CLI_DEFAULT_PARSER_PRIVILEGE,
@@ -114,7 +119,7 @@ impl CliParser {
     pub fn reset_line(&mut self) {
         self.line = String::from(" ");
         self.line.push_str(&self.input);
-        self.matched_len = 0;
+        self.matched_len.set(0);
         self.matched_vec.replace(Vec::new());
         self.node_token_vec.replace(Vec::new());
         self.only_once_set.clear();
@@ -138,24 +143,24 @@ impl CliParser {
 
     // Return current matched string len.
     pub fn matched_len(&self) -> usize {
-        self.matched_len
+        self.matched_len.get()
     }
 
     // Return reference to current remaining line string.
     pub fn line(&self) -> &str {
-        &self.line
+        &self.input[self.pos..]
     }
 
     // Return number of matched in current matched.
-    fn num_matched(&mut self) -> usize {
-        self.matched_vec.get_mut().len()
+    fn num_matched(&self) -> usize {
+        self.matched_vec.borrow_mut().len()
     }
 
     // Return candidate in matched.
-    fn get_candidate(&mut self) -> Rc<CliNode> {
+    fn get_candidate(&self) -> Rc<CliNode> {
         assert!(self.num_matched() == 1);
 
-        self.matched_vec.get_mut()[0].0.clone()
+        self.matched_vec.borrow_mut()[0].0.clone()
     }
 
     // Return candidate's MatchResult.
@@ -173,7 +178,7 @@ impl CliParser {
     }
 
     // Fill matched vec with next nodes from current node.
-    fn set_matched_vec(&mut self, node: Rc<CliNode>) {
+    fn set_matched_vec(&self, node: Rc<CliNode>) {
         self.matched_vec.replace(
             node.inner().next().iter()
                 .map(|n| (n.clone(), MatchResult::Success(MatchFlag::Partial)))
@@ -181,16 +186,16 @@ impl CliParser {
     }
 
     // Remove hidden node from matched.
-    fn filter_hidden(&mut self) {
-        self.matched_vec.get_mut().retain(|n| !n.0.inner().is_hidden());
+    fn filter_hidden(&self) {
+        self.matched_vec.borrow_mut().retain(|n| !n.0.inner().is_hidden());
     }
 
     // Remove the node already appeared with only once flag.
-    fn filter_only_once(&mut self) {
+    fn filter_only_once(&self) {
         let mut matched_vec = Vec::new();
 
         // TODO: refactoring
-        for n in self.matched_vec.get_mut() {
+        for n in self.matched_vec.borrow_mut().iter() {
             if !self.only_once_set.contains(n.0.inner().id()) {
                 matched_vec.push((n.0.clone(), n.1));
             }
@@ -200,9 +205,9 @@ impl CliParser {
     }
 
     // Remove node with prvilege greater than current privilege level.
-    fn filter_privilege(&mut self) {
+    fn filter_privilege(&self) {
         let privilege = self.privilege;
-        self.matched_vec.get_mut().retain(|n| n.0.inner().privilege() <= privilege);
+        self.matched_vec.borrow_mut().retain(|n| n.0.inner().privilege() <= privilege);
     }
 
     // Return true if space exists at the beginning and trim it, or return false.
@@ -218,30 +223,16 @@ impl CliParser {
     }
 
     // Get first token, and update line with remainder.
-    fn get_token(&mut self) -> Option<String> {
+    fn get_token(&mut self) -> Option<usize> {
         if self.line.len() == 0 {
             None
         }
         else {
-            let pos = match self.line.find(|c: char| c.is_whitespace()) {
-                Some(pos) => pos,
-                None => self.line.len(),
-            };
-
-            let token = String::from(&self.line[..pos]);
-            self.line.replace_range(..pos, "");
-            Some(token)
+            match self.line.find(|c: char| c.is_whitespace()) {
+                Some(pos) => Some(pos),
+                None => Some(self.line.len()),
+            }
         }
-    }
-
-    // Save token to state.
-    pub fn save_token(&mut self, token: &str) {
-        self.token = String::from(token);
-    }
-
-    // Saved token size.
-    pub fn token_len(&self) -> usize {
-        self.token.len()
     }
 
     // Take node token_vec.
@@ -251,7 +242,7 @@ impl CliParser {
 
     // Select matched nodes with MatchFlag smaller than or equal to 'limit'.
     // Among matched nodes with the same MatchFlag and the smallest MatchFlag.
-    fn filter_matched(&mut self, limit: MatchFlag) {
+    fn filter_matched(&self, limit: MatchFlag) {
         let mut limit = limit;
         let mut vec = self.matched_vec.replace(Vec::new());
 
@@ -263,11 +254,11 @@ impl CliParser {
                             continue;
                         }
                         else if flag < limit {
-                            self.matched_vec.get_mut().clear();
+                            self.matched_vec.borrow_mut().clear();
                             limit = flag;
                         }
 
-                        self.matched_vec.get_mut().push(n);
+                        self.matched_vec.borrow_mut().push(n);
                     },
                     _ => {}
                 }
@@ -279,7 +270,7 @@ impl CliParser {
     }
 
     // Given input on current CliNode, update matched_vec.
-    fn match_token(&mut self, token: &str, curr: Rc<CliNode>) {
+    fn match_token(&self, token: &str, curr: Rc<CliNode>) {
         self.matched_vec.replace(
             curr.inner().next().iter()
                 .filter_map(|n|
@@ -292,7 +283,7 @@ impl CliParser {
     }
 
     // Try match shorter string in line.
-    fn match_shorter(&mut self, curr: Rc<CliNode>, token: String) {
+    fn match_shorter(&self, curr: Rc<CliNode>, token: String) {
         let mut len = token.len();
 
         while len > 0 {
@@ -309,7 +300,7 @@ impl CliParser {
             len -= 1;
         }
 
-        self.matched_len = self.parsed_len() - token.len() + len;
+        self.matched_len.set(self.parsed_len() - token.len() + len);
     }
 
     // Parse line and match current node for completion.
@@ -327,13 +318,14 @@ impl CliParser {
             self.filter_privilege();
 
             self.last_parsed_len = self.parsed_len();
-            let token = match self.get_token() {
-                Some(token) => token,
+            let pos = match self.get_token() {
+                Some(pos) => pos,
                 None => break,
             };
 
-            self.save_token(&token);
-            self.match_token(&token, curr.clone());
+            let token = &self.input[self.pos..pos];
+            self.pos = pos;
+            self.match_token(token, curr.clone());
 
             if curr.inner().is_only_once() {
                 self.only_once_set.insert(String::from(curr.inner().id()));
@@ -345,12 +337,12 @@ impl CliParser {
 
                 // No match, try shorter to find one.
                 if self.num_matched() == 0 {
-                    self.match_shorter(curr.clone(), token.clone());
+                    self.match_shorter(curr.clone(), token.to_string());
                     if curr.inner().next().len() == 0 {
-                        self.matched_len += 1;
+                        self.matched_len.set(self.matched_len.get() + 1);
                     }
 
-                    return ExecResult::Unrecognized(self.matched_len)
+                    return ExecResult::Unrecognized(self.matched_len.get())
                 }
 
                 // Matched more than one, ambiguous.
@@ -372,12 +364,12 @@ impl CliParser {
 
             // Not yet at the end of input, but no match.
             if self.num_matched() == 0 {
-                self.match_shorter(curr.clone(), token.clone());
+                self.match_shorter(curr.clone(), token.to_string());
                 if curr.inner().next().len() == 0 {
-                    self.matched_len += 1;
+                    self.matched_len.set(self.matched_len.get() + 1);
                 }
 
-                return ExecResult::Unrecognized(self.matched_len)
+                return ExecResult::Unrecognized(self.matched_len.get())
             }
             else if self.num_matched() == 1 {
                 curr = self.get_candidate();
@@ -386,7 +378,7 @@ impl CliParser {
             break;
         }
 
-        self.matched_len = self.parsed_len();
+        self.matched_len.set(self.parsed_len());
         self.executable = curr.inner().is_executable();
         if self.executable {
             ExecResult::Complete
@@ -410,34 +402,36 @@ impl CliParser {
                     break;
                 }
 
-                self.matched_len = self.parsed_len();
-                return ExecResult::Unrecognized(self.matched_len)
+                self.matched_len.set(self.parsed_len());
+                return ExecResult::Unrecognized(self.matched_len.get())
             }
 
             self.set_matched_vec(curr.clone());
 
-            let token = match self.get_token() {
-                Some(token) => token,
+            let pos = match self.get_token() {
+                Some(pos) => pos,
                 None => break,
             };
+
+            let token = &self.input[self.pos..pos];
+            self.pos = pos;
 
             self.filter_only_once();
             self.filter_privilege();
 
-            self.save_token(&token);
-            self.match_token(&token, curr.clone());
+            self.match_token(token, curr.clone());
             self.filter_matched(MatchFlag::Partial);
 
             if self.num_matched() == 0 {
-                self.match_shorter(curr.clone(), token.clone());
-                return ExecResult::Unrecognized(self.matched_len)
+                self.match_shorter(curr.clone(), token.to_string());
+                return ExecResult::Unrecognized(self.matched_len.get())
             }
             else if self.num_matched() > 1 {
                 return ExecResult::Ambiguous
             }
 
             // Candidate is only one at this point.
-            let tuple: CliNodeTokenTuple = (self.get_candidate(), token.clone());
+            let tuple: CliNodeTokenTuple = (self.get_candidate(), token.to_string());
             self.node_token_vec.get_mut().push(tuple);
 
             // Line is still remaining, move forward.
