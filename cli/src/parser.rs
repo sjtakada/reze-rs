@@ -60,13 +60,13 @@ pub struct CliParser {
     input: String,
 
     // Current position.
-    pos: usize,
+    pos: Cell<usize>,
 
     // Last token.
     token: String,
 
     // Parsed len.
-    last_parsed_len: usize,
+    last_parsed_len: Cell<usize>,
 
     // Matched length.
     matched_len: Cell<usize>,
@@ -78,7 +78,7 @@ pub struct CliParser {
     node_token_vec: Cell<CliNodeTokenVec>,
 
     // Record id of node with only once flag.
-    only_once_set: HashSet<String>,
+    only_once_set: RefCell<HashSet<String>>,
 
     // Current privilege level.
     privilege: u8,
@@ -92,13 +92,13 @@ impl CliParser {
     pub fn new() -> CliParser {
         CliParser {
             input: String::new(),
-            pos: 0usize,
+            pos: Cell::new(0usize),
             token: String::new(),
-            last_parsed_len: 0usize,
+            last_parsed_len: Cell::new(0usize),
             matched_len: Cell::new(0usize),
             matched_vec: RefCell::new(Vec::new()),
             node_token_vec: Cell::new(Vec::new()),
-            only_once_set: HashSet::new(),
+            only_once_set: RefCell::new(HashSet::new()),
             privilege: CLI_DEFAULT_PARSER_PRIVILEGE,
             executable: false,
         }
@@ -107,24 +107,23 @@ impl CliParser {
     // Set input and reset state.
     pub fn init(&mut self, input: &str, privilege: u8) {
         self.input = String::from(input);
-        //self.input.push_str(input);
         self.privilege = privilege;
         self.reset_line();
     }
 
     // Reset line and other parser state.
     pub fn reset_line(&mut self) {
-        self.pos = 0;
+        self.pos.set(0);
         self.matched_len.set(0);
         self.matched_vec.replace(Vec::new());
         self.node_token_vec.replace(Vec::new());
-        self.only_once_set.clear();
+        self.only_once_set.borrow_mut().clear();
         self.executable = false;
     }
 
     // Return parser cursor position.
     pub fn parsed_len(&self) -> usize {
-        self.pos
+        self.pos.get()
     }
 
     // Return remaining input length.
@@ -134,7 +133,7 @@ impl CliParser {
 
     // Return last parsed length.
     pub fn last_parsed_len(&self) -> usize {
-        self.last_parsed_len
+        self.last_parsed_len.get()
     }
 
     // Return current matched vec and set it empty.
@@ -149,7 +148,7 @@ impl CliParser {
 
     // Return reference to current remaining line string.
     pub fn line(&self) -> &str {
-        &self.input[self.pos..]
+        &self.input[self.pos.get()..]
     }
 
     // Return number of matched in current matched.
@@ -197,7 +196,7 @@ impl CliParser {
 
         // TODO: refactoring
         for n in self.matched_vec.borrow_mut().iter() {
-            if !self.only_once_set.contains(n.0.inner().id()) {
+            if !self.only_once_set.borrow().contains(n.0.inner().id()) {
                 matched_vec.push((n.0.clone(), n.1));
             }
         }
@@ -217,7 +216,7 @@ impl CliParser {
         let offset = self.line_len() - s.len();
 
         if offset > 0 {
-            self.pos += offset;
+            self.pos.set(self.pos.get() + offset);
             true
         }
         else {
@@ -226,15 +225,20 @@ impl CliParser {
     }
 
     // Get first token, and update line with remainder.
-    fn get_token(&mut self) -> Option<usize> {
+    fn get_token(&self) -> Option<&str> {
+        self.last_parsed_len.set(self.parsed_len());
+
         if self.line_len() == 0 {
             None
         }
         else {
-            match self.line().find(|c: char| c.is_whitespace()) {
-                Some(pos) => Some(pos),
-                None => Some(self.line_len()),
-            }
+            let pos = match self.line().find(|c: char| c.is_whitespace()) {
+                Some(pos) => pos,
+                None => self.line_len(),
+            };
+
+            self.pos.set(self.pos.get() + pos);
+            Some(&self.input[self.last_parsed_len.get()..self.pos.get()])
         }
     }
 
@@ -321,17 +325,14 @@ impl CliParser {
                 break;
             }
 
-            self.last_parsed_len = self.parsed_len();
-            self.pos += match self.get_token() {
-                Some(pos) => pos,
+            let token = match self.get_token() {
+                Some(token) => token,
                 None => break,
             };
-
-            let token = &self.input[self.last_parsed_len..self.pos];
             self.match_token(token, curr.clone());
 
             if curr.inner().is_only_once() {
-                self.only_once_set.insert(String::from(curr.inner().id()));
+                self.only_once_set.borrow_mut().insert(String::from(curr.inner().id()));
             }
 
             // Not yet at the end of input.
@@ -409,13 +410,10 @@ impl CliParser {
 
             self.set_matched_vec(curr.clone());
 
-            self.last_parsed_len = self.parsed_len();
-            self.pos += match self.get_token() {
-                Some(pos) => pos,
+            let token = match self.get_token() {
+                Some(token) => token,
                 None => break,
             };
-
-            let token = &self.input[self.last_parsed_len..self.pos];
 
             self.filter_only_once();
             self.filter_privilege();
@@ -477,28 +475,28 @@ mod tests {
         p.init("show ip ospf interface", CLI_MAX_PARSER_PRIVILEGE);
 
         let ret = p.trim_start();
-        assert_eq!(ret, true);
+        assert_eq!(ret, false);
 
         let ret = p.trim_start();
         assert_eq!(ret, false);
 
         let token = p.get_token();
-        assert_eq!(token, Some(String::from("show")));
+        assert_eq!(token, Some("show"));
         assert_eq!(p.line(), String::from(" ip ospf interface"));
 
         let _ret = p.trim_start();
         let token = p.get_token();
-        assert_eq!(token, Some(String::from("ip")));
+        assert_eq!(token, Some("ip"));
         assert_eq!(p.line(), String::from(" ospf interface"));
 
         let _ret = p.trim_start();
         let token = p.get_token();
-        assert_eq!(token, Some(String::from("ospf")));
+        assert_eq!(token, Some("ospf"));
         assert_eq!(p.line(), String::from(" interface"));
 
         let _ret = p.trim_start();
         let token = p.get_token();
-        assert_eq!(token, Some(String::from("interface")));
+        assert_eq!(token, Some("interface"));
         assert_eq!(p.line(), String::from(""));
     }
 
@@ -514,17 +512,17 @@ mod tests {
         assert_eq!(ret, false);
 
         let token = p.get_token();
-        assert_eq!(token, Some(String::from("show")));
+        assert_eq!(token, Some("show"));
         assert_eq!(p.line(), String::from("   ip ospf "));
 
         let _ret = p.trim_start();
         let token = p.get_token();
-        assert_eq!(token, Some(String::from("ip")));
+        assert_eq!(token, Some("ip"));
         assert_eq!(p.line(), String::from(" ospf "));
 
         let _ret = p.trim_start();
         let token = p.get_token();
-        assert_eq!(token, Some(String::from("ospf")));
+        assert_eq!(token, Some("ospf"));
         assert_eq!(p.line(), String::from(" "));
 
         let _ret = p.trim_start();

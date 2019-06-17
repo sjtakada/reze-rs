@@ -8,8 +8,8 @@ edition = "2018"
 getopts = "0.2.18"
 quick-error = "1.2.2"
 #rustyline = "3.0.0"
-#rustyline = { git = "https://github.com/sjtakada/rustyline", branch = "custom" }
-rustyline = { path = "/home/toshiaki/git/rustyline" }
+rustyline = { git = "https://github.com/sjtakada/rustyline", branch = "custom" }
+#rustyline = { path = "/home/toshiaki/git/rustyline" }
 serde_json = "1.0.38"
 mio = "0.6.16"
 mio-uds = "0.6.7"
