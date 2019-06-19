@@ -1,3 +1,3 @@
 # reze-rs
 
-Renaissance of Z in Rust
+Renaissance of Zebra Routing Suite in Rust
