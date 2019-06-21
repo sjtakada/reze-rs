@@ -290,7 +290,7 @@ impl CliParser {
     }
 
     // Try match shorter string in line.
-    fn match_shorter(&self, curr: Rc<CliNode>, token: String) {
+    fn match_shorter(&self, token: &str, curr: Rc<CliNode>) {
         let mut len = token.len();
 
         while len > 0 {
@@ -341,7 +341,7 @@ impl CliParser {
 
                 // No match, try shorter to find one.
                 if self.num_matched() == 0 {
-                    self.match_shorter(curr.clone(), token.to_string());
+                    self.match_shorter(token, curr.clone());
                     if curr.inner().next().len() == 0 {
                         self.matched_len.set(self.matched_len.get() + 1);
                     }
@@ -368,7 +368,7 @@ impl CliParser {
 
             // Not yet at the end of input, but no match.
             if self.num_matched() == 0 {
-                self.match_shorter(curr.clone(), token.to_string());
+                self.match_shorter(token, curr.clone());
                 if curr.inner().next().len() == 0 {
                     self.matched_len.set(self.matched_len.get() + 1);
                 }
@@ -422,7 +422,7 @@ impl CliParser {
             self.filter_matched(MatchFlag::Partial);
 
             if self.num_matched() == 0 {
-                self.match_shorter(curr.clone(), token.to_string());
+                self.match_shorter(token, curr.clone());
                 return ExecResult::Unrecognized(self.matched_len.get())
             }
             else if self.num_matched() > 1 {
