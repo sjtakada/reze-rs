@@ -81,7 +81,7 @@ impl<'a> Completer for CliCompleter<'a> {
             }
         }
 
-        Ok((parser.last_parsed_len(), candidate))
+        Ok((parser.pos_prev(), candidate))
     }
 
     fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {

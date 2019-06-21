@@ -62,11 +62,11 @@ pub struct CliParser {
     // Current position.
     pos: Cell<usize>,
 
-    // Last token.
-    token: String,
+    // Previous position.
+    pos_prev: Cell<usize>,
 
-    // Parsed len.
-    last_parsed_len: Cell<usize>,
+    // Last token.
+    //token: String,
 
     // Matched length.
     matched_len: Cell<usize>,
@@ -93,8 +93,8 @@ impl CliParser {
         CliParser {
             input: String::new(),
             pos: Cell::new(0usize),
-            token: String::new(),
-            last_parsed_len: Cell::new(0usize),
+            pos_prev: Cell::new(0usize),
+            //token: String::new(),
             matched_len: Cell::new(0usize),
             matched_vec: RefCell::new(Vec::new()),
             node_token_vec: Cell::new(Vec::new()),
@@ -122,18 +122,18 @@ impl CliParser {
     }
 
     // Return parser cursor position.
-    pub fn parsed_len(&self) -> usize {
+    pub fn pos(&self) -> usize {
         self.pos.get()
+    }
+
+    // Return previouls position.
+    pub fn pos_prev(&self) -> usize {
+        self.pos_prev.get()
     }
 
     // Return remaining input length.
     pub fn line_len(&self) -> usize {
         self.line().len()
-    }
-
-    // Return last parsed length.
-    pub fn last_parsed_len(&self) -> usize {
-        self.last_parsed_len.get()
     }
 
     // Return current matched vec and set it empty.
@@ -224,9 +224,9 @@ impl CliParser {
         }
     }
 
-    // Get first token, and update line with remainder.
+    // Return string slice of an input token from current position.
     fn get_token(&self) -> Option<&str> {
-        self.last_parsed_len.set(self.parsed_len());
+        self.pos_prev.set(self.pos());
 
         if self.line_len() == 0 {
             None
@@ -238,7 +238,7 @@ impl CliParser {
             };
 
             self.pos.set(self.pos.get() + pos);
-            Some(&self.input[self.last_parsed_len.get()..self.pos.get()])
+            Some(&self.input[self.pos_prev.get()..self.pos.get()])
         }
     }
 
@@ -307,7 +307,7 @@ impl CliParser {
             len -= 1;
         }
 
-        self.matched_len.set(self.parsed_len() - token.len() + len);
+        self.matched_len.set(self.pos() - token.len() + len);
     }
 
     // Parse line and match current node for completion.
@@ -382,7 +382,7 @@ impl CliParser {
             break;
         }
 
-        self.matched_len.set(self.parsed_len());
+        self.matched_len.set(self.pos());
         self.executable = curr.inner().is_executable();
         if self.executable {
             ExecResult::Complete
@@ -404,7 +404,7 @@ impl CliParser {
                     break;
                 }
 
-                self.matched_len.set(self.parsed_len());
+                self.matched_len.set(self.pos());
                 return ExecResult::Unrecognized(self.matched_len.get())
             }
 
