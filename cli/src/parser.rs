@@ -65,9 +65,6 @@ pub struct CliParser {
     // Previous position.
     pos_prev: Cell<usize>,
 
-    // Last token.
-    //token: String,
-
     // Matched length.
     matched_len: Cell<usize>,
 
@@ -94,7 +91,6 @@ impl CliParser {
             input: String::new(),
             pos: Cell::new(0usize),
             pos_prev: Cell::new(0usize),
-            //token: String::new(),
             matched_len: Cell::new(0usize),
             matched_vec: RefCell::new(Vec::new()),
             node_token_vec: Cell::new(Vec::new()),
@@ -362,6 +358,19 @@ impl CliParser {
                 // Matched one, move to next node.
                 else {
                     let next = self.get_candidate();
+
+                    // Special case for LINE.
+                    if next.is_line() {
+                        self.matched_len.set(self.pos());
+                        self.executable = next.inner().is_executable();
+                        if self.executable {
+                            return ExecResult::Complete
+                        }
+                        else {
+                            return ExecResult::Incomplete
+                        }
+                    }
+
                     return self.parse(next);
                 }
             }
@@ -436,7 +445,11 @@ impl CliParser {
             // Line is still remaining, move forward.
             if !self.line().is_empty() {
                 let next = self.get_candidate();
-                return self.parse_execute(next)
+
+                // if next is LINE, will terminate.
+                if !next.is_line() {
+                    return self.parse_execute(next)
+                }
             }
 
             // No more line, make decision.

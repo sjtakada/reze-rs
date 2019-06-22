@@ -67,6 +67,11 @@ pub trait CliNode {
         storage.insert(String::from(self.inner().defun()), Value::String(String::from(input)));
     }
 
+    // Return true if it is LINE.
+    fn is_line(&self) -> bool {
+        false
+    }
+
     // Set executable.
     fn set_executable(&self) {
         self.inner().set_executable();
@@ -945,6 +950,16 @@ impl CliNode for CliNodeLine {
 
     fn collate(&self, _input: &str) -> MatchResult {
         MatchResult::Success(MatchFlag::Partial)
+    }
+
+    fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
+        let number = input.parse::<i64>().unwrap();
+        println!("*** {}", input);
+//        storage.insert(String::from(self.inner().defun()), Value::Number(number));
+    }
+
+    fn is_line(&self) -> bool {
+        true
     }
 }
 
