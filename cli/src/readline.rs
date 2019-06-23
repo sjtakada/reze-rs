@@ -5,7 +5,7 @@
 // Readline, rustyline integration.
 //
 
-//use std::collections::HashMap;
+use std::collections::HashMap;
 use std::cell::RefCell;
 //use std::cell::Cell;
 use std::rc::Rc;
@@ -27,10 +27,8 @@ use super::tree::CliTree;
 use super::parser::*;
 use super::node::CliNode;
 use super::node::NodeType;
+//use super::node::Value;
 use super::error::CliError;
-
-type CliNodeTokenTuple = (Rc<CliNode>, String);
-type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
 
 //
 pub struct CliCompleter<'a> {
@@ -66,8 +64,9 @@ impl<'a> Completer for CliCompleter<'a> {
         if vec.len() == 1 {
             let node = &vec[0].0;
             if node.node_type() == NodeType::Keyword {
-                let mut str = node.inner().token().to_string();
+                let mut str = node.inner().display().to_string();
                 str.push(' ');
+
                 candidate.push(str);
             }
         }
@@ -75,12 +74,12 @@ impl<'a> Completer for CliCompleter<'a> {
             for n in vec {
                 let node = &n.0;
                 if node.node_type() == NodeType::Keyword {
-                    candidate.push(node.inner().token().to_string());
+                    candidate.push(node.inner().display().to_string());
                 }
             }
         }
 
-        Ok((parser.current_pos() - parser.token_len(), candidate))
+        Ok((parser.pos_prev(), candidate))
     }
 
     fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {
@@ -96,7 +95,7 @@ impl<'a> Completer for CliCompleter<'a> {
         parser.init(&line, self.cli.privilege());
         let result = parser.parse(current.top());
         match result {
-            ExecResult::Unrecognized(pos) => {
+            ExecResult::Unrecognized(_pos) => {
                 println!("% Unrecognized command");
             },
             _ => {
@@ -104,10 +103,10 @@ impl<'a> Completer for CliCompleter<'a> {
                 let vec = parser.matched_vec(); 
                 let mut width_max = 0;
                 if vec.len() > 0 {
-                    if let Some(max) = vec.iter().map(|n| n.0.inner().token().len()).max() {
+                    if let Some(max) = vec.iter().map(|n| n.0.inner().display().len()).max() {
                         width_max = max;
                         for n in vec {
-                            println!("  {:width$}  {}", n.0.inner().token(), n.0.inner().help(), width = max);
+                            println!("  {:width$}  {}", n.0.inner().display(), n.0.inner().help(), width = max);
                         }
                     }
                 }
@@ -134,14 +133,14 @@ impl<'a> Completer for CliCompleter<'a> {
         let vec = parser.matched_vec(); 
         if vec.len() == 1 {
             let node = &vec[0].0;
-            let mut str = node.inner().token().to_string();
+            let mut str = node.inner().display().to_string();
             str.push(' ');
             candidate.push(str);
         }
         else {
             for n in vec {
                 let node = &n.0;
-                candidate.push(node.inner().token().to_string());
+                candidate.push(node.inner().display().to_string());
             }
         }
 
@@ -242,7 +241,7 @@ impl<'a> CliReadline<'a> {
             let mut result = parser.parse_execute(current.top());
             match result {
                 ExecResult::Complete => {
-                    match self.handle_actions(parser.node_token_vec()) {
+                    match self.handle_actions(&mut parser) {
                         Err(CliError::NoActionDefined) => {
                             println!("% No action defined");
                         },
@@ -285,7 +284,7 @@ impl<'a> CliReadline<'a> {
         let mut result = parser.parse_execute(current.top());
         match result {
             ExecResult::Complete => {
-                match self.handle_actions(parser.node_token_vec()) {
+                match self.handle_actions(parser) {
                     Err(CliError::NoActionDefined) => {
                         println!("% No action defined");
                     }
@@ -293,13 +292,13 @@ impl<'a> CliReadline<'a> {
                         println!("% Unknown action error in parent node");
                     }
                     Ok(()) => {
-                        self.cli.set_mode(current.name());
+                        self.cli.set_mode(current.name()).unwrap();
                         //println!("execute {}", line);
                     }
                 }
 
                 // We set mode up, if the command exists.
-                self.cli.set_mode(current.name());
+                self.cli.set_mode(current.name()).unwrap();
             }
             _ => {
                 match current.parent() {
@@ -316,14 +315,27 @@ impl<'a> CliReadline<'a> {
         result
     }
 
-    fn handle_actions(&self, node_token_vec: CliNodeTokenVec) -> Result<(), CliError> {
-        let (node, token) = node_token_vec.last().unwrap();
+    fn handle_actions(&self, parser: &mut CliParser) -> Result<(), CliError> {
+        // Populate mode params first.
+        println!("** handle_actions");
+
+/*
+        // Populate params and keywords.
+        for n in node_token_vec.iter() {
+            let node = n.0.clone();
+
+            if self.cli.is_debug() {
+
+            }
+        }
+
+*/
+        let node = parser.node_executable().unwrap();
 
         if node.inner().actions().len() > 0 {
             for action in node.inner().actions().iter() {
                 action.handle(&self.cli)?;
             }
-
             Ok(())
         }
         else {

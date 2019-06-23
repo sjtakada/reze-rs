@@ -22,6 +22,7 @@ use mio_uds::UnixStream;
 use serde_json;
 use rustyline::error::ReadlineError;
 
+use super::config::Config;
 use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
@@ -50,6 +51,9 @@ pub struct Cli {
 
     // Current privilege.
     privilege: Cell<u8>,
+
+    // Debug mode.
+    debug: bool,
 }
 
 impl Cli {
@@ -61,18 +65,21 @@ impl Cli {
             mode: RefCell::new(String::new()),
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
+            debug: false,
         }
     }
 
     // Entry point of shell initialization.
-    pub fn init(&mut self, json_dir: &str) -> Result<(), CliError> {
+    pub fn init(&mut self, config: Config) -> Result<(), CliError> {
+        self.debug = config.debug();
+
         // Initlaize signals.
         self.init_signals()?;
         
         // TBD: Terminal init
 
         // Initialize CLI modes.
-        let mut path = PathBuf::from(json_dir);
+        let mut path = PathBuf::from(config.json().unwrap());
         path.push(CLI_MODE_FILE);
         self.init_cli_modes(&path)?;
 
@@ -80,7 +87,7 @@ impl Cli {
         self.init_builtins()?;
 
         // Initialize CLI comand definitions.
-        let path = PathBuf::from(json_dir);
+        let path = PathBuf::from(config.json().unwrap());
         self.init_cli_commands(&path)?;
         self.set_mode(CLI_INITIAL_MODE)?;
 
@@ -150,7 +157,7 @@ impl Cli {
     pub fn call_builtin(&self, func: &str, params: &Vec<String>) -> Result<(), CliError> {
         match self.builtins.get(func) {
             Some(func) => {
-                func(self, params);
+                func(self, params).unwrap();
                 Ok(())
             },
             None => {
@@ -160,7 +167,7 @@ impl Cli {
     }
 
     fn can_exit(&self) -> bool {
-        let mut mode = self.mode.borrow_mut();
+        let mode = self.mode.borrow_mut();
         if String::from(mode.as_ref()) == CLI_INITIAL_MODE {
             true
         }
@@ -178,7 +185,7 @@ impl Cli {
     }
 
     pub fn mode(&self) -> String {
-        let mut mode = self.mode.borrow_mut();
+        let mode = self.mode.borrow_mut();
         String::from(mode.as_ref())
     }
 
@@ -188,6 +195,10 @@ impl Cli {
 
     pub fn privilege(&self) -> u8 {
         self.privilege.get()
+    }
+
+    pub fn is_debug(&self) -> bool {
+        self.debug
     }
 
     pub fn current(&self) -> Option<Rc<CliTree>> {
@@ -235,7 +246,7 @@ impl Cli {
     pub fn set_mode_up(&self) -> Result<(), CliError> {
         let current = self.current().unwrap();
         if let Some(parent) = current.parent() {
-            self.set_mode(parent.name());
+            self.set_mode(parent.name()).unwrap();
         }
 
         Ok(())
@@ -307,25 +318,25 @@ impl Cli {
         Ok(())
     }
 
-    fn parse_defun(&mut self, tokens: &serde_json::Value,
+    fn parse_defun(&mut self, defun_tokens: &serde_json::Value,
                    command: &serde_json::Value) {
         if command["mode"].is_array() {
             for mode in command["mode"].as_array().unwrap() {
                 if let Some(mode) = mode.as_str() {
                     if let Some(tree) = self.trees.get(mode) {
-                        tree.build_command(tokens, command);
+                        tree.build_command(defun_tokens, command);
                     }
                 }
             }
         }
     }
 
-    fn parse_defun_all(&mut self, tokens: &serde_json::Value,
+    fn parse_defun_all(&mut self, defun_tokens: &serde_json::Value,
                        commands: &serde_json::Value) {
-        if tokens.is_object() && commands.is_array() {
+        if defun_tokens.is_object() && commands.is_array() {
             let commands = commands.as_array().unwrap();
             for command in commands {
-                self.parse_defun(&tokens, &command);
+                self.parse_defun(&defun_tokens, &command);
             }
         }
     }
@@ -373,8 +384,8 @@ impl Cli {
         let mut path = env::temp_dir();
         path.push("rzrtd.cli");
 
-        let mut stream = match UnixStream::connect(path) {
-            Ok(mut stream) => stream,
+        let _stream = match UnixStream::connect(path) {
+            Ok(stream) => stream,
             Err(_) => return Err(CliError::ConnectError),
         };
         

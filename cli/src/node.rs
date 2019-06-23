@@ -10,7 +10,7 @@ use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefMut;
 use std::cell::RefCell;
-//use std::collections::HashMap;
+use std::collections::HashMap;
 
 use super::collate::*;
 use super::action::CliAction;
@@ -21,6 +21,7 @@ const CLI_TOKEN_IPV4_PREFIX: &str = "A.B.C.D/M";
 const CLI_TOKEN_IPV6_ADDRESS: &str = "X:X::X:X";
 const CLI_TOKEN_IPV6_PREFIX: &str = "X:X::X:X/M";
 const CLI_TOKEN_WORD: &str = "WORD";
+const CLI_TOKEN_LINE: &str = "LINE";
 //const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
 pub const CLI_DEFAULT_NODE_PRIVILEGE: u8 = 15;
 
@@ -34,14 +35,24 @@ pub enum NodeType {
     IPv6Address,
     Range,
     Word,
+    Line,
     Community,
     Array,
     Keyword,
     Dummy,
 }
 
+pub enum Value {
+    Number(i64),
+    Bool(bool),
+    String(String),
+    Array(Vec<Value>),
+}
+
 // CLI Node trait: Base interface for various type of CliNode.
 pub trait CliNode {
+    // Trait functions.
+
     // Return inner.
     fn inner(&self) -> Ref<CliNodeInner>;
 
@@ -50,6 +61,16 @@ pub trait CliNode {
 
     // Return match result and flag against input.
     fn collate(&self, input: &str) -> MatchResult;
+
+    // Capture values into specific key and type.
+    fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
+        storage.insert(String::from(self.inner().defun()), Value::String(String::from(input)));
+    }
+
+    // Return true if it is LINE.
+    fn is_line(&self) -> bool {
+        false
+    }
 
     // Set executable.
     fn set_executable(&self) {
@@ -75,11 +96,11 @@ pub struct CliNodeInner {
     // Defun token.
     defun: String,
 
-    // Help string.
+    // Long help.
     help: String,
 
-    // CLI token.
-    token: String,
+    // Display token for short help.
+    display: String,
 
     // Node vector is sorted.
     sorted: Cell<bool>,
@@ -93,6 +114,9 @@ pub struct CliNodeInner {
     // Hidden flag.
     hidden: Cell<bool>,
 
+    // Can show only once in candidate.
+    only_once: Cell<bool>,
+
     // Next candidate.
     next: RefCell<CliNodeVec>,
 
@@ -100,39 +124,61 @@ pub struct CliNodeInner {
     actions: RefCell<Vec<Rc<CliAction>>>,
 }
 
-//
+// CliNodeInner:
+//   Common variable for all type of CliNode.
 impl CliNodeInner {
-    pub fn new(id: &str, defun: &str, help: &str, token: &str) -> CliNodeInner {
+    // Constructor.
+    pub fn new(id: &str, defun: &str, help: &str, display: &str) -> CliNodeInner {
         CliNodeInner {
             id: String::from(id),
             defun: String::from(defun),
             help: String::from(help),
-            token: String::from(token),
+            display: String::from(display),
             sorted: Cell::new(false),
             executable: Cell::new(false),
             privilege: Cell::new(CLI_DEFAULT_NODE_PRIVILEGE),
             hidden: Cell::new(false),
+            only_once: Cell::new(false),
             next: RefCell::new(Vec::new()),
             actions: RefCell::new(Vec::new()),
         }
     }
 
+    // Node ID.
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    // Defun tokne.
     pub fn defun(&self) -> &str {
         &self.defun
     }
 
+    // Help string.
     pub fn help(&self) -> &str {
         &self.help
     }
 
-    pub fn token(&self) -> &str {
-        &self.token
+    // Display string.
+    pub fn display(&self) -> &str {
+        &self.display
     }
 
-    pub fn next(&self) -> RefMut<CliNodeVec> {
-        self.next.borrow_mut()
+    // Sorted flag.
+    pub fn is_sorted(&self) -> bool {
+        self.sorted.get()
     }
 
+    // Executable flag.
+    pub fn is_executable(&self) -> bool {
+        self.executable.get()
+    }
+
+    pub fn set_executable(&self) {
+        self.executable.set(true);
+    }
+
+    // Privilege.
     pub fn privilege(&self) -> u8 {
         self.privilege.get()
     }
@@ -141,17 +187,25 @@ impl CliNodeInner {
         self.privilege.set(privilege);
     }
 
+    // Hidden flag.
     pub fn is_hidden(&self) -> bool {
         self.hidden.get()
     }
 
-    pub fn set_executable(&self) {
-        self.executable.set(true);
+    // Only once flag.
+    pub fn is_only_once(&self) -> bool {
+        self.only_once.get()
     }
 
-    pub fn is_executable(&self) -> bool {
-        self.executable.get()
+    pub fn set_only_once(&self) {
+        self.only_once.set(true);
     }
+
+    // Vector of next nodes.
+    pub fn next(&self) -> RefMut<CliNodeVec> {
+        self.next.borrow_mut()
+    }
+
 
     pub fn push_action(&self, action: Rc<CliAction>) {
         self.actions.borrow_mut().push(action);
@@ -162,14 +216,15 @@ impl CliNodeInner {
     }
 
     pub fn sort_recursive(&self) {
-        self.next.borrow_mut().sort_by(|a, b| a.inner().token().partial_cmp(b.inner().token()).unwrap());
-        self.sorted.set(true);
+        if !self.sorted.get() {
+            self.next.borrow_mut().sort_by(|a, b| a.inner().display().partial_cmp(b.inner().display()).unwrap());
+            self.sorted.set(true);
 
-        for n in self.next.borrow_mut().iter() {
-            n.sort_recursive();
+            for n in self.next.borrow_mut().iter() {
+                n.sort_recursive();
+            }
         }
     }
-
 }
 
 // CLI dummy node:
@@ -204,22 +259,18 @@ impl CliNode for CliNodeDummy {
 //   static literal.
 pub struct CliNodeKeyword {
     inner: RefCell<CliNodeInner>,
-    enum_key: Option<String>,
+
+    key: Option<String>,
 }
 
 impl CliNodeKeyword {
-    pub fn new(id: &str, defun: &str, help: &str, enum_key: Option<&str>) -> CliNodeKeyword {
-        match enum_key {
-            Some(enum_key) =>
-                CliNodeKeyword {
-                    inner: RefCell::new(CliNodeInner::new(id, defun, help, defun)),
-                    enum_key: Some(String::from(enum_key)),
-                },
-            None => 
-                CliNodeKeyword {
-                    inner: RefCell::new(CliNodeInner::new(id, defun, help, defun)),
-                    enum_key: None
-                },
+    pub fn new(id: &str, defun: &str, help: &str, key: Option<&str>) -> CliNodeKeyword {
+        CliNodeKeyword {
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, defun)),
+            key: match key {
+                Some(key) => Some(String::from(key)),
+                None => None
+            }
         }
     }
 }
@@ -235,31 +286,31 @@ impl CliNode for CliNodeKeyword {
 
     fn collate(&self, input: &str) -> MatchResult {
         let input_len = input.len();
-        let token_len = self.inner().token.len();
+        let display_len = self.inner().display.len();
         let mut pos;
 
-        if input_len == token_len {
-            if input == self.inner().token {
+        if input_len == display_len {
+            if input == self.inner().display {
                 return MatchResult::Success(MatchFlag::Full)
             }
 
             pos = input_len;
         }
-        else if input_len < token_len {
-            if self.inner().token.starts_with(input) {
+        else if input_len < display_len {
+            if self.inner().display.starts_with(input) {
                 return MatchResult::Success(MatchFlag::Partial)
             }
 
             pos = input_len;
         }
-        else /* if input_len > token_len */ {
-            pos = token_len + 1;
+        else /* if input_len > display_len */ {
+            pos = display_len + 1;
         }
 
         while pos > 0 {
             pos -= 1;
             let input = &input[..pos];
-            if self.inner().token.starts_with(input) {
+            if self.inner().display.starts_with(input) {
                 return MatchResult::Failure(pos)
             }
         }
@@ -267,6 +318,16 @@ impl CliNode for CliNodeKeyword {
         MatchResult::Failure(pos)
     }
 
+    fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
+        match &self.key {
+            Some(key) => {
+                storage.insert(String::from(&key[..]), Value::String(String::from(input)));
+            },
+            None => {
+                storage.insert(String::from(self.inner().defun()), Value::Bool(true));
+            }
+        }
+    }
 }
 
 // CLI range node:
@@ -312,6 +373,11 @@ impl CliNode for CliNodeRange {
         }
 
         MatchResult::Failure(pos)
+    }
+
+    fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
+        let number = input.parse::<i64>().unwrap();
+        storage.insert(String::from(self.inner().defun()), Value::Number(number));
     }
 }
 
@@ -855,7 +921,44 @@ impl CliNode for CliNodeWord {
     }
 
     fn collate(&self, _input: &str) -> MatchResult {
-        MatchResult::Success(MatchFlag::Incomplete)
+        MatchResult::Success(MatchFlag::Partial)
+    }
+}
+
+// CLI Line node:
+//   match strings toward the end of line.
+pub struct CliNodeLine {
+    inner: RefCell<CliNodeInner>,
+}
+
+impl CliNodeLine {
+    pub fn new(id: &str, defun: &str, help: &str) -> CliNodeLine {
+        CliNodeLine {
+            inner: RefCell::new(CliNodeInner::new(id, defun, help, CLI_TOKEN_LINE)),
+        }
+    }
+}
+
+impl CliNode for CliNodeLine {
+    fn inner(&self) -> Ref<CliNodeInner> {
+        self.inner.borrow()
+    }
+
+    fn node_type(&self) -> NodeType {
+        NodeType::Line
+    }
+
+    fn collate(&self, _input: &str) -> MatchResult {
+        MatchResult::Success(MatchFlag::Partial)
+    }
+
+    fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
+        println!("*** {}", input);
+        storage.insert(String::from(self.inner().defun()), Value::String(input.to_string()));
+    }
+
+    fn is_line(&self) -> bool {
+        true
     }
 }
 
@@ -893,7 +996,7 @@ mod tests {
     pub fn test_node_range_1() {
         let node = CliNodeRange::new("range", "RANGE", "help", 100i64, 9999i64);
 
-        assert_eq!(node.inner().token(), "<100-9999>");
+        assert_eq!(node.inner().display(), "<100-9999>");
 
         let result = node.collate("100");
         assert_eq!(result, MatchResult::Success(MatchFlag::Full));
@@ -912,7 +1015,7 @@ mod tests {
     pub fn test_node_range_2() {
         let node = CliNodeRange::new("range", "RANGE", "help", 1i64, 4294967295i64);
 
-        assert_eq!(node.inner().token(), "<1-4294967295>");
+        assert_eq!(node.inner().display(), "<1-4294967295>");
 
         let result = node.collate("0");
         assert_eq!(result, MatchResult::Failure(0));

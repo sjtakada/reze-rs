@@ -31,6 +31,7 @@ pub enum TokenType {
     IPv6Address,
     Range,
     Word,
+    Line,
     Community,
     Array,
     Keyword,
@@ -54,6 +55,7 @@ impl TokenType {
             TokenType::IPv6Address => "IPv6Address",
             TokenType::Range => "Range",
             TokenType::Word => "Word",
+            TokenType::Line => "Line",
             TokenType::Community => "Community",
             TokenType::Array => "Array",
             TokenType::Keyword => "Keyword",
@@ -115,7 +117,7 @@ impl CliTree {
         &self.prompt
     }
 
-    pub fn build_command(&self, tokens: &serde_json::Value,
+    pub fn build_command(&self, defun_tokens: &serde_json::Value,
                          command: &serde_json::Value) {
         let defun = &command["defun"];
         if defun.is_string() {
@@ -128,18 +130,18 @@ impl CliTree {
             cv.push(self.top.borrow().clone());
 
             CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
-                                     &mut s, tokens, command, privilege);
+                                     &mut s, defun_tokens, command, privilege);
         }
     }
 
     fn build_recursive(curr: &mut CliNodeVec, head: &mut CliNodeVec,
                        tail: &mut CliNodeVec, s: &mut String,
-                       tokens: &serde_json::Value, command: &serde_json::Value,
+                       defun_tokens: &serde_json::Value, command: &serde_json::Value,
                        privilege: u8) -> TokenType {
         let mut is_head = true;
 
         while s.len() > 0 {
-            let (token_type, token) = CliTree::get_cli_token(s);
+            let (token_type, token) = CliTree::get_defun_token(s);
 
             match token_type {
                 TokenType::LeftParen |
@@ -152,11 +154,17 @@ impl CliTree {
                     while {
                         let mut cv = curr.clone();
                         token_type = CliTree::build_recursive(&mut cv, &mut hv, &mut tv,
-                                                                  s, tokens, command, privilege);
+                                                                  s, defun_tokens, command, privilege);
                         token_type == TokenType::VerticalBar
                     } { }
 
-                    if token_type == TokenType::RightBrace || token_type == TokenType::RightBracket {
+                    if token_type == TokenType::RightBrace {
+                        for h in hv {
+                            h.inner().set_only_once();
+                            CliTree::vector_add_node_each(&mut tv, h.clone());
+                        }
+                    }
+                    else if token_type == TokenType::RightBracket {
                         for h in hv {
                             CliTree::vector_add_node_each(&mut tv, h.clone());
                         }
@@ -180,7 +188,7 @@ impl CliTree {
                 _ => {
                     let token = token.unwrap();
 
-                    if let Some(new_node) = CliTree::new_node_by_type(token_type, tokens, &token) {
+                    if let Some(new_node) = CliTree::new_node_by_type(token_type, defun_tokens, &token) {
                         let next = match CliTree::find_next_by_node(curr, new_node.clone()) {
                             None => {
                                 CliTree::vector_add_node_each(curr, new_node.clone());
@@ -249,7 +257,7 @@ impl CliTree {
 
     // Parse string to return:
     //   TokenType, token and remainder of string.
-    fn get_cli_token(s: &mut String) -> (TokenType, Option<String>) {
+    fn get_defun_token(s: &mut String) -> (TokenType, Option<String>) {
         let offset;
         let token_type;
 
@@ -294,7 +302,7 @@ impl CliTree {
                         offset = s.find(|c: char|
                                         c == '(' || c == ')' ||
                                         c == '{' || c == '}' ||
-                                        c == '[' || c == '[' ||
+                                        c == '[' || c == ']' ||
                                         c == '|' || c == ' ').unwrap_or(s.len());
 
                         let word = &s[..offset];
@@ -318,6 +326,9 @@ impl CliTree {
                             },
                             "WORD" => {
                                 token_type = TokenType::Word;
+                            },
+                            "LINE" => {
+                                token_type = TokenType::Line;
                             },
                             "COMMUNITY" => {
                                 token_type = TokenType::Community;
@@ -374,51 +385,53 @@ impl CliTree {
     }
 
     // Return CLI Node by TokenType.
-    fn new_node_by_type(token_type: TokenType, tokens: &serde_json::Value, token: &str) -> Option<Rc<CliNode>> {
-        match tokens.get(token) {
-            Some(token_def) if token_def.is_object() => {
+    fn new_node_by_type(token_type: TokenType, defun_tokens: &serde_json::Value, token: &str) -> Option<Rc<CliNode>> {
+        if defun_tokens[token].is_object() {
+            let token_def = defun_tokens[token].as_object().unwrap();
+            let id = CliTree::get_str_or(token_def, "id", "<id>");
+            let help = CliTree::get_str_or(token_def, "help", "<help>");
+            
+            let node: Rc<CliNode> = match token_type {
+                TokenType::IPv4Prefix => Rc::new(CliNodeIPv4Prefix::new(&id, token, &help)),
+                TokenType::IPv4Address => Rc::new(CliNodeIPv4Address::new(&id, token, &help)),
+                TokenType::IPv6Prefix => Rc::new(CliNodeIPv6Prefix::new(&id, token, &help)),
+                TokenType::IPv6Address => Rc::new(CliNodeIPv6Address::new(&id, token, &help)),
+                TokenType::Range => {
+                    if token_def["range"].is_array() {
+                        let range = token_def["range"].as_array().unwrap();
+                        let min = range[0].as_i64().unwrap();
+                        let max = range[1].as_i64().unwrap();
 
-                let token_def = tokens[token].as_object().unwrap();
-                let id = CliTree::get_str_or(token_def, "id", "<id>");
-                let help = CliTree::get_str_or(token_def, "help", "<help>");
-                
-                let node: Rc<CliNode> = match token_type {
-                    TokenType::IPv4Prefix => Rc::new(CliNodeIPv4Prefix::new(&id, token, &help)),
-                    TokenType::IPv4Address => Rc::new(CliNodeIPv4Address::new(&id, token, &help)),
-                    TokenType::IPv6Prefix => Rc::new(CliNodeIPv6Prefix::new(&id, token, &help)),
-                    TokenType::IPv6Address => Rc::new(CliNodeIPv6Address::new(&id, token, &help)),
-                    TokenType::Range => {
-                        if token_def["range"].is_array() {
-                            let range = token_def["range"].as_array().unwrap();
-                            let min = range[0].as_i64().unwrap();
-                            let max = range[1].as_i64().unwrap();
-
-                            Rc::new(CliNodeRange::new(&id, token, &help, min, max))
-                        }
-                        else {
-                            Rc::new(CliNodeRange::new(&id, token, &help, 0, 1))
-                        }
-                    },
-                    TokenType::Word => Rc::new(CliNodeWord::new(&id, token, &help)),
-                    //TokenType::Community => CliNodeCommunity::new(&id, token, &help),
-                    TokenType::Keyword => {
-                        match token_def.get("enum") {
-                            Some(enum_key) => {
-                                Rc::new(CliNodeKeyword::new(&id, token, &help, enum_key.as_str()))
-                            },
-                            None => {
-                                Rc::new(CliNodeKeyword::new(&id, token, &help, None))
-                            }
-                        }
-                    },
-                    _ => {
-                        return None;
+                        Rc::new(CliNodeRange::new(&id, token, &help, min, max))
                     }
-                };
+                    else {
+                        Rc::new(CliNodeRange::new(&id, token, &help, 0, 1))
+                    }
+                },
+                TokenType::Word => Rc::new(CliNodeWord::new(&id, token, &help)),
+                TokenType::Line => Rc::new(CliNodeLine::new(&id, token, &help)),
+                //TokenType::Community => CliNodeCommunity::new(&id, token, &help),
+                TokenType::Keyword => {
+                    match token_def.get("enum") {
+                        Some(key) => {
+                            Rc::new(CliNodeKeyword::new(&id, token, &help, key.as_str()))
+                        },
+                        None => {
+                            Rc::new(CliNodeKeyword::new(&id, token, &help, None))
+                        }
+                    }
+                },
+                _ => {
+                    return None;
+                }
+            };
 
-                Some(node)
-            },
-            _ => None
+            Some(node)
+        }
+        else {
+            // Debug
+            println!("Unknown defun token {}", token);
+            None
         }
     }
 
@@ -427,7 +440,7 @@ impl CliTree {
             let inner = c.inner();
             let next = inner.next();
             for m in next.iter() {
-                if m.inner().token() == node.inner().token() {
+                if m.inner().display() == node.inner().display() {
                     return Some(m.clone());
                 }
             }
@@ -453,22 +466,22 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_tree_get_cli_token_1() {
+    pub fn test_tree_get_defun_token_1() {
         let mut s = String::from("ip route IPV4-PREFIX:1 IPV4-ADDRESS:2");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "ip");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "route");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::IPv4Prefix);
         assert_eq!(token.unwrap(), "IPV4-PREFIX:1");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::IPv4Address);
         assert_eq!(token.unwrap(), "IPV4-ADDRESS:2");
 
@@ -479,31 +492,31 @@ mod tests {
     pub fn test_tree_getcli_token_2() {
         let mut s = String::from("show (ip|ipv6) route");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "show");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::LeftParen);
         assert_eq!(token.unwrap(), "(");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "ip");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::VerticalBar);
         assert_eq!(token.unwrap(), "|");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "ipv6");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::RightParen);
         assert_eq!(token.unwrap(), ")");
 
-        let (t, token) = CliTree::get_cli_token(&mut s);
+        let (t, token) = CliTree::get_defun_token(&mut s);
         assert_eq!(t, TokenType::Keyword);
         assert_eq!(token.unwrap(), "route");
 
@@ -588,23 +601,23 @@ mod tests {
         assert_eq!(next.len(), 1);
 
         let n0 = &next[0];
-        assert_eq!(n0.inner().token(), "a");
+        assert_eq!(n0.inner().display(), "a");
 
         let inner = n0.inner();
         let next = inner.next();
         assert_eq!(next.len(), 1);
 
         let n1 = &next[0];
-        assert_eq!(n1.inner().token(), "b");
+        assert_eq!(n1.inner().display(), "b");
 
         let inner = n1.inner();
         let next = inner.next();
         assert_eq!(next.len(), 2);
 
         let n20 = &next[0];
-        assert_eq!(n20.inner().token(), "c");
+        assert_eq!(n20.inner().display(), "c");
         let n21 = &next[1];
-        assert_eq!(n21.inner().token(), "d");
+        assert_eq!(n21.inner().display(), "d");
 
         let inner = n20.inner();
         let next = inner.next();
@@ -615,30 +628,30 @@ mod tests {
         assert_eq!(next.len(), 3);
 
         let n30 = &next[0];
-        assert_eq!(n30.inner().token(), "e");
+        assert_eq!(n30.inner().display(), "e");
 
         let n31 = &next[1];
-        assert_eq!(n31.inner().token(), "f");
+        assert_eq!(n31.inner().display(), "f");
 
         let n32 = &next[2];
-        assert_eq!(n32.inner().token(), "g");
+        assert_eq!(n32.inner().display(), "g");
 
         let inner = n32.inner();
         let next = inner.next();
         assert_eq!(next.len(), 4);
 
         let n40 = &next[0];
-        assert_eq!(n40.inner().token(), "e");
+        assert_eq!(n40.inner().display(), "e");
 
         let n41 = &next[1];
-        assert_eq!(n41.inner().token(), "f");
+        assert_eq!(n41.inner().display(), "f");
 
         let n42 = &next[2];
-        assert_eq!(n42.inner().token(), "g");
+        assert_eq!(n42.inner().display(), "g");
         assert_eq!(n42.inner().is_executable(), false);
 
         let n43 = &next[3];
-        assert_eq!(n43.inner().token(), "x");
+        assert_eq!(n43.inner().display(), "x");
         assert_eq!(n43.inner().is_executable(), true);
     }
 }

@@ -198,7 +198,7 @@
       "WORD:3": {
         "id": "3",
         "type": "string",
-        "help": "dummy string "
+        "help": ""
       }
     },
     "command": [
@@ -227,7 +227,7 @@
         "type": "keyword",
         "help": "Assign the terminal connection password"
       },
-      "WORD:2": {
+      "LINE:2": {
         "id": "2",
         "type": "string",
         "help": "The UNENCRYPTED (cleartext) line password"
@@ -235,7 +235,7 @@
     },
     "command": [
       {
-        "defun": "password WORD:2",
+        "defun": "password LINE:2",
         "mode": [
           "CONFIG-MODE"
         ],

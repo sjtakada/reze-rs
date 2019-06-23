@@ -8,7 +8,7 @@
 use super::cli::Cli;
 use super::error::CliError;
 
-pub fn help(cli: &Cli, _params: &Vec<String>) -> Result<(), CliError> {
+pub fn help(_cli: &Cli, _params: &Vec<String>) -> Result<(), CliError> {
     println!(r#"Help may be requested at any point in a command by entering
 a question mark '?'.  If nothing matches, the help list will
 be empty and you must backup until entering a '?' shows the
