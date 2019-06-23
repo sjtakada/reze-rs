@@ -5,7 +5,7 @@
 // Readline, rustyline integration.
 //
 
-//use std::collections::HashMap;
+use std::collections::HashMap;
 use std::cell::RefCell;
 //use std::cell::Cell;
 use std::rc::Rc;
@@ -27,10 +27,8 @@ use super::tree::CliTree;
 use super::parser::*;
 use super::node::CliNode;
 use super::node::NodeType;
+//use super::node::Value;
 use super::error::CliError;
-
-type CliNodeTokenTuple = (Rc<CliNode>, String);
-type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
 
 //
 pub struct CliCompleter<'a> {
@@ -243,7 +241,7 @@ impl<'a> CliReadline<'a> {
             let mut result = parser.parse_execute(current.top());
             match result {
                 ExecResult::Complete => {
-                    match self.handle_actions(parser.node_token_vec()) {
+                    match self.handle_actions(&mut parser) {
                         Err(CliError::NoActionDefined) => {
                             println!("% No action defined");
                         },
@@ -286,7 +284,7 @@ impl<'a> CliReadline<'a> {
         let mut result = parser.parse_execute(current.top());
         match result {
             ExecResult::Complete => {
-                match self.handle_actions(parser.node_token_vec()) {
+                match self.handle_actions(parser) {
                     Err(CliError::NoActionDefined) => {
                         println!("% No action defined");
                     }
@@ -317,26 +315,27 @@ impl<'a> CliReadline<'a> {
         result
     }
 
-    fn handle_actions(&self, node_token_vec: CliNodeTokenVec) -> Result<(), CliError> {
+    fn handle_actions(&self, parser: &mut CliParser) -> Result<(), CliError> {
         // Populate mode params first.
-
         println!("** handle_actions");
 
+/*
         // Populate params and keywords.
         for n in node_token_vec.iter() {
             let node = n.0.clone();
 
             if self.cli.is_debug() {
+
             }
         }
 
-        let (node, _token) = node_token_vec.last().unwrap();
+*/
+        let node = parser.node_executable().unwrap();
 
         if node.inner().actions().len() > 0 {
             for action in node.inner().actions().iter() {
                 action.handle(&self.cli)?;
             }
-
             Ok(())
         }
         else {

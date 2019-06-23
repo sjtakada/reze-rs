@@ -953,9 +953,8 @@ impl CliNode for CliNodeLine {
     }
 
     fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
-        let number = input.parse::<i64>().unwrap();
         println!("*** {}", input);
-//        storage.insert(String::from(self.inner().defun()), Value::Number(number));
+        storage.insert(String::from(self.inner().defun()), Value::String(input.to_string()));
     }
 
     fn is_line(&self) -> bool {

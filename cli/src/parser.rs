@@ -10,11 +10,13 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::collections::HashSet;
+use std::collections::HashMap;
 
 //use serde_json;
 
 use super::error::CliError;
 use super::node::CliNode;
+use super::node::Value;
 use super::collate::*;
 
 // Constants.
@@ -23,8 +25,6 @@ const CLI_DEFAULT_PARSER_PRIVILEGE: u8 = 1;
 // Type aliases.
 type CliNodeMatchStateTuple = (Rc<CliNode>, MatchResult);
 type CliNodeMatchStateVec = Vec<CliNodeMatchStateTuple>;
-type CliNodeTokenTuple = (Rc<CliNode>, String);
-type CliNodeTokenVec = Vec<CliNodeTokenTuple>;
 
 // CLI Execution Result.
 #[derive(PartialEq, Copy, Clone)]
@@ -71,8 +71,11 @@ pub struct CliParser {
     // Vector of pair of CliNode and MatchState.
     matched_vec: RefCell<CliNodeMatchStateVec>,
 
-    // Vector of pair of CliNode and input token.
-    node_token_vec: Cell<CliNodeTokenVec>,
+    // Last matched node for execution.
+    node_executable: Option<Rc<CliNode>>,
+
+    // HashMap of captured key value pairs.
+    captured_map: RefCell<HashMap<String, Value>>,
 
     // Record id of node with only once flag.
     only_once_set: RefCell<HashSet<String>>,
@@ -93,7 +96,8 @@ impl CliParser {
             pos_prev: Cell::new(0usize),
             matched_len: Cell::new(0usize),
             matched_vec: RefCell::new(Vec::new()),
-            node_token_vec: Cell::new(Vec::new()),
+            node_executable: None,
+            captured_map: RefCell::new(HashMap::new()),
             only_once_set: RefCell::new(HashSet::new()),
             privilege: CLI_DEFAULT_PARSER_PRIVILEGE,
             executable: false,
@@ -112,7 +116,8 @@ impl CliParser {
         self.pos.set(0);
         self.matched_len.set(0);
         self.matched_vec.replace(Vec::new());
-        self.node_token_vec.replace(Vec::new());
+        self.node_executable = None;
+        self.captured_map.replace(HashMap::new());
         self.only_once_set.borrow_mut().clear();
         self.executable = false;
     }
@@ -145,6 +150,11 @@ impl CliParser {
     // Return reference to current remaining line string.
     pub fn line(&self) -> &str {
         &self.input[self.pos.get()..]
+    }
+
+    // Return executable node.
+    pub fn node_executable(&self) -> Option<Rc<CliNode>> {
+        self.node_executable.clone()
     }
 
     // Return number of matched in current matched.
@@ -236,11 +246,6 @@ impl CliParser {
             self.pos.set(self.pos.get() + pos);
             Some(&self.input[self.pos_prev.get()..self.pos.get()])
         }
-    }
-
-    // Take node token_vec.
-    pub fn node_token_vec(&self) -> CliNodeTokenVec {
-        self.node_token_vec.take()
     }
 
     // Select matched nodes with MatchFlag smaller than or equal to 'limit'.
@@ -439,18 +444,24 @@ impl CliParser {
             }
 
             // Candidate is only one at this point.
-            let tuple: CliNodeTokenTuple = (self.get_candidate(), token.to_string());
-            self.node_token_vec.get_mut().push(tuple);
+            let node = self.get_candidate();
+            if node.is_line() {
+                self.pos.set(self.pos_prev());
+                node.capture(self.line(), &mut self.captured_map.borrow_mut());
+            }
+            else {
+                node.capture(token, &mut self.captured_map.borrow_mut());
+            }
 
             // Line is still remaining, move forward.
             if !self.line().is_empty() {
-                let next = self.get_candidate();
-
                 // if next is LINE, will terminate.
-                if !next.is_line() {
-                    return self.parse_execute(next)
+                if !node.is_line() {
+                    return self.parse_execute(node)
                 }
             }
+
+            self.node_executable = Some(node.clone());
 
             // No more line, make decision.
             if self.get_candidate_result() == MatchResult::Success(MatchFlag::Incomplete) {
