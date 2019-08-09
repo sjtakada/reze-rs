@@ -5,3 +5,4 @@
 // Zebra - IPv4/IPv6 RIB manager, Kernel Interface.
 //
 pub mod master;
+pub mod netlink;

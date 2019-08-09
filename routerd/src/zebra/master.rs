@@ -20,13 +20,19 @@ use crate::core::message::nexus::NexusToProto;
 use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
 
+use super::netlink;
+
 // Store Zebra Client related information.
 struct ClientTuple {
     // Channel sender from Zebra to Protocol
     sender: mpsc::Sender<ZebraToProto>,
 }
 
+// Zebra Master.
 pub struct ZebraMaster {
+
+
+    //
     clients: HashMap<ProtocolType, ClientTuple>
 }
 
@@ -39,11 +45,13 @@ impl ZebraMaster {
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
+
+        // Init netlink socket.
+
+
+
         // Main loop for zebra
         'main: loop {
-            // Take care of protocol specific stuff.
-            // inner.start();
-
             // XXX: handle receiver_p2z 
             while let Ok(d) = receiver_p2z.try_recv() {
                 match d {
@@ -58,7 +66,7 @@ impl ZebraMaster {
                 }
             }
 
-            // 
+            // XXX: handle receiver_n2p
             while let Ok(d) = receiver_n2p.try_recv() {
                 match d {
                     NexusToProto::TimerExpiration(token) => {

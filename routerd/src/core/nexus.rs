@@ -18,7 +18,6 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::sync::mpsc;
 use std::sync::Arc;
-//use std::sync::Weak;
 use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
