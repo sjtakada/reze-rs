@@ -13,7 +13,8 @@ mio-uds = "0.6.7"
 thread-id = "3.3.0"
 libc = "0.2.60"
 
-neli = { git = "https://github.com/jbaublitz/neli.git", rev = "0bfe8f83f92ebb88f2ce7aff0e4387febaa3cc9c" }
+#neli = { git = "https://github.com/jbaublitz/neli.git", rev = "0bfe8f83f92ebb88f2ce7aff0e4387febaa3cc9c" }
+neli = { path = "/home/toshiaki/git/neli" }
 #neli = "0.4.3-r2"
 
 rtable = "0.1.2"

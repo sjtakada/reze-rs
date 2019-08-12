@@ -47,8 +47,8 @@ impl ZebraMaster {
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
 
         // Init netlink socket.
-
-
+        let mut nl = netlink::Netlink::new();
+        nl.init();
 
         // Main loop for zebra
         'main: loop {
