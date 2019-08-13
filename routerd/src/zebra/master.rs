@@ -20,7 +20,7 @@ use crate::core::message::nexus::NexusToProto;
 use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
 
-use super::netlink;
+use super::linux::netlink;
 
 // Store Zebra Client related information.
 struct ClientTuple {
