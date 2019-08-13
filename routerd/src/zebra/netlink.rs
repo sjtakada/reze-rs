@@ -50,7 +50,7 @@ impl Netlink {
         }
     }
 
-    pub fn parse_interface(&self, rtm: Nlmsghdr<Rtm, Ifinfomsg<Ifla>>) {
+    pub fn parse_interface(rtm: Nlmsghdr<Rtm, Ifinfomsg<Ifla>>) {
         // rtm.nl_payload.ifi_family
         // rtm.nl_payload.ifi_type
         // rtm.nl_payload.ifi_index
@@ -69,9 +69,9 @@ impl Netlink {
         }
     }
 
-    pub fn parse_info(&mut self) {
+    pub fn parse_info<P: neli::Nl>(&mut self, parser: &Fn(Nlmsghdr<Rtm, P>) -> ()) {
         println!("*** parse_info");
-        while let Ok(nl) = self.socket.recv_nl::<u16, Ifinfomsg<Ifla>>(None) {
+        while let Ok(nl) = self.socket.recv_nl::<u16, P>(None) {
             match Nlmsg::from(nl.nl_type) {
                 Nlmsg::Done => { println!("OK"); return; }
                 Nlmsg::Error => { println!("Err"); }
@@ -85,7 +85,7 @@ impl Netlink {
                         nl_payload: nl.nl_payload,
                     };
 
-                    self.parse_interface(rtm);
+                    parser(rtm);
                 }
             }
         }
@@ -93,7 +93,7 @@ impl Netlink {
 
     pub fn init(&mut self) {
         self.send_request(RtAddrFamily::Packet, Rtm::Getlink.into());
-        self.parse_info();
+        self.parse_info(&Netlink::parse_interface);
     }
 }
 
