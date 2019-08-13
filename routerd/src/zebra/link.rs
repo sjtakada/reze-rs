@@ -14,7 +14,7 @@ pub trait LinkHandler {
     //fn add_link(&self) -> ?
 
     // Get link information.
-    fn get_link(&self, index: i32) -> Link;
+    fn get_link(&self, index: i32) -> Option<Link>;
 
     // Set MTU.
     fn set_mtu(&self, mtu: u16) -> bool; // ? Error
@@ -31,19 +31,23 @@ pub trait LinkHandler {
 
 // Generic Link information
 pub struct Link {
-    // Link name from OS.
-    name: String,
+    // Interface index.
+    pub index: i32,
+
+    // Name from kernel.
+    pub name: String,
     
     // Hardware address.
-    hwaddr: [u8; 6],
+    pub hwaddr: [u8; 6],
 
     // MTU.
-    mtu: u16,
+    pub mtu: u16,
 }
 
 impl Link {
-    pub fn new(name: &str, hwaddr: [u8; 6], mtu: u16) -> Link {
+    pub fn new(index: i32, name: &str, hwaddr: [u8; 6], mtu: u16) -> Link {
         Link {
+            index,
             name: name.to_string(),
             hwaddr,
             mtu,
@@ -51,11 +55,3 @@ impl Link {
     }
 }
 
-/*
-let lh = LinkHandler::new();
-
-  zebra.lh.get_link_all();
-
-  zebra.register(link_state_change);
-
-*/

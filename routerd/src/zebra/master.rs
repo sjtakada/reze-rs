@@ -20,6 +20,7 @@ use crate::core::message::nexus::NexusToProto;
 use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
 
+use super::link::*;
 use super::linux::netlink;
 
 // Store Zebra Client related information.
@@ -47,8 +48,12 @@ impl ZebraMaster {
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
 
         // Init netlink socket.
-        let mut nl = netlink::Netlink::new();
-        nl.init();
+        let nl = netlink::Netlink::new();
+        let links = nl.get_links_all();
+
+        for l in links {
+            println!("*** ifindex={}, name={}, hwaddr={:?}, mtu={}", l.index, l.name, l.hwaddr, l.mtu);
+        }
 
         // Main loop for zebra
         'main: loop {
