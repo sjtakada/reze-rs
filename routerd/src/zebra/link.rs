@@ -41,11 +41,11 @@ pub struct Link {
     pub hwaddr: [u8; 6],
 
     // MTU.
-    pub mtu: u16,
+    pub mtu: u32,
 }
 
 impl Link {
-    pub fn new(index: i32, name: &str, hwaddr: [u8; 6], mtu: u16) -> Link {
+    pub fn new(index: i32, name: &str, hwaddr: [u8; 6], mtu: u32) -> Link {
         Link {
             index,
             name: name.to_string(),

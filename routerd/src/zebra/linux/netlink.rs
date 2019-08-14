@@ -20,20 +20,15 @@ use super::super::link::*;
 use super::super::address::*;
 use super::super::route::*;
 
-//use std::collections::HashMap;
-//fn attr_vec2map<T: Eq, P: Copy>(v: Vec<Rtattr<T, P>>) -> HashMap<T, P> {
-//    v.into_iter().map(|rta| (rta.rta_type, rta.rta_payload)).collect()
+//fn attr_lookup_by_type<'a, T: Eq, P>(v: &'a Vec<Rtattr<T, P>>, t: T) -> Option<&'a P> {
+//    for a in v {
+//        if a.rta_type == t {
+//            return Some(&a.rta_payload)
+//        }
+//    }
+//
+//    None
 //}
-
-fn attr_lookup_by_type<'a, T: Eq, P>(v: &'a Vec<Rtattr<T, P>>, t: T) -> Option<&'a P> {
-    for a in v {
-        if a.rta_type == t {
-            return Some(&a.rta_payload)
-        }
-    }
-
-    None
-}
 
 // Netlink.
 pub struct Netlink {
@@ -66,7 +61,7 @@ impl Netlink {
         };
 
         if let Err(err) = self.socket.borrow_mut().send_nl(nlh) {
-            println!("*** {:?}", err);
+            println!("Error: socket.send_nl() {:?}", err);
         }
     }
 
@@ -78,23 +73,32 @@ impl Netlink {
         // rtm.nl_payload.ifi_change?  not public
         // rtm.nl_payload.rtattrs
 
-/*
-        for rta in rtm.nl_payload.rtattrs {
-            print!("rtattrs len={}, type={:?}, ", rta.rta_len, rta.rta_type);
-            print!("{:?}", rta.rta_payload);
-            println!("");
+        let mut hwaddr: [u8; 6] = [0, 0, 0, 0, 0, 0];
+        let mut mtu = None;
+        let mut ifname = None;
+
+        for attr in &rtm.nl_payload.rtattrs {
+            fn to_u32(b: &[u8]) -> u32 {
+                b[0] as u32 | (b[1] as u32) << 8 | (b[2] as u32) << 16 | (b[3] as u32) << 24
+            }
+
+            match attr.rta_type {
+                Ifla::Address => {
+                    hwaddr[..6].clone_from_slice(&attr.rta_payload);
+                },
+                Ifla::Mtu => {
+                    mtu = Some(to_u32(&attr.rta_payload));
+                },
+                Ifla::Ifname => {
+                    ifname = Some(str::from_utf8(&attr.rta_payload).unwrap());
+                },
+                _ => {
+                    //
+                }
+            }
         }
-*/
-//        let map = attr_vec2map(rtm.nl_payload.rtattrs);
-        let address = attr_lookup_by_type(&rtm.nl_payload.rtattrs, Ifla::Address).unwrap();
-        let mtu = attr_lookup_by_type(&rtm.nl_payload.rtattrs, Ifla::Mtu).unwrap();
-        let name = attr_lookup_by_type(&rtm.nl_payload.rtattrs, Ifla::Ifname).unwrap();
 
-        let ifname = str::from_utf8(&name).unwrap();
-        let hwaddr: [u8; 6] = [address[0], address[1], address[2], address[3], address[4], address[5]];
-        let mtuv: u16 = (mtu[1] as u16) << 8 | mtu[0] as u16;
-
-        Link::new(rtm.nl_payload.ifi_index, ifname, hwaddr, mtuv)
+        Link::new(rtm.nl_payload.ifi_index, ifname.unwrap(), hwaddr, mtu.unwrap())
     }
 
     fn parse_info<P: neli::Nl, D>(&self, parser: &Fn(Nlmsghdr<Rtm, P>) -> D) -> Vec<D> {
