@@ -6,6 +6,7 @@
 //
 
 use log::debug;
+use std::rc::Rc;
 
 use std::collections::HashMap;
 use std::thread;
@@ -21,7 +22,7 @@ use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
 
 use super::link::*;
-use super::linux::netlink;
+use super::kernel::*;
 
 // Store Zebra Client related information.
 struct ClientTuple {
@@ -31,15 +32,23 @@ struct ClientTuple {
 
 // Zebra Master.
 pub struct ZebraMaster {
+    // ProtocolType to Zebra Client Tuple Map.
+    clients: HashMap<ProtocolType, ClientTuple>,
 
+    // Ifindex to Link map.
+    links: HashMap<i32, Rc<Link>>,
 
-    //
-    clients: HashMap<ProtocolType, ClientTuple>
+    // Name to Ifindex map.
+    name2ifindex: HashMap<String, i32>,
 }
 
 impl ZebraMaster {
     pub fn new() -> ZebraMaster {
-        ZebraMaster { clients: HashMap::new() }
+        ZebraMaster {
+            clients: HashMap::new(),
+            links: HashMap::new(),
+            name2ifindex: HashMap::new(),
+        }
     }
 
     pub fn start(&mut self,
@@ -47,13 +56,9 @@ impl ZebraMaster {
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
 
-        // Init netlink socket.
-        let nl = netlink::Netlink::new();
-        let links = nl.get_links_all();
-
-        for l in links {
-            println!("*** ifindex={}, name={}, hwaddr={:?}, mtu={}", l.index, l.name, l.hwaddr, l.mtu);
-        }
+        // Init Kernel interface.
+        let kernel = Kernel::new();
+        kernel.init();
 
         // Main loop for zebra
         'main: loop {

@@ -20,19 +20,12 @@ use super::super::link::*;
 use super::super::address::*;
 use super::super::route::*;
 
-//fn attr_lookup_by_type<'a, T: Eq, P>(v: &'a Vec<Rtattr<T, P>>, t: T) -> Option<&'a P> {
-//    for a in v {
-//        if a.rta_type == t {
-//            return Some(&a.rta_payload)
-//        }
-//    }
-//
-//    None
-//}
-
 // Netlink.
 pub struct Netlink {
+    //
     socket: RefCell<neli::socket::NlSocket>,
+
+    //
 }
 
 impl Netlink {
