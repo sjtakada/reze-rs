@@ -7,6 +7,7 @@
 use std::mem;
 use std::str;
 use std::cell::RefCell;
+use std::net::IpAddr;
 
 use libc::sockaddr_nl;
 
@@ -31,7 +32,10 @@ pub struct Netlink {
 impl Netlink {
     // Constructor.
     pub fn new() -> Netlink {
-        let socket = NlSocket::connect(NlFamily::Route, None, None, true).unwrap();
+        let group = vec![1, 5, 7, 9, 11];
+        let mut socket = NlSocket::connect2(NlFamily::Route, Some(group), true).unwrap();
+
+//        socket.nonblock().unwrap();
 
         // set buffersize
         // set non-blocking
@@ -49,13 +53,40 @@ impl Netlink {
             let len = None;
             let nlmsg_flags = vec![NlmF::Request, NlmF::Root, NlmF::Match];
             let nlmsg_seq = None;
-            let nlmsg_pid = None;
-            Nlmsghdr::new(len, nlmsg_type, nlmsg_flags, nlmsg_seq, nlmsg_pid, rtg)
+            Nlmsghdr::new(len, nlmsg_type, nlmsg_flags, nlmsg_seq, None, Some(rtg))
         };
 
         if let Err(err) = self.socket.borrow_mut().send_nl(nlh) {
             println!("Error: socket.send_nl() {:?}", err);
         }
+    }
+
+    fn parse_info<P: neli::Nl, D>(&self, parser: &Fn(Nlmsghdr<Rtm, P>) -> D) -> Vec<D> {
+        let mut v = Vec::new();
+        println!("** parse_info 00");
+
+        while let Ok(nl) = self.socket.borrow_mut().recv_nl::<Rtm, P>(None) {
+        println!("** parse_info 10");
+            match nl.nl_type {
+                Rtm::Done => {
+                    // We want to log probably.
+                    println!("Done");
+                    break;
+                },
+                Rtm::Error => {
+                    // We want to log probably.
+                    println!("Error");
+                    break;
+                }
+                _ => {
+                    v.push(parser(nl));
+                }
+            }
+        }
+        self.socket.borrow_mut().reset_buffer();
+
+        println!("** parse_info 99");
+        v
     }
 
     fn parse_interface(rtm: Nlmsghdr<Rtm, Ifinfomsg<Ifla>>) -> Link {
@@ -70,7 +101,7 @@ impl Netlink {
         let mut mtu = None;
         let mut ifname = None;
 
-        for attr in &rtm.nl_payload.rtattrs {
+        for attr in &rtm.nl_payload.as_ref().unwrap().rtattrs {
             fn to_u32(b: &[u8]) -> u32 {
                 b[0] as u32 | (b[1] as u32) << 8 | (b[2] as u32) << 16 | (b[3] as u32) << 24
             }
@@ -91,46 +122,55 @@ impl Netlink {
             }
         }
 
-        Link::new(rtm.nl_payload.ifi_index, ifname.unwrap(), hwaddr, mtu.unwrap())
+        Link::new(rtm.nl_payload.as_ref().unwrap().ifi_index, ifname.unwrap(), hwaddr, mtu.unwrap())
     }
 
-    fn parse_info<P: neli::Nl, D>(&self, parser: &Fn(Nlmsghdr<Rtm, P>) -> D) -> Vec<D> {
-        let mut v = Vec::new();
+    fn parse_interface_address(rtm: Nlmsghdr<Rtm, Ifaddrmsg<Ifa>>) -> Connected {
+        println!("*** prefixlen {}", rtm.nl_payload.as_ref().unwrap().ifa_prefixlen);
 
-        while let Ok(nl) = self.socket.borrow_mut().recv_nl::<u16, P>(None) {
-            match Nlmsg::from(nl.nl_type) {
-                Nlmsg::Done => {
-                    // We want to log probably.
-                    println!("Done");
-                    break;
-                },
-                Nlmsg::Error => {
-                    // We want to log probably.
-                    println!("Error");
-                    break;
+        let mut local = None;
+        let mut address = None;
+        let mut broadcast = None;
+
+        for attr in &rtm.nl_payload.as_ref().unwrap().rtattrs {
+            fn to_addr(b: &[u8]) -> Option<IpAddr> {
+                use std::convert::TryFrom;
+                if let Ok(tup) = <&[u8; 4]>::try_from(b) {
+                    Some(IpAddr::from(*tup))
+                } else if let Ok(tup) = <&[u8; 16]>::try_from(b) {
+                    Some(IpAddr::from(*tup))
+                } else {
+                    None
                 }
-                _ => {
-                    let rtm = Nlmsghdr {
-                        nl_len: nl.nl_len,
-                        nl_type: Rtm::from(nl.nl_type),
-                        nl_flags: nl.nl_flags,
-                        nl_seq: nl.nl_seq,
-                        nl_pid: nl.nl_pid,
-                        nl_payload: nl.nl_payload,
-                    };
+            }
 
-                    v.push(parser(rtm));
+            match attr.rta_type {
+                Ifa::Local => {
+                    local = to_addr(&attr.rta_payload);
+                },
+                Ifa::Address => {
+                    address = to_addr(&attr.rta_payload);
+                },
+                Ifa::Broadcast => {
+                    broadcast = to_addr(&attr.rta_payload);
+                },
+                _ => {
                 }
             }
         }
 
-        v
-    }
+        if let Some(local) = local {
+            println!("*** local {}", local);
+        }
+        if let Some(address) = address {
+            println!("*** address {}", address);
+        }
+        if let Some(broadcast) = broadcast {
+            println!("*** broadcast {}", broadcast);
+        }
 
-//    pub fn init(&mut self) {
-//        self.send_request(RtAddrFamily::Packet, Rtm::Getlink.into());
-//        self.parse_info(&Netlink::parse_interface);
-//    }
+        Connected::new()
+    }
 }
 
 impl LinkHandler for Netlink {
@@ -165,4 +205,12 @@ impl LinkHandler for Netlink {
 
     // Set callback for link stat change.
 //    fn set_link_change_callback(&self, &Fn());
+}
+
+impl AddressHandler for Netlink {
+    // Get all addresses from kernel
+    fn get_addresses_all(&self, family: RtAddrFamily) -> Vec<Connected> {
+        self.send_request(family, Rtm::Getaddr.into());
+        self.parse_info(&Netlink::parse_interface_address)
+    }
 }
