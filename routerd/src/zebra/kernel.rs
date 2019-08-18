@@ -5,22 +5,21 @@
 // Zebra - Kernel interface
 //
 
-use neli::consts::*;
-
 use super::link::*;
 use super::address::*;
-use super::linux::netlink::*;
+
+use super::linux::rt_netlink::*;
 
 // Kernel.
 pub struct Kernel {
     // Netlink socket.
-    netlink: Netlink,
+    rt_netlink: RtNetlink,
 }
 
 impl Kernel {
     pub fn new() -> Kernel {
         Kernel {
-            netlink: Netlink::new(),
+            rt_netlink: RtNetlink::new(),
         }
     }
 
