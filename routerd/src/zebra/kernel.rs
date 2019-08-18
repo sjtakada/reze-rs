@@ -8,18 +8,20 @@
 use super::link::*;
 use super::address::*;
 
-use super::linux::rt_netlink::*;
+use super::linux::netlink::*;
 
 // Kernel.
 pub struct Kernel {
     // Netlink socket.
-    rt_netlink: RtNetlink,
+    netlink: Netlink,
 }
 
 impl Kernel {
     pub fn new() -> Kernel {
+        let netlink = Netlink::new().unwrap();
+
         Kernel {
-            rt_netlink: RtNetlink::new(),
+            netlink
         }
     }
 
@@ -32,9 +34,9 @@ println!("*** init 00");
         }
 
 println!("*** init 20");
-        let v4addr = self.netlink.get_addresses_all(RtAddrFamily::Inet);
+        let v4addr = self.netlink.get_addresses_all(libc::AF_INET);
 println!("*** init 30");
-        let v6addr = self.netlink.get_addresses_all(RtAddrFamily::Inet6);
+        let v6addr = self.netlink.get_addresses_all(libc::AF_INET6);
 println!("*** init 99");
     }
 }

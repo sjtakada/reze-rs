@@ -9,14 +9,6 @@ use std::str;
 use std::cell::RefCell;
 use std::net::IpAddr;
 
-use libc::sockaddr_nl;
-
-//use neli::consts::*;
-//use neli::err::NlError;
-//use neli::nl::Nlmsghdr;
-//use neli::rtnl::*;
-//use neli::socket::*;
-
 use super::netlink;
 
 use super::super::link::*;
@@ -65,10 +57,9 @@ impl RtNetlink {
 
     fn parse_info<D>(&self, parser: &Fn(Nlmsghdr<Rtm>) -> D) -> Vec<D> {
         let mut v = Vec::new();
-        println!("** parse_info 00");
 
+/*
         while let Ok((nl, payload)) = self.socket.borrow_mut().recv_nl::<Rtm>(None) {
-        println!("** parse_info 10");
             match nl.nl_type {
                 Rtm::Done => {
                     // We want to log probably.
@@ -86,8 +77,7 @@ impl RtNetlink {
             }
         }
         self.socket.borrow_mut().reset_buffer();
-
-        println!("** parse_info 99");
+*/
         v
     }
 
@@ -140,9 +130,7 @@ impl RtNetlink {
         let mut local = None;
         let mut address = None;
         let mut broadcast = None;
-*/
 
-/*
         for attr in &rtm.nl_payload.as_ref().unwrap().rtattrs {
             fn to_addr(b: &[u8]) -> Option<IpAddr> {
                 use std::convert::TryFrom;
