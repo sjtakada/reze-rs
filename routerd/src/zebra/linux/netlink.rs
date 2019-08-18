@@ -8,7 +8,7 @@
 use std::io;
 use std::mem::{size_of, zeroed};
 use std::cell::Cell;
-use libc::{self, c_int};
+use libc::{self, c_void, c_int, c_uchar};
 
 //use std::str;
 //use std::net::IpAddr;
@@ -53,9 +53,9 @@ impl Netlink {
 
         let mut snl = unsafe { zeroed::<libc::sockaddr_nl>() };
         snl.nl_family = libc::AF_NETLINK as u16;
-        snl.nl_groups = RTMGRP_LINK as u32|
-                        RTMGRP_IPV4_IFADDR as u32| RTMGRP_IPV4_ROUTE as u32|
-                        RTMGRP_IPV6_IFADDR as u32| RTMGRP_IPV6_ROUTE as u32;
+        snl.nl_groups = RTMGRP_LINK as u32 |
+                        RTMGRP_IPV4_IFADDR as u32 | RTMGRP_IPV4_ROUTE as u32 |
+                        RTMGRP_IPV6_IFADDR as u32 | RTMGRP_IPV6_ROUTE as u32;
         let mut socklen: libc::socklen_t = size_of::<libc::sockaddr_nl>() as u32;
         match unsafe {
             libc::bind(
@@ -64,7 +64,7 @@ impl Netlink {
                 socklen,
             )
         } {
-            i if i >= 0 => (),
+            ret if ret >= 0 => (),
             _ => return Err(io::Error::last_os_error()),
         };
 
@@ -74,7 +74,7 @@ impl Netlink {
                 &mut snl as *const _ as *mut libc::sockaddr,
                 &mut socklen)
         } {
-            i if i == 0 && socklen == size_of::<libc::sockaddr_nl>() as u32 => (),
+            ret if ret == 0 && socklen == size_of::<libc::sockaddr_nl>() as u32 => (),
             _ => return Err(io::Error::last_os_error()),
         };
 
@@ -88,22 +88,43 @@ impl Netlink {
     }
 
     ///
-    fn send_request(&self, family: libc::c_int, msgtype: libc::c_int) -> Result<(), io::Error> {
-/*
-        let rtg = Rtgenmsg { rtgen_family: family };
-
-        let nlh = {
-            let len = None;
-            let nlmsg_flags = vec![NlmF::Request, NlmF::Root, NlmF::Match];
-            let nlmsg_seq = None;
-            Nlmsghdr::new(len, nlmsg_type, nlmsg_flags, nlmsg_seq, None/*, Some(rtg)*/)
-        };
-        // should send payload
-
-        if let Err(err) = self.socket.borrow_mut().send_nl(nlh) {
-            println!("Error: socket.send_nl() {:?}", err);
+    fn send_request(&self, family: libc::c_int, nlmsg_type: libc::c_int) -> Result<(), io::Error> {
+        struct Rtgenmsg {
+            rtgen_family: libc::c_uchar
         }
-*/
+
+        struct Request {
+            nlmsghdr: libc::nlmsghdr,
+            rtgenmsg: Rtgenmsg,
+        }
+
+        let seq = self.seq.get() + 1;
+        self.seq.set(seq);
+
+        let mut snl = unsafe { zeroed::<libc::sockaddr_nl>() };
+        snl.nl_family = libc::AF_NETLINK as u16;
+        
+        let mut req = unsafe { zeroed::<Request>() };
+        req.nlmsghdr.nlmsg_len = size_of::<Request>() as u32;
+        req.nlmsghdr.nlmsg_type = nlmsg_type as u16;
+        req.nlmsghdr.nlmsg_flags = libc::NLM_F_ROOT as u16 |
+                                   libc::NLM_F_MATCH as u16 |
+                                   libc::NLM_F_REQUEST as u16;
+        req.nlmsghdr.nlmsg_pid = self.pid;
+        req.nlmsghdr.nlmsg_seq = seq;
+        req.rtgenmsg.rtgen_family = family as u8;
+
+        match unsafe {
+            libc::sendto(self.sock,
+                         &req as *const _ as *const libc::c_void,
+                         size_of::<Request>(), 0,
+                         &snl as *const _ as *const libc::sockaddr,
+                         size_of::<libc::sockaddr_nl>() as u32)
+        } {
+            ret if ret >= 0 => (),
+            _ => return Err(io::Error::last_os_error()),
+        };
+
         Ok(())
     }
 
