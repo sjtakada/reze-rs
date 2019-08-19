@@ -6,12 +6,12 @@
 //
 
 use std::io;
+use std::str;
 use std::mem::{size_of, zeroed};
 use std::cell::Cell;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use libc::{self, c_void, c_int, c_uchar};
-
-//use std::str;
 //use std::net::IpAddr;
 
 use super::super::link::*;
@@ -26,8 +26,95 @@ const RTMGRP_IPV6_ROUTE: libc::c_int = 0x400;
 
 const NETLINK_RECV_BUFSIZ: usize = 4096;
 
-struct Nlmsghdr {
-    hoge: i32
+const NLMSG_ALIGNTO: usize = 4usize;
+
+fn nlmsg_align(len: usize) -> usize {
+    (len + NLMSG_ALIGNTO - 1) & !(NLMSG_ALIGNTO - 1)
+}
+
+fn nlmsg_data() -> usize {
+    size_of::<libc::nlmsghdr>()
+}
+
+fn nlmsg_attr<T>() -> usize {
+    nlmsg_data() + nlmsg_align(size_of::<T>())
+}
+
+fn nlmsg_attr_ok(buf: &[u8]) -> bool {
+    // Ensure the size of buffer has enough space for Rtattr.
+    if buf.len() >= size_of::<Rtattr>() {
+        let rta = buf as *const _ as *const Rtattr;
+        unsafe {
+            if (*rta).rta_len as usize >= size_of::<Rtattr>() && (*rta).rta_len as usize <= buf.len() {
+                true
+            } else {
+                false
+            }
+        }
+    } else {
+        false
+    }
+}
+
+fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
+    let mut map = AttrMap::new();
+    let mut b = &buf[..];
+
+    while nlmsg_attr_ok(b) {
+        let rta = b as *const _ as *const Rtattr;
+        unsafe {
+            let rta_len = (*rta).rta_len as usize;
+            let rta_type = (*rta).rta_type as i32;
+            let payload_len = rta_len - size_of::<Rtattr>();
+
+println!("*** parse_attr type {}, len {}", rta_type, rta_len);
+
+            map.insert(rta_type, &b[size_of::<Rtattr>()..rta_len]);
+
+            b = &b[nlmsg_align(rta_len)..];
+        }
+    }
+println!(">>>>>>>>>>> parse_attr return map");
+
+    map
+}
+
+/// Typedefs.
+type Nlmsghdr = libc::nlmsghdr;
+type AttrMap<'a> = HashMap<c_int, &'a [u8]>;
+
+/// struct rtattr
+#[repr(C)]
+struct Rtattr {
+    rta_len: u16,
+    rta_type: u16,
+}
+
+/// struct rtgenmsg from rtnetlink.h.
+#[repr(C)]
+struct Rtgenmsg {
+    rtgen_family: libc::c_uchar
+}
+
+/// struct ifinfomsg from rtnetlink.h.
+#[repr(C)]
+struct Ifinfomsg {
+    ifi_family: u8,
+    _ifi_pad: u8,
+    ifi_type: u16,
+    ifi_index: i32,
+    ifi_flags: u32,
+    ifi_change: u32,
+}
+
+/// struct ifaddrmsg from if_addr.h.
+#[repr(C)]
+struct Ifaddrmsg {
+    ifa_family: u8,
+    ifa_prefixlen: u8,
+    ifa_flags: u8,
+    ifa_scope: u8,
+    ifa_index: u32,
 }
 
 struct Buffer {
@@ -106,13 +193,8 @@ impl Netlink {
 
     ///
     fn send_request(&self, family: libc::c_int, nlmsg_type: libc::c_int) -> Result<(), io::Error> {
-        // TODO: should be defined in libc.
-        struct Rtgenmsg {
-            rtgen_family: libc::c_uchar
-        }
-
         struct Request {
-            nlmsghdr: libc::nlmsghdr,
+            nlmsghdr: Nlmsghdr,
             rtgenmsg: Rtgenmsg,
         }
 
@@ -146,7 +228,7 @@ impl Netlink {
         Ok(())
     }
 
-    fn parse_info<D>(&self, parser: &Fn(Nlmsghdr) -> D) -> Vec<D> {
+    fn parse_info<T, D>(&self, parser: &Fn(&Nlmsghdr, &T, &AttrMap) -> D) -> Vec<D> {
         let mut v = Vec::new();
 
         'outer: loop {
@@ -155,7 +237,7 @@ impl Netlink {
             let mut iov = unsafe { zeroed::<libc::iovec>() };
             iov.iov_base = &mut buffer.p as *const _ as *mut libc::c_void;
             iov.iov_len = NETLINK_RECV_BUFSIZ;
-            let mut snl =  unsafe { zeroed::<libc::sockaddr_nl>() };
+            let mut snl = unsafe { zeroed::<libc::sockaddr_nl>() };
             let mut msg = unsafe { zeroed::<libc::msghdr>() };
             msg.msg_name = &mut snl as *const _ as *mut libc::c_void;
             msg.msg_namelen = size_of::<libc::sockaddr_nl>() as u32;
@@ -188,14 +270,16 @@ impl Netlink {
             }
 
             let recvlen = ret as usize;
+            let mut recvbuf = &buffer.p[..recvlen];
             let mut p = 0;
             while p < recvlen {
                 unsafe {
-                    let buf = &buffer.p[p..];
-                    let header = buf as *const _ as *const libc::nlmsghdr;
+                    let mut buf = &recvbuf[p..];
+                    let header = buf as *const _ as *const Nlmsghdr;
                     let nlmsg_len = (*header).nlmsg_len;
                     println!("*** nlmsg_len {}", (*header).nlmsg_len);
                     println!("*** nlmsg_type {}", (*header).nlmsg_type);
+                    buf = &buf[..nlmsg_len as usize];
 
                     match (*header).nlmsg_type as i32 {
                         libc::NLMSG_DONE => break 'outer,
@@ -206,7 +290,14 @@ impl Netlink {
                         }
                     }
 
-                    p += (*header).nlmsg_len as usize;
+                    // TODO: debug message
+                    let databuf = &buf[nlmsg_data()..];
+                    let data = databuf as *const _ as *const T;
+                    let attrbuf = &buf[nlmsg_attr::<T>()..];
+                    let map = nlmsg_parse_attr(attrbuf);
+                    let ret = parser(&(*header), &(*data), &map);
+
+                    p += nlmsg_len as usize;
                 }
             }
         }
@@ -214,15 +305,25 @@ impl Netlink {
         v
     }
 
-    fn parse_interface(rtm: Nlmsghdr) -> Link {
+    fn parse_interface(h: &Nlmsghdr, ifi: &Ifinfomsg, attr: &AttrMap) -> Link {
         let mut hwaddr: [u8; 6] = [0, 0, 0, 0, 0, 0];
-        let mut mtu = None;
-        let mut ifname = None;
+//        let mut mtu = None;
+        let ifname = match attr.get(&(libc::IFLA_IFNAME as i32)) {
+            Some(ifname) => {
+                match str::from_utf8(ifname) {
+                    Ok(ifname) => ifname,
+                    Err(_) => "(Non-utf8)",
+                }
+            },
+            None => "(Unknown)"
+        };
+println!("*** {:?}", ifname);
 
-        Link::new(0, ifname.unwrap(), hwaddr, mtu.unwrap())
+
+        Link::new(0, /*ifname*/"hoge", hwaddr, 1500)
     }
 
-    fn parse_interface_address(rtm: Nlmsghdr) -> Connected {
+    fn parse_interface_address(h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> Connected {
         Connected::new()
     }
 }
