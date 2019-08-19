@@ -8,6 +8,7 @@
 use std::io;
 use std::mem::{size_of, zeroed};
 use std::cell::Cell;
+use std::cell::RefCell;
 use libc::{self, c_void, c_int, c_uchar};
 
 //use std::str;
@@ -23,8 +24,22 @@ const RTMGRP_IPV4_ROUTE: libc::c_int = 0x40;
 const RTMGRP_IPV6_IFADDR: libc::c_int = 0x100;
 const RTMGRP_IPV6_ROUTE: libc::c_int = 0x400;
 
+const NETLINK_RECV_BUFSIZ: usize = 4096;
+
 struct Nlmsghdr {
     hoge: i32
+}
+
+struct Buffer {
+    p: [u8; NETLINK_RECV_BUFSIZ],
+}
+
+impl Buffer {
+    pub fn new() -> Buffer {
+        Buffer {
+            p: [0; NETLINK_RECV_BUFSIZ],
+        }
+    }
 }
 
 /// Netlink Socket handler.
@@ -38,17 +53,18 @@ pub struct Netlink {
     /// Sequence number of messsage.
     seq: Cell<u32>,
 
-    // struct sockaddr_nl snl,
+    /// Receive buffer.
+    buf: RefCell<Buffer>,
 }
 
 impl Netlink {
     /// Constructor - open Netlink socket and bind.
     pub fn new() -> Result<Netlink, io::Error> {
-        let sock = match unsafe {
+        let sock = unsafe {
             libc::socket(libc::AF_NETLINK, libc::SOCK_RAW, libc::NETLINK_ROUTE)
-        } {
-            sock if sock >= 0 => sock,
-            _ => return Err(io::Error::last_os_error()),
+        };
+        if sock < 0 {
+            return Err(io::Error::last_os_error());
         };
 
         let mut snl = unsafe { zeroed::<libc::sockaddr_nl>() };
@@ -57,26 +73,26 @@ impl Netlink {
                         RTMGRP_IPV4_IFADDR as u32 | RTMGRP_IPV4_ROUTE as u32 |
                         RTMGRP_IPV6_IFADDR as u32 | RTMGRP_IPV6_ROUTE as u32;
         let mut socklen: libc::socklen_t = size_of::<libc::sockaddr_nl>() as u32;
-        match unsafe {
+        let ret = unsafe {
             libc::bind(
                 sock,
                 &snl as *const _ as *const libc::sockaddr,
                 socklen,
             )
-        } {
-            ret if ret >= 0 => (),
-            _ => return Err(io::Error::last_os_error()),
         };
+        if ret < 0 {
+            return Err(io::Error::last_os_error());
+        }
 
-        match unsafe {
+        let ret = unsafe {
             libc::getsockname(
                 sock,
                 &mut snl as *const _ as *mut libc::sockaddr,
                 &mut socklen)
-        } {
-            ret if ret == 0 && socklen == size_of::<libc::sockaddr_nl>() as u32 => (),
-            _ => return Err(io::Error::last_os_error()),
         };
+        if ret < 0 || socklen != size_of::<libc::sockaddr_nl>() as u32 {
+            return Err(io::Error::last_os_error());
+        }
 
         // TODO: set socket non-blocking.
 
@@ -84,11 +100,13 @@ impl Netlink {
             sock,
             pid: snl.nl_pid,
             seq: Cell::new(0u32),
+            buf: RefCell::new(Buffer::new()),
         })
     }
 
     ///
     fn send_request(&self, family: libc::c_int, nlmsg_type: libc::c_int) -> Result<(), io::Error> {
+        // TODO: should be defined in libc.
         struct Rtgenmsg {
             rtgen_family: libc::c_uchar
         }
@@ -114,22 +132,85 @@ impl Netlink {
         req.nlmsghdr.nlmsg_seq = seq;
         req.rtgenmsg.rtgen_family = family as u8;
 
-        match unsafe {
+        let ret = unsafe {
             libc::sendto(self.sock,
                          &req as *const _ as *const libc::c_void,
                          size_of::<Request>(), 0,
                          &snl as *const _ as *const libc::sockaddr,
                          size_of::<libc::sockaddr_nl>() as u32)
-        } {
-            ret if ret >= 0 => (),
-            _ => return Err(io::Error::last_os_error()),
         };
+        if ret < 0 {
+            return Err(io::Error::last_os_error());
+        }
 
         Ok(())
     }
 
     fn parse_info<D>(&self, parser: &Fn(Nlmsghdr) -> D) -> Vec<D> {
         let mut v = Vec::new();
+
+        'outer: loop {
+            let mut buffer = self.buf.borrow_mut();
+
+            let mut iov = unsafe { zeroed::<libc::iovec>() };
+            iov.iov_base = &mut buffer.p as *const _ as *mut libc::c_void;
+            iov.iov_len = NETLINK_RECV_BUFSIZ;
+            let mut snl =  unsafe { zeroed::<libc::sockaddr_nl>() };
+            let mut msg = unsafe { zeroed::<libc::msghdr>() };
+            msg.msg_name = &mut snl as *const _ as *mut libc::c_void;
+            msg.msg_namelen = size_of::<libc::sockaddr_nl>() as u32;
+            msg.msg_iov = &mut iov as *const _ as *mut libc::iovec;
+            msg.msg_iovlen = 1;
+
+            let ret = unsafe {
+                libc::recvmsg(self.sock,
+                              &msg as *const _ as *mut libc::msghdr,
+                              0)
+            };
+            if ret < 0 {
+                println!("*** parse_info Error");
+                // Check errno,
+                // errno == EINTR
+                //   break
+                // errno == EWOULDBLOCK || errno == EAGAIN
+                //   break
+                // or something else
+                // continue
+                continue;
+            } else if ret == 0 {
+                println!("*** parse_info no Data");
+                break 'outer;
+            }
+
+            if msg.msg_namelen != size_of::<libc::sockaddr_nl>() as u32 {
+                // sender address length error
+                break 'outer;
+            }
+
+            let recvlen = ret as usize;
+            let mut p = 0;
+            while p < recvlen {
+                unsafe {
+                    let buf = &buffer.p[p..];
+                    let header = buf as *const _ as *const libc::nlmsghdr;
+                    let nlmsg_len = (*header).nlmsg_len;
+                    println!("*** nlmsg_len {}", (*header).nlmsg_len);
+                    println!("*** nlmsg_type {}", (*header).nlmsg_type);
+
+                    match (*header).nlmsg_type as i32 {
+                        libc::NLMSG_DONE => break 'outer,
+                        libc::NLMSG_ERROR => {
+                        },
+                        _ => {
+
+                        }
+                    }
+
+                    p += (*header).nlmsg_len as usize;
+                }
+            }
+        }
+
         v
     }
 
@@ -150,7 +231,12 @@ impl Netlink {
 impl LinkHandler for Netlink {
     // Get all links from kernel.
     fn get_links_all(&self) -> Vec<Link> {
-        self.send_request(libc::AF_PACKET, libc::RTM_GETLINK as i32);
+println!("*** get_links_all 00");
+        match self.send_request(libc::AF_PACKET, libc::RTM_GETLINK as i32) {
+            Ok(_) => { println!("*** OK"); },
+            Err(_) =>  { println!("*** ERR"); },
+        };
+println!("*** get_links_all 10");
         self.parse_info(&Netlink::parse_interface)
     }
 
