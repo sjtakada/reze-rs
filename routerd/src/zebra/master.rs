@@ -56,14 +56,18 @@ impl ZebraMaster {
         }
     }
 
+    pub fn kernel_init(master: Rc<ZebraMaster>) {
+        // Connect master to kernel.
+        master.kernel.borrow_mut().connect(master.clone());
+
+        // Init Kernel interface.
+        master.kernel.borrow().init();
+    }
+
     pub fn start(&self,
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
-
-        // Init Kernel interface.
-        self.kernel.borrow().init();
-
         // Main loop for zebra
         'main: loop {
             // XXX: handle receiver_p2z 

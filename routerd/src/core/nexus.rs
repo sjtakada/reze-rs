@@ -16,6 +16,7 @@ use log::error;
 use std::collections::HashMap;
 use std::thread;
 use std::thread::JoinHandle;
+use std::rc::Rc;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::boxed::Box;
@@ -125,7 +126,8 @@ impl RouterNexus {
         let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
         let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
         let handle = thread::spawn(move || {
-            let mut zebra = ZebraMaster::new();
+            let mut zebra = Rc::new(ZebraMaster::new());
+            ZebraMaster::kernel_init(zebra.clone());
             zebra.start(sender_p2n, receiver_n2p, receiver_p2z);
 
             // TODO: may need some cleanup, before returning.

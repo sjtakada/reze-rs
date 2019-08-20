@@ -5,6 +5,8 @@
 // Zebra - Kernel interface
 //
 
+use std::rc::Weak;
+use std::rc::Rc;
 use std::cell::Cell;
 
 use super::master::*;
@@ -16,7 +18,7 @@ use super::linux::netlink::*;
 /// Kernel interface.
 pub struct Kernel {
     // Zebra Master.
-    //master: Cell<Option<&'a ZebraMaster<'a>>>,
+    master: Weak<ZebraMaster>,
 
     /// Netlink socket.
     netlink: Netlink,
@@ -27,24 +29,26 @@ impl Kernel {
         let netlink = Netlink::new().unwrap();
 
         Kernel {
-            netlink
+            master: Default::default(),
+            netlink,
         }
     }
 
+    pub fn connect(&mut self, master: Rc<ZebraMaster>) {
+        self.master = Rc::downgrade(&master);
+    }
+
     pub fn init(&self) {
-println!("*** init 00");
 //        self.master = Some(master);
 
-        let links = self.netlink.get_links_all().unwrap();
-
-        for l in links {
-            println!("*** ifindex={}, name={}, hwaddr={:?}, mtu={}", l.index, l.name, l.hwaddr, l.mtu);
+        let master = self.master.upgrade();
+        match master {
+            Some(master) => println!("Some"),
+            Nonw => println!("None"),
         }
 
-println!("*** init 20");
+        let links = self.netlink.get_links_all().unwrap();
         let v4addr = self.netlink.get_ipv4_addresses_all();
-println!("*** init 30");
         let v6addr = self.netlink.get_ipv6_addresses_all();
-println!("*** init 99");
     }
 }
