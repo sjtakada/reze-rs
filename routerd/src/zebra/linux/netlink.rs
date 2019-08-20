@@ -13,6 +13,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use libc::{self, c_void, c_int, c_uchar};
 //use std::net::IpAddr;
+use log::debug;
+use log::info;
+use log::error;
 
 use super::super::link::*;
 use super::super::address::*;
@@ -44,16 +47,27 @@ fn nlmsg_attr_ok(buf: &[u8]) -> bool {
     // Ensure the size of buffer has enough space for Rtattr.
     if buf.len() >= size_of::<Rtattr>() {
         let rta = buf as *const _ as *const Rtattr;
-        unsafe {
-            if (*rta).rta_len as usize >= size_of::<Rtattr>() && (*rta).rta_len as usize <= buf.len() {
-                true
-            } else {
-                false
-            }
+        let rta_len = unsafe { (*rta).rta_len as usize };
+        if rta_len >= size_of::<Rtattr>() && rta_len <= buf.len() {
+            true
+        } else {
+            false
         }
     } else {
         false
     }
+}
+
+fn get_u32(p: &[u8]) -> u32 {
+    unsafe { *(p as *const _ as *const u32) }
+}
+
+fn get_u16(p: &[u8]) -> u16 {
+    unsafe { *(p as *const _ as *const u16) }
+}
+
+fn get_u8(p: &[u8]) -> u8 {
+    unsafe { *(p as *const _ as *const u8) }
 }
 
 fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
@@ -191,7 +205,7 @@ impl Netlink {
         })
     }
 
-    ///
+    /// Send request message througn Netlink.
     fn send_request(&self, family: libc::c_int, nlmsg_type: libc::c_int) -> Result<(), io::Error> {
         struct Request {
             nlmsghdr: Nlmsghdr,
@@ -228,7 +242,8 @@ impl Netlink {
         Ok(())
     }
 
-    fn parse_info<T, D>(&self, parser: &Fn(&Nlmsghdr, &T, &AttrMap) -> D) -> Vec<D> {
+    /// Parse Netlink header and call parser to parse message payload.
+    fn parse_info<T, D>(&self, parser: &Fn(&Nlmsghdr, &T, &AttrMap) -> Option<D>) -> Result<Vec<D>, io::Error> {
         let mut v = Vec::new();
 
         'outer: loop {
@@ -245,12 +260,10 @@ impl Netlink {
             msg.msg_iovlen = 1;
 
             let ret = unsafe {
-                libc::recvmsg(self.sock,
-                              &msg as *const _ as *mut libc::msghdr,
-                              0)
+                libc::recvmsg(self.sock, &msg as *const _ as *mut libc::msghdr, 0)
             };
             if ret < 0 {
-                println!("*** parse_info Error");
+                info!("Error from recvmsg");
                 // Check errno,
                 // errno == EINTR
                 //   break
@@ -260,7 +273,7 @@ impl Netlink {
                 // continue
                 continue;
             } else if ret == 0 {
-                println!("*** parse_info no Data");
+                info!("No data received");
                 break 'outer;
             }
 
@@ -273,41 +286,59 @@ impl Netlink {
             let mut recvbuf = &buffer.p[..recvlen];
             let mut p = 0;
             while p < recvlen {
-                unsafe {
-                    let mut buf = &recvbuf[p..];
-                    let header = buf as *const _ as *const Nlmsghdr;
-                    let nlmsg_len = (*header).nlmsg_len;
-                    println!("*** nlmsg_len {}", (*header).nlmsg_len);
-                    println!("*** nlmsg_type {}", (*header).nlmsg_type);
-                    buf = &buf[..nlmsg_len as usize];
-
-                    match (*header).nlmsg_type as i32 {
-                        libc::NLMSG_DONE => break 'outer,
-                        libc::NLMSG_ERROR => {
-                        },
-                        _ => {
-
-                        }
-                    }
-
-                    // TODO: debug message
-                    let databuf = &buf[nlmsg_data()..];
-                    let data = databuf as *const _ as *const T;
-                    let attrbuf = &buf[nlmsg_attr::<T>()..];
-                    let map = nlmsg_parse_attr(attrbuf);
-                    let ret = parser(&(*header), &(*data), &map);
-
-                    p += nlmsg_len as usize;
+                if p + size_of::<Nlmsghdr>() > recvlen {
+                    error!("No enough space for Nlmsghdr in recv buffer.");
+                    break;
                 }
+
+                let mut buf = &recvbuf[p..];
+                let header = buf as *const _ as *const Nlmsghdr;
+                let nlmsg_len = unsafe { (*header).nlmsg_len };
+                let nlmsg_type = unsafe { (*header).nlmsg_type as i32 };
+                buf = &buf[..nlmsg_len as usize];
+
+                match nlmsg_type  {
+                    libc::NLMSG_DONE => break 'outer,
+                    libc::NLMSG_ERROR => {
+                    },
+                    _ => {
+                    }
+                }
+
+                debug!("Nlmsg type={}, len={}", nlmsg_type, nlmsg_len);
+
+                let databuf = &buf[nlmsg_data()..];
+                let data = databuf as *const _ as *const T;
+                let attrbuf = &buf[nlmsg_attr::<T>()..];
+                let map = nlmsg_parse_attr(attrbuf);
+                let ret = unsafe { parser(&(*header), &(*data), &map) };
+
+                p += nlmsg_len as usize;
             }
         }
 
-        v
+        Ok(v)
     }
 
-    fn parse_interface(h: &Nlmsghdr, ifi: &Ifinfomsg, attr: &AttrMap) -> Link {
-        let mut hwaddr: [u8; 6] = [0, 0, 0, 0, 0, 0];
-//        let mut mtu = None;
+    fn parse_interface(h: &Nlmsghdr, ifi: &Ifinfomsg, attr: &AttrMap) -> Option<Link> {
+        let ifindex = ifi.ifi_index;
+        let mut hwaddr: [u8; 6] = match attr.get(&(libc::IFLA_ADDRESS as i32)) {
+            Some(hwaddr) if hwaddr.len() == 6 => {
+                [hwaddr[0], hwaddr[1], hwaddr[2], hwaddr[3], hwaddr[4], hwaddr[5]]
+            },
+            Some(hwaddr) => {
+                error!("Invalid hwaddr length {}", hwaddr.len());
+                [0, 0, 0, 0, 0, 0]
+            },
+            None => {
+                [0, 0, 0, 0, 0, 0]
+            }
+        };
+
+        let mtu = match attr.get(&(libc::IFLA_MTU as i32)) {
+            Some(mtu) => get_u32(*mtu),
+            None => 0u32,  // maybe set default?
+        };
         let ifname = match attr.get(&(libc::IFLA_IFNAME as i32)) {
             Some(ifname) => {
                 match str::from_utf8(ifname) {
@@ -317,28 +348,31 @@ impl Netlink {
             },
             None => "(Unknown)"
         };
-println!("*** {:?}", ifname);
 
+        debug!("parse_interface() {} {} {} {:?} {}",
+               ifi.ifi_index, ifname, ifi.ifi_type, hwaddr, mtu);
 
-        Link::new(0, /*ifname*/"hoge", hwaddr, 1500)
+        Some(Link::new(ifi.ifi_index, ifname, ifi.ifi_type as u16, hwaddr, mtu))
     }
 
-    fn parse_interface_address(h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> Connected {
-        Connected::new()
+    fn parse_interface_address(h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> Option<Connected> {
+        Some(Connected::new())
     }
 }
 
 
 impl LinkHandler for Netlink {
     // Get all links from kernel.
-    fn get_links_all(&self) -> Vec<Link> {
-println!("*** get_links_all 00");
+    fn get_links_all(&self) -> Result<Vec<Link>, io::Error> {
+        debug!("Get links all");
+
         match self.send_request(libc::AF_PACKET, libc::RTM_GETLINK as i32) {
-            Ok(_) => { println!("*** OK"); },
-            Err(_) =>  { println!("*** ERR"); },
-        };
-println!("*** get_links_all 10");
-        self.parse_info(&Netlink::parse_interface)
+            Ok(_) => self.parse_info(&Netlink::parse_interface),
+            Err(err) => {
+                error!("Send request: RTM_GETLINK");
+                Err(err)
+            }
+        }
     }
 
     // Add link from zebra
@@ -370,8 +404,15 @@ println!("*** get_links_all 10");
 
 impl AddressHandler for Netlink {
     // Get all addresses from kernel
-    fn get_addresses_all(&self, family: libc::c_int) -> Vec<Connected> {
-        self.send_request(family, libc::RTM_GETADDR as i32);
-        self.parse_info(&Netlink::parse_interface_address)
+    fn get_addresses_all(&self, family: libc::c_int) -> Result<Vec<Connected>, io::Error> {
+        debug!("Get address all");
+
+        match self.send_request(family, libc::RTM_GETADDR as i32) {
+            Ok(_) => self.parse_info(&Netlink::parse_interface_address),
+            Err(err) => {
+                error!("Send request: RTM_GETADDR");
+                Err(err)
+            }
+        }
     }
 }

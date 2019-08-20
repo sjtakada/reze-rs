@@ -5,10 +5,12 @@
 // Zebra - Link handler
 //
 
+use std::io;
+
 // Abstracted event handler between Zebra and OS.
 pub trait LinkHandler {
     // Get all links from kernel.
-    fn get_links_all(&self) -> Vec<Link>;
+    fn get_links_all(&self) -> Result<Vec<Link>, io::Error>;
 
     // Add link from zebra
     //fn add_link(&self) -> ?
@@ -29,25 +31,29 @@ pub trait LinkHandler {
 //    fn set_link_change_callback(&self, &Fn());
 }
 
-// Generic Link information
+/// Generic Link information
 pub struct Link {
-    // Interface index.
+    /// Interface index.
     pub index: i32,
 
-    // Name from kernel.
+    /// Name from kernel.
     pub name: String,
     
-    // Hardware address.
+    /// Hardware type.
+    pub hwtype: u16,
+
+    /// Hardware address.
     pub hwaddr: [u8; 6],
 
-    // MTU.
+    /// MTU.
     pub mtu: u32,
 }
 
 impl Link {
-    pub fn new(index: i32, name: &str, hwaddr: [u8; 6], mtu: u32) -> Link {
+    pub fn new(index: i32, name: &str, hwtype: u16, hwaddr: [u8; 6], mtu: u32) -> Link {
         Link {
             index,
+            hwtype,
             name: name.to_string(),
             hwaddr,
             mtu,

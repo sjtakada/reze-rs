@@ -27,7 +27,7 @@ impl Kernel {
 
     pub fn init(&self) {
 println!("*** init 00");
-        let links = self.netlink.get_links_all();
+        let links = self.netlink.get_links_all().unwrap();
 
         for l in links {
             println!("*** ifindex={}, name={}, hwaddr={:?}, mtu={}", l.index, l.name, l.hwaddr, l.mtu);

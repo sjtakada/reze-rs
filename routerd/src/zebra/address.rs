@@ -5,9 +5,11 @@
 // Zebra - IPv4 and IPv6 address handler.
 //
 
+use std::io;
+
 pub trait AddressHandler {
     // Get all addresses from kernel
-    fn get_addresses_all(&self, family: libc::c_int) -> Vec<Connected>;
+    fn get_addresses_all(&self, family: libc::c_int) -> Result<Vec<Connected>, io::Error>;
 }
 
 
