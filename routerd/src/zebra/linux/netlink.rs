@@ -66,11 +66,11 @@ fn get_u32(p: &[u8]) -> u32 {
     unsafe { *(p as *const _ as *const u32) }
 }
 
-fn get_u16(p: &[u8]) -> u16 {
+fn _get_u16(p: &[u8]) -> u16 {
     unsafe { *(p as *const _ as *const u16) }
 }
 
-fn get_u8(p: &[u8]) -> u8 {
+fn _get_u8(p: &[u8]) -> u8 {
     unsafe { *(p as *const _ as *const u8) }
 }
 

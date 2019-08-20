@@ -5,14 +5,20 @@
 // Zebra - Kernel interface
 //
 
+use std::cell::Cell;
+
+use super::master::*;
 use super::link::*;
 use super::address::*;
 
 use super::linux::netlink::*;
 
-// Kernel.
+/// Kernel interface.
 pub struct Kernel {
-    // Netlink socket.
+    // Zebra Master.
+    //master: Cell<Option<&'a ZebraMaster<'a>>>,
+
+    /// Netlink socket.
     netlink: Netlink,
 }
 
@@ -27,6 +33,8 @@ impl Kernel {
 
     pub fn init(&self) {
 println!("*** init 00");
+//        self.master = Some(master);
+
         let links = self.netlink.get_links_all().unwrap();
 
         for l in links {

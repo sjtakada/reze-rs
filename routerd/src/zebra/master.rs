@@ -7,6 +7,7 @@
 
 use log::debug;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 use std::collections::HashMap;
 use std::thread;
@@ -24,41 +25,44 @@ use crate::core::message::zebra::ZebraToProto;
 use super::link::*;
 use super::kernel::*;
 
-// Store Zebra Client related information.
+/// Store Zebra Client related information.
 struct ClientTuple {
-    // Channel sender from Zebra to Protocol
+    /// Channel sender from Zebra to Protocol
     sender: mpsc::Sender<ZebraToProto>,
 }
 
-// Zebra Master.
+/// Zebra Master.
 pub struct ZebraMaster {
-    // ProtocolType to Zebra Client Tuple Map.
-    clients: HashMap<ProtocolType, ClientTuple>,
+    /// Kernel interface.
+    kernel: RefCell<Kernel>,
 
-    // Ifindex to Link map.
-    links: HashMap<i32, Rc<Link>>,
+    /// ProtocolType to Zebra Client Tuple Map.
+    clients: RefCell<HashMap<ProtocolType, ClientTuple>>,
 
-    // Name to Ifindex map.
+    /// Ifindex to Link map.
+    links: RefCell<HashMap<i32, Rc<Link>>>,
+
+    ///
     name2ifindex: HashMap<String, i32>,
 }
 
 impl ZebraMaster {
     pub fn new() -> ZebraMaster {
         ZebraMaster {
-            clients: HashMap::new(),
-            links: HashMap::new(),
+            kernel: RefCell::new(Kernel::new()),
+            clients: RefCell::new(HashMap::new()),
+            links: RefCell::new(HashMap::new()),
             name2ifindex: HashMap::new(),
         }
     }
 
-    pub fn start(&mut self,
+    pub fn start(&self,
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
 
         // Init Kernel interface.
-        let kernel = Kernel::new();
-        kernel.init();
+        self.kernel.borrow().init();
 
         // Main loop for zebra
         'main: loop {
@@ -66,7 +70,7 @@ impl ZebraMaster {
             while let Ok(d) = receiver_p2z.try_recv() {
                 match d {
                     ProtoToZebra::RegisterProto((proto, sender_z2p)) => {
-                        self.clients.insert(proto, ClientTuple { sender: sender_z2p });
+                        self.clients.borrow_mut().insert(proto, ClientTuple { sender: sender_z2p });
                         debug!("Register Protocol {}", proto);
                     },
                     ProtoToZebra::RouteAdd(_i) => {

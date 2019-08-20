@@ -16,26 +16,36 @@ pub trait AddressHandler {
 
     /// Get all IPv6 addresses from kernel.
     fn get_ipv6_addresses_all(&self) -> Result<Vec<Connected<Ipv6Addr>>, io::Error>;
+
+
 }
 
 /// Connected Address.
 pub struct Connected<T> {
     /// Address prefix.
-    prefix: Prefix<T>,
+    address: Prefix<T>,
+
+    /// Destination address prefix for peer.
+    destination: Option<Prefix<T>>,
 
     /// Secondary address.
     secondary: bool,
 
     /// Unnumbered.
     unnumbered: bool,
+
+    /// Label.
+    label: Option<String>,
 }
 
 impl<T> Connected<T> {
     pub fn new(prefix: Prefix<T>) -> Connected<T> {
         Connected::<T> {
-            prefix: prefix,
+            address: prefix,
+            destination: None,
             secondary: false,
             unnumbered: false,
+            label: None,
         }
     }
 }
