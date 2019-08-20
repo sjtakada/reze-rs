@@ -6,16 +6,20 @@
 //
 
 use std::io;
+use std::io::{Error, ErrorKind};
 use std::str;
+use std::str::FromStr;
 use std::mem::{size_of, zeroed};
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::net::{Ipv4Addr, Ipv6Addr};
 use libc::{self, c_void, c_int, c_uchar};
-//use std::net::IpAddr;
 use log::debug;
 use log::info;
 use log::error;
+
+use rtable::prefix::*;
 
 use super::super::link::*;
 use super::super::address::*;
@@ -71,7 +75,7 @@ fn get_u8(p: &[u8]) -> u8 {
 }
 
 fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
-    let mut map = AttrMap::new();
+    let mut m = AttrMap::new();
     let mut b = &buf[..];
 
     while nlmsg_attr_ok(b) {
@@ -81,16 +85,15 @@ fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
             let rta_type = (*rta).rta_type as i32;
             let payload_len = rta_len - size_of::<Rtattr>();
 
-println!("*** parse_attr type {}, len {}", rta_type, rta_len);
-
-            map.insert(rta_type, &b[size_of::<Rtattr>()..rta_len]);
+            m.insert(rta_type, &b[size_of::<Rtattr>()..rta_len]);
 
             b = &b[nlmsg_align(rta_len)..];
         }
     }
-println!(">>>>>>>>>>> parse_attr return map");
 
-    map
+    debug!("Attrs: {:?}", m.keys().collect::<Vec<&i32>>());
+
+    m
 }
 
 /// Typedefs.
@@ -305,7 +308,11 @@ impl Netlink {
                     }
                 }
 
-                debug!("Nlmsg type={}, len={}", nlmsg_type, nlmsg_len);
+                debug!("Nlmsg: type: {}, len: {}", nlmsg_type, nlmsg_len);
+
+                if (nlmsg_len as usize) < nlmsg_attr::<T>() {
+                    return Err(Error::new(ErrorKind::Other, "Insufficient Nlmsg length"))
+                }
 
                 let databuf = &buf[nlmsg_data()..];
                 let data = databuf as *const _ as *const T;
@@ -321,6 +328,8 @@ impl Netlink {
     }
 
     fn parse_interface(h: &Nlmsghdr, ifi: &Ifinfomsg, attr: &AttrMap) -> Option<Link> {
+        assert!(h.nlmsg_type == libc::RTM_NEWLINK);
+
         let ifindex = ifi.ifi_index;
         let mut hwaddr: [u8; 6] = match attr.get(&(libc::IFLA_ADDRESS as i32)) {
             Some(hwaddr) if hwaddr.len() == 6 => {
@@ -355,8 +364,34 @@ impl Netlink {
         Some(Link::new(ifi.ifi_index, ifname, ifi.ifi_type as u16, hwaddr, mtu))
     }
 
-    fn parse_interface_address(h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> Option<Connected> {
-        Some(Connected::new())
+    fn parse_interface_address<T: AddressLen + FromStr>(h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> Option<Connected<T>> {
+        assert!(h.nlmsg_type == libc::RTM_NEWADDR || h.nlmsg_type == libc::RTM_DELADDR);
+
+        if ifa.ifa_family as i32 != libc::AF_INET && ifa.ifa_family as i32 != libc::AF_INET6 {
+            return None
+        }
+
+        let mut local = attr.get(&(libc::IFA_LOCAL as i32));
+        let mut address = attr.get(&(libc::IFA_ADDRESS as i32));
+        if let None = local {
+            local = address;
+        }
+        if let None = address {
+            address = local;
+        }
+
+        let broad = match address {
+            Some(address) if address == local.unwrap() => {
+                Some(address)
+            },
+            _ => {
+                attr.get(&(libc::IFA_BROADCAST as i32))
+            }
+        };
+
+        let prefix = Prefix::<T>::new();
+
+        Some(Connected::<T>::new(prefix))
     }
 }
 
@@ -403,12 +438,25 @@ impl LinkHandler for Netlink {
 }
 
 impl AddressHandler for Netlink {
-    // Get all addresses from kernel
-    fn get_addresses_all(&self, family: libc::c_int) -> Result<Vec<Connected>, io::Error> {
+    // Get all IPv4 addresses from kernel
+    fn get_ipv4_addresses_all(&self) -> Result<Vec<Connected<Ipv4Addr>>, io::Error> {
         debug!("Get address all");
 
-        match self.send_request(family, libc::RTM_GETADDR as i32) {
-            Ok(_) => self.parse_info(&Netlink::parse_interface_address),
+        match self.send_request(libc::AF_INET, libc::RTM_GETADDR as i32) {
+            Ok(_) => self.parse_info(&Netlink::parse_interface_address::<Ipv4Addr>),
+            Err(err) => {
+                error!("Send request: RTM_GETADDR");
+                Err(err)
+            }
+        }
+    }
+
+    // Get all IPv6 addresses from kernel
+    fn get_ipv6_addresses_all(&self) -> Result<Vec<Connected<Ipv6Addr>>, io::Error> {
+        debug!("Get address all");
+
+        match self.send_request(libc::AF_INET6, libc::RTM_GETADDR as i32) {
+            Ok(_) => self.parse_info(&Netlink::parse_interface_address::<Ipv6Addr>),
             Err(err) => {
                 error!("Send request: RTM_GETADDR");
                 Err(err)

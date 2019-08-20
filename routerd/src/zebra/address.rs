@@ -6,21 +6,36 @@
 //
 
 use std::io;
+use std::net::{Ipv4Addr, Ipv6Addr};
+use rtable::prefix::*;
 
+/// Trait IP address handler.
 pub trait AddressHandler {
-    // Get all addresses from kernel
-    fn get_addresses_all(&self, family: libc::c_int) -> Result<Vec<Connected>, io::Error>;
+    /// Get all IPv4 addresses from kernel.
+    fn get_ipv4_addresses_all(&self) -> Result<Vec<Connected<Ipv4Addr>>, io::Error>;
+
+    /// Get all IPv6 addresses from kernel.
+    fn get_ipv6_addresses_all(&self) -> Result<Vec<Connected<Ipv6Addr>>, io::Error>;
 }
 
+/// Connected Address.
+pub struct Connected<T> {
+    /// Address prefix.
+    prefix: Prefix<T>,
 
-pub struct Connected {
-    // Address prefix.
-    // 
+    /// Secondary address.
+    secondary: bool,
+
+    /// Unnumbered.
+    unnumbered: bool,
 }
 
-impl Connected {
-    pub fn new() -> Connected {
-        Connected {
+impl<T> Connected<T> {
+    pub fn new(prefix: Prefix<T>) -> Connected<T> {
+        Connected::<T> {
+            prefix: prefix,
+            secondary: false,
+            unnumbered: false,
         }
     }
 }

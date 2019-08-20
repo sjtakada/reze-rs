@@ -34,9 +34,9 @@ println!("*** init 00");
         }
 
 println!("*** init 20");
-        let v4addr = self.netlink.get_addresses_all(libc::AF_INET);
+        let v4addr = self.netlink.get_ipv4_addresses_all();
 println!("*** init 30");
-        let v6addr = self.netlink.get_addresses_all(libc::AF_INET6);
+        let v6addr = self.netlink.get_ipv6_addresses_all();
 println!("*** init 99");
     }
 }
