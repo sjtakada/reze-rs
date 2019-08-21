@@ -7,6 +7,7 @@
 
 use std::rc::Weak;
 use std::rc::Rc;
+use std::net::{Ipv4Addr, Ipv6Addr};
 
 use super::master::*;
 use super::link::*;
@@ -18,8 +19,12 @@ use super::linux::netlink::*;
 
 /// Kernel Callbacks.
 pub struct KernelCallbacks {
-    pub new_link: &'static Fn(&ZebraMaster, Link) -> (),
+    pub add_link: &'static Fn(&ZebraMaster, Link) -> (),
     pub delete_link: &'static Fn(&ZebraMaster, Link) -> (),
+    pub add_ipv4_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
+    pub delete_ipv4_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
+    pub add_ipv6_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
+    pub delete_ipv6_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
 }
 
 /// Kernel interface.

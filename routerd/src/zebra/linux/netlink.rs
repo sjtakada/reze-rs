@@ -377,12 +377,15 @@ impl Netlink {
         debug!("parse_interface() {} {} {} {:?} {}",
                ifi.ifi_index, ifname, ifi.ifi_type, hwaddr, mtu);
 
-        // add callback
+        // Call master to add Link.
         if let Some(master) = self.master.upgrade() {
-            (self.callbacks.new_link)(&master, Link::new(ifi.ifi_index, ifname, ifi.ifi_type as u16, hwaddr, mtu));
-        }
+            let link = Link::new(ifi.ifi_index, ifname, ifi.ifi_type as u16, hwaddr, mtu);
+            (self.callbacks.add_link)(&master, link);
 
-        true
+            true
+        } else {
+            false
+        }
     }
 
     fn parse_interface_address<T>(&self, h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> bool

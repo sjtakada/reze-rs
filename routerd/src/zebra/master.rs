@@ -13,6 +13,7 @@ use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
 use std::sync::mpsc;
+use std::net::{Ipv4Addr, Ipv6Addr};
 
 //use crate::core::event::*;
 
@@ -23,6 +24,7 @@ use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
 
 use super::link::*;
+use super::address::*;
 use super::kernel::*;
 
 /// Store Zebra Client related information.
@@ -49,8 +51,12 @@ pub struct ZebraMaster {
 impl ZebraMaster {
     pub fn new() -> ZebraMaster {
         let callbacks = KernelCallbacks {
-            new_link: &ZebraMaster::new_link,
+            add_link: &ZebraMaster::add_link,
             delete_link: &ZebraMaster::delete_link,
+            add_ipv4_address: &ZebraMaster::add_ipv4_address,
+            delete_ipv4_address: &ZebraMaster::delete_ipv4_address,
+            add_ipv6_address: &ZebraMaster::add_ipv6_address,
+            delete_ipv6_address: &ZebraMaster::delete_ipv6_address,
         };
 
         ZebraMaster {
@@ -61,7 +67,7 @@ impl ZebraMaster {
         }
     }
 
-    pub fn new_link(&self, link: Link) {
+    pub fn add_link(&self, link: Link) {
         debug!("New Link");
 
         self.links.borrow_mut().insert(link.index(), Rc::new(link));
@@ -75,6 +81,22 @@ impl ZebraMaster {
         //self.links.borrow_mut().insert(link.index(), Rc::new(link));
 
         // TODO: notify this to other protocols.
+    }
+
+    pub fn add_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
+
+    }
+
+    pub fn delete_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
+
+    }
+
+    pub fn add_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
+
+    }
+
+    pub fn delete_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
+
     }
 
     pub fn kernel_init(master: Rc<ZebraMaster>) {
