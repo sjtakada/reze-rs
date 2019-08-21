@@ -10,6 +10,8 @@ use std::io::{Error, ErrorKind};
 use std::str;
 use std::str::FromStr;
 use std::mem::{size_of, zeroed};
+use std::rc::Rc;
+use std::rc::Weak;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -21,6 +23,8 @@ use log::error;
 
 use rtable::prefix::*;
 
+use super::super::master::ZebraMaster;
+use super::super::kernel::*;
 use super::super::link::*;
 use super::super::address::*;
 use super::super::route::*;
@@ -159,11 +163,17 @@ pub struct Netlink {
 
     /// Receive buffer.
     buf: RefCell<Buffer>,
+
+    /// ZebraMaster.
+    master: Weak<ZebraMaster>,
+
+    /// Zebra Callbak functions.
+    callbacks: KernelCallbacks,
 }
 
 impl Netlink {
     /// Constructor - open Netlink socket and bind.
-    pub fn new() -> Result<Netlink, io::Error> {
+    pub fn new(callbacks: KernelCallbacks) -> Result<Netlink, io::Error> {
         let sock = unsafe {
             libc::socket(libc::AF_NETLINK, libc::SOCK_RAW, libc::NETLINK_ROUTE)
         };
@@ -205,7 +215,14 @@ impl Netlink {
             pid: snl.nl_pid,
             seq: Cell::new(0u32),
             buf: RefCell::new(Buffer::new()),
+            master: Default::default(),
+            callbacks: callbacks,
         })
+    }
+
+    /// Set ZebraMaster.
+    pub fn set_master(&mut self, master: Rc<ZebraMaster>) {
+        self.master = Rc::downgrade(&master);
     }
 
     /// Send request message througn Netlink.
@@ -246,9 +263,7 @@ impl Netlink {
     }
 
     /// Parse Netlink header and call parser to parse message payload.
-    fn parse_info<T, D>(&self, parser: &Fn(&Nlmsghdr, &T, &AttrMap) -> Option<D>) -> Result<Vec<D>, io::Error> {
-        let mut v = Vec::new();
-
+    fn parse_info<T>(&self, parser: &Fn(&Netlink, &Nlmsghdr, &T, &AttrMap) -> bool) -> Result<(), io::Error> {
         'outer: loop {
             let mut buffer = self.buf.borrow_mut();
 
@@ -318,16 +333,17 @@ impl Netlink {
                 let data = databuf as *const _ as *const T;
                 let attrbuf = &buf[nlmsg_attr::<T>()..];
                 let map = nlmsg_parse_attr(attrbuf);
-                let ret = unsafe { parser(&(*header), &(*data), &map) };
+                let ret = unsafe { parser(self, &(*header), &(*data), &map) };
+                // TODO check return value?
 
                 p += nlmsg_len as usize;
             }
         }
 
-        Ok(v)
+        Ok(())
     }
 
-    fn parse_interface(h: &Nlmsghdr, ifi: &Ifinfomsg, attr: &AttrMap) -> Option<Link> {
+    fn parse_interface(&self, h: &Nlmsghdr, ifi: &Ifinfomsg, attr: &AttrMap) -> bool {
         assert!(h.nlmsg_type == libc::RTM_NEWLINK);
 
         let ifindex = ifi.ifi_index;
@@ -361,14 +377,20 @@ impl Netlink {
         debug!("parse_interface() {} {} {} {:?} {}",
                ifi.ifi_index, ifname, ifi.ifi_type, hwaddr, mtu);
 
-        Some(Link::new(ifi.ifi_index, ifname, ifi.ifi_type as u16, hwaddr, mtu))
+        // add callback
+        if let Some(master) = self.master.upgrade() {
+            (self.callbacks.new_link)(&master, Link::new(ifi.ifi_index, ifname, ifi.ifi_type as u16, hwaddr, mtu));
+        }
+
+        true
     }
 
-    fn parse_interface_address<T: AddressLen + FromStr>(h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> Option<Connected<T>> {
+    fn parse_interface_address<T>(&self, h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> bool
+    where T: AddressLen + FromStr {
         assert!(h.nlmsg_type == libc::RTM_NEWADDR || h.nlmsg_type == libc::RTM_DELADDR);
 
         if ifa.ifa_family as i32 != libc::AF_INET && ifa.ifa_family as i32 != libc::AF_INET6 {
-            return None
+            return false
         }
 
         let mut local = attr.get(&(libc::IFA_LOCAL as i32));
@@ -391,31 +413,30 @@ impl Netlink {
 
         let prefix = Prefix::<T>::new();
 
-        Some(Connected::<T>::new(prefix))
+        // add /delete callback
+
+//        Some(Connected::<T>::new(prefix))
+        true
     }
 }
 
 
 impl LinkHandler for Netlink {
-    // Get all links from kernel.
-    fn get_links_all(&self) -> Result<Vec<Link>, io::Error> {
+    /// Get all links from kernel.
+    fn get_links_all(&self) -> Result<(), io::Error> {
         debug!("Get links all");
 
-        match self.send_request(libc::AF_PACKET, libc::RTM_GETLINK as i32) {
-            Ok(_) => self.parse_info(&Netlink::parse_interface),
-            Err(err) => {
-                error!("Send request: RTM_GETLINK");
-                Err(err)
-            }
+        if let Err(err) = self.send_request(libc::AF_PACKET, libc::RTM_GETLINK as i32) {
+            error!("Send request: RTM_GETLINK");
+            return Err(err)
         }
-    }
 
-    // Add link from zebra
-    //fn add_link(&self) -> ?
+        if let Err(err) = self.parse_info(&Netlink::parse_interface) {
+            error!("Parse info: RTM_GETLINK");
+            return Err(err)
+        }
 
-    // Get link information.
-    fn get_link(&self, index: i32) -> Option<Link> {
-        None
+        Ok(())
     }
 
     // Set MTU.
@@ -439,28 +460,36 @@ impl LinkHandler for Netlink {
 
 impl AddressHandler for Netlink {
     // Get all IPv4 addresses from kernel
-    fn get_ipv4_addresses_all(&self) -> Result<Vec<Connected<Ipv4Addr>>, io::Error> {
+    fn get_ipv4_addresses_all(&self) -> Result<(), io::Error> {
         debug!("Get address all");
 
-        match self.send_request(libc::AF_INET, libc::RTM_GETADDR as i32) {
-            Ok(_) => self.parse_info(&Netlink::parse_interface_address::<Ipv4Addr>),
-            Err(err) => {
-                error!("Send request: RTM_GETADDR");
-                Err(err)
-            }
+        if let Err(err) = self.send_request(libc::AF_INET, libc::RTM_GETADDR as i32) {
+            error!("Send request: RTM_GETADDR");
+            return Err(err)
         }
+
+        if let Err(err) = self.parse_info(&Netlink::parse_interface_address::<Ipv4Addr>) {
+            error!("Parse info: RTM_GETADDR");
+            return Err(err)
+        }
+
+        Ok(())
     }
 
     // Get all IPv6 addresses from kernel
-    fn get_ipv6_addresses_all(&self) -> Result<Vec<Connected<Ipv6Addr>>, io::Error> {
+    fn get_ipv6_addresses_all(&self) -> Result<(), io::Error> {
         debug!("Get address all");
 
-        match self.send_request(libc::AF_INET6, libc::RTM_GETADDR as i32) {
-            Ok(_) => self.parse_info(&Netlink::parse_interface_address::<Ipv6Addr>),
-            Err(err) => {
-                error!("Send request: RTM_GETADDR");
-                Err(err)
-            }
+        if let Err(err) = self.send_request(libc::AF_INET6, libc::RTM_GETADDR as i32) {
+            error!("Send request: RTM_GETADDR");
+            return Err(err)
         }
+
+        if let Err(err) = self.parse_info(&Netlink::parse_interface_address::<Ipv6Addr>) {
+            error!("Parse info: RTM_GETADDR");
+            return Err(err)
+        }
+
+        Ok(())
     }
 }

@@ -48,20 +48,38 @@ pub struct ZebraMaster {
 
 impl ZebraMaster {
     pub fn new() -> ZebraMaster {
+        let callbacks = KernelCallbacks {
+            new_link: &ZebraMaster::new_link,
+            delete_link: &ZebraMaster::delete_link,
+        };
+
         ZebraMaster {
-            kernel: RefCell::new(Kernel::new()),
+            kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
             name2ifindex: HashMap::new(),
         }
     }
 
-    pub fn kernel_init(master: Rc<ZebraMaster>) {
-        // Connect master to kernel.
-        master.kernel.borrow_mut().connect(master.clone());
+    pub fn new_link(&self, link: Link) {
+        debug!("New Link");
 
-        // Init Kernel interface.
-        master.kernel.borrow().init();
+        self.links.borrow_mut().insert(link.index(), Rc::new(link));
+
+        // TODO: notify this to other protocols.
+    }
+
+    pub fn delete_link(&self, link: Link) {
+        debug!("Delete Link");
+
+        //self.links.borrow_mut().insert(link.index(), Rc::new(link));
+
+        // TODO: notify this to other protocols.
+    }
+
+    pub fn kernel_init(master: Rc<ZebraMaster>) {
+        // Init Kernel driver.
+        master.kernel.borrow_mut().init(master.clone());
     }
 
     pub fn start(&self,

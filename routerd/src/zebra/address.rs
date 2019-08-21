@@ -6,16 +6,16 @@
 //
 
 use std::io;
-use std::net::{Ipv4Addr, Ipv6Addr};
+//use std::net::{Ipv4Addr, Ipv6Addr};
 use rtable::prefix::*;
 
 /// Trait IP address handler.
 pub trait AddressHandler {
     /// Get all IPv4 addresses from kernel.
-    fn get_ipv4_addresses_all(&self) -> Result<Vec<Connected<Ipv4Addr>>, io::Error>;
+    fn get_ipv4_addresses_all(&self) -> Result<(), io::Error>;
 
     /// Get all IPv6 addresses from kernel.
-    fn get_ipv6_addresses_all(&self) -> Result<Vec<Connected<Ipv6Addr>>, io::Error>;
+    fn get_ipv6_addresses_all(&self) -> Result<(), io::Error>;
 
 
 }

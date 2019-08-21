@@ -6,47 +6,46 @@
 //
 
 use std::io;
+use std::net::{Ipv4Addr, Ipv6Addr};
 
-// Abstracted event handler between Zebra and OS.
+use super::master::*;
+use super::address::*;
+
+/// Abstracted event handler between Zebra and OS.
 pub trait LinkHandler {
-    // Get all links from kernel.
-    fn get_links_all(&self) -> Result<Vec<Link>, io::Error>;
+    /// Get all links from kernel.
+    fn get_links_all(&self) -> Result<(), io::Error>;
 
-    // Add link from zebra
-    //fn add_link(&self) -> ?
-
-    // Get link information.
-    fn get_link(&self, index: i32) -> Option<Link>;
-
-    // Set MTU.
+    /// Set MTU.
     fn set_mtu(&self, mtu: u16) -> bool; // ? Error
 
-    // Set link up.
+    /// Set link up.
     fn set_link_up(&self) -> bool;
 
-    // Set link down.
+    /// Set link down.
     fn set_link_down(&self) -> bool;
-
-    // Set callback for link stat change.
-//    fn set_link_change_callback(&self, &Fn());
 }
 
 /// Generic Link information
 pub struct Link {
     /// Interface index.
-    pub index: i32,
+    index: i32,
 
     /// Name from kernel.
-    pub name: String,
+    name: String,
     
     /// Hardware type.
-    pub hwtype: u16,
+    hwtype: u16,
 
     /// Hardware address.
-    pub hwaddr: [u8; 6],
+    hwaddr: [u8; 6],
 
     /// MTU.
-    pub mtu: u32,
+    mtu: u32,
+
+    /// Connected addresses.
+    addr4: Vec<Connected<Ipv4Addr>>,
+    addr6: Vec<Connected<Ipv6Addr>>,
 }
 
 impl Link {
@@ -57,7 +56,13 @@ impl Link {
             name: name.to_string(),
             hwaddr,
             mtu,
+            addr4: Vec::new(),
+            addr6: Vec::new(),
         }
+    }
+
+    pub fn index(&self) -> i32 {
+        self.index
     }
 }
 

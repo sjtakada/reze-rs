@@ -2,12 +2,11 @@
 // ReZe.Rs - Router Daemon
 //   Copyright (C) 2018,2019 Toshiaki Takada
 //
-// Zebra - Kernel interface
+// Zebra - Kernel driver
 //
 
 use std::rc::Weak;
 use std::rc::Rc;
-use std::cell::Cell;
 
 use super::master::*;
 use super::link::*;
@@ -15,39 +14,33 @@ use super::address::*;
 
 use super::linux::netlink::*;
 
+//use log::error;
+
+/// Kernel Callbacks.
+pub struct KernelCallbacks {
+    pub new_link: &'static Fn(&ZebraMaster, Link) -> (),
+    pub delete_link: &'static Fn(&ZebraMaster, Link) -> (),
+}
+
 /// Kernel interface.
 pub struct Kernel {
-    // Zebra Master.
-    master: Weak<ZebraMaster>,
-
-    /// Netlink socket.
+    /// Netlink for Linux.
     netlink: Netlink,
 }
 
 impl Kernel {
-    pub fn new() -> Kernel {
-        let netlink = Netlink::new().unwrap();
+    pub fn new(callbacks: KernelCallbacks) -> Kernel {
+        let netlink = Netlink::new(callbacks).unwrap();
 
         Kernel {
-            master: Default::default(),
             netlink,
         }
     }
 
-    pub fn connect(&mut self, master: Rc<ZebraMaster>) {
-        self.master = Rc::downgrade(&master);
-    }
+    pub fn init(&mut self, master: Rc<ZebraMaster>) {
+        self.netlink.set_master(master);
 
-    pub fn init(&self) {
-//        self.master = Some(master);
-
-        let master = self.master.upgrade();
-        match master {
-            Some(master) => println!("Some"),
-            Nonw => println!("None"),
-        }
-
-        let links = self.netlink.get_links_all().unwrap();
+        let links = self.netlink.get_links_all();
         let v4addr = self.netlink.get_ipv4_addresses_all();
         let v6addr = self.netlink.get_ipv6_addresses_all();
     }
