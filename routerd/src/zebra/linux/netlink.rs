@@ -39,6 +39,24 @@ const NETLINK_RECV_BUFSIZ: usize = 4096;
 
 const NLMSG_ALIGNTO: usize = 4usize;
 
+pub trait AddressFamily {
+    /// Return libc Addressfamily
+    fn address_family() -> libc::c_int;
+}
+
+impl AddressFamily for Ipv4Addr {
+    fn address_family() -> libc::c_int {
+        libc::AF_INET
+    }
+}
+
+impl AddressFamily for Ipv6Addr {
+    fn address_family() -> libc::c_int {
+        libc::AF_INET6
+    }
+}
+
+
 fn nlmsg_align(len: usize) -> usize {
     (len + NLMSG_ALIGNTO - 1) & !(NLMSG_ALIGNTO - 1)
 }
@@ -384,17 +402,22 @@ impl Netlink {
 
             true
         } else {
+            error!("Callback failed");
             false
         }
     }
 
     fn parse_interface_address<T>(&self, h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> bool
-    where T: AddressLen + FromStr {
+    where T: AddressFamily + AddressLen + FromStr {
         assert!(h.nlmsg_type == libc::RTM_NEWADDR || h.nlmsg_type == libc::RTM_DELADDR);
 
-        if ifa.ifa_family as i32 != libc::AF_INET && ifa.ifa_family as i32 != libc::AF_INET6 {
+        if ifa.ifa_family as i32 != T::address_family() {
             return false
         }
+
+//        if ifa.ifa_family as i32 != libc::AF_INET && ifa.ifa_family as i32 != libc::AF_INET6 {
+//            return false
+//        }
 
         let mut local = attr.get(&(libc::IFA_LOCAL as i32));
         let mut address = attr.get(&(libc::IFA_ADDRESS as i32));
@@ -416,10 +439,27 @@ impl Netlink {
 
         let prefix = Prefix::<T>::new();
 
-        // add /delete callback
-
-//        Some(Connected::<T>::new(prefix))
-        true
+        if let Some(master) = self.master.upgrade() {
+/*
+            if h.nlmsg_type == libc::RTM_NETADDR {
+                if ifa.ifa_family as i32 == libc::AF_INET {
+                    (self.callback.add_ipv4_address)(&master, );
+                } else /* ifa.ifa_family as i32 == libc::AF_INET6 */ {
+                    (self.callback.add_ipv6_address)(&master, );
+                }
+            } else /* h.nlmsg_type == libc::RTM_DELADDR */ {
+                if ifa.ifa_family as i32 == libc::AF_INET {
+                    (self.callback.delete_ipv4_address)(&master, );
+                } else /* ifa.ifa_family as i32 == libc::AF_INET6 */ {
+                    (self.callback.delete_ipv6_address)(&master, );
+                }
+            }
+*/
+            true
+        } else {
+            error!("Callback failed");
+            true
+        }
     }
 }
 
