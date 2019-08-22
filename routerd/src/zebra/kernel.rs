@@ -5,7 +5,6 @@
 // Zebra - Kernel driver
 //
 
-use std::rc::Weak;
 use std::rc::Rc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
@@ -27,10 +26,10 @@ pub struct KernelCallbacks {
     pub delete_ipv6_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
 }
 
-/// Kernel interface.
+/// Kernel driver.
 pub struct Kernel {
-    /// Netlink for Linux.
-    netlink: Netlink,
+    /// Kernel driver for Linux.
+    driver: Netlink,
 }
 
 impl Kernel {
@@ -38,15 +37,17 @@ impl Kernel {
         let netlink = Netlink::new(callbacks).unwrap();
 
         Kernel {
-            netlink,
+            driver: netlink,
         }
     }
 
     pub fn init(&mut self, master: Rc<ZebraMaster>) {
-        self.netlink.set_master(master);
+        self.driver.set_master(master);
 
-        let links = self.netlink.get_links_all();
-        let v4addr = self.netlink.get_addresses_all::<Ipv4Addr>();
-        let v6addr = self.netlink.get_addresses_all::<Ipv6Addr>();
+        let links = self.driver.get_links_all();
+        let v4addr = self.driver.get_addresses_all::<Ipv4Addr>();
+        let v6addr = self.driver.get_addresses_all::<Ipv6Addr>();
+        // route ipv4
+        // route ipv6
     }
 }

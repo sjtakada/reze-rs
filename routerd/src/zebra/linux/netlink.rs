@@ -398,10 +398,6 @@ impl Netlink {
             return false
         }
 
-//        if ifa.ifa_family as i32 != libc::AF_INET && ifa.ifa_family as i32 != libc::AF_INET6 {
-//            return false
-//        }
-
         let mut local = attr.get(&(libc::IFA_LOCAL as i32));
         let mut address = attr.get(&(libc::IFA_ADDRESS as i32));
         if let None = local {
@@ -420,24 +416,23 @@ impl Netlink {
             }
         };
 
-        let prefix = Prefix::<T>::new();
+        let index = ifa.ifa_index as i32;
+        let prefix = Prefix::<T>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
+        let connected = Connected::<T>::new(prefix);
 
         if let Some(master) = self.master.upgrade() {
-/*
-            if h.nlmsg_type == libc::RTM_NETADDR {
-                if ifa.ifa_family as i32 == libc::AF_INET {
-                    (self.callback.add_ipv4_address)(&master, );
-                } else /* ifa.ifa_family as i32 == libc::AF_INET6 */ {
-                    (self.callback.add_ipv6_address)(&master, );
-                }
-            } else /* h.nlmsg_type == libc::RTM_DELADDR */ {
-                if ifa.ifa_family as i32 == libc::AF_INET {
-                    (self.callback.delete_ipv4_address)(&master, );
-                } else /* ifa.ifa_family as i32 == libc::AF_INET6 */ {
-                    (self.callback.delete_ipv6_address)(&master, );
-                }
-            }
-*/
+            match (h.nlmsg_type, ifa.ifa_family as i32) {
+                (libc::RTM_NEWADDR, libc::AF_INET) =>
+                    (self.callbacks.add_ipv4_address)(&master, index, connected),
+                (libc::RTM_DELADDR, libc::AF_INET) =>
+                    (self.callbacks.delete_ipv4_address)(&master, index, connected),
+                (libc::RTM_NEWADDR, libc::AF_INET6) =>
+                    (self.callbacks.add_ipv6_address)(&master, index, connected),
+                (libc::RTM_DELADDR, libc::AF_INET6) =>
+                    (self.callbacks.delete_ipv6_address)(&master, index, connected),
+                (_, _) => assert!(false),
+            };
+
             true
         } else {
             error!("Callback failed");
