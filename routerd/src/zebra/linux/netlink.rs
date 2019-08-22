@@ -16,7 +16,7 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::net::{Ipv4Addr, Ipv6Addr};
-use libc::{self, c_void, c_int, c_uchar};
+use libc::{self, c_int/*, c_void, c_uchar*/};
 use log::debug;
 use log::info;
 use log::error;
@@ -27,7 +27,7 @@ use super::super::master::ZebraMaster;
 use super::super::kernel::*;
 use super::super::link::*;
 use super::super::address::*;
-use super::super::route::*;
+//use super::super::route::*;
 
 const RTMGRP_LINK: libc::c_int = 1;
 const RTMGRP_IPV4_IFADDR: libc::c_int = 0x10;
@@ -88,7 +88,7 @@ fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
         unsafe {
             let rta_len = (*rta).rta_len as usize;
             let rta_type = (*rta).rta_type as i32;
-            let payload_len = rta_len - size_of::<Rtattr>();
+            let _payload_len = rta_len - size_of::<Rtattr>();
 
             m.insert(rta_type, &b[size_of::<Rtattr>()..rta_len]);
 
@@ -302,7 +302,7 @@ impl Netlink {
             }
 
             let recvlen = ret as usize;
-            let mut recvbuf = &buffer.p[..recvlen];
+            let recvbuf = &buffer.p[..recvlen];
             let mut p = 0;
             while p < recvlen {
                 if p + size_of::<Nlmsghdr>() > recvlen {
@@ -334,7 +334,7 @@ impl Netlink {
                 let data = databuf as *const _ as *const T;
                 let attrbuf = &buf[nlmsg_attr::<T>()..];
                 let map = nlmsg_parse_attr(attrbuf);
-                let ret = unsafe { parser(self, &(*header), &(*data), &map) };
+                let _ret = unsafe { parser(self, &(*header), &(*data), &map) };
                 // TODO check return value?
 
                 p += nlmsg_len as usize;
@@ -348,7 +348,7 @@ impl Netlink {
         assert!(h.nlmsg_type == libc::RTM_NEWLINK);
 
         let ifindex = ifi.ifi_index;
-        let mut hwaddr: [u8; 6] = match attr.get(&(libc::IFLA_ADDRESS as i32)) {
+        let hwaddr: [u8; 6] = match attr.get(&(libc::IFLA_ADDRESS as i32)) {
             Some(hwaddr) if hwaddr.len() == 6 => {
                 [hwaddr[0], hwaddr[1], hwaddr[2], hwaddr[3], hwaddr[4], hwaddr[5]]
             },
@@ -376,7 +376,7 @@ impl Netlink {
         };
 
         debug!("parse_interface() {} {} {} {:?} {}",
-               ifi.ifi_index, ifname, ifi.ifi_type, hwaddr, mtu);
+               ifindex, ifname, ifi.ifi_type, hwaddr, mtu);
 
         // Call master to add Link.
         if let Some(master) = self.master.upgrade() {
@@ -407,7 +407,7 @@ impl Netlink {
             address = local;
         }
 
-        let broad = match address {
+        let _broad = match address {
             Some(address) if address == local.unwrap() => {
                 Some(address)
             },
@@ -417,21 +417,35 @@ impl Netlink {
         };
 
         let index = ifa.ifa_index as i32;
-        let prefix = Prefix::<T>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
-        let connected = Connected::<T>::new(prefix);
 
         if let Some(master) = self.master.upgrade() {
-            match (h.nlmsg_type, ifa.ifa_family as i32) {
-                (libc::RTM_NEWADDR, libc::AF_INET) =>
-                    (self.callbacks.add_ipv4_address)(&master, index, connected),
-                (libc::RTM_DELADDR, libc::AF_INET) =>
-                    (self.callbacks.delete_ipv4_address)(&master, index, connected),
-                (libc::RTM_NEWADDR, libc::AF_INET6) =>
-                    (self.callbacks.add_ipv6_address)(&master, index, connected),
-                (libc::RTM_DELADDR, libc::AF_INET6) =>
-                    (self.callbacks.delete_ipv6_address)(&master, index, connected),
-                (_, _) => assert!(false),
-            };
+            match ifa.ifa_family as i32 {
+                libc::AF_INET => {
+                    let prefix = Prefix::<Ipv4Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
+                    let connected = Connected::<Ipv4Addr>::new(prefix);
+
+                    match h.nlmsg_type {
+                        libc::RTM_NEWADDR =>
+                            (self.callbacks.add_ipv4_address)(&master, index, connected),
+                        libc::RTM_DELADDR =>
+                            (self.callbacks.delete_ipv4_address)(&master, index, connected),
+                        _ => assert!(false),
+                    }
+                },
+                libc::AF_INET6 => {
+                    let prefix = Prefix::<Ipv6Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
+                    let connected = Connected::<Ipv6Addr>::new(prefix);
+
+                    match h.nlmsg_type {
+                        libc::RTM_NEWADDR =>
+                            (self.callbacks.add_ipv6_address)(&master, index, connected),
+                        libc::RTM_DELADDR =>
+                            (self.callbacks.delete_ipv6_address)(&master, index, connected),
+                        _ => assert!(false),
+                    }
+                },
+                _ => assert!(false),
+            }
 
             true
         } else {
@@ -461,7 +475,7 @@ impl LinkHandler for Netlink {
     }
 
     // Set MTU.
-    fn set_mtu(&self, mtu: u16) -> bool {
+    fn set_mtu(&self, _mtu: u16) -> bool {
         true
     }
 

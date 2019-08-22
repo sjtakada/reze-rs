@@ -44,9 +44,9 @@ impl Kernel {
     pub fn init(&mut self, master: Rc<ZebraMaster>) {
         self.driver.set_master(master);
 
-        let links = self.driver.get_links_all();
-        let v4addr = self.driver.get_addresses_all::<Ipv4Addr>();
-        let v6addr = self.driver.get_addresses_all::<Ipv6Addr>();
+        let _links = self.driver.get_links_all();
+        let _v4addr = self.driver.get_addresses_all::<Ipv4Addr>();
+        let _v6addr = self.driver.get_addresses_all::<Ipv6Addr>();
         // route ipv4
         // route ipv6
     }

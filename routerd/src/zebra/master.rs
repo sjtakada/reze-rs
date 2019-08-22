@@ -5,7 +5,7 @@
 // Zebra Master
 //
 
-use log::debug;
+use log::{debug, error};
 use std::rc::Rc;
 use std::cell::RefCell;
 
@@ -30,7 +30,7 @@ use super::kernel::*;
 /// Store Zebra Client related information.
 struct ClientTuple {
     /// Channel sender from Zebra to Protocol
-    sender: mpsc::Sender<ZebraToProto>,
+    _sender: mpsc::Sender<ZebraToProto>,
 }
 
 /// Zebra Master.
@@ -45,7 +45,7 @@ pub struct ZebraMaster {
     links: RefCell<HashMap<i32, Rc<Link>>>,
 
     ///
-    name2ifindex: HashMap<String, i32>,
+    _name2ifindex: HashMap<String, i32>,
 }
 
 impl ZebraMaster {
@@ -63,7 +63,7 @@ impl ZebraMaster {
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
-            name2ifindex: HashMap::new(),
+            _name2ifindex: HashMap::new(),
         }
     }
 
@@ -75,7 +75,7 @@ impl ZebraMaster {
         // TODO: notify this to other protocols.
     }
 
-    pub fn delete_link(&self, link: Link) {
+    pub fn delete_link(&self, _link: Link) {
         debug!("Delete Link");
 
         //self.links.borrow_mut().insert(link.index(), Rc::new(link));
@@ -84,19 +84,39 @@ impl ZebraMaster {
     }
 
     pub fn add_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
+        debug!("Add IPv4 Address");
 
+        match self.links.borrow().get(&index) {
+            Some(link) => link.add_ipv4_address(conn),
+            None => error!("No link found with index {}", index),
+        }
     }
 
     pub fn delete_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
+        debug!("Delete IPv4 Address");
 
+        match self.links.borrow().get(&index) {
+            Some(link) => link.delete_ipv4_address(conn),
+            None => error!("No link found with index {}", index),
+        }
     }
 
     pub fn add_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
+        debug!("Add IPv6 Address");
 
+        match self.links.borrow().get(&index) {
+            Some(link) => link.add_ipv6_address(conn),
+            None => error!("No link found with index {}", index),
+        }
     }
 
     pub fn delete_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
+        debug!("Delete IPv6 Address");
 
+        match self.links.borrow().get(&index) {
+            Some(link) => link.delete_ipv6_address(conn),
+            None => error!("No link found with index {}", index),
+        }
     }
 
     pub fn kernel_init(master: Rc<ZebraMaster>) {
@@ -114,7 +134,7 @@ impl ZebraMaster {
             while let Ok(d) = receiver_p2z.try_recv() {
                 match d {
                     ProtoToZebra::RegisterProto((proto, sender_z2p)) => {
-                        self.clients.borrow_mut().insert(proto, ClientTuple { sender: sender_z2p });
+                        self.clients.borrow_mut().insert(proto, ClientTuple { _sender: sender_z2p });
                         debug!("Register Protocol {}", proto);
                     },
                     ProtoToZebra::RouteAdd(_i) => {

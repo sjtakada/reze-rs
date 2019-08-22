@@ -54,7 +54,10 @@ impl UdsServerEntry {
             Some(ref mut stream) => {
                 let mut buffer = String::new();
 
-                stream.read_to_string(&mut buffer);
+                match stream.read_to_string(&mut buffer) {
+                    Ok(_) => {},
+                    Err(_) => {},
+                }
                 let command = String::from(buffer.trim());
                 Some(command)
             },

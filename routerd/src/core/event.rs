@@ -78,7 +78,11 @@ impl EventManager {
     pub fn poll_get_events(&self) -> Events {
         let inner = self.inner.borrow_mut();
         let mut events = Events::with_capacity(1024);
-        inner.poll.poll(&mut events, Some(inner.timeout));
+
+        match inner.poll.poll(&mut events, Some(inner.timeout)) {
+            Ok(_) => {},
+            Err(_) => {}
+        }
 
         events
     }

@@ -66,7 +66,7 @@ impl ProtocolMaster {
                  sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  sender_p2z: mpsc::Sender<ProtoToZebra>,
-                 receiver_z2p: mpsc::Receiver<ZebraToProto>) {
+                 _receiver_z2p: mpsc::Receiver<ZebraToProto>) {
         if let Some(ref mut inner) = *self.inner.borrow_mut() {
             self.sender_p2n.borrow_mut().replace(sender_p2n);
             self.sender_p2z.borrow_mut().replace(sender_p2z);
@@ -85,7 +85,10 @@ impl ProtocolMaster {
 
                             match self.timer_handler_get(token) {
                                 Some(handler) => {
-                                    handler.handle(EventType::TimerEvent, None);
+                                    match handler.handle(EventType::TimerEvent, None) {
+                                        Ok(_) => {},
+                                        Err(_) => {}
+                                    }
                                 },
                                 None => {
                                     error!("Handler doesn't exist");

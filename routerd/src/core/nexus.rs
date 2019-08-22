@@ -11,7 +11,7 @@
 //
 
 use log::debug;
-use log::error;
+//use log::error;
 
 use std::collections::HashMap;
 use std::thread;
@@ -64,13 +64,13 @@ pub struct RouterNexus {
 
 impl UdsServerHandler for RouterNexus {
     // Process command.
-    fn handle_message(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
         if let Some(command) = entry.stream_read() {
             debug!("received command {}", command);
 
             if command == "ospf" {
                     // Spawn ospf instance
-                    let (handle, sender, sender_z2p) =
+                    let (handle, sender, _sender_z2p) =
                         self.spawn_protocol(ProtocolType::Ospf,
                                             self.clone_sender_p2n(),
                                             self.clone_sender_p2z());
@@ -126,7 +126,7 @@ impl RouterNexus {
         let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
         let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
         let handle = thread::spawn(move || {
-            let mut zebra = Rc::new(ZebraMaster::new());
+            let zebra = Rc::new(ZebraMaster::new());
             ZebraMaster::kernel_init(zebra.clone());
             zebra.start(sender_p2n, receiver_n2p, receiver_p2z);
 
@@ -169,7 +169,10 @@ impl RouterNexus {
     //
     fn finish_protocol(&self, proto: &ProtocolType) {
         if let Some(tuple) = self.masters.borrow_mut().remove(&proto) {
-            tuple.sender.send(NexusToProto::ProtoTermination);
+            match tuple.sender.send(NexusToProto::ProtoTermination) {
+                Ok(_) => {},
+                Err(_) => {},
+            }
 
             match tuple.handle.join() {
                 Ok(_ret) => {

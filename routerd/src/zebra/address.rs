@@ -36,29 +36,29 @@ pub trait AddressHandler {
 /// Connected Address.
 pub struct Connected<T> {
     /// Address prefix.
-    address: Prefix<T>,
+    _address: Prefix<T>,
 
     /// Destination address prefix for peer.
-    destination: Option<Prefix<T>>,
+    _destination: Option<Prefix<T>>,
 
     /// Secondary address.
-    secondary: bool,
+    _secondary: bool,
 
     /// Unnumbered.
-    unnumbered: bool,
+    _unnumbered: bool,
 
     /// Label.
-    label: Option<String>,
+    _label: Option<String>,
 }
 
 impl<T> Connected<T> {
     pub fn new(prefix: Prefix<T>) -> Connected<T> {
         Connected::<T> {
-            address: prefix,
-            destination: None,
-            secondary: false,
-            unnumbered: false,
-            label: None,
+            _address: prefix,
+            _destination: None,
+            _secondary: false,
+            _unnumbered: false,
+            _label: None,
         }
     }
 }

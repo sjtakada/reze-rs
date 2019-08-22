@@ -68,7 +68,7 @@ impl Server {
 // Timer client
 pub struct Client {
     // Parent  
-    master: RefCell<Arc<ProtocolMaster>>,
+    _master: RefCell<Arc<ProtocolMaster>>,
 
     // Token
     token: u32,
@@ -82,7 +82,7 @@ impl Client {
     // Constructor
     pub fn new(master: Arc<ProtocolMaster>) -> Client {
         Client {
-            master: RefCell::new(master),
+            _master: RefCell::new(master),
             token: 0u32,
             timers: Mutex::new(HashMap::new())
         }

@@ -6,9 +6,10 @@
 //
 
 use std::io;
+use std::cell::RefCell;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use super::master::*;
+//use super::master::*;
 use super::address::*;
 
 /// Abstracted event handler between Zebra and OS.
@@ -32,37 +33,51 @@ pub struct Link {
     index: i32,
 
     /// Name from kernel.
-    name: String,
+    pub name: String,
     
     /// Hardware type.
-    hwtype: u16,
+    _hwtype: u16,
 
     /// Hardware address.
-    hwaddr: [u8; 6],
+    _hwaddr: [u8; 6],
 
     /// MTU.
-    mtu: u32,
+    _mtu: u32,
 
     /// Connected addresses.
-    addr4: Vec<Connected<Ipv4Addr>>,
-    addr6: Vec<Connected<Ipv6Addr>>,
+    addr4: RefCell<Vec<Connected<Ipv4Addr>>>,
+    addr6: RefCell<Vec<Connected<Ipv6Addr>>>,
 }
 
 impl Link {
     pub fn new(index: i32, name: &str, hwtype: u16, hwaddr: [u8; 6], mtu: u32) -> Link {
         Link {
             index,
-            hwtype,
+            _hwtype: hwtype,
             name: name.to_string(),
-            hwaddr,
-            mtu,
-            addr4: Vec::new(),
-            addr6: Vec::new(),
+            _hwaddr: hwaddr,
+            _mtu: mtu,
+            addr4: RefCell::new(Vec::new()),
+            addr6: RefCell::new(Vec::new()),
         }
     }
 
     pub fn index(&self) -> i32 {
         self.index
+    }
+
+    pub fn add_ipv4_address(&self, conn: Connected<Ipv4Addr>) {
+        self.addr4.borrow_mut().push(conn);
+    }
+
+    pub fn delete_ipv4_address(&self, _conn: Connected<Ipv4Addr>) {
+    }
+
+    pub fn add_ipv6_address(&self, conn: Connected<Ipv6Addr>) {
+        self.addr6.borrow_mut().push(conn);
+    }
+
+    pub fn delete_ipv6_address(&self, _conn: Connected<Ipv6Addr>) {
     }
 }
 
