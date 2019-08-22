@@ -39,23 +39,6 @@ const NETLINK_RECV_BUFSIZ: usize = 4096;
 
 const NLMSG_ALIGNTO: usize = 4usize;
 
-pub trait AddressFamily {
-    /// Return libc Addressfamily
-    fn address_family() -> libc::c_int;
-}
-
-impl AddressFamily for Ipv4Addr {
-    fn address_family() -> libc::c_int {
-        libc::AF_INET
-    }
-}
-
-impl AddressFamily for Ipv6Addr {
-    fn address_family() -> libc::c_int {
-        libc::AF_INET6
-    }
-}
-
 
 fn nlmsg_align(len: usize) -> usize {
     (len + NLMSG_ALIGNTO - 1) & !(NLMSG_ALIGNTO - 1)
@@ -502,33 +485,17 @@ impl LinkHandler for Netlink {
 }
 
 impl AddressHandler for Netlink {
-    // Get all IPv4 addresses from kernel
-    fn get_ipv4_addresses_all(&self) -> Result<(), io::Error> {
+    /// Get all addresses per Address Family from kernel.
+    fn get_addresses_all<T>(&self) -> Result<(), io::Error>
+    where T: AddressFamily + AddressLen + FromStr {
         debug!("Get address all");
 
-        if let Err(err) = self.send_request(libc::AF_INET, libc::RTM_GETADDR as i32) {
+        if let Err(err) = self.send_request(T::address_family(), libc::RTM_GETADDR as i32) {
             error!("Send request: RTM_GETADDR");
             return Err(err)
         }
 
-        if let Err(err) = self.parse_info(&Netlink::parse_interface_address::<Ipv4Addr>) {
-            error!("Parse info: RTM_GETADDR");
-            return Err(err)
-        }
-
-        Ok(())
-    }
-
-    // Get all IPv6 addresses from kernel
-    fn get_ipv6_addresses_all(&self) -> Result<(), io::Error> {
-        debug!("Get address all");
-
-        if let Err(err) = self.send_request(libc::AF_INET6, libc::RTM_GETADDR as i32) {
-            error!("Send request: RTM_GETADDR");
-            return Err(err)
-        }
-
-        if let Err(err) = self.parse_info(&Netlink::parse_interface_address::<Ipv6Addr>) {
+        if let Err(err) = self.parse_info(&Netlink::parse_interface_address::<T>) {
             error!("Parse info: RTM_GETADDR");
             return Err(err)
         }

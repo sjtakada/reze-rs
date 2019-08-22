@@ -46,7 +46,7 @@ impl Kernel {
         self.netlink.set_master(master);
 
         let links = self.netlink.get_links_all();
-        let v4addr = self.netlink.get_ipv4_addresses_all();
-        let v6addr = self.netlink.get_ipv6_addresses_all();
+        let v4addr = self.netlink.get_addresses_all::<Ipv4Addr>();
+        let v6addr = self.netlink.get_addresses_all::<Ipv6Addr>();
     }
 }
