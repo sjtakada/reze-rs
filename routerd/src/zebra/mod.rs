@@ -9,6 +9,8 @@ pub mod master;
 pub mod link;
 pub mod address;   
 pub mod route;
+pub mod static_route;
+
 pub mod kernel;
 pub mod linux;
 

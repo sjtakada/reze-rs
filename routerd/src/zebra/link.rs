@@ -36,13 +36,13 @@ pub struct Link {
     pub name: String,
     
     /// Hardware type.
-    _hwtype: u16,
+    hwtype: u16,
 
     /// Hardware address.
-    _hwaddr: [u8; 6],
+    hwaddr: [u8; 6],
 
     /// MTU.
-    _mtu: u32,
+    mtu: u32,
 
     /// Connected addresses.
     addr4: RefCell<Vec<Connected<Ipv4Addr>>>,
@@ -53,10 +53,10 @@ impl Link {
     pub fn new(index: i32, name: &str, hwtype: u16, hwaddr: [u8; 6], mtu: u32) -> Link {
         Link {
             index,
-            _hwtype: hwtype,
+            hwtype: hwtype,
             name: name.to_string(),
-            _hwaddr: hwaddr,
-            _mtu: mtu,
+            hwaddr: hwaddr,
+            mtu: mtu,
             addr4: RefCell::new(Vec::new()),
             addr6: RefCell::new(Vec::new()),
         }
@@ -66,18 +66,50 @@ impl Link {
         self.index
     }
 
+    pub fn hwtype(&self) -> u16 {
+        self.hwtype
+    }
+
+    pub fn hwaddr(&self) -> &[u8; 6] {
+        &self.hwaddr
+    }
+
+    pub fn mtu(&self) -> u32 {
+        self.mtu
+    }
+
     pub fn add_ipv4_address(&self, conn: Connected<Ipv4Addr>) {
         self.addr4.borrow_mut().push(conn);
     }
 
-    pub fn delete_ipv4_address(&self, _conn: Connected<Ipv4Addr>) {
+    pub fn delete_ipv4_address(&self, conn: Connected<Ipv4Addr>) {
+        let len = self.addr4.borrow().len();
+        let list = self.addr4.borrow_mut();
+
+        for i in 0..len {
+            let c = &list[i];
+            if c.address() == conn.address() {
+                self.addr4.borrow_mut().remove(i);
+                break;
+            }
+        }
     }
 
     pub fn add_ipv6_address(&self, conn: Connected<Ipv6Addr>) {
         self.addr6.borrow_mut().push(conn);
     }
 
-    pub fn delete_ipv6_address(&self, _conn: Connected<Ipv6Addr>) {
+    pub fn delete_ipv6_address(&self, conn: Connected<Ipv6Addr>) {
+        let len = self.addr6.borrow().len();
+        let list = self.addr6.borrow_mut();
+
+        for i in 0..len {
+            let c = &list[i];
+            if c.address() == conn.address() {
+                self.addr6.borrow_mut().remove(i);
+                break;
+            }
+        }
     }
 }
 
