@@ -8,19 +8,74 @@ use std::sync::Arc;
 
 use log::info;
 use simplelog::*;
+use getopts::Options;
 
 use routerd::core::event::*;
 use routerd::core::nexus::*;
 use routerd::core::uds_server::*;
 
-// Global entry point of ReZe Router Daemon.
+const ROUTERD_VERSION: &str = "1.0";
+const COPYRIGHT: &str = "Copyright (C) 2018,2019 Toshaki Takada";
+
+/// Help
+fn print_help(program: &str, opts: Options) {
+    let brief = format!("Usage: {} [options]", program);
+    print!("{}", opts.usage(&brief));
+}
+
+/// Version.
+fn print_version(program: &str) {
+    println!("{} version {}", program, ROUTERD_VERSION);
+    println!("{}", COPYRIGHT);
+    println!("");
+}
+
+/// Global entry point of ReZe Router Daemon.
 fn main() {
-    // TODO: command line arguments.
+    // Command line arguments.
+    let args: Vec<String> = env::args().collect();
+    let program = args[0].clone();
+
+    let mut opts = Options::new();
+    opts.optopt("l", "loglevel", "Set log level (default debug)", "LOGLEVEL");
+    opts.optflag("h", "help", "Display this help and exit");
+    opts.optflag("v", "version", "Print program version");
+
+    let matches = match opts.parse(&args[1..]) {
+        Ok(matches) => matches,
+        Err(_err) => {
+            println!("Invalid option");
+            print_help(&program, opts);
+            return;
+        }
+    };
+
+    if matches.opt_present("h") {
+        print_help(&program, opts);
+        return;
+    }
+
+    if matches.opt_present("v") {
+        print_version(&program);
+        return;
+    }
+
+    let level_filter = if let Some(loglevel) = matches.opt_str("l") {
+        match loglevel.as_ref() {
+            "error" => LevelFilter::Error,
+            "warn" => LevelFilter::Warn,
+            "info" => LevelFilter::Info,
+            "trace" => LevelFilter::Trace,
+            _ => LevelFilter::Debug
+        }
+    } else {
+        LevelFilter::Debug
+    };
 
     // Init logger
     CombinedLogger::init(
         vec![
-            TermLogger::new(LevelFilter::Debug, Config::default()).unwrap()
+            TermLogger::new(level_filter, Config::default(), TerminalMode::Mixed).unwrap()
         ]
     ).unwrap();
 
