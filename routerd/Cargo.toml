@@ -19,7 +19,8 @@ serde_json = "1.0.40"
 rtable = { git = "https://github.com/sjtakada/rtable" }
 #rtable = { path = "/home/toshiaki/git/rtable" }
 
-# maybe not used
+## maybe not used
+#jsonpath = "0.1.1"
 #tempdir = "0.3.7"
 #lazycell = "1.2.1"
 #tokio = "0.1.11"
