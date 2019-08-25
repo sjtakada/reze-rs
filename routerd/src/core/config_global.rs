@@ -19,7 +19,7 @@ use super::config::Config;
 
 /// Global config.
 pub struct ConfigGlobal {
-    /// Top level configurations.
+    /// Top level config storage.
     map: HashMap<String, Rc<Config>>,
 }
 

@@ -5,10 +5,50 @@
 // Zebra - Static route.
 //
 
-//use std::net::{Ipv4Addr, Ipv6Addr};
+use std::io;
+use std::rc::Rc;
+//use std::collections::HashMap;
+use std::net::{Ipv4Addr, Ipv6Addr};
 
-//use rtable::tree::*;
+use rtable::tree::*;
 use rtable::prefix::*;
+
+use crate::core::config::*;
+
+/// IPv4 Static route configs.
+pub struct Ipv4StaticRoute {
+    /// Config.
+    config: Tree<Prefix<Ipv4Addr>, Rc<StaticRoute<Ipv4Addr>>>,
+}
+
+impl Ipv4StaticRoute {
+    /// Constructor.
+    pub fn new() -> Ipv4StaticRoute {
+        Ipv4StaticRoute {
+            config: Tree::new(),
+        }
+    }
+}
+
+impl Config for Ipv4StaticRoute {
+    /// Return unique identifier, this is used to register to parent as a key.
+    fn id(&self) -> &str {
+        "ipv4_routes"
+    }
+
+    /// Handle POST method.
+    fn post(&self, key: &Key, params: Option<&serde_json::Value>) -> Result<(), io::Error> {
+        match params {
+            Some(json) => {
+            },
+            None => {
+            }
+        }
+
+        Ok(())
+    }
+}
+
 
 /// Static route.
 pub struct StaticRoute<T> {

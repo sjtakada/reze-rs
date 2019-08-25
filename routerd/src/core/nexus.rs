@@ -34,31 +34,39 @@ use super::message::zebra::ProtoToZebra;
 use super::message::zebra::ZebraToProto;
 
 use super::master::ProtocolMaster;
+use super::config::Config;
+use super::config_global::ConfigGlobal;
 use crate::zebra::master::ZebraMaster;
+use crate::zebra::static_route::*;
 use crate::bgp::master::BgpMaster;
 use crate::ospf::master::OspfMasterInner;
 
 use super::timer;
 
+/// Thread handle and Channel tuple.
 struct MasterTuple {
-    // Thread Join handle
+    /// Thread Join handle
     handle: JoinHandle<()>,
 
-    // Channel sender from Master To Protocol
+    /// Channel sender from Master To Protocol
     sender: mpsc::Sender<NexusToProto>,
 }
 
+/// Router Nexus.
 pub struct RouterNexus {
-    // MasterInner map
+    /// Global config.
+    config: RefCell<Arc<ConfigGlobal>>,
+
+    /// MasterInner map
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
-    // Timer server
+    /// Timer server
     timer_server: RefCell<timer::Server>,
 
-    // Sender channel for ProtoToNexus
+    /// Sender channel for ProtoToNexus
     sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
 
-    // Sender channel for ProtoToZebra
+    /// Sender channel for ProtoToZebra
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 }
 
@@ -112,11 +120,21 @@ impl UdsServerHandler for RouterNexus {
 impl RouterNexus {
     pub fn new() -> RouterNexus {
         RouterNexus {
+            config: RefCell::new(Arc::new(ConfigGlobal::new())),
             masters: RefCell::new(HashMap::new()),
             timer_server: RefCell::new(timer::Server::new()),
             sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
         }
+    }
+
+    // Initialize Config tree.
+    fn config_init(&self) {
+        let ref mut config = *self.config.borrow_mut();
+        let config = Arc::get_mut(config).unwrap();
+
+        let ipv4_routes = Ipv4StaticRoute::new();
+        config.register_child(Rc::new(ipv4_routes));
     }
 
     // Construct MasterInner instance and spawn a thread.
