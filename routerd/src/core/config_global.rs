@@ -8,7 +8,8 @@
 //use std::io;
 //use std::net::{Ipv4Addr, Ipv6Addr};
 use std::collections::HashMap;
-use std::rc::Rc;
+//use std::rc::Rc;
+use std::sync::Arc;
 
 //use serde_json;
 //use log::debug;
@@ -20,7 +21,7 @@ use super::config::Config;
 /// Global config.
 pub struct ConfigGlobal {
     /// Top level config storage.
-    map: HashMap<String, Rc<Config>>,
+    map: HashMap<String, Arc<Config + Send + Sync>>,
 }
 
 impl ConfigGlobal {
@@ -36,7 +37,7 @@ impl Config for ConfigGlobal {
         "config"
     }
 
-    fn register_child(&mut self, config: Rc<Config>) {
+    fn register_child(&mut self, config: Arc<Config + Sync + Send>) {
         self.map.insert(String::from(config.id()), config.clone());
     }
 }

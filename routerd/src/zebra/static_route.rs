@@ -7,10 +7,11 @@
 
 use std::io;
 use std::rc::Rc;
-//use std::collections::HashMap;
+use std::sync::Arc;
+use std::collections::BTreeMap;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use rtable::tree::*;
+//use rtable::tree::*;
 use rtable::prefix::*;
 
 use crate::core::config::*;
@@ -18,14 +19,14 @@ use crate::core::config::*;
 /// IPv4 Static route configs.
 pub struct Ipv4StaticRoute {
     /// Config.
-    config: Tree<Prefix<Ipv4Addr>, Rc<StaticRoute<Ipv4Addr>>>,
+    config: BTreeMap<Prefix<Ipv4Addr>, Arc<StaticRoute<Ipv4Addr>>>,
 }
 
 impl Ipv4StaticRoute {
     /// Constructor.
     pub fn new() -> Ipv4StaticRoute {
         Ipv4StaticRoute {
-            config: Tree::new(),
+            config: BTreeMap::new(),
         }
     }
 }

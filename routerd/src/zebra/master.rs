@@ -7,6 +7,7 @@
 
 use log::{debug, error};
 use std::rc::Rc;
+use std::sync::Arc;
 use std::cell::RefCell;
 
 use std::collections::HashMap;
@@ -22,6 +23,7 @@ use crate::core::message::nexus::ProtoToNexus;
 use crate::core::message::nexus::NexusToProto;
 use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
+use crate::core::config_global::*;
 
 use super::link::*;
 use super::address::*;
@@ -35,6 +37,9 @@ struct ClientTuple {
 
 /// Zebra Master.
 pub struct ZebraMaster {
+    /// Reference config tree.
+    config: Arc<ConfigGlobal>,
+
     /// Kernel interface.
     kernel: RefCell<Kernel>,
 
@@ -49,7 +54,7 @@ pub struct ZebraMaster {
 }
 
 impl ZebraMaster {
-    pub fn new() -> ZebraMaster {
+    pub fn new(config: Arc<ConfigGlobal>) -> ZebraMaster {
         let callbacks = KernelCallbacks {
             add_link: &ZebraMaster::add_link,
             delete_link: &ZebraMaster::delete_link,
@@ -60,6 +65,7 @@ impl ZebraMaster {
         };
 
         ZebraMaster {
+            config: config,
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),

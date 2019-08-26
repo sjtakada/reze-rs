@@ -131,20 +131,24 @@ impl RouterNexus {
     // Initialize Config tree.
     fn config_init(&self) {
         let ref mut config = *self.config.borrow_mut();
-        let config = Arc::get_mut(config).unwrap();
+        let mut config = Arc::get_mut(config).unwrap();
 
         let ipv4_routes = Ipv4StaticRoute::new();
-        config.register_child(Rc::new(ipv4_routes));
+        config.register_child(Arc::new(ipv4_routes));
     }
 
     // Construct MasterInner instance and spawn a thread.
     fn spawn_zebra(&self, sender_p2n: mpsc::Sender<ProtoToNexus>)
                    -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ProtoToZebra>) {
+        // Clone global config.
+        let ref mut config = *self.config.borrow_mut();
+        let config = Arc::clone(config);
+
         // Create channel from RouterNexus to MasterInner
         let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
         let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
         let handle = thread::spawn(move || {
-            let zebra = Rc::new(ZebraMaster::new());
+            let zebra = Rc::new(ZebraMaster::new(config));
             ZebraMaster::kernel_init(zebra.clone());
             zebra.start(sender_p2n, receiver_n2p, receiver_p2z);
 

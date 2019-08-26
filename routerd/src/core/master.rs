@@ -18,7 +18,6 @@ use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
-//use std::marker::Send;
 
 use super::event::*;
 

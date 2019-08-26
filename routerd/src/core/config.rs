@@ -7,7 +7,8 @@
 
 use std::io;
 use std::net::{Ipv4Addr, Ipv6Addr};
-use std::rc::Rc;
+//use std::rc::Rc;
+use std::sync::Arc;
 
 use serde_json;
 use log::debug;
@@ -30,7 +31,7 @@ pub trait Config {
     fn id(&self) -> &str;
 
     /// Register child Config trait object to this Config.
-    fn register_child(&mut self, _child: Rc<Config>) {
+    fn register_child(&mut self, _child: Arc<Config + Send + Sync>) {
         debug!("This object does not have child Config object");
         ()
     }
