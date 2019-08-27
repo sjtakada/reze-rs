@@ -118,9 +118,12 @@ impl UdsServerHandler for RouterNexus {
 }
 
 impl RouterNexus {
+    /// Constructor.
     pub fn new() -> RouterNexus {
+        let config = RouterNexus::config_global();
+
         RouterNexus {
-            config: RefCell::new(Arc::new(ConfigGlobal::new())),
+            config: RefCell::new(Arc::new(config)),
             masters: RefCell::new(HashMap::new()),
             timer_server: RefCell::new(timer::Server::new()),
             sender_p2n: RefCell::new(None),
@@ -129,12 +132,12 @@ impl RouterNexus {
     }
 
     // Initialize Config tree.
-    fn config_init(&self) {
-        let ref mut config = *self.config.borrow_mut();
-        let mut config = Arc::get_mut(config).unwrap();
-
+    fn config_global() -> ConfigGlobal {
+        let mut config = ConfigGlobal::new();
         let ipv4_routes = Ipv4StaticRoute::new();
         config.register_child(Arc::new(ipv4_routes));
+
+        config
     }
 
     // Construct MasterInner instance and spawn a thread.
