@@ -168,7 +168,7 @@ impl Cli {
 
     fn can_exit(&self) -> bool {
         let mode = self.mode.borrow_mut();
-        if String::from(mode.as_ref()) == CLI_INITIAL_MODE {
+        if String::from(mode.as_str()) == CLI_INITIAL_MODE {
             true
         }
         else {
@@ -186,7 +186,7 @@ impl Cli {
 
     pub fn mode(&self) -> String {
         let mode = self.mode.borrow_mut();
-        String::from(mode.as_ref())
+        String::from(mode.as_str())
     }
 
     pub fn set_privilege(&self, privilege: u8) {

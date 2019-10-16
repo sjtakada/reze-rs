@@ -224,7 +224,7 @@ impl<'a> CliReadline<'a> {
         let readline = editor.readline(&self.cli.prompt());
         match readline {
             Ok(line) => {
-                editor.add_history_entry(line.as_ref());
+                editor.add_history_entry(line.as_str());
                 Ok(line)
             },
             Err(err) => Err(err)

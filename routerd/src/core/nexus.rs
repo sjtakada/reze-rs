@@ -85,7 +85,7 @@ impl UdsServerHandler for RouterNexus {
                     self.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
 
                     // register sender_z2p to Zebra thread
-            } else if command == "quie" {
+            } else if command == "quit" {
                 return Err(CoreError::NexusTermination)
             } else {
                 return Err(CoreError::CommandNotFound(command.to_string()))
