@@ -8,7 +8,7 @@
 use std::sync;
 use nix::sys::signal;
 
-static SIGTSTP_ONCE: sync::Once = sync::ONCE_INIT;
+static SIGTSTP_ONCE: sync::Once = sync::Once::new();
 
 pub fn ignore_sigtstp_handler() {
     SIGTSTP_ONCE.call_once(|| unsafe {

@@ -5,7 +5,7 @@
 // Readline, rustyline integration.
 //
 
-use std::collections::HashMap;
+//use std::collections::HashMap;
 use std::cell::RefCell;
 //use std::cell::Cell;
 use std::rc::Rc;
@@ -25,7 +25,7 @@ use rustyline::config;
 use super::cli::Cli;
 use super::tree::CliTree;
 use super::parser::*;
-use super::node::CliNode;
+//use super::node::CliNode;
 use super::node::NodeType;
 //use super::node::Value;
 use super::error::CliError;

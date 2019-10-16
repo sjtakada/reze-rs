@@ -23,7 +23,7 @@ use super::collate::*;
 const CLI_DEFAULT_PARSER_PRIVILEGE: u8 = 1;
 
 // Type aliases.
-type CliNodeMatchStateTuple = (Rc<CliNode>, MatchResult);
+type CliNodeMatchStateTuple = (Rc<dyn CliNode>, MatchResult);
 type CliNodeMatchStateVec = Vec<CliNodeMatchStateTuple>;
 
 // CLI Execution Result.
@@ -72,7 +72,7 @@ pub struct CliParser {
     matched_vec: RefCell<CliNodeMatchStateVec>,
 
     // Last matched node for execution.
-    node_executable: Option<Rc<CliNode>>,
+    node_executable: Option<Rc<dyn CliNode>>,
 
     // HashMap of captured key value pairs.
     captured_map: RefCell<HashMap<String, Value>>,
@@ -153,7 +153,7 @@ impl CliParser {
     }
 
     // Return executable node.
-    pub fn node_executable(&self) -> Option<Rc<CliNode>> {
+    pub fn node_executable(&self) -> Option<Rc<dyn CliNode>> {
         self.node_executable.clone()
     }
 
@@ -163,7 +163,7 @@ impl CliParser {
     }
 
     // Return candidate in matched.
-    fn get_candidate(&self) -> Rc<CliNode> {
+    fn get_candidate(&self) -> Rc<dyn CliNode> {
         assert!(self.num_matched() == 1);
 
         self.matched_vec.borrow_mut()[0].0.clone()
@@ -184,7 +184,7 @@ impl CliParser {
     }
 
     // Fill matched vec with next nodes from current node.
-    fn set_matched_vec(&self, node: Rc<CliNode>) {
+    fn set_matched_vec(&self, node: Rc<dyn CliNode>) {
         self.matched_vec.replace(
             node.inner().next().iter()
                 .map(|n| (n.clone(), MatchResult::Success(MatchFlag::Partial)))
@@ -278,7 +278,7 @@ impl CliParser {
     }
 
     // Given input on current CliNode, update matched_vec.
-    fn match_token(&self, token: &str, curr: Rc<CliNode>) {
+    fn match_token(&self, token: &str, curr: Rc<dyn CliNode>) {
         self.matched_vec.replace(
             curr.inner().next().iter()
                 .filter_map(|n|
@@ -291,7 +291,7 @@ impl CliParser {
     }
 
     // Try match shorter string in line.
-    fn match_shorter(&self, token: &str, curr: Rc<CliNode>) {
+    fn match_shorter(&self, token: &str, curr: Rc<dyn CliNode>) {
         let mut len = token.len();
 
         while len > 0 {
@@ -312,7 +312,7 @@ impl CliParser {
     }
 
     // Parse line and match current node for completion.
-    pub fn parse(&mut self, curr: Rc<CliNode>) -> ExecResult {
+    pub fn parse(&mut self, curr: Rc<dyn CliNode>) -> ExecResult {
         let mut curr = curr;
 
         loop {
@@ -407,7 +407,7 @@ impl CliParser {
     }
 
     // Parse line and match current node for execution.
-    pub fn parse_execute(&mut self, curr: Rc<CliNode>) -> ExecResult {
+    pub fn parse_execute(&mut self, curr: Rc<dyn CliNode>) -> ExecResult {
         let executable = curr.is_executable();
 
         loop {

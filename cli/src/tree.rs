@@ -82,7 +82,7 @@ pub struct CliTree {
     parent: Option<Rc<CliTree>>,
 
     // Top CliNode.
-    top: RefCell<Rc<CliNode>>,
+    top: RefCell<Rc<dyn CliNode>>,
 
     // Exit to finish flag.
     // exit_to_finish: bool;
@@ -105,7 +105,7 @@ impl CliTree {
         &self.mode
     }
 
-    pub fn top(&self) -> Rc<CliNode> {
+    pub fn top(&self) -> Rc<dyn CliNode> {
         self.top.borrow().clone()
     }
 
@@ -366,7 +366,7 @@ impl CliTree {
         (token_type, Some(token))
     }
 
-    fn vector_add_node_each(curr: &mut CliNodeVec, node: Rc<CliNode>) {
+    fn vector_add_node_each(curr: &mut CliNodeVec, node: Rc<dyn CliNode>) {
         for c in curr {
             let inner = c.inner();
             let mut next = inner.next();
@@ -385,13 +385,13 @@ impl CliTree {
     }
 
     // Return CLI Node by TokenType.
-    fn new_node_by_type(token_type: TokenType, defun_tokens: &serde_json::Value, token: &str) -> Option<Rc<CliNode>> {
+    fn new_node_by_type(token_type: TokenType, defun_tokens: &serde_json::Value, token: &str) -> Option<Rc<dyn CliNode>> {
         if defun_tokens[token].is_object() {
             let token_def = defun_tokens[token].as_object().unwrap();
             let id = CliTree::get_str_or(token_def, "id", "<id>");
             let help = CliTree::get_str_or(token_def, "help", "<help>");
             
-            let node: Rc<CliNode> = match token_type {
+            let node: Rc<dyn CliNode> = match token_type {
                 TokenType::IPv4Prefix => Rc::new(CliNodeIPv4Prefix::new(&id, token, &help)),
                 TokenType::IPv4Address => Rc::new(CliNodeIPv4Address::new(&id, token, &help)),
                 TokenType::IPv6Prefix => Rc::new(CliNodeIPv6Prefix::new(&id, token, &help)),
@@ -435,7 +435,7 @@ impl CliTree {
         }
     }
 
-    fn find_next_by_node(curr: &CliNodeVec, node: Rc<CliNode>) -> Option<Rc<CliNode>> {
+    fn find_next_by_node(curr: &CliNodeVec, node: Rc<dyn CliNode>) -> Option<Rc<dyn CliNode>> {
         for c in curr {
             let inner = c.inner();
             let next = inner.next();

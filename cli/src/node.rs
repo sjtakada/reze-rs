@@ -25,7 +25,7 @@ const CLI_TOKEN_LINE: &str = "LINE";
 //const CLI_TOKEN_COMMUNITY: &str = "AA:NN";
 pub const CLI_DEFAULT_NODE_PRIVILEGE: u8 = 15;
 
-pub type CliNodeVec = Vec<Rc<CliNode>>;
+pub type CliNodeVec = Vec<Rc<dyn CliNode>>;
 
 #[derive(PartialEq)]
 pub enum NodeType {
@@ -121,7 +121,7 @@ pub struct CliNodeInner {
     next: RefCell<CliNodeVec>,
 
     // Actions.
-    actions: RefCell<Vec<Rc<CliAction>>>,
+    actions: RefCell<Vec<Rc<dyn CliAction>>>,
 }
 
 // CliNodeInner:
@@ -207,11 +207,11 @@ impl CliNodeInner {
     }
 
 
-    pub fn push_action(&self, action: Rc<CliAction>) {
+    pub fn push_action(&self, action: Rc<dyn CliAction>) {
         self.actions.borrow_mut().push(action);
     }
 
-    pub fn actions(&self) -> RefMut<Vec<Rc<CliAction>>> {
+    pub fn actions(&self) -> RefMut<Vec<Rc<dyn CliAction>>> {
         self.actions.borrow_mut()
     }
 
@@ -433,7 +433,7 @@ impl CliNode for CliNodeIPv4Prefix {
         for c in input.chars() {
             next_state = State::Unknown;
             let token = match c {
-                '0' ... '9' => Token::Digit,
+                '0' ..= '9' => Token::Digit,
                 '.' => Token::Dot,
                 '/' => Token::Slash,
                 _ => break,
@@ -549,7 +549,7 @@ impl CliNode for CliNodeIPv4Address {
         for c in input.chars() {
             next_state = State::Unknown;
             let token = match c {
-                '0' ... '9' => Token::Digit,
+                '0' ..= '9' => Token::Digit,
                 '.' => Token::Dot,
                 _ => break,
             };
@@ -663,13 +663,13 @@ impl CliNode for CliNodeIPv6Prefix {
             let token = match state {
                 State::Slash | State::PrefixLen => {
                     match c {
-                        '0' ... '9' => Token::PlenDigit,
+                        '0' ..= '9' => Token::PlenDigit,
                         _ => Token::Unknown,
                     }
                 },
                 _ => {
                     match c {
-                        '0' ... '9' | 'a' ... 'f' | 'A' ... 'F'
+                        '0' ..= '9' | 'a' ..= 'f' | 'A' ..= 'F'
                             => Token::Xdigit,
                         ':' => Token::Colon,
                         '/' => Token::Slash,
@@ -804,7 +804,7 @@ impl CliNode for CliNodeIPv6Address {
         for c in input.chars() {
             let next_state;
             let token = match c {
-                '0' ... '9' | 'a' ... 'f' | 'A' ... 'F'
+                '0' ..= '9' | 'a' ..= 'f' | 'A' ..= 'F'
                     => Token::Xdigit,
                 ':' => Token::Colon,
                 _   => {
