@@ -21,7 +21,7 @@ use super::config::Config;
 /// Global config.
 pub struct ConfigGlobal {
     /// Top level config storage.
-    map: HashMap<String, Arc<Config + Send + Sync>>,
+    map: HashMap<String, Arc<dyn Config + Send + Sync>>,
 }
 
 impl ConfigGlobal {
@@ -37,7 +37,7 @@ impl Config for ConfigGlobal {
         "config"
     }
 
-    fn register_child(&mut self, config: Arc<Config + Sync + Send>) {
+    fn register_child(&mut self, config: Arc<dyn Config + Sync + Send>) {
         self.map.insert(String::from(config.id()), config.clone());
     }
 }

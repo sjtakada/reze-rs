@@ -18,12 +18,12 @@ use super::linux::netlink::*;
 
 /// Kernel Callbacks.
 pub struct KernelCallbacks {
-    pub add_link: &'static Fn(&ZebraMaster, Link) -> (),
-    pub delete_link: &'static Fn(&ZebraMaster, Link) -> (),
-    pub add_ipv4_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
-    pub delete_ipv4_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
-    pub add_ipv6_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
-    pub delete_ipv6_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
+    pub add_link: &'static dyn Fn(&ZebraMaster, Link) -> (),
+    pub delete_link: &'static dyn Fn(&ZebraMaster, Link) -> (),
+    pub add_ipv4_address: &'static dyn Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
+    pub delete_ipv4_address: &'static dyn Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
+    pub add_ipv6_address: &'static dyn Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
+    pub delete_ipv6_address: &'static dyn Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
 }
 
 /// Kernel driver.

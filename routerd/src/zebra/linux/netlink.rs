@@ -264,7 +264,7 @@ impl Netlink {
     }
 
     /// Parse Netlink header and call parser to parse message payload.
-    fn parse_info<T>(&self, parser: &Fn(&Netlink, &Nlmsghdr, &T, &AttrMap) -> bool) -> Result<(), io::Error> {
+    fn parse_info<T>(&self, parser: &dyn Fn(&Netlink, &Nlmsghdr, &T, &AttrMap) -> bool) -> Result<(), io::Error> {
         'outer: loop {
             let mut buffer = self.buf.borrow_mut();
 

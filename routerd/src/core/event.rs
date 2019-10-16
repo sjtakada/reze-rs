@@ -40,7 +40,7 @@ pub struct EventManagerInner {
     index: usize,
 
     // Token to handler map.
-    handlers: HashMap<Token, Arc<EventHandler + Send + Sync>>,
+    handlers: HashMap<Token, Arc<dyn EventHandler + Send + Sync>>,
 
     // mio::Poll
     poll: Poll,
@@ -65,7 +65,7 @@ impl EventManager {
         }
     }
 
-    pub fn register_read(&self, fd: &Evented, handler: Arc<EventHandler + Send + Sync>) {
+    pub fn register_read(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
         let mut inner = self.inner.borrow_mut();
         let token = Token(inner.index);
 
@@ -87,7 +87,7 @@ impl EventManager {
         events
     }
 
-    pub fn poll_get_handler(&self, event: Event) -> Option<Arc<EventHandler + Send + Sync>> {
+    pub fn poll_get_handler(&self, event: Event) -> Option<Arc<dyn EventHandler + Send + Sync>> {
         let inner = self.inner.borrow_mut();
         match inner.handlers.get(&event.token()) {
             Some(handler) => Some(handler.clone()),

@@ -106,7 +106,7 @@ pub struct UdsServer {
     event_manager: RefCell<Arc<EventManager>>,
 
     // Message Server Handler
-    handler: RefCell<Arc<UdsServerHandler>>,
+    handler: RefCell<Arc<dyn UdsServerHandler>>,
 
     // Message Server Inner
     inner: RefCell<Option<Arc<UdsServerInner>>>,
@@ -116,7 +116,7 @@ pub struct UdsServer {
 }
   
 impl UdsServer {
-    fn new(event_manager: Arc<EventManager>, handler: Arc<UdsServerHandler>, path: &PathBuf) -> UdsServer {
+    fn new(event_manager: Arc<EventManager>, handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> UdsServer {
         let listener = match UnixListener::bind(path) {
             Ok(listener) => listener,
             Err(_) => panic!("UnixListener::bind() error"),
@@ -130,7 +130,7 @@ impl UdsServer {
         }
     }
 
-    pub fn start(event_manager: Arc<EventManager>, handler: Arc<UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
+    pub fn start(event_manager: Arc<EventManager>, handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
         let server = Arc::new(UdsServer::new(event_manager.clone(), handler, path));
         let inner = Arc::new(UdsServerInner::new(server.clone()));
 

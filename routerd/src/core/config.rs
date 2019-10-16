@@ -31,7 +31,7 @@ pub trait Config {
     fn id(&self) -> &str;
 
     /// Register child Config trait object to this Config.
-    fn register_child(&mut self, _child: Arc<Config + Send + Sync>) {
+    fn register_child(&mut self, _child: Arc<dyn Config + Send + Sync>) {
         debug!("This object does not have child Config object");
         ()
     }
