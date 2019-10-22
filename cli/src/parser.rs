@@ -477,6 +477,7 @@ impl CliParser {
         }
 
         if executable {
+            self.node_executable = Some(curr.clone());
             ExecResult::Complete
         }
         else {
