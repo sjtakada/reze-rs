@@ -42,6 +42,33 @@ impl CliAction for CliActionMode {
     }
 }
 
+// Http action.
+pub struct CliActionHttp {
+    method: String,
+    path: String,
+    params: Vec<String>,
+}
+
+impl CliActionHttp {
+    pub fn new(value: &serde_json::Value) -> CliActionHttp {
+        let method = value["method"].as_str().unwrap_or("GET");
+        let path = value["path"].as_str().unwrap_or("");
+        let params = value["params"].as_object();
+
+        CliActionHttp {
+            method: String::from(method),
+            path: String::from(path),
+            params: Vec::new(),
+        }
+    }
+}
+
+impl CliAction for CliActionHttp {
+    fn handle(&self, cli: &Cli) -> Result<(), CliError> {
+        Ok(())
+    }
+}
+
 // Built-in action.
 pub struct CliActionBuiltin {
     func: String,
