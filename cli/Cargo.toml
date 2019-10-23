@@ -16,3 +16,5 @@ mio-uds = "0.6.7"
 #libc = "0.2.51"
 nix = "0.13.0"
 #signal-hook = "0.1.8"
+
+common = { path = "../common" }

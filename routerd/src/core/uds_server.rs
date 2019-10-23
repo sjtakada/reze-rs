@@ -134,7 +134,7 @@ impl UdsServer {
         let server = Arc::new(UdsServer::new(event_manager.clone(), handler, path));
         let inner = Arc::new(UdsServerInner::new(server.clone()));
 
-        event_manager.register_read(&server.listener, inner.clone());
+        event_manager.register_listen(&server.listener, inner.clone());
 
         server.inner.borrow_mut().replace(inner);
         server

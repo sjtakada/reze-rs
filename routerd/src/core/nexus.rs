@@ -24,6 +24,7 @@ use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
 
+use super::signal;
 use super::error::*;
 use super::event::*;
 use super::uds_server::*;
@@ -225,7 +226,7 @@ impl RouterNexus {
     }
 
     //
-    pub fn start(&self, event_manager: Arc<EventManager>) {
+    pub fn start(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
         self.sender_p2n.borrow_mut().replace(sender_p2n);
@@ -236,6 +237,11 @@ impl RouterNexus {
         self.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
         'main: loop {
+            // Signal is caught.
+            if signal::is_sigint_caught() {
+                break 'main;
+            }
+
             //
             match event_manager.poll() {
                 Err(CoreError::NexusTermination) => break 'main,
@@ -292,5 +298,6 @@ impl RouterNexus {
         }
 
         // Nexus terminated.
+        Err(CoreError::NexusTermination)
     }
 }

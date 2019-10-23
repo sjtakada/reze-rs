@@ -65,6 +65,16 @@ impl EventManager {
         }
     }
 
+    pub fn register_listen(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
+        let mut inner = self.inner.borrow_mut();
+        let token = Token(inner.index);
+
+        inner.handlers.insert(token, handler);
+        inner.poll.register(fd, token, Ready::readable(), PollOpt::edge()).unwrap();
+
+        inner.index += 1;
+    }
+
     pub fn register_read(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
         let mut inner = self.inner.borrow_mut();
         let token = Token(inner.index);

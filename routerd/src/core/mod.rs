@@ -5,6 +5,7 @@
 // Core module.
 //
 pub mod error;
+pub mod signal;
 pub mod config;
 pub mod nexus;
 pub mod master;

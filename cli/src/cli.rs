@@ -22,6 +22,8 @@ use mio_uds::UnixStream;
 use serde_json;
 use rustyline::error::ReadlineError;
 
+use common::consts::*;
+
 use super::config::Config;
 use super::error::CliError;
 use super::readline::*;
@@ -92,7 +94,7 @@ impl Cli {
         self.set_mode(CLI_INITIAL_MODE)?;
 
         // TBD: Connect server or send.
-        //self.init_server_connect()?;
+        self.init_server_connect()?;
 
         // Init readline.
         let readline = CliReadline::new(&self);
@@ -382,10 +384,12 @@ impl Cli {
     fn init_server_connect(&self) -> Result<(), CliError> {
         // Initialize connection to server.
         let mut path = env::temp_dir();
-        path.push("rzrtd.cli");
+        path.push(CLI_UDS_FILENAME);
 
         let _stream = match UnixStream::connect(path) {
-            Ok(stream) => stream,
+            Ok(stream) => {
+                stream
+            },
             Err(_) => return Err(CliError::ConnectError),
         };
         
