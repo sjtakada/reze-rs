@@ -484,6 +484,10 @@ impl CliParser {
             ExecResult::Incomplete
         }
     }
+
+    pub fn params_get(&self) -> HashMap<String, Value> {
+        self.captured_map.replace(HashMap::new())
+    }
 }
 
 

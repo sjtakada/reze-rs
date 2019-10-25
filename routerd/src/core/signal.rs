@@ -10,14 +10,14 @@ use std::sync;
 use nix::sys::signal;
 
 static SIGTSTP_ONCE: sync::Once = sync::Once::new();
-static SIGINT_CALLED: sync::atomic::AtomicUsize = sync::atomic::AtomicUsize::new(0);
+static SIGINT_CAUGHT: sync::atomic::AtomicUsize = sync::atomic::AtomicUsize::new(0);
 
 extern fn sigint_handler(_: i32) {
-    SIGINT_CALLED.fetch_add(1, sync::atomic::Ordering::SeqCst);
+    SIGINT_CAUGHT.fetch_add(1, sync::atomic::Ordering::SeqCst);
 }
 
 pub fn is_sigint_caught() -> bool {
-    SIGINT_CALLED.load(sync::atomic::Ordering::SeqCst) > 0
+    SIGINT_CAUGHT.load(sync::atomic::Ordering::SeqCst) > 0
 }
 
 pub fn signal_init() {

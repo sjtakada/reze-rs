@@ -9,6 +9,7 @@ use std::env;
 //use std::io;
 use std::io::BufReader;
 use std::io::Read;
+use std::io::Write;
 use std::fs;
 use std::fs::File;
 use std::path::Path;
@@ -54,6 +55,9 @@ pub struct Cli {
     // Current privilege.
     privilege: Cell<u8>,
 
+    // Server stream.
+    stream: RefCell<Option<UnixStream>>,
+
     // Debug mode.
     debug: bool,
 }
@@ -67,6 +71,7 @@ impl Cli {
             mode: RefCell::new(String::new()),
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
+            stream: RefCell::new(None),
             debug: false,
         }
     }
@@ -388,7 +393,7 @@ impl Cli {
 
         let _stream = match UnixStream::connect(path) {
             Ok(stream) => {
-                stream
+                self.stream.borrow_mut().replace(stream);
             },
             Err(_) => return Err(CliError::ConnectError),
         };
@@ -401,6 +406,16 @@ impl Cli {
         signal::ignore_sigtstp_handler();
 
         Ok(())
+    }
+
+    pub fn stream_send(&self, message: &str) {
+        match self.stream.borrow_mut().as_ref() {
+            Some(mut s) => {
+                s.write_all(message.as_bytes());
+            },
+            None => {
+            }
+        }
     }
 }
 

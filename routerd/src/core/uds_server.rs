@@ -154,6 +154,10 @@ impl EventHandler for UdsServerInner {
                         let entry = UdsServerEntry::new(server.clone());
                         let event_manager = server.event_manager.borrow();
 
+                        if let Err(_) = server.handler.borrow_mut().handle_connect(server.clone(), &entry) {
+                            //
+                        }
+
                         event_manager.register_read(&stream, entry.clone());
                         entry.stream.borrow_mut().replace(stream);
                     },

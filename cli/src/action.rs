@@ -5,12 +5,15 @@
 // CLI Action.
 //
 
+use std::collections::HashMap;
+
 use super::cli::Cli;
 use super::error::CliError;
+use super::node::Value;
 
 // Action trait.
 pub trait CliAction {
-    fn handle(&self, cli: &Cli) -> Result<(), CliError>;
+    fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError>;
 }
 
 // Mode action.
@@ -35,7 +38,7 @@ impl CliActionMode {
 }
 
 impl CliAction for CliActionMode {
-    fn handle(&self, cli: &Cli) -> Result<(), CliError> {
+    fn handle(&self, cli: &Cli, _params: &HashMap<String, Value>) -> Result<(), CliError> {
         cli.set_mode(&self.name)?;
 
         Ok(())
@@ -64,7 +67,14 @@ impl CliActionHttp {
 }
 
 impl CliAction for CliActionHttp {
-    fn handle(&self, cli: &Cli) -> Result<(), CliError> {
+    fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
+        // replace path with params.
+        // build json body.
+        let request = format!("{}\n", &self.path);
+        let body = serde_json::to_string(&params).unwrap();
+
+        cli.stream_send(&request);
+
         Ok(())
     }
 }
@@ -87,7 +97,7 @@ impl CliActionBuiltin {
 }
 
 impl CliAction for CliActionBuiltin {
-    fn handle(&self, cli: &Cli) -> Result<(), CliError> {
+    fn handle(&self, cli: &Cli, _params: &HashMap<String, Value>) -> Result<(), CliError> {
         cli.call_builtin(&self.func, &self.params)
     }
 }

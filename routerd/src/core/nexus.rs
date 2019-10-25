@@ -75,8 +75,9 @@ impl UdsServerHandler for RouterNexus {
     // Process command.
     fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
         if let Some(command) = entry.stream_read() {
-            debug!("received command {}", command);
+            debug!("received command '{}'", command);
 
+/*
             if command == "ospf" {
                     // Spawn ospf instance
                     let (handle, sender, _sender_z2p) =
@@ -91,6 +92,7 @@ impl UdsServerHandler for RouterNexus {
             } else {
                 return Err(CoreError::CommandNotFound(command.to_string()))
             }
+*/
         }
 
         /*
@@ -110,10 +112,12 @@ impl UdsServerHandler for RouterNexus {
     }
 
     fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+        debug!("handle_connect");
         Ok(())
     }
     
     fn handle_disconnect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+        debug!("handle_disconnect");
         Ok(())
     }
 }

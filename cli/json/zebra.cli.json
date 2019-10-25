@@ -51,7 +51,14 @@
           {
             "http": {
               "method": "POST",
-              "path": "route_ipv4/:ADDRESS/:MASKLEN/nexthop_ipv4s/:IPV4-ADDRESS:4.0"
+              "path": "route_ipv4/:IPV4-ADDRESS:3.1,IPV4-ADDRESS:3.2:",
+              "params": {
+                "nexthops" : [
+                  {
+                    "ipv4_address": "IPV4-ADDRESS:4.0"
+                  }
+                ]
+              }
             },
             "cond": "IPV4-ADDRESS:4.0"
           }

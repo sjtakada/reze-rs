@@ -5,12 +5,17 @@
 // CLI Node.
 //
 
+use std::fmt;
+use std::fmt::Display;
+use std::fmt::Formatter;
 use std::rc::Rc;
 use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefMut;
 use std::cell::RefCell;
 use std::collections::HashMap;
+
+use serde::{Serialize, Serializer};
 
 use super::collate::*;
 use super::action::CliAction;
@@ -47,6 +52,23 @@ pub enum Value {
     Bool(bool),
     String(String),
     Array(Vec<Value>),
+}
+
+impl Display for Value {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+impl Serialize for Value {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer {
+        match self {
+            Value::Number(i) => serializer.serialize_i64(*i),
+            Value::Bool(b) => serializer.serialize_bool(*b),
+            _ => serializer.serialize_str("*"),
+        }
+    }
 }
 
 // CLI Node trait: Base interface for various type of CliNode.

@@ -319,22 +319,12 @@ impl<'a> CliReadline<'a> {
         // Populate mode params first.
         println!("** handle_actions");
 
-/*
-        // Populate params and keywords.
-        for n in node_token_vec.iter() {
-            let node = n.0.clone();
-
-            if self.cli.is_debug() {
-
-            }
-        }
-
-*/
         let node = parser.node_executable().unwrap();
+        let params = parser.params_get();
 
         if node.inner().actions().len() > 0 {
             for action in node.inner().actions().iter() {
-                action.handle(&self.cli)?;
+                action.handle(&self.cli, &params)?;
             }
             Ok(())
         }
