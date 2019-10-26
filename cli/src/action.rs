@@ -70,10 +70,11 @@ impl CliAction for CliActionHttp {
     fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
         // replace path with params.
         // build json body.
-        let request = format!("{}\n", &self.path);
+        let request = format!("{} {}\n\n", &self.method, &self.path);
         let body = serde_json::to_string(&params).unwrap();
 
         cli.stream_send(&request);
+        cli.stream_send(&body);
 
         Ok(())
     }
