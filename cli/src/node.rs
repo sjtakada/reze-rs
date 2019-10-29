@@ -48,6 +48,7 @@ pub enum NodeType {
 }
 
 pub enum Value {
+    None,
     Number(i64),
     Bool(bool),
     String(String),
@@ -64,8 +65,10 @@ impl Serialize for Value {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer {
         match self {
+            Value::None => serializer.serialize_str(&""),
             Value::Number(i) => serializer.serialize_i64(*i),
             Value::Bool(b) => serializer.serialize_bool(*b),
+            Value::String(s) => serializer.serialize_str(s),
             _ => serializer.serialize_str("*"),
         }
     }

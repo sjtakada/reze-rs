@@ -21,6 +21,7 @@ pub enum EventType {
     ReadEvent,
     WriteEvent,
     TimerEvent,
+    ErrorEvent,
 }
 
 //
@@ -85,6 +86,14 @@ impl EventManager {
         inner.index += 1;
     }
 
+    pub fn unregister_read(&self, fd: &dyn Evented) {
+        let mut inner = self.inner.borrow_mut();
+        let token = Token(inner.index);
+
+        inner.handlers.remove(&token);
+        inner.poll.deregister(fd).unwrap();
+    }
+
     pub fn poll_get_events(&self) -> Events {
         let inner = self.inner.borrow_mut();
         let mut events = Events::with_capacity(1024);
@@ -111,11 +120,22 @@ impl EventManager {
 
         for event in events.iter() {
             if let Some(handler) = self.poll_get_handler(event) {
-                match handler.handle(EventType::ReadEvent, None) {
-                    Err(CoreError::NexusTermination) => {
-                        terminated = true
-                    },
-                    _ => {
+                if event.readiness() == Ready::readable() {
+                    match handler.handle(EventType::ReadEvent, None) {
+                        Err(CoreError::NexusTermination) => {
+                            terminated = true
+                        },
+                        _ => {
+                        }
+                    }
+                }
+                else {
+                    match handler.handle(EventType::ErrorEvent, None) {
+                        Err(CoreError::NexusTermination) => {
+                            terminated = true
+                        },
+                        _ => {
+                        }
                     }
                 }
             }

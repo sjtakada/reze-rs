@@ -51,11 +51,11 @@
           {
             "http": {
               "method": "POST",
-              "path": "route_ipv4/:IPV4-ADDRESS:3.1,IPV4-ADDRESS:3.2:",
+              "path": "route_ipv4/:IPV4-ADDRESS:3.1/:IPV4-ADDRESS:3.2",
               "params": {
                 "nexthops" : [
                   {
-                    "ipv4_address": "IPV4-ADDRESS:4.0"
+                    "ipv4_address": ":IPV4-ADDRESS:4.0"
                   }
                 ]
               }

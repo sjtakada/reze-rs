@@ -12,6 +12,7 @@ use std::io::Read;
 use std::sync::Arc;
 use std::cell::RefCell;
 use std::path::PathBuf;
+use std::net::Shutdown;
 
 use mio_uds::UnixListener;
 use mio_uds::UnixStream;
@@ -64,6 +65,16 @@ impl UdsServerEntry {
             None => None
         }
     }
+
+    pub fn stream_shutdown(&self) {
+        match *self.stream.borrow_mut() {
+            Some(ref mut stream) => {
+                stream.shutdown(Shutdown::Both);
+            },
+            None => {
+            }
+        }
+    }
 }
 
 
@@ -76,6 +87,13 @@ impl EventHandler for UdsServerEntry {
 
                 // Dispatch message to Server message handler.
                 return handler.handle_message(server.clone(), self);
+            },
+            EventType::ErrorEvent => {
+                let server = self.server.borrow_mut();
+                let handler = server.handler.borrow_mut();
+
+                // Dispatch message to Server message handler.
+                return handler.handle_disconnect(server.clone(), self);
             },
             _ => {
                 debug!("Unknown event");
@@ -139,6 +157,12 @@ impl UdsServer {
         server.inner.borrow_mut().replace(inner);
         server
     }
+
+    pub fn unregister_read(&self, entry: &UdsServerEntry) {
+        if let Some(ref mut entry) = *entry.stream.borrow_mut() {
+            self.event_manager.borrow().unregister_read(entry);
+        }
+    }
 }
 
 impl EventHandler for UdsServerInner {
@@ -149,7 +173,7 @@ impl EventHandler for UdsServerInner {
             EventType::ReadEvent => {
                 match server.listener.accept() {
                     Ok(Some((stream, _addr))) => {
-                        debug!("Got a message client: {:?}", _addr);
+                        debug!("Accept a message client: {:?}", _addr);
 
                         let entry = UdsServerEntry::new(server.clone());
                         let event_manager = server.event_manager.borrow();
@@ -162,7 +186,7 @@ impl EventHandler for UdsServerInner {
                         entry.stream.borrow_mut().replace(stream);
                     },
                     Ok(None) => debug!("OK, but None???"),
-                    Err(err) => debug!("accept function failed: {:?}", err),
+                    Err(err) => debug!("Accept failed: {:?}", err),
                 }
             },
             _ => {

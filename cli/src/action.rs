@@ -69,12 +69,25 @@ impl CliActionHttp {
 impl CliAction for CliActionHttp {
     fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
         // replace path with params.
+        let path = self.path.split('/').map(|p| {
+            if &p[0..1] == ":" {
+                match params.get(&p[1..]) {
+                    Some(v) => format!("{}", v),
+                    None => "".to_string(), //&Value::None
+                }
+            } else {
+                p.to_string()
+            }
+        }).collect::<Vec<_>>().join("/");
+
         // build json body.
-        let request = format!("{} {}\n\n", &self.method, &self.path);
+        let request = format!("{} {}\n\n", self.method, path);
         let body = serde_json::to_string(&params).unwrap();
 
-        cli.stream_send(&request);
-        cli.stream_send(&body);
+        println!("{}", request);
+
+//        cli.stream_send(&request);
+//        cli.stream_send(&body);
 
         Ok(())
     }
