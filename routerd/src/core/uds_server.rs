@@ -45,9 +45,11 @@ pub struct UdsServerEntry {
 }
 
 impl UdsServerEntry {
-    pub fn new(server: Arc<UdsServer>) -> Arc<UdsServerEntry> {
-        Arc::new(UdsServerEntry { server: RefCell::new(server),
-                                  stream: RefCell::new(None) })
+    pub fn new(server: Arc<UdsServer>) -> UdsServerEntry {
+        UdsServerEntry {
+            server: RefCell::new(server),
+            stream: RefCell::new(None)
+        }
     }
 
     pub fn stream_read(&self) -> Option<String> {
@@ -77,6 +79,11 @@ impl UdsServerEntry {
     }
 }
 
+impl Drop for UdsServerEntry {
+    fn drop(&mut self) {
+        println!("Drop UdsServerEntry");
+    }
+}
 
 impl EventHandler for UdsServerEntry {
     fn handle(&self, e: EventType, _param: Option<Arc<EventParam>>) -> Result<(), CoreError> {
@@ -175,7 +182,7 @@ impl EventHandler for UdsServerInner {
                     Ok(Some((stream, _addr))) => {
                         debug!("Accept a message client: {:?}", _addr);
 
-                        let entry = UdsServerEntry::new(server.clone());
+                        let entry = Arc::new(UdsServerEntry::new(server.clone()));
                         let event_manager = server.event_manager.borrow();
 
                         if let Err(_) = server.handler.borrow_mut().handle_connect(server.clone(), &entry) {

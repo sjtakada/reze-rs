@@ -95,19 +95,6 @@ impl UdsServerHandler for RouterNexus {
 */
         }
 
-        /*
-        match self.process_command(&command) {
-            Err(CoreError::NexusTermination) => {
-                debug!("Termination");
-            },
-            Err(CoreError::CommandNotFound(str)) => {
-                error!("Command not found '{}'", str);
-            },
-            _ => {
-            }
-        }
-    }
-*/
         Ok(())
     }
 
