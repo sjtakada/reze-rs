@@ -10,10 +10,12 @@ use log::debug;
 use std::io::Read;
 
 use std::sync::Arc;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::net::Shutdown;
 
+use mio::Token;
 use mio_uds::UnixListener;
 use mio_uds::UnixStream;
 
@@ -37,6 +39,9 @@ unsafe impl Sync for UdsServerEntry {}
 
 // Unix Domain Socket server entry, created per connect.
 pub struct UdsServerEntry {
+    // EventHandler token.
+    token: Cell<Token>,
+
     // Pointer to UdsServer.
     server: RefCell<Arc<UdsServer>>,
 
@@ -47,6 +52,7 @@ pub struct UdsServerEntry {
 impl UdsServerEntry {
     pub fn new(server: Arc<UdsServer>) -> UdsServerEntry {
         UdsServerEntry {
+            token: Cell::new(Token(0)),
             server: RefCell::new(server),
             stream: RefCell::new(None)
         }
@@ -100,6 +106,14 @@ impl EventHandler for UdsServerEntry {
         }
 
         Ok(())
+    }
+
+    fn set_token(&self, token: Token) {
+        self.token.replace(token);
+    }
+
+    fn get_token(&self) -> Token {
+        self.token.get()
     }
 }
 
@@ -172,7 +186,7 @@ impl UdsServer {
 
     pub fn shutdown_entry(&self, entry: &UdsServerEntry) {
         if let Some(ref mut stream) = *entry.stream.borrow_mut() {
-            self.get_inner().event_manager.borrow().unregister_read(stream);
+            self.get_inner().event_manager.borrow().unregister_read(stream, entry.get_token());
             stream.shutdown(Shutdown::Both);
         }
 

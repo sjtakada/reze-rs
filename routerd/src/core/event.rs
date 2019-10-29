@@ -15,7 +15,7 @@ use super::error::*;
 
 use mio::*;
 
-//
+/// Event types.
 pub enum EventType {
     SimpleEvent,
     ReadEvent,
@@ -24,18 +24,26 @@ pub enum EventType {
     ErrorEvent,
 }
 
-//
+/// Event parameters.
 pub enum EventParam {
     Param(String)
 }
 
-//
+/// Event Handler trait.
 pub trait EventHandler {
     fn handle(&self, event_type: EventType, param: Option<Arc<EventParam>>) -> Result<(), CoreError>;
+
+    fn set_token(&self, token: Token) {
+        // Placeholder
+    }
+
+    fn get_token(&self) -> Token {
+        // Placeholder
+        Token(0)
+    }
 }
 
-
-//
+///
 pub struct EventManagerInner {
     // Token index.
     index: usize,
@@ -50,6 +58,7 @@ pub struct EventManagerInner {
     timeout: Duration,
 }
 
+///
 pub struct EventManager {
     pub inner: RefCell<EventManagerInner>,
 }
@@ -58,7 +67,7 @@ impl EventManager {
     pub fn new() -> EventManager {
         EventManager {
             inner: RefCell::new(EventManagerInner {
-                index: 0,
+                index: 1,	// Reserve 0
                 handlers: HashMap::new(),
                 poll: Poll::new().unwrap(),
                 timeout: Duration::from_millis(10),
@@ -80,17 +89,18 @@ impl EventManager {
         let mut inner = self.inner.borrow_mut();
         let token = Token(inner.index);
 
+        handler.set_token(token);
+
         inner.handlers.insert(token, handler);
         inner.poll.register(fd, token, Ready::readable(), PollOpt::level()).unwrap();
 
         inner.index += 1;
     }
 
-    pub fn unregister_read(&self, fd: &dyn Evented) {
+    pub fn unregister_read(&self, fd: &dyn Evented, token: Token) {
         let mut inner = self.inner.borrow_mut();
-        let token = Token(inner.index);
 
-        inner.handlers.remove(&token);
+        let e = inner.handlers.remove(&token);
         inner.poll.deregister(fd).unwrap();
     }
 
