@@ -90,14 +90,16 @@ impl EventHandler for UdsServerEntry {
         match e {
             EventType::ReadEvent => {
                 let server = self.server.borrow_mut();
-                let handler = server.handler.borrow_mut();
+                let inner = server.get_inner();
+                let handler = inner.handler.borrow_mut();
 
                 // Dispatch message to Server message handler.
                 return handler.handle_message(server.clone(), self);
             },
             EventType::ErrorEvent => {
                 let server = self.server.borrow_mut();
-                let handler = server.handler.borrow_mut();
+                let inner = server.get_inner();
+                let handler = inner.handler.borrow_mut();
 
                 // Dispatch message to Server message handler.
                 return handler.handle_disconnect(server.clone(), self);
@@ -111,14 +113,34 @@ impl EventHandler for UdsServerEntry {
     }
 }
 
-struct UdsServerInner {
+/// UdsServer Inner.
+pub struct UdsServerInner {
+    /// UdsServer
     server: RefCell<Arc<UdsServer>>,
+
+    /// EventManager.
+    event_manager: RefCell<Arc<EventManager>>,
+
+    /// Message Server Handler.
+    handler: RefCell<Arc<dyn UdsServerHandler>>,
+
+    /// mio UnixListener.
+    listener: UnixListener,
 }
 
 impl UdsServerInner {
-    pub fn new(server: Arc<UdsServer>) -> UdsServerInner {
+    pub fn new(server: Arc<UdsServer>, event_manager: Arc<EventManager>,
+               handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> UdsServerInner {
+        let listener = match UnixListener::bind(path) {
+            Ok(listener) => listener,
+            Err(_) => panic!("UnixListener::bind() error"),
+        };
+
         UdsServerInner {
-            server: RefCell::new(server)
+            server: RefCell::new(server),
+            event_manager: RefCell::new(event_manager),
+            handler: RefCell::new(handler),
+            listener: listener,
         }
     }
 }
@@ -126,40 +148,33 @@ impl UdsServerInner {
 unsafe impl Send for UdsServerInner {}
 unsafe impl Sync for UdsServerInner {}
 
+/// UdsServer Message Server.
 pub struct UdsServer {
-    // EventManager
-    event_manager: RefCell<Arc<EventManager>>,
-
-    // Message Server Handler
-    handler: RefCell<Arc<dyn UdsServerHandler>>,
-
-    // Message Server Inner
+    /// UdsServer Inner.
     inner: RefCell<Option<Arc<UdsServerInner>>>,
-
-    // mio UnixListener
-    listener: UnixListener,
 }
   
 impl UdsServer {
-    fn new(event_manager: Arc<EventManager>, handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> UdsServer {
-        let listener = match UnixListener::bind(path) {
-            Ok(listener) => listener,
-            Err(_) => panic!("UnixListener::bind() error"),
-        };
-
+    fn new() -> UdsServer {
         UdsServer {
-            event_manager: RefCell::new(event_manager),
-            handler: RefCell::new(handler),
             inner: RefCell::new(None),
-            listener: listener,
         }
     }
 
-    pub fn start(event_manager: Arc<EventManager>, handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
-        let server = Arc::new(UdsServer::new(event_manager.clone(), handler, path));
-        let inner = Arc::new(UdsServerInner::new(server.clone()));
+    pub fn get_inner(&self) -> Arc<UdsServerInner> {
+        if let Some(ref mut inner) = *self.inner.borrow_mut() {
+            return inner.clone()
+        }
 
-        event_manager.register_listen(&server.listener, inner.clone());
+        // should not happen.
+        panic!();
+    }
+
+    pub fn start(event_manager: Arc<EventManager>, handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
+        let server = Arc::new(UdsServer::new());
+        let inner = Arc::new(UdsServerInner::new(server.clone(), event_manager.clone(), handler.clone(), path));
+
+        event_manager.register_listen(&inner.listener, inner.clone());
 
         server.inner.borrow_mut().replace(inner);
         server
@@ -167,7 +182,7 @@ impl UdsServer {
 
     pub fn unregister_read(&self, entry: &UdsServerEntry) {
         if let Some(ref mut entry) = *entry.stream.borrow_mut() {
-            self.event_manager.borrow().unregister_read(entry);
+            self.get_inner().event_manager.borrow().unregister_read(entry);
         }
     }
 }
@@ -178,14 +193,14 @@ impl EventHandler for UdsServerInner {
 
         match e {
             EventType::ReadEvent => {
-                match server.listener.accept() {
+                match self.listener.accept() {
                     Ok(Some((stream, _addr))) => {
                         debug!("Accept a message client: {:?}", _addr);
 
                         let entry = Arc::new(UdsServerEntry::new(server.clone()));
-                        let event_manager = server.event_manager.borrow();
+                        let event_manager = self.event_manager.borrow();
 
-                        if let Err(_) = server.handler.borrow_mut().handle_connect(server.clone(), &entry) {
+                        if let Err(_) = self.handler.borrow_mut().handle_connect(server.clone(), &entry) {
                             //
                         }
 
