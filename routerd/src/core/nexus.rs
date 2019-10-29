@@ -102,10 +102,9 @@ impl UdsServerHandler for RouterNexus {
         debug!("handle_connect");
         Ok(())
     }
-    
+
     fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-        server.unregister_read(entry);
-        entry.stream_shutdown();
+        server.shutdown_entry(entry);
 
         debug!("handle_disconnect");
         Ok(())

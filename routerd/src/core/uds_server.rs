@@ -67,16 +67,6 @@ impl UdsServerEntry {
             None => None
         }
     }
-
-    pub fn stream_shutdown(&self) {
-        match *self.stream.borrow_mut() {
-            Some(ref mut stream) => {
-                stream.shutdown(Shutdown::Both);
-            },
-            None => {
-            }
-        }
-    }
 }
 
 impl Drop for UdsServerEntry {
@@ -180,10 +170,13 @@ impl UdsServer {
         server
     }
 
-    pub fn unregister_read(&self, entry: &UdsServerEntry) {
-        if let Some(ref mut entry) = *entry.stream.borrow_mut() {
-            self.get_inner().event_manager.borrow().unregister_read(entry);
+    pub fn shutdown_entry(&self, entry: &UdsServerEntry) {
+        if let Some(ref mut stream) = *entry.stream.borrow_mut() {
+            self.get_inner().event_manager.borrow().unregister_read(stream);
+            stream.shutdown(Shutdown::Both);
         }
+
+        entry.stream.replace(None);
     }
 }
 
@@ -201,7 +194,7 @@ impl EventHandler for UdsServerInner {
                         let event_manager = self.event_manager.borrow();
 
                         if let Err(_) = self.handler.borrow_mut().handle_connect(server.clone(), &entry) {
-                            //
+                            // TBD
                         }
 
                         event_manager.register_read(&stream, entry.clone());
