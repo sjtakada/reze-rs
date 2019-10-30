@@ -229,13 +229,14 @@ impl RouterNexus {
         self.sender_p2z.borrow_mut().replace(sender_p2z);
         self.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
+        // Event loop.
         'main: loop {
             // Signal is caught.
             if signal::is_sigint_caught() {
                 break 'main;
             }
 
-            //
+            // Process events.
             match event_manager.poll() {
                 Err(CoreError::NexusTermination) => break 'main,
                 _ => {}

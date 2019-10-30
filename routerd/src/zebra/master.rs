@@ -175,9 +175,9 @@ impl ZebraMaster {
                         break 'main;
                     }
                 }
-
-                thread::sleep(Duration::from_millis(100));
             }
+
+            thread::sleep(Duration::from_millis(10));
 
             // TODO: Some cleanup has to be done for inner.
             // inner.finish();
