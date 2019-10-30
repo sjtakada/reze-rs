@@ -48,7 +48,7 @@ pub enum NodeType {
 }
 
 pub enum Value {
-    None,
+    Null,
     Number(i64),
     Bool(bool),
     String(String),
@@ -57,7 +57,13 @@ pub enum Value {
 
 impl Display for Value {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{}", self)
+        match self {
+            Value::Null => write!(f, "None"),
+            Value::Bool(b) => write!(f, "bool"),
+            Value::Number(i) => write!(f, "{}", i),
+            Value::String(s) => write!(f, "{}", s),
+            Value::Array(v) => write!(f, "array"),
+        }
     }
 }
 
@@ -65,7 +71,7 @@ impl Serialize for Value {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer {
         match self {
-            Value::None => serializer.serialize_str(&""),
+            Value::Null => serializer.serialize_str(&""),
             Value::Number(i) => serializer.serialize_i64(*i),
             Value::Bool(b) => serializer.serialize_bool(*b),
             Value::String(s) => serializer.serialize_str(s),

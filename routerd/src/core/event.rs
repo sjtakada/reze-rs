@@ -82,6 +82,7 @@ impl EventManager {
         inner.handlers.insert(token, handler);
         inner.poll.register(fd, token, Ready::readable(), PollOpt::edge()).unwrap();
 
+        // TODO: consider rollover?
         inner.index += 1;
     }
 
@@ -94,6 +95,7 @@ impl EventManager {
         inner.handlers.insert(token, handler);
         inner.poll.register(fd, token, Ready::readable(), PollOpt::level()).unwrap();
 
+        // TODO: consider rollover?
         inner.index += 1;
     }
 

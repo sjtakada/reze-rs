@@ -78,16 +78,17 @@ impl CliAction for CliActionHttp {
             } else {
                 p.to_string()
             }
-        }).collect::<Vec<_>>().join("/");
+        }).collect::<Vec<String>>().join("/");
 
         // build json body.
         let request = format!("{} {}\n\n", self.method, path);
-        let body = serde_json::to_string(&params).unwrap();
+        let body = serde_json::to_string(params).unwrap();
 
         println!("{}", request);
+        println!("{}", body);
 
-//        cli.stream_send(&request);
-//        cli.stream_send(&body);
+        cli.stream_send(&request);
+        cli.stream_send(&body);
 
         Ok(())
     }
