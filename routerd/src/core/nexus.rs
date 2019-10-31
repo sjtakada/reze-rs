@@ -22,7 +22,6 @@ use std::sync::Arc;
 use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
-//use std::time::Instant;
 
 use super::signal;
 use super::error::*;
@@ -246,13 +245,16 @@ impl RouterNexus {
             while let Ok(d) = receiver.try_recv() {
                 match d {
                     ProtoToNexus::TimerRegistration((p, d, token)) => {
-                        debug!("Received timer registration {} {}", p, token);
+                        debug!("Received Timer Registration {} {}", p, token);
 
                         self.timer_server.borrow_mut().register(p, d, token);
-                    }
+                    },
+                    ProtoToNexus::ConfigRegistration((p, path, bulk)) => {
+                        debug!("Received Config Registration {} {} {}", p, path, bulk);
+                    },
                     ProtoToNexus::ProtoException(s) => {
-                        debug!("Received exception {}", s);
-                    }
+                        debug!("Received Exception {}", s);
+                    },
                 }
             }
 

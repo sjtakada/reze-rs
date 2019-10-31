@@ -134,9 +134,9 @@ impl ZebraMaster {
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
-        // Main loop for zebra
+        // Zebra main loop
         'main: loop {
-            // XXX: handle receiver_p2z 
+            // Process ProtoToZebra messages through the channel.
             while let Ok(d) = receiver_p2z.try_recv() {
                 match d {
                     ProtoToZebra::RegisterProto((proto, sender_z2p)) => {
@@ -150,7 +150,7 @@ impl ZebraMaster {
                 }
             }
 
-            // XXX: handle receiver_n2p
+            // Process NexusToProto messages through the channel.
             while let Ok(d) = receiver_n2p.try_recv() {
                 match d {
                     NexusToProto::TimerExpiration(token) => {
@@ -167,8 +167,8 @@ impl ZebraMaster {
                     }
                          */
                     },
-                    NexusToProto::PostConfig((command, _v)) => {
-                        debug!("Received PostConfig with command {}", command);
+                    NexusToProto::PostConfig((path, json)) => {
+                        debug!("Received PostConfig with command {} {}", path, json);
                     },
                     NexusToProto::ProtoTermination => {
                         debug!("Received ProtoTermination");
