@@ -130,20 +130,11 @@ impl ZebraMaster {
         master.kernel.borrow_mut().init(master.clone());
     }
 
-    pub fn config_init(&self, sender_p2n: &mpsc::Sender<ProtoToNexus>) {
-        if let Err(err) = sender_p2n.send(ProtoToNexus::ConfigRegistration((ProtocolType::Zebra,
-                                                                            "route_ipv4".to_string(), false))) {
-            error!("Config init route_ipv4 {}", err);
-        }
-    }
-
     pub fn start(&self,
-                 sender_p2n: mpsc::Sender<ProtoToNexus>,
+                 _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
         // Initialize some stuff.
-        // Initialize config
-        self.config_init(&sender_p2n);
 
         // Zebra main loop
         'main: loop {

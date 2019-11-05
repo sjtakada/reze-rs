@@ -6,6 +6,7 @@
 //
 
 pub mod master;
+pub mod config;
 pub mod link;
 pub mod address;   
 pub mod route;

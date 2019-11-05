@@ -51,7 +51,7 @@ pub enum ProtoToNexus {
     ///     ProtocolType: Type of protocol
     ///     String: path
     ///     bool: whether or not sends current configs in bulk.
-    ConfigRegistration((ProtocolType, String, bool)),
+    // ConfigRegistration((ProtocolType, String, bool)),
 
     /// Request configuration.
     //ConfigReqeust(String),
