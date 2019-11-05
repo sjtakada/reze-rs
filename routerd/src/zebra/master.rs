@@ -23,7 +23,7 @@ use crate::core::message::nexus::ProtoToNexus;
 use crate::core::message::nexus::NexusToProto;
 use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
-use crate::core::config_global::*;
+use crate::core::config_master::*;
 
 use super::link::*;
 use super::address::*;
@@ -38,7 +38,7 @@ struct ClientTuple {
 /// Zebra Master.
 pub struct ZebraMaster {
     /// Reference config tree.
-    config: Arc<ConfigGlobal>,
+    config: Arc<ConfigMaster>,
 
     /// Kernel interface.
     kernel: RefCell<Kernel>,
@@ -54,7 +54,7 @@ pub struct ZebraMaster {
 }
 
 impl ZebraMaster {
-    pub fn new(config: Arc<ConfigGlobal>) -> ZebraMaster {
+    pub fn new(config: Arc<ConfigMaster>) -> ZebraMaster {
         let callbacks = KernelCallbacks {
             add_link: &ZebraMaster::add_link,
             delete_link: &ZebraMaster::delete_link,
@@ -130,10 +130,21 @@ impl ZebraMaster {
         master.kernel.borrow_mut().init(master.clone());
     }
 
+    pub fn config_init(&self, sender_p2n: &mpsc::Sender<ProtoToNexus>) {
+        if let Err(err) = sender_p2n.send(ProtoToNexus::ConfigRegistration((ProtocolType::Zebra,
+                                                                            "route_ipv4".to_string(), false))) {
+            error!("Config init route_ipv4 {}", err);
+        }
+    }
+
     pub fn start(&self,
-                 _sender_p2n: mpsc::Sender<ProtoToNexus>,
+                 sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
+        // Initialize some stuff.
+        // Initialize config
+        self.config_init(&sender_p2n);
+
         // Zebra main loop
         'main: loop {
             // Process ProtoToZebra messages through the channel.

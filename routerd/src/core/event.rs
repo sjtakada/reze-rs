@@ -33,7 +33,7 @@ pub enum EventParam {
 pub trait EventHandler {
     fn handle(&self, event_type: EventType, param: Option<Arc<EventParam>>) -> Result<(), CoreError>;
 
-    fn set_token(&self, token: Token) {
+    fn set_token(&self, _token: Token) {
         // Placeholder
     }
 
@@ -102,7 +102,7 @@ impl EventManager {
     pub fn unregister_read(&self, fd: &dyn Evented, token: Token) {
         let mut inner = self.inner.borrow_mut();
 
-        let e = inner.handlers.remove(&token);
+        let _e = inner.handlers.remove(&token);
         inner.poll.deregister(fd).unwrap();
     }
 

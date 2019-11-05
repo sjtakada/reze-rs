@@ -6,10 +6,11 @@
 //
 
 use std::io;
-use std::rc::Rc;
+//use std::rc::Rc;
 use std::sync::Arc;
 use std::collections::BTreeMap;
-use std::net::{Ipv4Addr, Ipv6Addr};
+use std::net::Ipv4Addr;
+//use std::net::Ipv6Addr;
 
 //use rtable::tree::*;
 use rtable::prefix::*;
@@ -34,13 +35,14 @@ impl Ipv4StaticRoute {
 impl Config for Ipv4StaticRoute {
     /// Return unique identifier, this is used to register to parent as a key.
     fn id(&self) -> &str {
-        "ipv4_routes"
+        "route_ipv4"
     }
 
     /// Handle POST method.
-    fn post(&self, key: &Key, params: Option<&serde_json::Value>) -> Result<(), io::Error> {
+    fn post(&self, _key: &Key, params: Option<&serde_json::Value>) -> Result<(), io::Error> {
         match params {
-            Some(json) => {
+            Some(_json) => {
+
             },
             None => {
             }

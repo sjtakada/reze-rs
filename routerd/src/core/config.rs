@@ -7,13 +7,13 @@
 
 use std::io;
 use std::net::{Ipv4Addr, Ipv6Addr};
-//use std::rc::Rc;
 use std::sync::Arc;
 
 use serde_json;
 use log::debug;
 
 use rtable::prefix::*;
+
 
 pub enum Key {
     Singular,
@@ -66,5 +66,3 @@ pub trait Config {
         Ok(())
     }
 }
-
-

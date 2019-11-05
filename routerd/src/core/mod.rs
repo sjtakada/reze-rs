@@ -14,4 +14,4 @@ pub mod message;
 pub mod timer;
 pub mod event;
 pub mod uds_server;
-pub mod config_global;
+pub mod config_master;

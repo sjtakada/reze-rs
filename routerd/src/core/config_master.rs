@@ -2,7 +2,7 @@
 // ReZe.Rs - Router Daemon
 //   Copyright (C) 2018,2019 Toshiaki Takada
 //
-// Core - global config.
+// Core - config master.
 //
 
 //use std::io;
@@ -19,20 +19,20 @@ use std::sync::Arc;
 use super::config::Config;
 
 /// Global config.
-pub struct ConfigGlobal {
+pub struct ConfigMaster {
     /// Top level config storage.
     map: HashMap<String, Arc<dyn Config + Send + Sync>>,
 }
 
-impl ConfigGlobal {
-    pub fn new() -> ConfigGlobal {
-        ConfigGlobal {
+impl ConfigMaster {
+    pub fn new() -> ConfigMaster {
+        ConfigMaster {
             map: HashMap::new(),
         }
     }
 }
 
-impl Config for ConfigGlobal {
+impl Config for ConfigMaster {
     fn id(&self) -> &str {
         "config"
     }

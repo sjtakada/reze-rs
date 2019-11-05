@@ -35,7 +35,7 @@ use super::message::zebra::ZebraToProto;
 
 use super::master::ProtocolMaster;
 use super::config::Config;
-use super::config_global::ConfigGlobal;
+use super::config_master::ConfigMaster;
 use crate::zebra::master::ZebraMaster;
 use crate::zebra::static_route::*;
 use crate::bgp::master::BgpMaster;
@@ -55,7 +55,10 @@ struct MasterTuple {
 /// Router Nexus.
 pub struct RouterNexus {
     /// Global config.
-    config: RefCell<Arc<ConfigGlobal>>,
+    config: RefCell<Arc<ConfigMaster>>,
+
+    /// Config registry map from path to proto.
+    config_registry: RefCell<HashMap<String, Option<ProtocolType>>>,
 
     /// MasterInner map
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
@@ -113,10 +116,11 @@ impl UdsServerHandler for RouterNexus {
 impl RouterNexus {
     /// Constructor.
     pub fn new() -> RouterNexus {
-        let config = RouterNexus::config_global();
+        let config = RouterNexus::config_master();
 
         RouterNexus {
             config: RefCell::new(Arc::new(config)),
+            config_registry: RefCell::new(HashMap::new()),
             masters: RefCell::new(HashMap::new()),
             timer_server: RefCell::new(timer::Server::new()),
             sender_p2n: RefCell::new(None),
@@ -125,10 +129,10 @@ impl RouterNexus {
     }
 
     // Initialize Config tree.
-    fn config_global() -> ConfigGlobal {
-        let mut config = ConfigGlobal::new();
-        let ipv4_routes = Ipv4StaticRoute::new();
-        config.register_child(Arc::new(ipv4_routes));
+    fn config_master() -> ConfigMaster {
+        let mut config = ConfigMaster::new();
+//        let ipv4_routes = Ipv4StaticRoute::new();
+//        config.register_child(Arc::new(ipv4_routes));
 
         config
     }
@@ -241,7 +245,7 @@ impl RouterNexus {
                 _ => {}
             }
 
-            // Process channels
+            // Process ProtoToNexus messages through channels.
             while let Ok(d) = receiver.try_recv() {
                 match d {
                     ProtoToNexus::TimerRegistration((p, d, token)) => {
@@ -251,6 +255,8 @@ impl RouterNexus {
                     },
                     ProtoToNexus::ConfigRegistration((p, path, bulk)) => {
                         debug!("Received Config Registration {} {} {}", p, path, bulk);
+
+                        self.config_registry.borrow_mut().insert(path.clone(), Some(p));
                     },
                     ProtoToNexus::ProtoException(s) => {
                         debug!("Received Exception {}", s);

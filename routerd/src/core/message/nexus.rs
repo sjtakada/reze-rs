@@ -50,7 +50,7 @@ pub enum ProtoToNexus {
     ///   Nexus sends config update asynchronously through PostConfig message.
     ///     ProtocolType: Type of protocol
     ///     String: path
-    ///     bool: whether or notsends current configs in bulk.
+    ///     bool: whether or not sends current configs in bulk.
     ConfigRegistration((ProtocolType, String, bool)),
 
     /// Request configuration.
