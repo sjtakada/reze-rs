@@ -6,7 +6,6 @@
 //
 
 use std::collections::HashMap;
-use std::str;
 use regex::Regex;
 
 use super::cli::Cli;
@@ -70,6 +69,8 @@ impl CliActionHttp {
 
 impl CliAction for CliActionHttp {
     fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
+        let config_prefix = "/config";
+
         // replace path with params.
         let path = self.path.split('/').map(|p| {
             if &p[0..1] == ":" {
@@ -82,13 +83,17 @@ impl CliAction for CliActionHttp {
             }
         }).collect::<Vec<String>>().join("/");
 
-        // Maybe we could just check first letter of keyword instead of using Regex..
-        let re = Regex::new(r"^[A-Z]").unwrap();
+        let path = format!("{}/{}", config_prefix, path);
+
+        // TODO: Maybe we could just check first letter of keyword instead of using Regex..
+        let re = Regex::new(r"^:[A-Z]").unwrap();
 
         let mut body = self.params.clone();
-        for (key, value) in params {
-            if re.is_match(key) {
-                body = body.replace(key, &value.to_string());
+        for (k, v) in params {
+            let key = format!(":{}", k);
+
+            if re.is_match(&key) {
+                body = body.replace(&key, &v.to_string());
             }
         }
 

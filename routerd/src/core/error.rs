@@ -14,6 +14,10 @@ quick_error! {
             description("Nexus is terminated")
             display(r#"Nexus is terminated"#)
         }
+        RequestInvalid(s: String) {
+            description("Command request is invalid")
+            display(r#"Command request {} is invalid"#, s)
+        }
         CommandNotFound(s: String) {
             description("The command could not be found")
             display(r#"The command "{}" could not be found"#, s)

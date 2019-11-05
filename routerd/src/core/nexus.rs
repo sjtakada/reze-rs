@@ -74,8 +74,39 @@ impl UdsServerHandler for RouterNexus {
     // Process command.
     fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
         if let Some(command) = entry.stream_read() {
-            debug!("received command '{}'", command);
+            let mut lines = command.lines();
 
+            if let Some(req) = lines.next() {
+                let mut words = req.split_ascii_whitespace();
+
+                if let Some(method) = words.next() {
+                    if let Some(path) = words.next() {
+                        let mut body: Option<String> = None;
+
+                        if let Some(_) = lines.next() {
+                            if let Some(b) =  lines.next() {
+                                body = Some(b.to_string());
+                            }
+                        }
+
+                        debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
+
+                        // dispatch command.
+
+                        Ok(())
+                    } else {
+                        Err(CoreError::RequestInvalid(req.to_string()))
+                    }
+                } else {
+                    Err(CoreError::RequestInvalid(req.to_string()))
+                }
+            } else {
+                Err(CoreError::RequestInvalid("(no request line)".to_string()))
+            }
+        } else {
+            Err(CoreError::RequestInvalid("(no message)".to_string()))
+        }
+    }
 /*
             if command == "ospf" {
                     // Spawn ospf instance
@@ -92,10 +123,6 @@ impl UdsServerHandler for RouterNexus {
                 return Err(CoreError::CommandNotFound(command.to_string()))
             }
 */
-        }
-
-        Ok(())
-    }
 
     fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
         debug!("handle_connect");

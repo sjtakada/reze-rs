@@ -5,7 +5,7 @@
 // Unix Domain Socket Server
 //
 
-use log::debug;
+use log::{debug, error};
 
 use std::io::Read;
 
@@ -64,9 +64,17 @@ impl UdsServerEntry {
                 let mut buffer = String::new();
 
                 match stream.read_to_string(&mut buffer) {
-                    Ok(_) => {},
-                    Err(_) => {},
+                    Ok(_) => {
+                        // may not come here.
+                    },
+                    Err(err) => {
+                        if err.kind() != std::io::ErrorKind::WouldBlock {
+                            error!("Error: {}", err);
+                            return None
+                        }
+                    },
                 }
+
                 let command = String::from(buffer.trim());
                 Some(command)
             },
