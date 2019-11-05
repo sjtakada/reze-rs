@@ -6,6 +6,8 @@
 //
 
 use std::collections::HashMap;
+use std::str;
+use regex::Regex;
 
 use super::cli::Cli;
 use super::error::CliError;
@@ -49,19 +51,19 @@ impl CliAction for CliActionMode {
 pub struct CliActionHttp {
     method: String,
     path: String,
-    params: Vec<String>,
+    params: String,
 }
 
 impl CliActionHttp {
     pub fn new(value: &serde_json::Value) -> CliActionHttp {
         let method = value["method"].as_str().unwrap_or("GET");
         let path = value["path"].as_str().unwrap_or("");
-        let params = value["params"].as_object();
+        let params = value["params"].to_string();
 
         CliActionHttp {
             method: String::from(method),
             path: String::from(path),
-            params: Vec::new(),
+            params: params,
         }
     }
 }
@@ -73,16 +75,25 @@ impl CliAction for CliActionHttp {
             if &p[0..1] == ":" {
                 match params.get(&p[1..]) {
                     Some(v) => format!("{}", v),
-                    None => "".to_string(), //&Value::None
+                    None => "".to_string(),
                 }
             } else {
                 p.to_string()
             }
         }).collect::<Vec<String>>().join("/");
 
+        // Maybe we could just check first letter of keyword instead of using Regex..
+        let re = Regex::new(r"^[A-Z]").unwrap();
+
+        let mut body = self.params.clone();
+        for (key, value) in params {
+            if re.is_match(key) {
+                body = body.replace(key, &value.to_string());
+            }
+        }
+
         // build json body.
         let request = format!("{} {}\n\n", self.method, path);
-        let body = serde_json::to_string(params).unwrap();
 
         println!("{}", request);
         println!("{}", body);

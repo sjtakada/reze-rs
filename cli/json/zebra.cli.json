@@ -40,7 +40,7 @@
     "command": [
       {
         "defun": "ip route IPV4-ADDRESS:3.1 IPV4-ADDRESS:3.2 IPV4-ADDRESS:4.0",
-        "defunx": "ip route (IPV4-ADDRESS:3.1 IPV4-ADDRESS:3.2|IPV4-PREFIX:3.3) (IPV4-ADDRESS:4.0|WORD:4.1)",
+        "defun_x": "ip route (IPV4-ADDRESS:3.1 IPV4-ADDRESS:3.2|IPV4-PREFIX:3.3) (IPV4-ADDRESS:4.0|WORD:4.1)",
         "mode": [
           "CONFIG-MODE"
         ],
