@@ -6,6 +6,7 @@
 //
 
 use std::io;
+use std::fmt;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::sync::Arc;
 
@@ -14,6 +15,27 @@ use log::debug;
 
 use rtable::prefix::*;
 
+pub enum Method {
+    Get,
+    Post,
+    Put,
+    Delete,
+    Update,
+}
+
+impl fmt::Display for Method {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match self {
+            Method::Get => "GET",
+            Method::Post => "POST",
+            Method::Put => "PUT",
+            Method::Delete => "DELETE",
+            Method::Update => "UPDATE",
+        };
+
+        write!(f, "{}", s)
+    }
+}
 
 pub enum Key {
     Singular,

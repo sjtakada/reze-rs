@@ -15,4 +15,3 @@ pub fn zebra_config_init(config: &mut ConfigMaster) {
     let ipv4_routes = Ipv4StaticRoute::new();
     config.register_child(Arc::new(ipv4_routes));
 }
-

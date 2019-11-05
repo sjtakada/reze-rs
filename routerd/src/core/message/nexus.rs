@@ -17,6 +17,7 @@
 use std::time::Duration;
 
 use crate::core::protocols::ProtocolType;
+use crate::core::config::Method;
 
 /// Message from Nexus to Protocol.
 pub enum NexusToProto {
@@ -29,7 +30,7 @@ pub enum NexusToProto {
     ///   Nexus sends configuration in JSON.
     ///     String: path
     ///     Value: JSON object
-    PostConfig((String, serde_json::Value)),
+    PostConfig((Method, String, serde_json::Value)),
 
     /// Notify protocol termination.
     ///   Nexus requests protocol to terminate.

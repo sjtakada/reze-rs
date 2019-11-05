@@ -169,8 +169,8 @@ impl ZebraMaster {
                     }
                          */
                     },
-                    NexusToProto::PostConfig((path, json)) => {
-                        debug!("Received PostConfig with command {} {}", path, json);
+                    NexusToProto::PostConfig((method, path, json)) => {
+                        debug!("Received PostConfig with command {} {} {}", method, path, json);
                     },
                     NexusToProto::ProtoTermination => {
                         debug!("Received ProtoTermination");
