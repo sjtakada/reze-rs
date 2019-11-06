@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 //use serde_json;
 
-use super::config::Config;
+use super::config::*;
 use super::protocols::ProtocolType;
 
 /// Global config.
@@ -38,6 +38,17 @@ impl Config for ConfigMaster {
 
     fn register_child(&mut self, config: Arc<dyn Config + Sync + Send>) {
         self.map.insert(String::from(config.id()), config.clone());
+    }
+
+    fn lookup_child(&self, path: &str) -> Option<Arc<dyn Config + Send + Sync>> {
+        if let Some((id, path)) = split_id_and_path(path) {
+            match self.map.get(&id) {
+                Some(config) => Some(config.clone()),
+                None => None,
+            }
+        } else {
+            None
+        }
     }
 
 //    fn post(&self, path: &str, _params: Option<String>) -> Result<(), io::Error> {

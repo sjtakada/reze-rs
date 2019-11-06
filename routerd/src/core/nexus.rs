@@ -11,7 +11,7 @@
 //
 
 use log::debug;
-//use log::error;
+use log::error;
 
 use std::collections::HashMap;
 use std::thread;
@@ -35,8 +35,7 @@ use super::message::zebra::ProtoToZebra;
 use super::message::zebra::ZebraToProto;
 
 use super::master::ProtocolMaster;
-use super::config::Config;
-use super::config::Method;
+use super::config::*;
 use super::config_master::ConfigMaster;
 use crate::zebra::master::ZebraMaster;
 use crate::zebra::config::*;
@@ -97,7 +96,9 @@ impl UdsServerHandler for RouterNexus {
                             debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
 
                             // dispatch command.
-                            self.dispatch_command(method, path, body);
+                            if let Some((id, path)) = split_id_and_path(path) {
+                                self.dispatch_command(method, &path.unwrap(), body);
+                            }
 
                             Ok(())
                         } else {
@@ -192,7 +193,7 @@ impl RouterNexus {
     }
 
     // Construct MasterInner instance and spawn a thread.
-    fn spawn_protocol(&self, p: ProtocolType,
+    fn _spawn_protocol(&self, p: ProtocolType,
                       sender_p2n: mpsc::Sender<ProtoToNexus>,
                       sender_p2z: mpsc::Sender<ProtoToZebra>)
                       -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ZebraToProto>) {
@@ -332,7 +333,17 @@ impl RouterNexus {
 
     //
     fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) {
-        let paths = path.split('/');
-//        let config = self.config.borrow().get(paths[0]);
+        match self.config.borrow().lookup_child(path) {
+            Some(config) => {
+                if config.protocol_type() == ProtocolType::Master {
+                    debug!("{}", config.protocol_type());
+                } else {
+                    debug!("{}", config.protocol_type());
+                }
+            },
+            None => {
+                error!("No config exists")
+            }
+        }
     }
 }

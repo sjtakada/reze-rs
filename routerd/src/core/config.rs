@@ -8,13 +8,14 @@
 use std::io;
 use std::fmt;
 use std::str::FromStr;
-use std::net::{Ipv4Addr, Ipv6Addr};
+//use std::net::{Ipv4Addr, Ipv6Addr};
 use std::sync::Arc;
 
-use serde_json;
+//use serde_json;
 use log::debug;
+use regex::Regex;
 
-use rtable::prefix::*;
+//use rtable::prefix::*;
 
 use super::protocols::ProtocolType;
 use super::error::*;
@@ -84,6 +85,12 @@ pub trait Config {
         ()
     }
 
+    /// Lookup child Config with given path.
+    fn lookup_child(&self, path: &str) -> Option<Arc<dyn Config + Send + Sync>> {
+        debug!("Not implemented");
+        None
+    }
+
     /// Handle GET method.
     fn get(&self, _path: &str, _params: Option<String>) -> Result<(), io::Error> {
         debug!("Method not implemented");
@@ -112,5 +119,26 @@ pub trait Config {
     fn update(&self, _path: &str, _params: Option<String>) -> Result<(), io::Error> {
         debug!("Method not implemented");
         Ok(())
+    }
+}
+
+/// Utilities.
+pub fn split_id_and_path(s: &str) -> Option<(String, Option<String>)> {
+    let re = Regex::new(r"^/([^/]+)(.*)$").unwrap();
+    match re.captures(s) {
+        Some(caps) => {
+            match caps.get(1) {
+                Some(id) => {
+                    let mut path: Option<String> = None;
+                    if let Some(p) = caps.get(2) {
+                        path = Some(p.as_str().to_string());
+                    }
+
+                    Some((id.as_str().to_string(), path))
+                },
+                None => None,
+            }
+        },
+        None => None,
     }
 }
