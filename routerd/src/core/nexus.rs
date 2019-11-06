@@ -22,6 +22,7 @@ use std::sync::Arc;
 use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
+use std::str::FromStr;
 
 use super::signal;
 use super::error::*;
@@ -35,6 +36,7 @@ use super::message::zebra::ZebraToProto;
 
 use super::master::ProtocolMaster;
 use super::config::Config;
+use super::config::Method;
 use super::config_master::ConfigMaster;
 use crate::zebra::master::ZebraMaster;
 use crate::zebra::config::*;
@@ -79,21 +81,28 @@ impl UdsServerHandler for RouterNexus {
             if let Some(req) = lines.next() {
                 let mut words = req.split_ascii_whitespace();
 
-                if let Some(method) = words.next() {
-                    if let Some(path) = words.next() {
-                        let mut body: Option<String> = None;
+                if let Some(method_str) = words.next() {
+                    if let Ok(method) = Method::from_str(method_str) {
 
-                        if let Some(_) = lines.next() {
-                            if let Some(b) =  lines.next() {
-                                body = Some(b.to_string());
+                        if let Some(path) = words.next() {
+                            let mut body: Option<String> = None;
+
+                            // Skip a blank line and get body if it is present.
+                            if let Some(_) = lines.next() {
+                                if let Some(b) =  lines.next() {
+                                    body = Some(b.to_string());
+                                }
                             }
+
+                            debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
+
+                            // dispatch command.
+                            self.dispatch_command(method, path, body);
+
+                            Ok(())
+                        } else {
+                            Err(CoreError::RequestInvalid(req.to_string()))
                         }
-
-                        debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
-
-                        // dispatch command.
-
-                        Ok(())
                     } else {
                         Err(CoreError::RequestInvalid(req.to_string()))
                     }
@@ -276,11 +285,6 @@ impl RouterNexus {
 
                         self.timer_server.borrow_mut().register(p, d, token);
                     },
-//                    ProtoToNexus::ConfigRegistration((p, path, bulk)) => {
-//                        debug!("Received Config Registration {} {} {}", p, path, bulk);
-//
-//                        self.config_registry.borrow_mut().insert(path.clone(), Some(p));
-//                    },
                     ProtoToNexus::ProtoException(s) => {
                         debug!("Received Exception {}", s);
                     },
@@ -324,5 +328,11 @@ impl RouterNexus {
 
         // Nexus terminated.
         Err(CoreError::NexusTermination)
+    }
+
+    //
+    fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) {
+        let paths = path.split('/');
+//        let config = self.config.borrow().get(paths[0]);
     }
 }

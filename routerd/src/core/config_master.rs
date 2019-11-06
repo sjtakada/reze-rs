@@ -5,18 +5,13 @@
 // Core - config master.
 //
 
-//use std::io;
-//use std::net::{Ipv4Addr, Ipv6Addr};
 use std::collections::HashMap;
-//use std::rc::Rc;
 use std::sync::Arc;
 
 //use serde_json;
-//use log::debug;
-//use jsonpath;
 
-//use rtable::prefix::*;
 use super::config::Config;
+use super::protocols::ProtocolType;
 
 /// Global config.
 pub struct ConfigMaster {
@@ -37,7 +32,16 @@ impl Config for ConfigMaster {
         "config"
     }
 
+    fn protocol_type(&self) -> ProtocolType {
+        ProtocolType::Master
+    }
+
     fn register_child(&mut self, config: Arc<dyn Config + Sync + Send>) {
         self.map.insert(String::from(config.id()), config.clone());
     }
+
+//    fn post(&self, path: &str, _params: Option<String>) -> Result<(), io::Error> {
+//
+//        Ok(())
+//    }
 }

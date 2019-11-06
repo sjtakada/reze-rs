@@ -15,6 +15,7 @@ use std::net::Ipv4Addr;
 //use rtable::tree::*;
 use rtable::prefix::*;
 
+use crate::core::protocols::ProtocolType;
 use crate::core::config::*;
 
 /// IPv4 Static route configs.
@@ -38,8 +39,13 @@ impl Config for Ipv4StaticRoute {
         "route_ipv4"
     }
 
+    /// Return protocol type.
+    fn protocol_type(&self) -> ProtocolType {
+        ProtocolType::Zebra
+    }
+
     /// Handle POST method.
-    fn post(&self, _key: &Key, params: Option<&serde_json::Value>) -> Result<(), io::Error> {
+    fn post(&self, _path: &str, params: Option<String>) -> Result<(), io::Error> {
         match params {
             Some(_json) => {
 

@@ -26,11 +26,12 @@ pub enum NexusToProto {
     ///     u32: Token
     TimerExpiration(u32),
 
-    /// Post configuration.
-    ///   Nexus sends configuration in JSON.
+    /// Send configuration.
+    ///   Nexus sends configuration.
+    ///     Method: method
     ///     String: path
-    ///     Value: JSON object
-    PostConfig((Method, String, serde_json::Value)),
+    ///     Value: JSON object in String
+    SendConfig((Method, String, Box<String>)),
 
     /// Notify protocol termination.
     ///   Nexus requests protocol to terminate.

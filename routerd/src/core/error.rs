@@ -22,6 +22,10 @@ quick_error! {
             description("The command could not be found")
             display(r#"The command "{}" could not be found"#, s)
         }
+        ParseMethod {
+            description("Unknown Method")
+            display(r#"Uknown Method"#)
+        }
     }
 }
 

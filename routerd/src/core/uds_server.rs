@@ -195,7 +195,10 @@ impl UdsServer {
     pub fn shutdown_entry(&self, entry: &UdsServerEntry) {
         if let Some(ref mut stream) = *entry.stream.borrow_mut() {
             self.get_inner().event_manager.borrow().unregister_read(stream, entry.get_token());
-            stream.shutdown(Shutdown::Both);
+
+            if let Err(err) = stream.shutdown(Shutdown::Both) {
+                error!("Entry shutdown error");
+            }
         }
 
         entry.stream.replace(None);
