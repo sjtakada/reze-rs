@@ -241,11 +241,21 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
+    fn config_init(&self) {
+        self.config.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
+        self.config.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);
+
+        self.config.borrow_mut().register_protocol("ospf", ProtocolType::Ospf);
+    }
+
     //
     pub fn start(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
         self.sender_p2n.borrow_mut().replace(sender_p2n);
+
+        // Config init.
+        self.config_init();
 
         // Spawn zebra instance
         let (handle, sender, sender_p2z) = self.spawn_zebra(self.clone_sender_p2n());
@@ -324,13 +334,22 @@ impl RouterNexus {
             Some(config_or_protocol) => {
                 match config_or_protocol {
                     ConfigOrProtocol::Local(config) => {
-                        if config.protocol_type() == ProtocolType::Master {
-                            debug!("{}", config.protocol_type());
-                        } else {
-                            debug!("{}", config.protocol_type());
-                        }
+                            debug!("local config");
                     },
                     ConfigOrProtocol::Proto(p) => {
+                        match self.masters.borrow_mut().get(&p) {
+                            Some(tuple) => {
+                                let b = match body {
+                                    Some(s) => Some(Box::new(s)),
+                                    None => None
+                                };
+
+                                tuple.sender.send(NexusToProto::SendConfig((method, path.to_string(), b)));
+                            },
+                            None => {
+                                panic!("Unexpected error");
+                            },
+                        }
                     },
                 }
             },

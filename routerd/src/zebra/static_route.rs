@@ -39,11 +39,6 @@ impl Config for Ipv4StaticRoute {
         "route_ipv4"
     }
 
-    /// Return protocol type.
-    fn protocol_type(&self) -> ProtocolType {
-        ProtocolType::Zebra
-    }
-
     /// Handle POST method.
     fn post(&self, _path: &str, params: Option<String>) -> Result<(), io::Error> {
         match params {

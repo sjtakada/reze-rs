@@ -77,9 +77,6 @@ pub trait Config {
     /// Return unique identifier, this is used to register to parent as a key.
     fn id(&self) -> &str;
 
-    /// Return protocol type, owner of the config.
-    fn protocol_type(&self) -> ProtocolType;
-
     /// Register child Config trait object to this Config.
     fn register_child(&mut self, _child: Rc<dyn Config>) {
         debug!("This object does not have child Config object");

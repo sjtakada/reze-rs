@@ -5,7 +5,7 @@
 // Nexus Message
 // - Nexus to Protocol
 //   - Timer Expiration
-//   - Post Configuration 
+//   - Send Config
 //   - Show Command (sync)
 // - Protocol to Nexus
 //   - Timer Registration
@@ -31,7 +31,7 @@ pub enum NexusToProto {
     ///     Method: method
     ///     String: path
     ///     Value: JSON object in String
-    SendConfig((Method, String, Box<String>)),
+    SendConfig((Method, String, Option<Box<String>>)),
 
     /// Notify protocol termination.
     ///   Nexus requests protocol to terminate.

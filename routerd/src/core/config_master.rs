@@ -37,6 +37,10 @@ impl ConfigMaster {
             None
         }
     }
+
+    pub fn register_protocol(&mut self, path: &str, protocol_type: ProtocolType) {
+        self.map.insert(path.to_string(), ConfigOrProtocol::Proto(protocol_type));
+    }
 }
 
 /*
