@@ -8,15 +8,19 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
-//use serde_json;
-
 use super::config::*;
 use super::protocols::ProtocolType;
+
+/// Config or Protocol
+pub enum ConfigOrProtocol {
+    Local(Rc<dyn Config>),
+    Proto(ProtocolType),
+}
 
 /// Global config.
 pub struct ConfigMaster {
     /// Top level config storage.
-    map: HashMap<String, Rc<dyn Config>>,
+    map: HashMap<String, ConfigOrProtocol>,
 }
 
 impl ConfigMaster {
@@ -25,8 +29,17 @@ impl ConfigMaster {
             map: HashMap::new(),
         }
     }
+
+    pub fn lookup_child(&self, path: &str) -> Option<&ConfigOrProtocol> {
+        if let Some((id, path)) = split_id_and_path(path) {
+            self.map.get(&id)
+        } else {
+            None
+        }
+    }
 }
 
+/*
 impl Config for ConfigMaster {
     fn id(&self) -> &str {
         "config"
@@ -50,9 +63,5 @@ impl Config for ConfigMaster {
             None
         }
     }
-
-//    fn post(&self, path: &str, _params: Option<String>) -> Result<(), io::Error> {
-//
-//        Ok(())
-//    }
 }
+*/

@@ -36,7 +36,7 @@ use super::message::zebra::ZebraToProto;
 
 use super::master::ProtocolMaster;
 use super::config::*;
-use super::config_master::ConfigMaster;
+use super::config_master::*;
 use crate::zebra::master::ZebraMaster;
 use crate::bgp::master::BgpMaster;
 use crate::ospf::master::OspfMasterInner;
@@ -321,11 +321,17 @@ impl RouterNexus {
     //
     fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) {
         match self.config.borrow().lookup_child(path) {
-            Some(config) => {
-                if config.protocol_type() == ProtocolType::Master {
-                    debug!("{}", config.protocol_type());
-                } else {
-                    debug!("{}", config.protocol_type());
+            Some(config_or_protocol) => {
+                match config_or_protocol {
+                    ConfigOrProtocol::Local(config) => {
+                        if config.protocol_type() == ProtocolType::Master {
+                            debug!("{}", config.protocol_type());
+                        } else {
+                            debug!("{}", config.protocol_type());
+                        }
+                    },
+                    ConfigOrProtocol::Proto(p) => {
+                    },
                 }
             },
             None => {

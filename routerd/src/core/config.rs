@@ -2,7 +2,7 @@
 // ReZe.Rs - Router Daemon
 //   Copyright (C) 2018,2019 Toshiaki Takada
 //
-// Core - config.
+// Core - Config.
 //
 
 use std::io;
