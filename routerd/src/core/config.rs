@@ -9,7 +9,8 @@ use std::io;
 use std::fmt;
 use std::str::FromStr;
 //use std::net::{Ipv4Addr, Ipv6Addr};
-use std::sync::Arc;
+//use std::sync::Arc;
+use std::rc::Rc;
 
 //use serde_json;
 use log::debug;
@@ -80,13 +81,13 @@ pub trait Config {
     fn protocol_type(&self) -> ProtocolType;
 
     /// Register child Config trait object to this Config.
-    fn register_child(&mut self, _child: Arc<dyn Config + Send + Sync>) {
+    fn register_child(&mut self, _child: Rc<dyn Config>) {
         debug!("This object does not have child Config object");
         ()
     }
 
     /// Lookup child Config with given path.
-    fn lookup_child(&self, path: &str) -> Option<Arc<dyn Config + Send + Sync>> {
+    fn lookup_child(&self, path: &str) -> Option<Rc<dyn Config>> {
         debug!("Not implemented");
         None
     }

@@ -6,7 +6,7 @@
 //
 
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::rc::Rc;
 
 //use serde_json;
 
@@ -16,7 +16,7 @@ use super::protocols::ProtocolType;
 /// Global config.
 pub struct ConfigMaster {
     /// Top level config storage.
-    map: HashMap<String, Arc<dyn Config + Send + Sync>>,
+    map: HashMap<String, Rc<dyn Config>>,
 }
 
 impl ConfigMaster {
@@ -36,11 +36,11 @@ impl Config for ConfigMaster {
         ProtocolType::Master
     }
 
-    fn register_child(&mut self, config: Arc<dyn Config + Sync + Send>) {
+    fn register_child(&mut self, config: Rc<dyn Config>) {
         self.map.insert(String::from(config.id()), config.clone());
     }
 
-    fn lookup_child(&self, path: &str) -> Option<Arc<dyn Config + Send + Sync>> {
+    fn lookup_child(&self, path: &str) -> Option<Rc<dyn Config>> {
         if let Some((id, path)) = split_id_and_path(path) {
             match self.map.get(&id) {
                 Some(config) => Some(config.clone()),
