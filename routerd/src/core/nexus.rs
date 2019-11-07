@@ -38,7 +38,6 @@ use super::master::ProtocolMaster;
 use super::config::*;
 use super::config_master::ConfigMaster;
 use crate::zebra::master::ZebraMaster;
-use crate::zebra::config::*;
 use crate::bgp::master::BgpMaster;
 use crate::ospf::master::OspfMasterInner;
 
@@ -56,7 +55,7 @@ struct MasterTuple {
 /// Router Nexus.
 pub struct RouterNexus {
     /// Global config.
-    config: RefCell<Arc<ConfigMaster>>,
+    config: RefCell<ConfigMaster>,
 
     /// MasterInner map
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
@@ -150,10 +149,8 @@ impl UdsServerHandler for RouterNexus {
 impl RouterNexus {
     /// Constructor.
     pub fn new() -> RouterNexus {
-        let config = RouterNexus::config_master();
-
         RouterNexus {
-            config: RefCell::new(Arc::new(config)),
+            config: RefCell::new(ConfigMaster::new()),
             masters: RefCell::new(HashMap::new()),
             timer_server: RefCell::new(timer::Server::new()),
             sender_p2n: RefCell::new(None),
@@ -161,27 +158,17 @@ impl RouterNexus {
         }
     }
 
-    // Initialize Config tree.
-    fn config_master() -> ConfigMaster {
-        let mut config = ConfigMaster::new();
-
-        zebra_config_init(&mut config);
-
-        config
-    }
-
     // Construct MasterInner instance and spawn a thread.
     fn spawn_zebra(&self, sender_p2n: mpsc::Sender<ProtoToNexus>)
                    -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ProtoToZebra>) {
         // Clone global config.
         let ref mut config = *self.config.borrow_mut();
-        let config = Arc::clone(config);
 
         // Create channel from RouterNexus to MasterInner
         let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
         let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
         let handle = thread::spawn(move || {
-            let zebra = Rc::new(ZebraMaster::new(config));
+            let zebra = Rc::new(ZebraMaster::new());
             ZebraMaster::kernel_init(zebra.clone());
             zebra.start(sender_p2n, receiver_n2p, receiver_p2z);
 

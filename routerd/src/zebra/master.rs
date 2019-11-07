@@ -7,7 +7,6 @@
 
 use log::{debug, error};
 use std::rc::Rc;
-use std::sync::Arc;
 use std::cell::RefCell;
 
 use std::collections::HashMap;
@@ -38,7 +37,7 @@ struct ClientTuple {
 /// Zebra Master.
 pub struct ZebraMaster {
     /// Reference config tree.
-    config: Arc<ConfigMaster>,
+    config: RefCell<ConfigMaster>,
 
     /// Kernel interface.
     kernel: RefCell<Kernel>,
@@ -54,7 +53,7 @@ pub struct ZebraMaster {
 }
 
 impl ZebraMaster {
-    pub fn new(config: Arc<ConfigMaster>) -> ZebraMaster {
+    pub fn new() -> ZebraMaster {
         let callbacks = KernelCallbacks {
             add_link: &ZebraMaster::add_link,
             delete_link: &ZebraMaster::delete_link,
@@ -65,7 +64,7 @@ impl ZebraMaster {
         };
 
         ZebraMaster {
-            config: config,
+            config: RefCell::new(ConfigMaster::new()),
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
