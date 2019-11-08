@@ -141,6 +141,7 @@ impl ZebraMaster {
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
         // Initialize some stuff.
+        self.config_init();
 
         // Zebra main loop
         'main: loop {
@@ -176,7 +177,7 @@ impl ZebraMaster {
                          */
                     },
                     NexusToProto::SendConfig((method, path, body)) => {
-                        debug!("Received PostConfig with command {} {} {:?}", method, path, body);
+                        debug!("Received SendConfig with command {} {} {:?}", method, path, body);
 
                         self.config.borrow_mut().apply(method, &path, body);
                     },

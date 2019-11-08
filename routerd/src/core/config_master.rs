@@ -9,6 +9,8 @@ use std::io;
 use std::rc::Rc;
 use std::collections::HashMap;
 
+use log::error;
+
 use super::config::*;
 use super::protocols::ProtocolType;
 
@@ -53,12 +55,14 @@ impl ConfigMaster {
                         }
                     },
                     _ => {
-                        Ok(())
                         // some error
+                        error!("No local config to apply");
+                        Ok(())
                     }
                 }
             },
             None => {
+                error!("No matched path to apply {}", path);
                 Ok(())
                 // some error
             },
