@@ -8,15 +8,10 @@
 use std::io;
 use std::fmt;
 use std::str::FromStr;
-//use std::net::{Ipv4Addr, Ipv6Addr};
-//use std::sync::Arc;
 use std::rc::Rc;
 
-//use serde_json;
 use log::debug;
 use regex::Regex;
-
-//use rtable::prefix::*;
 
 use super::protocols::ProtocolType;
 use super::error::*;
@@ -26,7 +21,7 @@ pub enum Method {
     Post,
     Put,
     Delete,
-    Update,
+    Patch,
 }
 
 impl FromStr for Method {
@@ -40,7 +35,7 @@ impl FromStr for Method {
             "post" => Ok(Method::Post),
             "put" => Ok(Method::Put),
             "delete" => Ok(Method::Delete),
-            "update" => Ok(Method::Update),
+            "patch" => Ok(Method::Patch),
             _ => Err(CoreError::ParseMethod),
         }
     }
@@ -53,24 +48,12 @@ impl fmt::Display for Method {
             Method::Post => "POST",
             Method::Put => "PUT",
             Method::Delete => "DELETE",
-            Method::Update => "UPDATE",
+            Method::Patch => "PATCH",
         };
 
         write!(f, "{}", s)
     }
 }
-
-/*
-pub enum Key {
-    Singular,
-    Str(String),
-    Num(u32),
-    Address4(Ipv4Addr),
-    Address6(Ipv6Addr),
-    Prefix4(Prefix<Ipv4Addr>),
-    Prefix6(Prefix<Ipv6Addr>),
-}
-*/
 
 /// Config trait.
 pub trait Config {
@@ -90,31 +73,31 @@ pub trait Config {
     }
 
     /// Handle GET method.
-    fn get(&self, _path: &str, _params: Option<String>) -> Result<(), io::Error> {
+    fn get(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle POST method.
-    fn post(&self, _path: &str, _params: Option<String>) -> Result<(), io::Error> {
+    fn post(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle PUT method.
-    fn put(&self, _path: &str, _params: Option<String>) -> Result<(), io::Error> {
+    fn put(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle DELETE method.
-    fn delete(&self, _path: &str, _params: Option<String>) -> Result<(), io::Error> {
+    fn delete(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
         debug!("Method not implemented");
         Ok(())
     }
 
-    /// Handle UPDATE method.
-    fn update(&self, _path: &str, _params: Option<String>) -> Result<(), io::Error> {
+    /// Handle PATCH method.
+    fn patch(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
         debug!("Method not implemented");
         Ok(())
     }

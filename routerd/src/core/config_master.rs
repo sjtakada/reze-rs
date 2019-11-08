@@ -5,8 +5,9 @@
 // Core - config master.
 //
 
-use std::collections::HashMap;
+use std::io;
 use std::rc::Rc;
+use std::collections::HashMap;
 
 use super::config::*;
 use super::protocols::ProtocolType;
@@ -30,7 +31,7 @@ impl ConfigMaster {
         }
     }
 
-    pub fn lookup_child(&self, path: &str) -> Option<&ConfigOrProtocol> {
+    pub fn lookup(&self, path: &str) -> Option<&ConfigOrProtocol> {
         if let Some((id, path)) = split_id_and_path(path) {
             self.map.get(&id)
         } else {
@@ -38,8 +39,38 @@ impl ConfigMaster {
         }
     }
 
+    pub fn apply(&self, method: Method, path: &str, body: Option<Box<String>>) -> Result<(), io::Error> {
+        match self.lookup(path) {
+            Some(config_or_protocol) => {
+                match config_or_protocol {
+                    ConfigOrProtocol::Local(config) => {
+                        match method {
+                            Method::Get => config.get(path, body),
+                            Method::Post => config.post(path, body),
+                            Method::Put => config.put(path, body),
+                            Method::Delete => config.delete(path, body),
+                            Method::Patch => config.patch(path, body),
+                        }
+                    },
+                    _ => {
+                        Ok(())
+                        // some error
+                    }
+                }
+            },
+            None => {
+                Ok(())
+                // some error
+            },
+        }
+    }
+
     pub fn register_protocol(&mut self, path: &str, protocol_type: ProtocolType) {
         self.map.insert(path.to_string(), ConfigOrProtocol::Proto(protocol_type));
+    }
+
+    pub fn register_config(&mut self, path: &str, config: Rc<dyn Config>) {
+        self.map.insert(path.to_string(), ConfigOrProtocol::Local(config));
     }
 }
 

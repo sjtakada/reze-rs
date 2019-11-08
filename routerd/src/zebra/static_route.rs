@@ -5,6 +5,7 @@
 // Zebra - Static route.
 //
 
+use log::debug;
 use std::io;
 //use std::rc::Rc;
 use std::sync::Arc;
@@ -40,10 +41,10 @@ impl Config for Ipv4StaticRoute {
     }
 
     /// Handle POST method.
-    fn post(&self, _path: &str, params: Option<String>) -> Result<(), io::Error> {
+    fn post(&self, _path: &str, params: Option<Box<String>>) -> Result<(), io::Error> {
         match params {
             Some(_json) => {
-
+                debug!("Configuring IPv4 static routes");
             },
             None => {
             }

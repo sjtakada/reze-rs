@@ -330,7 +330,7 @@ impl RouterNexus {
 
     //
     fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) {
-        match self.config.borrow().lookup_child(path) {
+        match self.config.borrow().lookup(path) {
             Some(config_or_protocol) => {
                 match config_or_protocol {
                     ConfigOrProtocol::Local(config) => {

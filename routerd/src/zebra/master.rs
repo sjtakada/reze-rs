@@ -17,6 +17,8 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 
 //use crate::core::event::*;
 
+use super::static_route::*;
+
 use crate::core::protocols::ProtocolType;
 use crate::core::message::nexus::ProtoToNexus;
 use crate::core::message::nexus::NexusToProto;
@@ -129,6 +131,11 @@ impl ZebraMaster {
         master.kernel.borrow_mut().init(master.clone());
     }
 
+    fn config_init(&self) {
+        let ipv4_routes = Ipv4StaticRoute::new();
+        self.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
+    }
+
     pub fn start(&self,
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
@@ -170,6 +177,8 @@ impl ZebraMaster {
                     },
                     NexusToProto::SendConfig((method, path, body)) => {
                         debug!("Received PostConfig with command {} {} {:?}", method, path, body);
+
+                        self.config.borrow_mut().apply(method, &path, body);
                     },
                     NexusToProto::ProtoTermination => {
                         debug!("Received ProtoTermination");
