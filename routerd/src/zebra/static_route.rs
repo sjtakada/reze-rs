@@ -5,30 +5,37 @@
 // Zebra - Static route.
 //
 
-use log::debug;
 use std::io;
-//use std::rc::Rc;
+use std::rc::Rc;
 use std::sync::Arc;
 use std::collections::BTreeMap;
 use std::net::Ipv4Addr;
 //use std::net::Ipv6Addr;
 
-//use rtable::tree::*;
+use serde_json;
+
+use log::debug;
 use rtable::prefix::*;
 
 use crate::core::protocols::ProtocolType;
 use crate::core::config::*;
+use super::master::ZebraMaster;
+use super::nexthop::*;
 
 /// IPv4 Static route configs.
 pub struct Ipv4StaticRoute {
+    /// 
+    master: Rc<ZebraMaster>,
+
     /// Config.
     config: BTreeMap<Prefix<Ipv4Addr>, Arc<StaticRoute<Ipv4Addr>>>,
 }
 
 impl Ipv4StaticRoute {
     /// Constructor.
-    pub fn new() -> Ipv4StaticRoute {
+    pub fn new(master: Rc<ZebraMaster>) -> Ipv4StaticRoute {
         Ipv4StaticRoute {
+            master: master,
             config: BTreeMap::new(),
         }
     }
@@ -41,13 +48,28 @@ impl Config for Ipv4StaticRoute {
     }
 
     /// Handle POST method.
-    fn post(&self, _path: &str, params: Option<Box<String>>) -> Result<(), io::Error> {
+    fn post(&self, path: &str, params: Option<Box<String>>) -> Result<(), io::Error> {
         match params {
-            Some(_json) => {
+            Some(json_str) => {
                 debug!("Configuring IPv4 static routes");
+
+                match split_id_and_path(path) {
+                    Some((addr, opt_mask)) => {
+                        let mask = opt_mask.unwrap_or("255.255.255.255".to_string());
+
+                        // TODO: should handle error.
+                        let json: serde_json::Value = serde_json::from_str(&json_str).unwrap();
+
+                        self.master.rib_add_static_ipv4(&addr, &mask, &json);
+                    },
+                    None => {
+                        debug!("Invalid path");
+                    }
+                }
             },
             None => {
-            }
+                debug!("No parameters")
+            },
         }
 
         Ok(())
@@ -96,50 +118,5 @@ impl<T: Clone> StaticRoute<T> {
         let nexthop = Nexthop::from_address(address);
 
         self.nexthops.push(nexthop);
-    }
-}
-
-
-/// Nexthop.
-pub struct Nexthop<T> {
-    /// Name of interface.
-    ifname: Option<String>,
-
-    /// IP address.
-    address: Option<T>,
-    
-    /// IP network - TBD.
-    _network: Option<Prefix<T>>,
-}
-
-impl<T: Clone> Nexthop<T> {
-    pub fn from_ifname(ifname: &str) -> Nexthop<T> {
-        Nexthop::<T> {
-            ifname: Some(String::from(ifname)),
-            address: None,
-            _network: None,
-        }
-    }
-
-    pub fn from_address(address: &T) -> Nexthop<T> {
-        Nexthop::<T> {
-            ifname: None,
-            address: Some(address.clone()),
-            _network: None
-        }
-    }
-
-    pub fn ifname(&self) -> Option<&str> {
-        match self.ifname {
-            Some(ref ifname) => Some(ifname),
-            None => None,
-        }
-    }
-
-    pub fn address(&self) -> Option<&T> {
-        match self.address {
-            Some(ref address) => Some(address),
-            None => None,
-        }
     }
 }

@@ -169,7 +169,7 @@ impl RouterNexus {
         let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
         let handle = thread::spawn(move || {
             let zebra = Rc::new(ZebraMaster::new());
-            ZebraMaster::kernel_init(zebra.clone());
+            ZebraMaster::init(zebra.clone());
             zebra.start(sender_p2n, receiver_n2p, receiver_p2z);
 
             // TODO: may need some cleanup, before returning.

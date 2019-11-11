@@ -126,23 +126,30 @@ impl ZebraMaster {
         }
     }
 
-    pub fn kernel_init(master: Rc<ZebraMaster>) {
+    pub fn rib_add_static_ipv4(&self, addr: &str, mask: &str, params: &serde_json::Value) {
+        debug!("*** {} {} {:?}", addr, mask, params);
+        debug!("RIB add static IPv4");
+    }
+
+    pub fn init(master: Rc<ZebraMaster>) {
+        ZebraMaster::kernel_init(master.clone());
+        ZebraMaster::config_init(master.clone());
+    }
+
+    fn kernel_init(master: Rc<ZebraMaster>) {
         // Init Kernel driver.
         master.kernel.borrow_mut().init(master.clone());
     }
 
-    fn config_init(&self) {
-        let ipv4_routes = Ipv4StaticRoute::new();
-        self.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
+    fn config_init(master: Rc<ZebraMaster>) {
+        let ipv4_routes = Ipv4StaticRoute::new(master.clone());
+        master.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
     }
 
     pub fn start(&self,
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
-        // Initialize some stuff.
-        self.config_init();
-
         // Zebra main loop
         'main: loop {
             // Process ProtoToZebra messages through the channel.
