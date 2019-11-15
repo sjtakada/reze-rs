@@ -8,45 +8,25 @@
 use rtable::prefix::*;
 
 /// Nexthop.
-pub struct Nexthop<T> {
-    /// Name of interface.
-    ifname: Option<String>,
+pub enum Nexthop<T> {
+    /// IP Address.
+    Address(T),
 
-    /// IP address.
-    address: Option<T>,
-    
-    /// IP network - TBD.
-    _network: Option<Prefix<T>>,
+    /// Interface Name.
+    Ifname(String),
+
+    /// Network Prefix - TBD: floating nexthop.
+    Network(Prefix<T>),
 }
 
-impl<T: Clone> Nexthop<T> {
-    pub fn from_ifname(ifname: &str) -> Nexthop<T> {
-        Nexthop::<T> {
-            ifname: Some(String::from(ifname)),
-            address: None,
-            _network: None,
-        }
-    }
-
+impl<T: Clone + AddressLen> Nexthop<T> {
+    /// Construct Nexthop from IP address.
     pub fn from_address(address: &T) -> Nexthop<T> {
-        Nexthop::<T> {
-            ifname: None,
-            address: Some(address.clone()),
-            _network: None
-        }
+        Nexthop::<T>::Address(address.clone())
     }
 
-    pub fn ifname(&self) -> Option<&str> {
-        match self.ifname {
-            Some(ref ifname) => Some(ifname),
-            None => None,
-        }
-    }
-
-    pub fn address(&self) -> Option<&T> {
-        match self.address {
-            Some(ref address) => Some(address),
-            None => None,
-        }
+    /// Construct Nexthop from Interface name.
+    pub fn from_ifname(ifname: &str) -> Nexthop<T> {
+        Nexthop::<T>::Ifname(String::from(ifname))
     }
 }

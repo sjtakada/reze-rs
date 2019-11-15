@@ -92,7 +92,7 @@ pub struct StaticRoute<T> {
     nexthops: Vec<Nexthop<T>>,
 }
 
-impl<T: Clone> StaticRoute<T> {
+impl<T: Clone + AddressLen> StaticRoute<T> {
     pub fn new(prefix: Prefix<T>, distance: u8, tag: u32) -> StaticRoute<T> {
         StaticRoute {
             prefix,
