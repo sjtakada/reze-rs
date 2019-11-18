@@ -114,7 +114,7 @@ impl<T: Clone + AddressLen> StaticRoute<T> {
         self.tag
     }
 
-    pub fn add_nexthop_ip(&mut self, address: &T) {
+    pub fn add_nexthop_address(&mut self, address: &T) {
         let nexthop = Nexthop::from_address(address);
 
         self.nexthops.push(nexthop);

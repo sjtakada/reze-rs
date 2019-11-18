@@ -79,6 +79,9 @@ impl<P: Prefixable + fmt::Debug> RibTable<P> {
 
         let it = self.tree.lookup_exact(prefix);
         if let Some(ref node) = *it.node() {
+            // TBD: compare existing RIB with the same type, and replace it if they are different
+            // and then run RIB update process.
+
             match *node.data() {
                 Some(ref mut v) => {
                     let rib = Rib::new(rib_type, distance, tag);

@@ -17,7 +17,7 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 
 //use crate::core::event::*;
 
-use super::static_route::*;
+use rtable::prefix::*;
 
 use crate::core::protocols::ProtocolType;
 use crate::core::message::nexus::ProtoToNexus;
@@ -29,6 +29,8 @@ use crate::core::config_master::*;
 use super::link::*;
 use super::address::*;
 use super::kernel::*;
+use super::static_route::*;
+use super::rib::*;
 
 /// Store Zebra Client related information.
 struct ClientTuple {
@@ -50,8 +52,14 @@ pub struct ZebraMaster {
     /// Ifindex to Link map.
     links: RefCell<HashMap<i32, Rc<Link>>>,
 
-    ///
+    /// TBD
     _name2ifindex: HashMap<String, i32>,
+
+    /// IPv4 RIB.
+    rib_ipv4: RefCell<RibTable<Prefix<Ipv4Addr>>>,
+
+    /// IPv6 RIB.
+    rib_ipv6: RefCell<RibTable<Prefix<Ipv6Addr>>>,
 }
 
 impl ZebraMaster {
@@ -71,6 +79,8 @@ impl ZebraMaster {
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
             _name2ifindex: HashMap::new(),
+            rib_ipv4: RefCell::new(RibTable::<Prefix<Ipv4Addr>>::new()),
+            rib_ipv6: RefCell::new(RibTable::<Prefix<Ipv6Addr>>::new()),
         }
     }
 
@@ -127,8 +137,7 @@ impl ZebraMaster {
     }
 
     pub fn rib_add_static_ipv4(&self, addr: &str, mask: &str, params: &serde_json::Value) {
-        debug!("*** {} {} {:?}", addr, mask, params);
-        debug!("RIB add static IPv4");
+        debug!("RIB add static IPv4 {} {} {:?}", addr, mask, params);
     }
 
     pub fn init(master: Rc<ZebraMaster>) {
