@@ -71,7 +71,7 @@ impl<P: Prefixable + fmt::Debug> RibTable<P> {
         }
     }
 
-    pub fn add(&mut self, rib_type: RibType, prefix: &P, distance: u8, tag: u32) {
+    pub fn add(&mut self, rib: Rib<P>, prefix: &P) {
         let v = Vec::new();
         if let Some(_) = self.tree.insert(prefix, v) {
             debug!("Prefix {:?} exists", prefix);
@@ -84,7 +84,6 @@ impl<P: Prefixable + fmt::Debug> RibTable<P> {
 
             match *node.data() {
                 Some(ref mut v) => {
-                    let rib = Rib::new(rib_type, distance, tag);
                     v.push(rib);
                 }
                 None => {}

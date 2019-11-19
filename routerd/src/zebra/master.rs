@@ -14,6 +14,7 @@ use std::thread;
 use std::time::Duration;
 use std::sync::mpsc;
 use std::net::{Ipv4Addr, Ipv6Addr};
+use std::str::FromStr;
 
 //use crate::core::event::*;
 
@@ -136,8 +137,17 @@ impl ZebraMaster {
         }
     }
 
-    pub fn rib_add_static_ipv4(&self, addr: &str, mask: &str, params: &serde_json::Value) {
-        debug!("RIB add static IPv4 {} {} {:?}", addr, mask, params);
+    pub fn rib_add_static_ipv4(&self, addr_str: &str, mask_str: &str, params: &serde_json::Value) {
+        debug!("RIB add static IPv4 {} {} {:?}", addr_str, mask_str, params);
+
+        if let Ok(prefix) = prefix_ipv4_from(addr_str, mask_str) {
+            let distance = 1;
+            let tag = 0;
+            let rib = Rib::<Prefix<Ipv4Addr>>::new(RibType::Static, distance, tag);
+
+            // TBD: handle return value
+            self.rib_ipv4.borrow_mut().add(rib, &prefix);
+        }
     }
 
     pub fn init(master: Rc<ZebraMaster>) {
