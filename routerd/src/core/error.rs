@@ -18,9 +18,13 @@ quick_error! {
             description("Command request is invalid")
             display(r#"Command request {} is invalid"#, s)
         }
-        CommandNotFound(s: String) {
+        ConfigNotFound(s: String) {
             description("The command could not be found")
             display(r#"The command "{}" could not be found"#, s)
+        }
+        CommandExecError(s: String) {
+            description("Command execution error")
+            display(r#"Command execution error {}"#, s)
         }
         ParseMethod {
             description("Unknown Method")

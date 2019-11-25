@@ -11,6 +11,7 @@ use std::collections::HashMap;
 
 use log::error;
 
+use super::error::*;
 use super::config::*;
 use super::protocols::ProtocolType;
 
@@ -41,31 +42,40 @@ impl ConfigMaster {
         }
     }
 
-    pub fn apply(&self, method: Method, path: &str, body: Option<Box<String>>) -> Result<(), io::Error> {
-        match self.lookup(path) {
-            Some(config_or_protocol) => {
-                match config_or_protocol {
-                    ConfigOrProtocol::Local(config) => {
-                        match method {
-                            Method::Get => config.get(path, body),
-                            Method::Post => config.post(path, body),
-                            Method::Put => config.put(path, body),
-                            Method::Delete => config.delete(path, body),
-                            Method::Patch => config.patch(path, body),
+    pub fn apply(&self, method: Method, path: &str, body: Option<Box<String>>) -> Result<(), CoreError> {
+        if let Some((id, path)) = split_id_and_path(path) {
+            match path {
+                Some(path) => {
+                    if let Some(config_or_protocol) = self.map.get(&id) {
+                        match config_or_protocol {
+                            ConfigOrProtocol::Local(config) => {
+                                match method {
+                                    Method::Get => config.get(&path, body),
+                                    Method::Post => config.post(&path, body),
+                                    Method::Put => config.put(&path, body),
+                                    Method::Delete => config.delete(&path, body),
+                                    Method::Patch => config.patch(&path, body),
+                                }
+                            },
+                            _ => {
+                                // some error
+                                error!("No local config to apply");
+                                Err(CoreError::ConfigNotFound("No local config".to_string()))
+                            }
                         }
-                    },
-                    _ => {
-                        // some error
-                        error!("No local config to apply");
-                        Ok(())
+                    } else {
+                        error!("No matched path to apply {}", path);
+                        Err(CoreError::ConfigNotFound("No match path".to_string()))
                     }
+                },
+                None => {
+                    error!("Insufficient config path");
+                    Err(CoreError::ConfigNotFound("Insufficient config path".to_string()))
                 }
-            },
-            None => {
-                error!("No matched path to apply {}", path);
-                Ok(())
-                // some error
-            },
+            }
+        } else {
+            error!("Invalid path");
+            Err(CoreError::ConfigNotFound("Invalid path".to_string()))
         }
     }
 

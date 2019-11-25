@@ -10,6 +10,7 @@ use std::io::{Error, ErrorKind};
 use std::str;
 use std::str::FromStr;
 use std::mem::{size_of, zeroed};
+use std::ptr::copy;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::cell::Cell;
@@ -23,6 +24,7 @@ use log::error;
 
 use rtable::prefix::*;
 
+use super::rtnetlink::*;
 use super::super::master::ZebraMaster;
 use super::super::kernel::*;
 use super::super::link::*;
@@ -35,13 +37,22 @@ const RTMGRP_IPV4_ROUTE: libc::c_int = 0x40;
 const RTMGRP_IPV6_IFADDR: libc::c_int = 0x100;
 const RTMGRP_IPV6_ROUTE: libc::c_int = 0x400;
 
+const RTPROT_ZEBRA: libc::c_int = 11;
+
 const NETLINK_RECV_BUFSIZ: usize = 4096;
 
 const NLMSG_ALIGNTO: usize = 4usize;
 
-
 fn nlmsg_align(len: usize) -> usize {
     (len + NLMSG_ALIGNTO - 1) & !(NLMSG_ALIGNTO - 1)
+}
+
+fn nlmsg_hdrlen() -> usize {
+    nlmsg_align(size_of::<libc::nlmsghdr>())
+}
+
+fn nlmsg_length(len: usize) -> usize {
+    nlmsg_hdrlen() + len
 }
 
 fn nlmsg_data() -> usize {
@@ -64,6 +75,58 @@ fn nlmsg_attr_ok(buf: &[u8]) -> bool {
         }
     } else {
         false
+    }
+}
+
+fn addattr_l(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
+    let len = rta_length(alen);
+    let ptr = h as *const _ as *const usize;
+
+    if nlmsg_align(h.nlmsg_len as usize) + len > maxlen {
+        false
+    } else {
+        unsafe {
+            let src_ptr = src as *const _ as *mut libc::c_void;
+
+            let rta = ptr.offset(nlmsg_align(h.nlmsg_len as usize) as isize) as *mut Rtattr;
+            let rta_ptr = rta as *const _ as *mut libc::c_void;
+            let dst_ptr = rta_ptr.offset(size_of::<Rtattr>() as isize);
+
+            (*rta).rta_len = len as u16;
+            (*rta).rta_type = rta_type as u16;
+            
+            copy(src_ptr, dst_ptr, alen);
+
+            h.nlmsg_len = (nlmsg_align(h.nlmsg_len as usize) + len) as u32;
+        }
+
+        true
+    }
+}
+
+fn addattr32(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: u32) -> bool {
+    let len = rta_length(size_of::<u32>());
+    let ptr = h as *const _ as *const usize;
+
+    if nlmsg_align(h.nlmsg_len as usize) + len > maxlen {
+        false
+    } else {
+        unsafe {
+            let src_ptr = &src as *const _ as *mut libc::c_void;
+
+            let rta = ptr.offset(nlmsg_align(h.nlmsg_len as usize) as isize) as *mut Rtattr;
+            let rta_ptr = rta as *const _ as *mut libc::c_void;
+            let dst_ptr = rta_ptr.offset(size_of::<Rtattr>() as isize);
+
+            (*rta).rta_len = len as u16;
+            (*rta).rta_type = rta_type as u16;
+            
+            copy(src_ptr, dst_ptr, size_of::<u32>());
+
+            h.nlmsg_len = (nlmsg_align(h.nlmsg_len as usize) + len) as u32;
+        }
+
+        true
     }
 }
 
@@ -105,11 +168,20 @@ fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
 type Nlmsghdr = libc::nlmsghdr;
 type AttrMap<'a> = HashMap<c_int, &'a [u8]>;
 
-/// struct rtattr
+/// struct rtmsg from rtnetlink.h.
 #[repr(C)]
-struct Rtattr {
-    rta_len: u16,
-    rta_type: u16,
+struct Rtmsg {
+    rtm_family: u8,
+    rtm_dst_len: u8,
+    rtm_src_len: u8,
+    rtm_tos: u8,
+
+    rtm_table: u8,
+    rtm_protocol: u8,
+    rtm_scope: u8,
+    rtm_type: u8,
+
+    rtm_flags: u16,
 }
 
 /// struct rtgenmsg from rtnetlink.h.
@@ -137,6 +209,11 @@ struct Ifaddrmsg {
     ifa_flags: u8,
     ifa_scope: u8,
     ifa_index: u32,
+}
+
+/// Dummy placeholder for netlink_talk
+#[repr(C)]
+struct NlDummy {
 }
 
 struct Buffer {
@@ -226,7 +303,83 @@ impl Netlink {
         self.master = Rc::downgrade(&master);
     }
 
-    /// Send request message througn Netlink.
+    /// Build route message.
+    fn route_msg<P: Prefixable>(&self, h: &mut Nlmsghdr, cmd: libc::c_int, prefix: &P) -> Result<(), io::Error> {
+        let family = libc::AF_INET;
+        let bytelen = if family == libc::AF_INET { 4 } else { 16 };
+
+        struct Request {
+            nlmsghdr: Nlmsghdr,
+            rtmsg: Rtmsg,
+            buf: [u8; 4096],	// XXX
+        }
+
+        let mut req = unsafe { zeroed::<Request>() };
+
+        req.nlmsghdr.nlmsg_len = nlmsg_length(size_of::<Rtmsg>()) as u32;
+        req.nlmsghdr.nlmsg_type = cmd as u16;
+        req.nlmsghdr.nlmsg_flags = libc::NLM_F_CREATE as u16 |
+                                   libc::NLM_F_REPLACE as u16 |
+                                   libc::NLM_F_REQUEST as u16;
+        req.rtmsg.rtm_family = family as u8;
+        req.rtmsg.rtm_table = libc::RT_TABLE_MAIN;
+        req.rtmsg.rtm_dst_len = prefix.len();
+        req.rtmsg.rtm_protocol = RTPROT_ZEBRA as u8;
+        req.rtmsg.rtm_scope = libc::RT_SCOPE_LINK;
+
+        if cmd == libc::RTM_NEWROUTE as i32 {
+            req.rtmsg.rtm_type = libc::RTN_UNICAST;
+        }
+
+        // Destination address.
+        addattr_l(&mut req.nlmsghdr, size_of::<Request>(), libc::RTA_DST as i32, prefix.octets(), bytelen);
+
+        // Metric.
+        addattr32(&mut req.nlmsghdr, size_of::<Request>(), libc::RTA_PRIORITY as i32, 1);
+
+        // Nexthops.
+        let nexthop: [u8; 4] = [1, 2, 3, 4];
+        addattr_l(&mut req.nlmsghdr, size_of::<Request>(), libc::RTA_GATEWAY as i32, &nexthop, 4);
+
+        // Send command message through Netlink socket.
+        self.send_command(&mut req.nlmsghdr)
+    }
+
+    /// Send a command through Netlink.
+    fn send_command(&self, mut h: &mut Nlmsghdr) -> Result<(), io::Error> {
+        let mut snl = unsafe { zeroed::<libc::sockaddr_nl>() };
+        snl.nl_family = libc::AF_NETLINK as u16;
+
+        let mut iov = unsafe { zeroed::<libc::iovec>() };
+        iov.iov_base = &mut h as *const _ as *mut libc::c_void;
+        iov.iov_len = h.nlmsg_len as usize;
+
+        let mut msg = unsafe { zeroed::<libc::msghdr>() };
+        msg.msg_name = &mut snl as *const _ as *mut libc::c_void;
+        msg.msg_namelen = size_of::<libc::sockaddr_nl>() as u32;
+        msg.msg_iov = &mut iov as *const _ as *mut libc::iovec;
+        msg.msg_iovlen = 1;
+
+        let seq = self.seq.get() + 1;
+        self.seq.set(seq);
+
+        h.nlmsg_seq = seq;
+        h.nlmsg_flags |= libc::NLM_F_ACK as u16;
+
+        let ret = unsafe {
+            libc::sendmsg(self.sock,
+                          &msg as *const _ as *const libc::msghdr, 0)
+        };
+
+        if ret < 0 {
+            return Err(io::Error::last_os_error());
+        }
+
+        self.parse_info(&Netlink::parse_dummy)
+    }
+
+    /// Send a request message through Netlink.
+    /// Expect to receive response.
     fn send_request(&self, family: libc::c_int, nlmsg_type: libc::c_int) -> Result<(), io::Error> {
         struct Request {
             nlmsghdr: Nlmsghdr,
@@ -342,6 +495,12 @@ impl Netlink {
         }
 
         Ok(())
+    }
+
+    fn parse_dummy(&self, h: &Nlmsghdr, ifi: &NlDummy, attr: &AttrMap) -> bool {
+        debug!("Nlmsg type {}", h.nlmsg_type);
+
+        true
     }
 
     fn parse_interface(&self, h: &Nlmsghdr, ifi: &Ifinfomsg, attr: &AttrMap) -> bool {

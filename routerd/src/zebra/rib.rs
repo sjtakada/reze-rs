@@ -77,6 +77,8 @@ impl<P: Prefixable + fmt::Debug> RibTable<P> {
             debug!("Prefix {:?} exists", prefix);
         }
 
+        debug!("rib add");
+
         let it = self.tree.lookup_exact(prefix);
         if let Some(ref node) = *it.node() {
             // TBD: compare existing RIB with the same type, and replace it if they are different

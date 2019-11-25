@@ -73,31 +73,31 @@ pub trait Config {
     }
 
     /// Handle GET method.
-    fn get(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
+    fn get(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle POST method.
-    fn post(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
+    fn post(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle PUT method.
-    fn put(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
+    fn put(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle DELETE method.
-    fn delete(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
+    fn delete(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle PATCH method.
-    fn patch(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), io::Error> {
+    fn patch(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }

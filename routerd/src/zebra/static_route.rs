@@ -19,6 +19,7 @@ use rtable::prefix::*;
 
 use crate::core::protocols::ProtocolType;
 use crate::core::config::*;
+use crate::core::error::*;
 use super::master::ZebraMaster;
 use super::nexthop::*;
 
@@ -48,19 +49,26 @@ impl Config for Ipv4StaticRoute {
     }
 
     /// Handle POST method.
-    fn post(&self, path: &str, params: Option<Box<String>>) -> Result<(), io::Error> {
+    fn post(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
         match params {
             Some(json_str) => {
                 debug!("Configuring IPv4 static routes");
 
+                let mut mask_str: &str;
                 match split_id_and_path(path) {
-                    Some((addr, opt_mask)) => {
-                        let mask = opt_mask.unwrap_or("255.255.255.255".to_string());
-
+                    Some((addr_str, none_or_mask_str)) => {
                         // TODO: should handle error.
                         let json: serde_json::Value = serde_json::from_str(&json_str).unwrap();
 
-                        self.master.rib_add_static_ipv4(&addr, &mask, &json);
+                        match none_or_mask_str {
+                            Some(mask_str) => {
+                                // Trim leading "/" from mask_str.
+                                self.master.rib_add_static_ipv4(&addr_str, &mask_str[1..], &json);
+                            },
+                            None => {
+                                self.master.rib_add_static_ipv4(&addr_str, "255.255.255.255", &json);
+                            }
+                        };
                     },
                     None => {
                         debug!("Invalid path");
