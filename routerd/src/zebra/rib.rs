@@ -7,12 +7,15 @@
 
 use std::time;
 use std::fmt;
+use std::rc::Rc;
+use std::rc::Weak;
 
 use log::debug;
 
 use rtable::prefix::*;
 use rtable::tree::*;
 
+use super::master::*;
 use super::nexthop::*;
 
 /// RIB type.
@@ -60,6 +63,9 @@ impl<P: Prefixable> Rib<P> {
 
 /// RIB table.
 pub struct RibTable<P: Prefixable> {
+    /// Zebra master.
+    master: Weak<ZebraMaster>,
+
     /// Table tree.
     tree: Tree<P, Vec<Rib<P>>>,
 }
@@ -67,8 +73,14 @@ pub struct RibTable<P: Prefixable> {
 impl<P: Prefixable + fmt::Debug> RibTable<P> {
     pub fn new() -> RibTable<P> {
         RibTable {
+            master: Default::default(),
             tree: Tree::new(),
         }
+    }
+
+    /// Set ZebraMaster.
+    pub fn set_master(&mut self, master: Rc<ZebraMaster>) {
+        self.master = Rc::downgrade(&master);
     }
 
     pub fn add(&mut self, rib: Rib<P>, prefix: &P) {
@@ -83,6 +95,11 @@ impl<P: Prefixable + fmt::Debug> RibTable<P> {
         if let Some(ref node) = *it.node() {
             // TBD: compare existing RIB with the same type, and replace it if they are different
             // and then run RIB update process.
+
+
+            if let Some(master) = self.master.upgrade() {
+                master.rib_install_kernel(prefix, &rib);
+            }
 
             match *node.data() {
                 Some(ref mut v) => {

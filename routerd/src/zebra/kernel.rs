@@ -8,6 +8,9 @@
 use std::rc::Rc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
+use rtable::prefix::*;
+
+use super::rib::*;
 use super::master::*;
 use super::link::*;
 use super::address::*;
@@ -49,5 +52,11 @@ impl Kernel {
         let _v6addr = self.driver.get_addresses_all::<Ipv6Addr>();
         // route ipv4
         // route ipv6
+    }
+
+    pub fn install<P: Prefixable>(&self, prefix: &P, rib: &Rib<P>) {
+println!("*** instlal kernel");
+
+        self.driver.install(prefix, rib);
     }
 }

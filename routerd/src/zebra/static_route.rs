@@ -25,7 +25,7 @@ use super::nexthop::*;
 
 /// IPv4 Static route configs.
 pub struct Ipv4StaticRoute {
-    /// 
+    /// Zebra master.
     master: Rc<ZebraMaster>,
 
     /// Config.

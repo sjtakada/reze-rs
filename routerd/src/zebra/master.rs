@@ -150,9 +150,14 @@ impl ZebraMaster {
         }
     }
 
+    pub fn rib_install_kernel<P: Prefixable>(&self, prefix: &P, rib: &Rib<P>) {
+        self.kernel.borrow_mut().install(prefix, rib);
+    }
+
     pub fn init(master: Rc<ZebraMaster>) {
         ZebraMaster::kernel_init(master.clone());
         ZebraMaster::config_init(master.clone());
+        ZebraMaster::rib_init(master.clone());
     }
 
     fn kernel_init(master: Rc<ZebraMaster>) {
@@ -163,6 +168,11 @@ impl ZebraMaster {
     fn config_init(master: Rc<ZebraMaster>) {
         let ipv4_routes = Ipv4StaticRoute::new(master.clone());
         master.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
+    }
+
+    fn rib_init(master: Rc<ZebraMaster>) {
+        master.rib_ipv4.borrow_mut().set_master(master.clone());
+        master.rib_ipv6.borrow_mut().set_master(master.clone());
     }
 
     pub fn start(&self,
