@@ -14,18 +14,24 @@ use std::thread;
 use std::time::Duration;
 use std::sync::mpsc;
 use std::net::{Ipv4Addr, Ipv6Addr};
+use std::str::FromStr;
 
 //use crate::core::event::*;
+
+use rtable::prefix::*;
 
 use crate::core::protocols::ProtocolType;
 use crate::core::message::nexus::ProtoToNexus;
 use crate::core::message::nexus::NexusToProto;
 use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
+use crate::core::config_master::*;
 
 use super::link::*;
 use super::address::*;
 use super::kernel::*;
+use super::static_route::*;
+use super::rib::*;
 
 /// Store Zebra Client related information.
 struct ClientTuple {
@@ -35,6 +41,9 @@ struct ClientTuple {
 
 /// Zebra Master.
 pub struct ZebraMaster {
+    /// Reference config tree.
+    config: RefCell<ConfigMaster>,
+
     /// Kernel interface.
     kernel: RefCell<Kernel>,
 
@@ -44,8 +53,14 @@ pub struct ZebraMaster {
     /// Ifindex to Link map.
     links: RefCell<HashMap<i32, Rc<Link>>>,
 
-    ///
+    /// TBD
     _name2ifindex: HashMap<String, i32>,
+
+    /// IPv4 RIB.
+    rib_ipv4: RefCell<RibTable<Prefix<Ipv4Addr>>>,
+
+    /// IPv6 RIB.
+    rib_ipv6: RefCell<RibTable<Prefix<Ipv6Addr>>>,
 }
 
 impl ZebraMaster {
@@ -60,10 +75,13 @@ impl ZebraMaster {
         };
 
         ZebraMaster {
+            config: RefCell::new(ConfigMaster::new()),
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
             _name2ifindex: HashMap::new(),
+            rib_ipv4: RefCell::new(RibTable::<Prefix<Ipv4Addr>>::new()),
+            rib_ipv6: RefCell::new(RibTable::<Prefix<Ipv6Addr>>::new()),
         }
     }
 
@@ -119,18 +137,51 @@ impl ZebraMaster {
         }
     }
 
-    pub fn kernel_init(master: Rc<ZebraMaster>) {
+    pub fn rib_add_static_ipv4(&self, addr_str: &str, mask_str: &str, params: &serde_json::Value) {
+        debug!("RIB add static IPv4 {} {} {:?}", addr_str, mask_str, params);
+
+        if let Ok(prefix) = prefix_ipv4_from(addr_str, mask_str) {
+            let distance = 1;
+            let tag = 0;
+            let rib = Rib::<Prefix<Ipv4Addr>>::new(RibType::Static, distance, tag);
+
+            // TBD: handle return value
+            self.rib_ipv4.borrow_mut().add(rib, &prefix);
+        }
+    }
+
+    pub fn rib_install_kernel<P: Prefixable>(&self, prefix: &P, rib: &Rib<P>) {
+        self.kernel.borrow_mut().install(prefix, rib);
+    }
+
+    pub fn init(master: Rc<ZebraMaster>) {
+        ZebraMaster::kernel_init(master.clone());
+        ZebraMaster::config_init(master.clone());
+        ZebraMaster::rib_init(master.clone());
+    }
+
+    fn kernel_init(master: Rc<ZebraMaster>) {
         // Init Kernel driver.
         master.kernel.borrow_mut().init(master.clone());
+    }
+
+    fn config_init(master: Rc<ZebraMaster>) {
+        let ipv4_routes = Ipv4StaticRoute::new(master.clone());
+        master.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
+    }
+
+    fn rib_init(master: Rc<ZebraMaster>) {
+        master.rib_ipv4.borrow_mut().set_master(master.clone());
+        master.rib_ipv6.borrow_mut().set_master(master.clone());
     }
 
     pub fn start(&self,
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
-        // Main loop for zebra
+        // Zebra main loop
         'main: loop {
-            // XXX: handle receiver_p2z 
+            // Process ProtoToZebra messages through the channel.
             while let Ok(d) = receiver_p2z.try_recv() {
                 match d {
                     ProtoToZebra::RegisterProto((proto, sender_z2p)) => {
@@ -144,7 +195,7 @@ impl ZebraMaster {
                 }
             }
 
-            // XXX: handle receiver_n2p
+            // Process NexusToProto messages through the channel.
             while let Ok(d) = receiver_n2p.try_recv() {
                 match d {
                     NexusToProto::TimerExpiration(token) => {
@@ -161,17 +212,19 @@ impl ZebraMaster {
                     }
                          */
                     },
-                    NexusToProto::PostConfig((command, _v)) => {
-                        debug!("Received PostConfig with command {}", command);
+                    NexusToProto::SendConfig((method, path, body)) => {
+                        debug!("Received SendConfig with command {} {} {:?}", method, path, body);
+
+                        self.config.borrow_mut().apply(method, &path, body);
                     },
                     NexusToProto::ProtoTermination => {
                         debug!("Received ProtoTermination");
                         break 'main;
                     }
                 }
-
-                thread::sleep(Duration::from_millis(100));
             }
+
+            thread::sleep(Duration::from_millis(10));
 
             // TODO: Some cleanup has to be done for inner.
             // inner.finish();

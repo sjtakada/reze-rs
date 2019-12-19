@@ -14,9 +14,21 @@ quick_error! {
             description("Nexus is terminated")
             display(r#"Nexus is terminated"#)
         }
-        CommandNotFound(s: String) {
+        RequestInvalid(s: String) {
+            description("Command request is invalid")
+            display(r#"Command request {} is invalid"#, s)
+        }
+        ConfigNotFound(s: String) {
             description("The command could not be found")
             display(r#"The command "{}" could not be found"#, s)
+        }
+        CommandExecError(s: String) {
+            description("Command execution error")
+            display(r#"Command execution error {}"#, s)
+        }
+        ParseMethod {
+            description("Unknown Method")
+            display(r#"Uknown Method"#)
         }
     }
 }

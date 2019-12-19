@@ -11,7 +11,7 @@
 //
 
 use log::debug;
-//use log::error;
+use log::error;
 
 use std::collections::HashMap;
 use std::thread;
@@ -22,8 +22,9 @@ use std::sync::Arc;
 use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
-//use std::time::Instant;
+use std::str::FromStr;
 
+use super::signal;
 use super::error::*;
 use super::event::*;
 use super::uds_server::*;
@@ -34,31 +35,38 @@ use super::message::zebra::ProtoToZebra;
 use super::message::zebra::ZebraToProto;
 
 use super::master::ProtocolMaster;
+use super::config::*;
+use super::config_master::*;
 use crate::zebra::master::ZebraMaster;
 use crate::bgp::master::BgpMaster;
 use crate::ospf::master::OspfMasterInner;
 
 use super::timer;
 
+/// Thread handle and Channel tuple.
 struct MasterTuple {
-    // Thread Join handle
+    /// Thread Join handle
     handle: JoinHandle<()>,
 
-    // Channel sender from Master To Protocol
+    /// Channel sender from Master To Protocol
     sender: mpsc::Sender<NexusToProto>,
 }
 
+/// Router Nexus.
 pub struct RouterNexus {
-    // MasterInner map
+    /// Global config.
+    config: RefCell<ConfigMaster>,
+
+    /// MasterInner map
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
-    // Timer server
+    /// Timer server
     timer_server: RefCell<timer::Server>,
 
-    // Sender channel for ProtoToNexus
+    /// Sender channel for ProtoToNexus
     sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
 
-    // Sender channel for ProtoToZebra
+    /// Sender channel for ProtoToZebra
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 }
 
@@ -66,8 +74,49 @@ impl UdsServerHandler for RouterNexus {
     // Process command.
     fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
         if let Some(command) = entry.stream_read() {
-            debug!("received command {}", command);
+            let mut lines = command.lines();
 
+            if let Some(req) = lines.next() {
+                let mut words = req.split_ascii_whitespace();
+
+                if let Some(method_str) = words.next() {
+                    if let Ok(method) = Method::from_str(method_str) {
+
+                        if let Some(path) = words.next() {
+                            let mut body: Option<String> = None;
+
+                            // Skip a blank line and get body if it is present.
+                            if let Some(_) = lines.next() {
+                                if let Some(b) =  lines.next() {
+                                    body = Some(b.to_string());
+                                }
+                            }
+
+                            debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
+
+                            // dispatch command.
+                            if let Some((id, path)) = split_id_and_path(path) {
+                                self.dispatch_command(method, &path.unwrap(), body);
+                            }
+
+                            Ok(())
+                        } else {
+                            Err(CoreError::RequestInvalid(req.to_string()))
+                        }
+                    } else {
+                        Err(CoreError::RequestInvalid(req.to_string()))
+                    }
+                } else {
+                    Err(CoreError::RequestInvalid(req.to_string()))
+                }
+            } else {
+                Err(CoreError::RequestInvalid("(no request line)".to_string()))
+            }
+        } else {
+            Err(CoreError::RequestInvalid("(no message)".to_string()))
+        }
+    }
+/*
             if command == "ospf" {
                     // Spawn ospf instance
                     let (handle, sender, _sender_z2p) =
@@ -77,41 +126,31 @@ impl UdsServerHandler for RouterNexus {
                     self.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
 
                     // register sender_z2p to Zebra thread
-            } else if command == "quie" {
+            } else if command == "quit" {
                 return Err(CoreError::NexusTermination)
             } else {
                 return Err(CoreError::CommandNotFound(command.to_string()))
             }
-        }
-
-        /*
-        match self.process_command(&command) {
-            Err(CoreError::NexusTermination) => {
-                debug!("Termination");
-            },
-            Err(CoreError::CommandNotFound(str)) => {
-                error!("Command not found '{}'", str);
-            },
-            _ => {
-            }
-        }
-    }
 */
-        Ok(())
-    }
 
     fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+        debug!("handle_connect");
         Ok(())
     }
-    
-    fn handle_disconnect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+
+    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        server.shutdown_entry(entry);
+
+        debug!("handle_disconnect");
         Ok(())
     }
 }
 
 impl RouterNexus {
+    /// Constructor.
     pub fn new() -> RouterNexus {
         RouterNexus {
+            config: RefCell::new(ConfigMaster::new()),
             masters: RefCell::new(HashMap::new()),
             timer_server: RefCell::new(timer::Server::new()),
             sender_p2n: RefCell::new(None),
@@ -122,12 +161,15 @@ impl RouterNexus {
     // Construct MasterInner instance and spawn a thread.
     fn spawn_zebra(&self, sender_p2n: mpsc::Sender<ProtoToNexus>)
                    -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ProtoToZebra>) {
+        // Clone global config.
+        let ref mut config = *self.config.borrow_mut();
+
         // Create channel from RouterNexus to MasterInner
         let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
         let (sender_p2z, receiver_p2z) = mpsc::channel::<ProtoToZebra>();
         let handle = thread::spawn(move || {
             let zebra = Rc::new(ZebraMaster::new());
-            ZebraMaster::kernel_init(zebra.clone());
+            ZebraMaster::init(zebra.clone());
             zebra.start(sender_p2n, receiver_n2p, receiver_p2z);
 
             // TODO: may need some cleanup, before returning.
@@ -138,7 +180,7 @@ impl RouterNexus {
     }
 
     // Construct MasterInner instance and spawn a thread.
-    fn spawn_protocol(&self, p: ProtocolType,
+    fn _spawn_protocol(&self, p: ProtocolType,
                       sender_p2n: mpsc::Sender<ProtoToNexus>,
                       sender_p2z: mpsc::Sender<ProtoToZebra>)
                       -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ZebraToProto>) {
@@ -199,35 +241,51 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
+    fn config_init(&self) {
+        self.config.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
+        self.config.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);
+
+        self.config.borrow_mut().register_protocol("ospf", ProtocolType::Ospf);
+    }
+
     //
-    pub fn start(&self, event_manager: Arc<EventManager>) {
+    pub fn start(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
         self.sender_p2n.borrow_mut().replace(sender_p2n);
+
+        // Config init.
+        self.config_init();
 
         // Spawn zebra instance
         let (handle, sender, sender_p2z) = self.spawn_zebra(self.clone_sender_p2n());
         self.sender_p2z.borrow_mut().replace(sender_p2z);
         self.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
+        // Event loop.
         'main: loop {
-            //
+            // Signal is caught.
+            if signal::is_sigint_caught() {
+                break 'main;
+            }
+
+            // Process events.
             match event_manager.poll() {
                 Err(CoreError::NexusTermination) => break 'main,
                 _ => {}
             }
 
-            // Process channels
+            // Process ProtoToNexus messages through channels.
             while let Ok(d) = receiver.try_recv() {
                 match d {
                     ProtoToNexus::TimerRegistration((p, d, token)) => {
-                        debug!("Received timer registration {} {}", p, token);
+                        debug!("Received Timer Registration {} {}", p, token);
 
                         self.timer_server.borrow_mut().register(p, d, token);
-                    }
+                    },
                     ProtoToNexus::ProtoException(s) => {
-                        debug!("Received exception {}", s);
-                    }
+                        debug!("Received Exception {}", s);
+                    },
                 }
             }
 
@@ -267,5 +325,37 @@ impl RouterNexus {
         }
 
         // Nexus terminated.
+        Err(CoreError::NexusTermination)
+    }
+
+    //
+    fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) {
+        match self.config.borrow().lookup(path) {
+            Some(config_or_protocol) => {
+                match config_or_protocol {
+                    ConfigOrProtocol::Local(config) => {
+                            debug!("local config");
+                    },
+                    ConfigOrProtocol::Proto(p) => {
+                        match self.masters.borrow_mut().get(&p) {
+                            Some(tuple) => {
+                                let b = match body {
+                                    Some(s) => Some(Box::new(s)),
+                                    None => None
+                                };
+
+                                tuple.sender.send(NexusToProto::SendConfig((method, path.to_string(), b)));
+                            },
+                            None => {
+                                panic!("Unexpected error");
+                            },
+                        }
+                    },
+                }
+            },
+            None => {
+                error!("No config exists")
+            }
+        }
     }
 }

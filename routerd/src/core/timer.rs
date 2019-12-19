@@ -18,7 +18,7 @@ use super::protocols::ProtocolType;
 use super::master::ProtocolMaster;
 use super::event;
 
-// Timer entry
+/// Timer entry
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Entry {
     pub protocol: ProtocolType,
@@ -38,7 +38,7 @@ impl PartialOrd	for Entry {
     }
 }
 
-// Timer server
+/// Timer server
 pub struct Server {
     heap: BinaryHeap<Entry>
 }
@@ -65,21 +65,21 @@ impl Server {
     }
 }
 
-// Timer client
+/// Timer client
 pub struct Client {
-    // Parent  
+    /// Parent  
     _master: RefCell<Arc<ProtocolMaster>>,
 
-    // Token
+    /// Token
     token: u32,
 
-    // Token to EventHandler map
-    timers: Mutex<HashMap<u32, Arc<event::EventHandler + Send + Sync>>>,
+    /// Token to EventHandler map
+    timers: Mutex<HashMap<u32, Arc<dyn event::EventHandler + Send + Sync>>>,
 }
 
-// Timer client implementation
+/// Timer client implementation
 impl Client {
-    // Constructor
+    /// Constructor
     pub fn new(master: Arc<ProtocolMaster>) -> Client {
         Client {
             _master: RefCell::new(master),
@@ -88,7 +88,7 @@ impl Client {
         }
     }
 
-    pub fn register(&mut self, handler: Arc<event::EventHandler + Send + Sync>, _d: Duration) -> u32 {
+    pub fn register(&mut self, handler: Arc<dyn event::EventHandler + Send + Sync>, _d: Duration) -> u32 {
         let token = self.token;
         let mut timers = self.timers.lock().unwrap();
         timers.insert(token, handler);
@@ -97,7 +97,7 @@ impl Client {
         token
     }
 
-    pub fn unregister(&mut self, token: u32) -> Option<Arc<event::EventHandler + Send + Sync>> {
+    pub fn unregister(&mut self, token: u32) -> Option<Arc<dyn event::EventHandler + Send + Sync>> {
         let mut timers = self.timers.lock().unwrap();
         timers.remove(&token)
     }

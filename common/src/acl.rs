@@ -1,11 +1,14 @@
-///
-/// ACL: Access Control List
-///
-/// # CLI Output
-///   access-list 100 permit 1.1.1.1
-///   access-list 100 deny 2.2.2.2
-///   access-list 100 permit any
-///
+//
+// ReZe.Rs - ReZe CLI
+//   Copyright (C) 2018,2019 Toshiaki Takada
+//
+// ACL: Access Control List
+//
+// # CLI Output
+//   access-list 100 permit 1.1.1.1
+//   access-list 100 deny 2.2.2.2
+//   access-list 100 permit any
+//
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;

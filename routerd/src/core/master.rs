@@ -18,7 +18,6 @@ use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
-//use std::marker::Send;
 
 use super::event::*;
 
@@ -32,7 +31,7 @@ use super::timer;
 
 pub struct ProtocolMaster {
     // Protocol specific inner
-    inner: RefCell<Option<Box<MasterInner>>>,
+    inner: RefCell<Option<Box<dyn MasterInner>>>,
 
     // Sender channel for ProtoToNexus Message
     sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
@@ -54,7 +53,7 @@ impl ProtocolMaster {
         }
     }
 
-    fn timer_handler_get(&self, token: u32) -> Option<Arc<EventHandler + Send + Sync>> {
+    fn timer_handler_get(&self, token: u32) -> Option<Arc<dyn EventHandler + Send + Sync>> {
         let mut some_handler = None;
         if let Some(ref mut timer_client) = *self.timer_client.borrow_mut() {
             some_handler = timer_client.unregister(token);
@@ -95,8 +94,8 @@ impl ProtocolMaster {
                                 }
                             }
                         },
-                        NexusToProto::PostConfig((command, _v)) => {
-                            debug!("Received PostConfig with command {}", command);
+                        NexusToProto::SendConfig((method, path, body)) => {
+                            debug!("Received SendConfig with command {} {} {:?}", method, path, body);
                         },
                         NexusToProto::ProtoTermination => {
                             debug!("Received ProtoTermination");
@@ -116,7 +115,7 @@ impl ProtocolMaster {
     }
 
     // TODO: may return value
-    pub fn timer_register(&self, p: ProtocolType, d: Duration, handler: Arc<EventHandler + Send + Sync>) {
+    pub fn timer_register(&self, p: ProtocolType, d: Duration, handler: Arc<dyn EventHandler + Send + Sync>) {
         if let Some(ref mut sender) = *self.sender_p2n.borrow_mut() {
             if let Some(ref mut timer_client) = *self.timer_client.borrow_mut() {
                 let token = timer_client.register(handler, d);
@@ -135,7 +134,7 @@ impl ProtocolMaster {
         }
     }
 
-    pub fn inner_set(&self, inner: Box<MasterInner>) {
+    pub fn inner_set(&self, inner: Box<dyn MasterInner>) {
         self.inner.borrow_mut().replace(inner);
     }
 

@@ -5,17 +5,21 @@
 
 use std::env;
 use std::sync::Arc;
+use std::fs;
 
 use log::info;
 use simplelog::*;
 use getopts::Options;
 
+use common::consts::*;
+
+use routerd::core::error::*;
+use routerd::core::signal::*;
 use routerd::core::event::*;
 use routerd::core::nexus::*;
 use routerd::core::uds_server::*;
 
-const ROUTERD_VERSION: &str = "1.0";
-const COPYRIGHT: &str = "Copyright (C) 2018,2019 Toshaki Takada";
+const ROUTERD_VERSION: &str = "0.1.0";
 
 /// Help
 fn print_help(program: &str, opts: Options) {
@@ -79,6 +83,9 @@ fn main() {
         ]
     ).unwrap();
 
+    // Init Signals.
+    signal_init();
+
     // Start daemon
     info!("ReZe Router Daemon started.");
 
@@ -92,7 +99,7 @@ fn main() {
 fn start() {
     // Create Unix Domain Socket to accept commands.
     let mut path = env::temp_dir();
-    path.push("routerd.cli");
+    path.push(CLI_UDS_FILENAME);
 
     // Prepare some objects.
     let event_manager = Arc::new(EventManager::new());
@@ -100,6 +107,18 @@ fn start() {
     let _uds_server = UdsServer::start(event_manager.clone(), nexus.clone(), &path);
 
     // Start nexus.
-    nexus.start(event_manager);
+    match nexus.start(event_manager) {
+        Err(CoreError::NexusTermination) => {
+        },
+        _ => {
+        }
+    }
+
+    // Cleanup.
+    if let Err(_) = fs::remove_file(path) {
+
+    }
+
+    ()
 }
 

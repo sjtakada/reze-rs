@@ -9,6 +9,7 @@ use std::env;
 //use std::io;
 use std::io::BufReader;
 use std::io::Read;
+use std::io::Write;
 use std::fs;
 use std::fs::File;
 use std::path::Path;
@@ -21,6 +22,8 @@ use std::rc::Rc;
 use mio_uds::UnixStream;
 use serde_json;
 use rustyline::error::ReadlineError;
+
+use common::consts::*;
 
 use super::config::Config;
 use super::error::CliError;
@@ -52,6 +55,9 @@ pub struct Cli {
     // Current privilege.
     privilege: Cell<u8>,
 
+    // Server stream.
+    stream: RefCell<Option<UnixStream>>,
+
     // Debug mode.
     debug: bool,
 }
@@ -65,6 +71,7 @@ impl Cli {
             mode: RefCell::new(String::new()),
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
+            stream: RefCell::new(None),
             debug: false,
         }
     }
@@ -92,7 +99,7 @@ impl Cli {
         self.set_mode(CLI_INITIAL_MODE)?;
 
         // TBD: Connect server or send.
-        //self.init_server_connect()?;
+        self.init_server_connect()?;
 
         // Init readline.
         let readline = CliReadline::new(&self);
@@ -168,7 +175,7 @@ impl Cli {
 
     fn can_exit(&self) -> bool {
         let mode = self.mode.borrow_mut();
-        if String::from(mode.as_ref()) == CLI_INITIAL_MODE {
+        if String::from(mode.as_str()) == CLI_INITIAL_MODE {
             true
         }
         else {
@@ -186,7 +193,7 @@ impl Cli {
 
     pub fn mode(&self) -> String {
         let mode = self.mode.borrow_mut();
-        String::from(mode.as_ref())
+        String::from(mode.as_str())
     }
 
     pub fn set_privilege(&self, privilege: u8) {
@@ -382,10 +389,12 @@ impl Cli {
     fn init_server_connect(&self) -> Result<(), CliError> {
         // Initialize connection to server.
         let mut path = env::temp_dir();
-        path.push("rzrtd.cli");
+        path.push(CLI_UDS_FILENAME);
 
         let _stream = match UnixStream::connect(path) {
-            Ok(stream) => stream,
+            Ok(stream) => {
+                self.stream.borrow_mut().replace(stream);
+            },
             Err(_) => return Err(CliError::ConnectError),
         };
         
@@ -397,6 +406,16 @@ impl Cli {
         signal::ignore_sigtstp_handler();
 
         Ok(())
+    }
+
+    pub fn stream_send(&self, message: &str) {
+        match self.stream.borrow_mut().as_ref() {
+            Some(mut s) => {
+                s.write_all(message.as_bytes());
+            },
+            None => {
+            }
+        }
     }
 }
 

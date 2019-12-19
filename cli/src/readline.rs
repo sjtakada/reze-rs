@@ -5,7 +5,7 @@
 // Readline, rustyline integration.
 //
 
-use std::collections::HashMap;
+//use std::collections::HashMap;
 use std::cell::RefCell;
 //use std::cell::Cell;
 use std::rc::Rc;
@@ -25,7 +25,7 @@ use rustyline::config;
 use super::cli::Cli;
 use super::tree::CliTree;
 use super::parser::*;
-use super::node::CliNode;
+//use super::node::CliNode;
 use super::node::NodeType;
 //use super::node::Value;
 use super::error::CliError;
@@ -224,7 +224,7 @@ impl<'a> CliReadline<'a> {
         let readline = editor.readline(&self.cli.prompt());
         match readline {
             Ok(line) => {
-                editor.add_history_entry(line.as_ref());
+                editor.add_history_entry(line.as_str());
                 Ok(line)
             },
             Err(err) => Err(err)
@@ -319,22 +319,12 @@ impl<'a> CliReadline<'a> {
         // Populate mode params first.
         println!("** handle_actions");
 
-/*
-        // Populate params and keywords.
-        for n in node_token_vec.iter() {
-            let node = n.0.clone();
-
-            if self.cli.is_debug() {
-
-            }
-        }
-
-*/
         let node = parser.node_executable().unwrap();
+        let params = parser.params_get();
 
         if node.inner().actions().len() > 0 {
             for action in node.inner().actions().iter() {
-                action.handle(&self.cli)?;
+                action.handle(&self.cli, &params)?;
             }
             Ok(())
         }

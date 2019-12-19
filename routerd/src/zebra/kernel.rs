@@ -8,6 +8,9 @@
 use std::rc::Rc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
+use rtable::prefix::*;
+
+use super::rib::*;
 use super::master::*;
 use super::link::*;
 use super::address::*;
@@ -18,12 +21,12 @@ use super::linux::netlink::*;
 
 /// Kernel Callbacks.
 pub struct KernelCallbacks {
-    pub add_link: &'static Fn(&ZebraMaster, Link) -> (),
-    pub delete_link: &'static Fn(&ZebraMaster, Link) -> (),
-    pub add_ipv4_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
-    pub delete_ipv4_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
-    pub add_ipv6_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
-    pub delete_ipv6_address: &'static Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
+    pub add_link: &'static dyn Fn(&ZebraMaster, Link) -> (),
+    pub delete_link: &'static dyn Fn(&ZebraMaster, Link) -> (),
+    pub add_ipv4_address: &'static dyn Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
+    pub delete_ipv4_address: &'static dyn Fn(&ZebraMaster, i32, Connected<Ipv4Addr>) -> (),
+    pub add_ipv6_address: &'static dyn Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
+    pub delete_ipv6_address: &'static dyn Fn(&ZebraMaster, i32, Connected<Ipv6Addr>) -> (),
 }
 
 /// Kernel driver.
@@ -49,5 +52,11 @@ impl Kernel {
         let _v6addr = self.driver.get_addresses_all::<Ipv6Addr>();
         // route ipv4
         // route ipv6
+    }
+
+    pub fn install<P: Prefixable>(&self, prefix: &P, rib: &Rib<P>) {
+println!("*** instlal kernel");
+
+        self.driver.install(prefix, rib);
     }
 }
