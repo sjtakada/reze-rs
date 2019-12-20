@@ -54,9 +54,7 @@ impl Kernel {
         // route ipv6
     }
 
-    pub fn install<P: Prefixable>(&self, prefix: &P, rib: &Rib<P>) {
-println!("*** instlal kernel");
-
+    pub fn install<T: AddressLen + Clone>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
         self.driver.install(prefix, rib);
     }
 }

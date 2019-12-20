@@ -2,7 +2,7 @@
 // ReZe.Rs - Router Daemon
 //   Copyright (C) 2018,2019 Toshiaki Takada
 //
-// Error
+// Core Error
 //
 
 use quick_error::*;

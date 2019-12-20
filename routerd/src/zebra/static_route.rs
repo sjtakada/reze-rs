@@ -5,12 +5,12 @@
 // Zebra - Static route.
 //
 
-use std::io;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::collections::BTreeMap;
 use std::net::Ipv4Addr;
 //use std::net::Ipv6Addr;
+use std::str::FromStr;
 
 use serde_json;
 
@@ -29,7 +29,7 @@ pub struct Ipv4StaticRoute {
     master: Rc<ZebraMaster>,
 
     /// Config.
-    config: BTreeMap<Prefix<Ipv4Addr>, Arc<StaticRoute<Ipv4Addr>>>,
+    _config: BTreeMap<Prefix<Ipv4Addr>, Arc<StaticRoute<Ipv4Addr>>>,
 }
 
 impl Ipv4StaticRoute {
@@ -37,7 +37,7 @@ impl Ipv4StaticRoute {
     pub fn new(master: Rc<ZebraMaster>) -> Ipv4StaticRoute {
         Ipv4StaticRoute {
             master: master,
-            config: BTreeMap::new(),
+            _config: BTreeMap::new(),
         }
     }
 }
@@ -54,7 +54,6 @@ impl Config for Ipv4StaticRoute {
             Some(json_str) => {
                 debug!("Configuring IPv4 static routes");
 
-                let mut mask_str: &str;
                 match split_id_and_path(path) {
                     Some((addr_str, none_or_mask_str)) => {
                         // TODO: should handle error.
@@ -86,7 +85,7 @@ impl Config for Ipv4StaticRoute {
 
 
 /// Static route.
-pub struct StaticRoute<T> {
+pub struct StaticRoute<T: AddressLen> {
     /// Prefix.
     prefix: Prefix<T>,
 
@@ -100,7 +99,7 @@ pub struct StaticRoute<T> {
     nexthops: Vec<Nexthop<T>>,
 }
 
-impl<T: Clone + AddressLen> StaticRoute<T> {
+impl<T: Clone + AddressLen + FromStr> StaticRoute<T> {
     pub fn new(prefix: Prefix<T>, distance: u8, tag: u32) -> StaticRoute<T> {
         StaticRoute {
             prefix,

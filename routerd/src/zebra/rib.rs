@@ -31,47 +31,55 @@ pub enum RibType {
     Bgp,
 }
 
-/// RIB
-pub struct Rib<P: Prefixable> {
+/// RIB.
+pub struct Rib<T: AddressLen> {
     /// Type.
-    rib_type: RibType,
+    _rib_type: RibType,
 
     /// Nexthops.
-    nexthops: Vec<Nexthop<P>>,
+    nexthops: Vec<Nexthop<T>>,
 
     /// Tag.
-    tag: u32,
+    _tag: u32,
+
+    /// Administrative distance.
+    _distance: u8,
 
     /// Time updated.
-    instant: time::Instant,
+    _instant: time::Instant,
 }
 
-impl<P: Prefixable> Rib<P> {
-    pub fn new(rib_type: RibType, distance: u8, tag: u32) -> Rib<P> {
+impl<T: AddressLen> Rib<T> {
+    pub fn new(rib_type: RibType, distance: u8, tag: u32) -> Rib<T> {
         Rib {
-            rib_type: rib_type,
+            _rib_type: rib_type,
             nexthops: Vec::new(),
-            tag: tag,
-            instant: time::Instant::now(),
+            _tag: tag,
+            _distance: distance,
+            _instant: time::Instant::now(),
         }
     }
 
-    pub fn add_nexthop(&mut self, nexthop: Nexthop<P>) {
+    pub fn nexthops(&self) -> &Vec<Nexthop<T>> {
+        &self.nexthops
+    }
+
+    pub fn add_nexthop(&mut self, nexthop: Nexthop<T>) {
         self.nexthops.push(nexthop);
     }
 }
 
 /// RIB table.
-pub struct RibTable<P: Prefixable> {
+pub struct RibTable<T: AddressLen + Clone> {
     /// Zebra master.
     master: Weak<ZebraMaster>,
 
     /// Table tree.
-    tree: Tree<P, Vec<Rib<P>>>,
+    tree: Tree<Prefix<T>, Vec<Rib<T>>>,
 }
 
-impl<P: Prefixable + fmt::Debug> RibTable<P> {
-    pub fn new() -> RibTable<P> {
+impl<T: AddressLen + Clone + fmt::Debug> RibTable<T> {
+    pub fn new() -> RibTable<T> {
         RibTable {
             master: Default::default(),
             tree: Tree::new(),
@@ -83,7 +91,7 @@ impl<P: Prefixable + fmt::Debug> RibTable<P> {
         self.master = Rc::downgrade(&master);
     }
 
-    pub fn add(&mut self, rib: Rib<P>, prefix: &P) {
+    pub fn add(&mut self, rib: Rib<T>, prefix: &Prefix<T>) {
         let v = Vec::new();
         if let Some(_) = self.tree.insert(prefix, v) {
             debug!("Prefix {:?} exists", prefix);

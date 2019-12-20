@@ -5,17 +5,17 @@
 // Zebra - Link handler
 //
 
-use std::io;
 use std::cell::RefCell;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
 //use super::master::*;
 use super::address::*;
+use super::error::*;
 
 /// Abstracted event handler between Zebra and OS.
 pub trait LinkHandler {
     /// Get all links from kernel.
-    fn get_links_all(&self) -> Result<(), io::Error>;
+    fn get_links_all(&self) -> Result<(), ZebraError>;
 
     /// Set MTU.
     fn set_mtu(&self, mtu: u16) -> bool; // ? Error

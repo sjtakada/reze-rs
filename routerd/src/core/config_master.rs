@@ -5,7 +5,6 @@
 // Core - config master.
 //
 
-use std::io;
 use std::rc::Rc;
 use std::collections::HashMap;
 
@@ -35,7 +34,7 @@ impl ConfigMaster {
     }
 
     pub fn lookup(&self, path: &str) -> Option<&ConfigOrProtocol> {
-        if let Some((id, path)) = split_id_and_path(path) {
+        if let Some((id, _path)) = split_id_and_path(path) {
             self.map.get(&id)
         } else {
             None

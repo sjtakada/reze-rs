@@ -197,7 +197,7 @@ impl UdsServer {
             self.get_inner().event_manager.borrow().unregister_read(stream, entry.get_token());
 
             if let Err(err) = stream.shutdown(Shutdown::Both) {
-                error!("Entry shutdown error");
+                error!("Entry shutdown error {}", err.to_string());
             }
         }
 

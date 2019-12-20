@@ -5,11 +5,12 @@
 // Zebra - IPv4 and IPv6 address handler.
 //
 
-use std::io;
 use std::str::FromStr;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
 use rtable::prefix::*;
+
+use super::error::*;
 
 pub trait AddressFamily {
     /// Return libc Addressfamily
@@ -30,7 +31,7 @@ impl AddressFamily for Ipv6Addr {
 
 /// Trait IP address handler.
 pub trait AddressHandler {
-    fn get_addresses_all<T: AddressFamily + AddressLen + FromStr>(&self) ->  Result<(), io::Error>;
+    fn get_addresses_all<T: AddressFamily + AddressLen + FromStr>(&self) ->  Result<(), ZebraError>;
 }
 
 /// Connected Address.

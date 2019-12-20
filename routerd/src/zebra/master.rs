@@ -14,7 +14,6 @@ use std::thread;
 use std::time::Duration;
 use std::sync::mpsc;
 use std::net::{Ipv4Addr, Ipv6Addr};
-use std::str::FromStr;
 
 //use crate::core::event::*;
 
@@ -32,6 +31,7 @@ use super::address::*;
 use super::kernel::*;
 use super::static_route::*;
 use super::rib::*;
+use super::nexthop::*;
 
 /// Store Zebra Client related information.
 struct ClientTuple {
@@ -57,10 +57,10 @@ pub struct ZebraMaster {
     _name2ifindex: HashMap<String, i32>,
 
     /// IPv4 RIB.
-    rib_ipv4: RefCell<RibTable<Prefix<Ipv4Addr>>>,
+    rib_ipv4: RefCell<RibTable<Ipv4Addr>>,
 
     /// IPv6 RIB.
-    rib_ipv6: RefCell<RibTable<Prefix<Ipv6Addr>>>,
+    rib_ipv6: RefCell<RibTable<Ipv6Addr>>,
 }
 
 impl ZebraMaster {
@@ -80,8 +80,8 @@ impl ZebraMaster {
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
             _name2ifindex: HashMap::new(),
-            rib_ipv4: RefCell::new(RibTable::<Prefix<Ipv4Addr>>::new()),
-            rib_ipv6: RefCell::new(RibTable::<Prefix<Ipv6Addr>>::new()),
+            rib_ipv4: RefCell::new(RibTable::<Ipv4Addr>::new()),
+            rib_ipv6: RefCell::new(RibTable::<Ipv6Addr>::new()),
         }
     }
 
@@ -143,14 +143,34 @@ impl ZebraMaster {
         if let Ok(prefix) = prefix_ipv4_from(addr_str, mask_str) {
             let distance = 1;
             let tag = 0;
-            let rib = Rib::<Prefix<Ipv4Addr>>::new(RibType::Static, distance, tag);
+            let mut rib = Rib::<Ipv4Addr>::new(RibType::Static, distance, tag);
+
+            // Add nexthops.
+            if params.is_object() && params["nexthops"].is_array() {
+                for nexthop in params["nexthops"].as_array().unwrap() {
+                    if nexthop.is_object() {
+                        for key in nexthop.as_object().unwrap().keys() {
+                            match key.as_ref() {
+                                "ipv4_address" => {
+                                    match Nexthop::<Ipv4Addr>::from_address_str(nexthop[key].as_str().unwrap()) {
+                                        Some(address) => rib.add_nexthop(address),
+                                        None => {}
+                                    }
+                                },
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+            }
+
 
             // TBD: handle return value
             self.rib_ipv4.borrow_mut().add(rib, &prefix);
         }
     }
 
-    pub fn rib_install_kernel<P: Prefixable>(&self, prefix: &P, rib: &Rib<P>) {
+    pub fn rib_install_kernel<T: AddressLen + Clone>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
         self.kernel.borrow_mut().install(prefix, rib);
     }
 
@@ -215,7 +235,10 @@ impl ZebraMaster {
                     NexusToProto::SendConfig((method, path, body)) => {
                         debug!("Received SendConfig with command {} {} {:?}", method, path, body);
 
-                        self.config.borrow_mut().apply(method, &path, body);
+                        match self.config.borrow_mut().apply(method, &path, body) {
+                            Ok(_) => { }
+                            Err(_) => error!("config apply error"),
+                        }
                     },
                     NexusToProto::ProtoTermination => {
                         debug!("Received ProtoTermination");

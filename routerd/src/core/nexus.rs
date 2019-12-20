@@ -95,7 +95,7 @@ impl UdsServerHandler for RouterNexus {
                             debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
 
                             // dispatch command.
-                            if let Some((id, path)) = split_id_and_path(path) {
+                            if let Some((_id, path)) = split_id_and_path(path) {
                                 self.dispatch_command(method, &path.unwrap(), body);
                             }
 
@@ -162,7 +162,7 @@ impl RouterNexus {
     fn spawn_zebra(&self, sender_p2n: mpsc::Sender<ProtoToNexus>)
                    -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ProtoToZebra>) {
         // Clone global config.
-        let ref mut config = *self.config.borrow_mut();
+        let ref mut _config = *self.config.borrow_mut();
 
         // Create channel from RouterNexus to MasterInner
         let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
@@ -333,7 +333,7 @@ impl RouterNexus {
         match self.config.borrow().lookup(path) {
             Some(config_or_protocol) => {
                 match config_or_protocol {
-                    ConfigOrProtocol::Local(config) => {
+                    ConfigOrProtocol::Local(_config) => {
                             debug!("local config");
                     },
                     ConfigOrProtocol::Proto(p) => {
@@ -344,7 +344,11 @@ impl RouterNexus {
                                     None => None
                                 };
 
-                                tuple.sender.send(NexusToProto::SendConfig((method, path.to_string(), b)));
+                                // XXX
+                                match tuple.sender.send(NexusToProto::SendConfig((method, path.to_string(), b))) {
+                                    Ok(_) => {},
+                                    Err(_) => error!("sender error"),
+                                }
                             },
                             None => {
                                 panic!("Unexpected error");

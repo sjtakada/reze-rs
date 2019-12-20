@@ -5,7 +5,6 @@
 // Core - Config.
 //
 
-use std::io;
 use std::fmt;
 use std::str::FromStr;
 use std::rc::Rc;
@@ -13,7 +12,7 @@ use std::rc::Rc;
 use log::debug;
 use regex::Regex;
 
-use super::protocols::ProtocolType;
+//use super::protocols::ProtocolType;
 use super::error::*;
 
 pub enum Method {
@@ -67,7 +66,7 @@ pub trait Config {
     }
 
     /// Lookup child Config with given path.
-    fn lookup_child(&self, path: &str) -> Option<Rc<dyn Config>> {
+    fn lookup_child(&self, _path: &str) -> Option<Rc<dyn Config>> {
         debug!("Not implemented");
         None
     }
