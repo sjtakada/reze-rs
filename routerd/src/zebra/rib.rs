@@ -8,7 +8,9 @@
 use std::time;
 use std::fmt;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::rc::Weak;
+use std::str::FromStr;
 
 use log::debug;
 
@@ -17,6 +19,7 @@ use rtable::tree::*;
 
 use super::master::*;
 use super::nexthop::*;
+use super::static_route::*;
 
 /// RIB type.
 pub enum RibType {
@@ -49,7 +52,8 @@ pub struct Rib<T: AddressLen> {
     _instant: time::Instant,
 }
 
-impl<T: AddressLen> Rib<T> {
+impl<T: AddressLen + Clone + FromStr> Rib<T> {
+    /// Constructor.
     pub fn new(rib_type: RibType, distance: u8, tag: u32) -> Rib<T> {
         Rib {
             _rib_type: rib_type,
@@ -58,6 +62,24 @@ impl<T: AddressLen> Rib<T> {
             _distance: distance,
             _instant: time::Instant::now(),
         }
+    }
+
+    /// Construct RIB from static route config.
+    pub fn from_static_route(config: Arc<StaticRoute<T>>) -> Rib<T> {
+        let mut rib = Rib::<T>::new(RibType::Static, config.distance(), config.tag());
+        for nexthop in config.nexthops() {
+            match nexthop {
+                Nexthop::Address(_address) => {
+                    rib.add_nexthop(nexthop.clone());
+                },
+                Nexthop::Ifname(_ifname) => {
+                },
+                Nexthop::Network::<T>(_network) => {
+                },
+            }
+        }
+
+        rib
     }
 
     pub fn nexthops(&self) -> &Vec<Nexthop<T>> {
@@ -78,7 +100,8 @@ pub struct RibTable<T: AddressLen + Clone> {
     tree: Tree<Prefix<T>, Vec<Rib<T>>>,
 }
 
-impl<T: AddressLen + Clone + fmt::Debug> RibTable<T> {
+impl<T: AddressLen + Clone + FromStr + fmt::Debug> RibTable<T> {
+    /// Constructor.
     pub fn new() -> RibTable<T> {
         RibTable {
             master: Default::default(),

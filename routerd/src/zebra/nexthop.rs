@@ -10,6 +10,7 @@ use std::str::FromStr;
 use rtable::prefix::*;
 
 /// Nexthop.
+#[derive(Clone)]
 pub enum Nexthop<T: AddressLen> {
     /// IP Address.
     Address(T),

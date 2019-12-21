@@ -56,6 +56,9 @@
                 "nexthops" : [
                   {
                     "ipv4_address": ":IPV4-ADDRESS:4.0"
+                  },
+                  {
+                    "ipv4_address": ":IPV4-ADDRESS:4.0"
                   }
                 ]
               }

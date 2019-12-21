@@ -321,7 +321,7 @@ impl Netlink {
     }
 
     /// Install route to kernel.
-    pub fn install<T: AddressLen + Clone>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
+    pub fn install<T: AddressLen + Clone + FromStr>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
 
         match self.route_msg::<T>(libc::RTM_NEWROUTE as i32, prefix, rib) {
             Ok(_) => {},
@@ -330,7 +330,7 @@ impl Netlink {
     }
 
     /// Build route message.
-    fn route_msg<T: AddressLen + Clone>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError> {
+    fn route_msg<T: AddressLen + Clone + FromStr>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError> {
         debug!("Route message");
 
         #[repr(C)]
