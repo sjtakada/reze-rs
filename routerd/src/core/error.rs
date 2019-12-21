@@ -22,7 +22,7 @@ quick_error! {
             description("The command could not be found")
             display(r#"The command "{}" could not be found"#, s)
         }
-        CommandExecError(s: String) {
+        CommandExec(s: String) {
             description("Command execution error")
             display(r#"Command execution error {}"#, s)
         }

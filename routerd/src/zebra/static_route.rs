@@ -24,8 +24,14 @@ use crate::core::error::*;
 use super::master::ZebraMaster;
 use super::nexthop::*;
 
+/// Constants.
+const ZEBRA_ADMINISTRATIVE_DISTANCE_DEFAULT: u8 = 1;
+const ZEBRA_STATIC_ROUTE_TAG_DEFAULT: u32 = 0;
+
+
 /// IPv4 Static route configs.
 pub struct Ipv4StaticRoute {
+
     /// Zebra master.
     master: Rc<ZebraMaster>,
 
@@ -69,31 +75,28 @@ impl Config for Ipv4StaticRoute {
                     Some((addr_str, none_or_mask_str)) => {
                         // TODO: should handle error.
                         let json: serde_json::Value = serde_json::from_str(&json_str).unwrap();
-                        match none_or_mask_str {
-                            Some(mask_str) => {
-                                // Trim leading "/" from mask_str.
-                                if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
-                                    let config = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json));
-                                    let _config_old = self.add(prefix, config.clone());
-
-                                    self.master.rib_add_static_ipv4(config);
-//                                self.master.rib_add_static_ipv4(&addr_str, &mask_str[1..], &json);
-                                } else {
-                                    debug!("Invalid address or mask {} {}", addr_str, mask_str);
-                                }
-                            },
-                            None => {
-//                                self.master.rib_add_static_ipv4(&addr_str, "255.255.255.255", &json);
-                            }
+                        let mask_str = match none_or_mask_str {
+                            Some(mask_str) => mask_str,
+                            None => "/255.255.255.255".to_string(),
                         };
+
+                        // Trim leading "/" from mask_str.
+                        if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
+                            let config = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json));
+                            let _config_old = self.add(prefix, config.clone());
+
+                            self.master.rib_add_static_ipv4(config);
+                        } else {
+                            return Err(CoreError::CommandExec(format!("Invalid address or mask {} {}", addr_str, mask_str)))
+                        }
                     },
                     None => {
-                        debug!("Invalid path");
+                        return Err(CoreError::CommandExec(format!("Invalid path")));
                     }
                 }
             },
             None => {
-                debug!("No parameters")
+                return Err(CoreError::CommandExec(format!("No parameters")));
             },
         }
 
@@ -128,8 +131,8 @@ impl<T: Clone + AddressLen + FromStr> StaticRoute<T> {
     }
 
     pub fn from_json(prefix: &Prefix<T>, params: &serde_json::Value) -> StaticRoute<T> {
-        let mut distance = 1u8;
-        let mut tag = 0u32;
+        let mut distance = ZEBRA_ADMINISTRATIVE_DISTANCE_DEFAULT;
+        let mut tag = ZEBRA_STATIC_ROUTE_TAG_DEFAULT;
         let mut nexthops: Vec<Nexthop<T>> = Vec::new();
 
         if params.is_object() {
