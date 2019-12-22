@@ -50,7 +50,7 @@
         "actions": [
           {
             "http": {
-              "method": "POST",
+              "method": "PUT",
               "path": "route_ipv4/:IPV4-ADDRESS:3.1/:IPV4-ADDRESS:3.2",
               "params": {
                 "nexthops" : [

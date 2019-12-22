@@ -48,6 +48,14 @@ impl Ipv4StaticRoute {
         }
     }
 
+    /// Lookup a static route by prefix.
+    pub fn lookup(&self, p: &Prefix<Ipv4Addr>) -> Option<Arc<StaticRoute<Ipv4Addr>>> {
+        match self.config.borrow_mut().get(p) {
+            Some(sr) => Some(sr.clone()),
+            None => None,
+        }
+    }
+
     /// Add a static route config into the tree.
     pub fn add(&self, p: Prefix<Ipv4Addr>, s: Arc<StaticRoute<Ipv4Addr>>) -> Option<Arc<StaticRoute<Ipv4Addr>>> {
         self.config.borrow_mut().insert(p, s)
@@ -65,11 +73,11 @@ impl Config for Ipv4StaticRoute {
         "route_ipv4"
     }
 
-    /// Handle POST method.
-    fn post(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+    /// Handle PUT method.
+    fn put(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
         match params {
             Some(json_str) => {
-                debug!("Configuring IPv4 static routes");
+                debug!("Configuring an IPv4 static route");
 
                 match split_id_and_path(path) {
                     Some((addr_str, none_or_mask_str)) => {
@@ -82,10 +90,17 @@ impl Config for Ipv4StaticRoute {
 
                         // Trim leading "/" from mask_str.
                         if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
-                            let config = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json));
-                            let _config_old = self.add(prefix, config.clone());
+                            match self.lookup(&prefix) {
+                                Some(sr) => {
 
-                            self.master.rib_add_static_ipv4(config);
+                                },
+                                None => {
+                                    let sr = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json));
+                                    let _config_old = self.add(prefix, sr.clone());
+
+                                    self.master.rib_add_static_ipv4(sr);
+                                }
+                            }
                         } else {
                             return Err(CoreError::CommandExec(format!("Invalid address or mask {} {}", addr_str, mask_str)))
                         }
