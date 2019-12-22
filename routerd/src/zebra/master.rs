@@ -9,6 +9,7 @@ use log::{debug, error};
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::str::FromStr;
+use std::hash::Hash;
 
 use std::collections::HashMap;
 use std::thread;
@@ -139,17 +140,17 @@ impl ZebraMaster {
         }
     }
 
-    pub fn rib_add_static_ipv4(&self, config: Arc<StaticRoute<Ipv4Addr>>) {
-        debug!("RIB add static IPv4 {:?}", config.prefix());
+    pub fn rib_add_static_ipv4(&self, sr: Arc<StaticRoute<Ipv4Addr>>) {
+        debug!("RIB add static IPv4 {:?}", sr.prefix());
 
-        let prefix = config.prefix().clone();
-        let mut rib = Rib::<Ipv4Addr>::from_static_route(config);
+        let prefix = sr.prefix().clone();
+        let mut rib = Rib::<Ipv4Addr>::from_static_route(sr);
 
         // TBD: handle return value
         self.rib_ipv4.borrow_mut().add(rib, &prefix);
     }
 
-    pub fn rib_install_kernel<T: AddressLen + Clone + FromStr>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
+    pub fn rib_install_kernel<T: AddressLen + Clone + FromStr + Hash + Eq>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
         self.kernel.borrow_mut().install(prefix, rib);
     }
 

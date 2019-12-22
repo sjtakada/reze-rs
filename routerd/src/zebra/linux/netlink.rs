@@ -17,6 +17,7 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::net::{Ipv4Addr, Ipv6Addr};
+use std::hash::Hash;
 use libc::{self, c_int/*, c_void, c_uchar*/};
 use log::debug;
 use log::info;
@@ -321,7 +322,7 @@ impl Netlink {
     }
 
     /// Install route to kernel.
-    pub fn install<T: AddressLen + Clone + FromStr>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
+    pub fn install<T: AddressLen + Clone + FromStr + Eq + Hash>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
 
         match self.route_msg::<T>(libc::RTM_NEWROUTE as i32, prefix, rib) {
             Ok(_) => {},
@@ -330,7 +331,7 @@ impl Netlink {
     }
 
     /// Build route message.
-    fn route_msg<T: AddressLen + Clone + FromStr>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError> {
+    fn route_msg<T: AddressLen + Clone + FromStr + Eq + Hash>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError> {
         debug!("Route message");
 
         #[repr(C)]

@@ -55,7 +55,11 @@
               "params": {
                 "nexthops" : [
                   {
-                    "ipv4_address": ":IPV4-ADDRESS:4.0"
+                    "nexthop": {
+                      "ipv4_address": ":IPV4-ADDRESS:4.0"
+                    },
+                    "tag": 0,
+                    "distance": 1
                   },
                   {
                     "ipv4_address": ":IPV4-ADDRESS:4.0"

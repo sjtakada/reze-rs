@@ -10,9 +10,11 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::net::Ipv4Addr;
 //use std::net::Ipv6Addr;
 use std::str::FromStr;
+use std::hash::Hash;
 
 use serde_json;
 use log::{debug, error};
@@ -122,81 +124,104 @@ impl Config for Ipv4StaticRoute {
 
 /// Static route.
 pub struct StaticRoute<T: AddressLen> {
+
     /// Prefix.
     prefix: Prefix<T>,
 
-    /// Administrative distance.
-    distance: u8,
-
-    /// Route tag.
-    tag: u32,
-
     /// Nexthop(s).
-    nexthops: Vec<Nexthop<T>>,
+    nexthops: HashMap<Nexthop<T>, StaticRouteInfo>,
 }
 
-impl<T: Clone + AddressLen + FromStr> StaticRoute<T> {
-    pub fn new(prefix: Prefix<T>, distance: u8, tag: u32) -> StaticRoute<T> {
-        StaticRoute {
-            prefix,
-            distance,
-            tag,
-            nexthops: Vec::new(),
-        }
-    }
+impl<T: Clone + AddressLen + Eq + Hash + FromStr> StaticRoute<T> {
 
+    /// Construct static route from JSON.
     pub fn from_json(prefix: &Prefix<T>, params: &serde_json::Value) -> StaticRoute<T> {
-        let mut distance = ZEBRA_ADMINISTRATIVE_DISTANCE_DEFAULT;
-        let mut tag = ZEBRA_STATIC_ROUTE_TAG_DEFAULT;
-        let mut nexthops: Vec<Nexthop<T>> = Vec::new();
+        let mut nexthops: HashMap<Nexthop<T>, StaticRouteInfo> = HashMap::new();
 
         if params.is_object() {
             for key in params.as_object().unwrap().keys() {
                 match key.as_ref() {
-                    "distance" => {
-                        if params[key].is_number() {
-                            distance = params[key].as_u64().unwrap() as u8;
-                        }
-                    },
-                    "tag" => {
-                        if params[key].is_number() {
-                            tag = params[key].as_u64().unwrap() as u32;
-                        }
-                    },
                     "nexthops" => {
-                        if params[key].is_array() {
-                            for nexthop in params[key].as_array().unwrap() {
-                                for t in nexthop.as_object().unwrap().keys() {
-                                    match t.as_ref() {
-                                        "ipv4_address" => {
-                                            match Nexthop::<T>::from_address_str(nexthop[t].as_str().unwrap()) {
-                                                Some(address) => nexthops.push(address),
-                                                None => {}
+                        if params["nexthops"].is_array() {
+                            for param in params[key].as_array().unwrap() {
+                                if param.is_object() {
+                                    let mut nexthop = None;
+                                    let mut distance = ZEBRA_ADMINISTRATIVE_DISTANCE_DEFAULT;
+                                    let mut tag = ZEBRA_STATIC_ROUTE_TAG_DEFAULT;
+
+                                    if let Some(nh) = param.get("nexthop") {
+                                        if nh.is_object() {
+                                            if let Some(v) = nh.get("ipv4_address") {
+                                                if let Some(address) = Nexthop::<T>::from_address_str(v.as_str().unwrap()) {
+                                                    nexthop = Some(address.clone());
+                                                }
                                             }
-                                        },
-                                        "interface" => {
-                                        },
-                                        "ipv4_network" => {
-                                        },
-                                        _ => {
-                                            error!("Unknown nexthop type {}", t)
+
+                                            if let Some(v) = nh.get("interface") {
+                                                // TBD
+                                            }
                                         }
+                                    }
+
+                                    if let Some(v) = param["distance"].as_u64() {
+                                        distance = v as u8;
+                                    }
+
+                                    if let Some(v) = param["tag"].as_u64() {
+                                        tag = v as u32;
+                                    }
+
+                                    if let Some(nexthop) = nexthop {
+                                        nexthops.insert(nexthop, StaticRouteInfo { distance, tag});
                                     }
                                 }
                             }
                         }
                     },
                     _ => {
+
+                    },
+/*
+
+                                for t in param.as_object().unwrap().keys() {
+                                    match t.as_ref() {
+                                        "ipv4_address" => {
+                                            match Nexthop::<T>::from_address_str(param[t].as_str().unwrap()) {
+                                                Some(address) => nexthop = address.clone(),
+                                                None => {}
+                                            }
+                                        },
+                                        "distance" => {
+                                            if param[t].is_number() {
+                                                distance = param[t].as_u64().unwrap() as u8;
+                                            }
+                                        },
+                                        "tag" => {
+                                            if param[t].is_number() {
+                                                tag = param[t].as_u64().unwrap() as u32;
+                                            }
+                                        },
+                                        _ => {
+                                            error!("Unknown nexthop parameter {}", t)
+                                        },
+
+                                    }
+                                }
+
+                                nexthops.insert(nexthop, StaticRouteInfo { distance, tag });
+                            }
+                        }
+                    },
+                    _ => {
                         error!("Unknown static route param {}", key);
                     }
+*/
                 }
             }
         }
 
         StaticRoute {
             prefix: prefix.clone(),
-            distance: distance,
-            tag: tag,
             nexthops: nexthops,
         }
     }
@@ -205,23 +230,23 @@ impl<T: Clone + AddressLen + FromStr> StaticRoute<T> {
         &self.prefix
     }
 
-    pub fn distance(&self) -> u8 {
-        self.distance
-    }
+//    pub fn distance(&self) -> u8 {
+//        self.distance
+//    }
 
-    pub fn tag(&self) -> u32 {
-        self.tag
-    }
+//    pub fn tag(&self) -> u32 {
+//        self.tag
+//    }
 
-    pub fn nexthops(&self) -> &Vec<Nexthop<T>> {
+    pub fn nexthops(&self) -> &HashMap<Nexthop<T>, StaticRouteInfo> {
         &self.nexthops
     }
 
-    pub fn add_nexthop_address(&mut self, address: &T) {
-        let nexthop = Nexthop::from_address(address);
-
-        self.nexthops.push(nexthop);
-    }
+//    pub fn add_nexthop_address(&mut self, address: &T) {
+//        let nexthop = Nexthop::from_address(address);
+//
+//        self.nexthops.push(nexthop);
+//    }
 }
 
 impl<T: AddressLen + PartialEq> PartialEq for StaticRoute<T> {
@@ -245,6 +270,14 @@ impl<T: AddressLen + Ord> Ord for StaticRoute<T> {
     }
 }
 
+/// Static route info.
+pub struct StaticRouteInfo {
+    /// Administrative distance.
+    distance: u8,
+
+    /// Route tag,
+    tag: u32,
+}
 
 ///
 /// Unit tests for StaticRoute.

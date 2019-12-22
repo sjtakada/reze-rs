@@ -11,6 +11,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::rc::Weak;
 use std::str::FromStr;
+use std::hash::Hash;
 
 use log::debug;
 
@@ -52,7 +53,7 @@ pub struct Rib<T: AddressLen> {
     _instant: time::Instant,
 }
 
-impl<T: AddressLen + Clone + FromStr> Rib<T> {
+impl<T: AddressLen + Clone + FromStr + Eq + Hash> Rib<T> {
     /// Constructor.
     pub fn new(rib_type: RibType, distance: u8, tag: u32) -> Rib<T> {
         Rib {
@@ -65,9 +66,9 @@ impl<T: AddressLen + Clone + FromStr> Rib<T> {
     }
 
     /// Construct RIB from static route config.
-    pub fn from_static_route(config: Arc<StaticRoute<T>>) -> Rib<T> {
-        let mut rib = Rib::<T>::new(RibType::Static, config.distance(), config.tag());
-        for nexthop in config.nexthops() {
+    pub fn from_static_route(sr: Arc<StaticRoute<T>>) -> Rib<T> {
+        let mut rib = Rib::<T>::new(RibType::Static, 0, 0);
+        for (nexthop, info) in sr.nexthops() {
             match nexthop {
                 Nexthop::Address(_address) => {
                     rib.add_nexthop(nexthop.clone());
@@ -100,7 +101,7 @@ pub struct RibTable<T: AddressLen + Clone> {
     tree: Tree<Prefix<T>, Vec<Rib<T>>>,
 }
 
-impl<T: AddressLen + Clone + FromStr + fmt::Debug> RibTable<T> {
+impl<T: AddressLen + Clone + FromStr + Hash + Eq + fmt::Debug> RibTable<T> {
     /// Constructor.
     pub fn new() -> RibTable<T> {
         RibTable {
