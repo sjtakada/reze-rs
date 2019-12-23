@@ -144,7 +144,7 @@ impl ZebraMaster {
         debug!("RIB add static IPv4 {:?}", sr.prefix());
 
         let prefix = sr.prefix().clone();
-        let mut rib = Rib::<Ipv4Addr>::from_static_route(sr);
+        let rib = Rib::<Ipv4Addr>::from_static_route(sr);
 
         // TBD: handle return value
         self.rib_ipv4.borrow_mut().add(rib, &prefix);
@@ -217,7 +217,7 @@ impl ZebraMaster {
 
                         match self.config.borrow_mut().apply(method, &path, body) {
                             Ok(_) => { }
-                            Err(_) => error!("config apply error"),
+                            Err(err) => error!("{}", err.to_string()),
                         }
                     },
                     NexusToProto::ProtoTermination => {

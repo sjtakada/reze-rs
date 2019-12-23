@@ -93,13 +93,12 @@ impl Config for Ipv4StaticRoute {
                         // Trim leading "/" from mask_str.
                         if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
                             match self.lookup(&prefix) {
-                                Some(sr) => {
+                                Some(_sr) => {
 
                                 },
                                 None => {
-                                    let sr = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json));
+                                    let sr = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
                                     let _config_old = self.add(prefix, sr.clone());
-
                                     self.master.rib_add_static_ipv4(sr);
                                 }
                             }
@@ -135,95 +134,64 @@ pub struct StaticRoute<T: AddressLen> {
 impl<T: Clone + AddressLen + Eq + Hash + FromStr> StaticRoute<T> {
 
     /// Construct static route from JSON.
-    pub fn from_json(prefix: &Prefix<T>, params: &serde_json::Value) -> StaticRoute<T> {
+    pub fn from_json(prefix: &Prefix<T>, params: &serde_json::Value) -> Result<StaticRoute<T>, CoreError> {
         let mut nexthops: HashMap<Nexthop<T>, StaticRouteInfo> = HashMap::new();
 
-        if params.is_object() {
-            for key in params.as_object().unwrap().keys() {
-                match key.as_ref() {
-                    "nexthops" => {
-                        if params["nexthops"].is_array() {
-                            for param in params[key].as_array().unwrap() {
-                                if param.is_object() {
-                                    let mut nexthop = None;
-                                    let mut distance = ZEBRA_ADMINISTRATIVE_DISTANCE_DEFAULT;
-                                    let mut tag = ZEBRA_STATIC_ROUTE_TAG_DEFAULT;
+        if !params.is_object() {
+            return Err(CoreError::CommandExec("JSON params is not object".to_string()))
+        }
 
-                                    if let Some(nh) = param.get("nexthop") {
-                                        if nh.is_object() {
-                                            if let Some(v) = nh.get("ipv4_address") {
-                                                if let Some(address) = Nexthop::<T>::from_address_str(v.as_str().unwrap()) {
-                                                    nexthop = Some(address.clone());
-                                                }
-                                            }
+        let params = params.as_object().unwrap();
+        if let Some(v_nexthops) = params.get("nexthops") {
+            if !v_nexthops.is_array() {
+                return Err(CoreError::CommandExec("No nexthop array in params".to_string()))
+            }
 
-                                            if let Some(v) = nh.get("interface") {
-                                                // TBD
-                                            }
-                                        }
-                                    }
+            for v_nh in v_nexthops.as_array().unwrap() {
+                if !v_nh.is_object() {
+                    error!("Nexthop is not object");
+                    continue;
+                }
 
-                                    if let Some(v) = param["distance"].as_u64() {
-                                        distance = v as u8;
-                                    }
+                let mut nexthop = None;
+                let mut distance = ZEBRA_ADMINISTRATIVE_DISTANCE_DEFAULT;
+                let mut tag = ZEBRA_STATIC_ROUTE_TAG_DEFAULT;
 
-                                    if let Some(v) = param["tag"].as_u64() {
-                                        tag = v as u32;
-                                    }
-
-                                    if let Some(nexthop) = nexthop {
-                                        nexthops.insert(nexthop, StaticRouteInfo { distance, tag});
-                                    }
-                                }
+                if let Some(nh) = v_nh.get("nexthop") {
+                    if nh.is_object() {
+                        if let Some(v) = nh.get("ipv4_address") {
+                            if let Some(address) = Nexthop::<T>::from_address_str(v.as_str().unwrap()) {
+                                nexthop = Some(address.clone());
                             }
                         }
-                    },
-                    _ => {
 
-                    },
-/*
-
-                                for t in param.as_object().unwrap().keys() {
-                                    match t.as_ref() {
-                                        "ipv4_address" => {
-                                            match Nexthop::<T>::from_address_str(param[t].as_str().unwrap()) {
-                                                Some(address) => nexthop = address.clone(),
-                                                None => {}
-                                            }
-                                        },
-                                        "distance" => {
-                                            if param[t].is_number() {
-                                                distance = param[t].as_u64().unwrap() as u8;
-                                            }
-                                        },
-                                        "tag" => {
-                                            if param[t].is_number() {
-                                                tag = param[t].as_u64().unwrap() as u32;
-                                            }
-                                        },
-                                        _ => {
-                                            error!("Unknown nexthop parameter {}", t)
-                                        },
-
-                                    }
-                                }
-
-                                nexthops.insert(nexthop, StaticRouteInfo { distance, tag });
-                            }
+                        if let Some(_v) = nh.get("interface") {
+                            // TBD
                         }
-                    },
-                    _ => {
-                        error!("Unknown static route param {}", key);
                     }
-*/
+                }
+
+                if let Some(v) = v_nh["distance"].as_u64() {
+                    distance = v as u8;
+                }
+
+                if let Some(v) = v_nh["tag"].as_u64() {
+                    tag = v as u32;
+                }
+
+                if let Some(nexthop) = nexthop {
+                    nexthops.insert(nexthop, StaticRouteInfo { distance, tag});
                 }
             }
+        } else {
+            return Err(CoreError::CommandExec("No nexthop in params".to_string()))
         }
 
-        StaticRoute {
-            prefix: prefix.clone(),
-            nexthops: nexthops,
+        if nexthops.len() == 0 {
+            return Err(CoreError::CommandExec("No valid nexthops".to_string()))
         }
+
+        Ok(StaticRoute { prefix: prefix.clone(), nexthops: nexthops })
     }
 
     pub fn prefix(&self) -> &Prefix<T> {
