@@ -131,7 +131,9 @@ pub struct StaticRoute<T: AddressLen> {
     nexthops: HashMap<Nexthop<T>, StaticRouteInfo>,
 }
 
-impl<T: Clone + AddressLen + Eq + Hash + FromStr> StaticRoute<T> {
+impl<T> StaticRoute<T>
+where T: Clone + AddressLen + Eq + Hash + FromStr
+{
 
     /// Construct static route from JSON.
     pub fn from_json(prefix: &Prefix<T>, params: &serde_json::Value) -> Result<StaticRoute<T>, CoreError> {
@@ -217,22 +219,31 @@ impl<T: Clone + AddressLen + Eq + Hash + FromStr> StaticRoute<T> {
 //    }
 }
 
-impl<T: AddressLen + PartialEq> PartialEq for StaticRoute<T> {
+impl<T> PartialEq for StaticRoute<T>
+where T: AddressLen + PartialEq
+{
     fn eq(&self, other: &Self) -> bool {
         self.prefix == other.prefix
     }
 }
 
-impl<T: AddressLen + Eq> Eq for StaticRoute<T> {}
+impl<T> Eq for StaticRoute<T>
+where T: AddressLen + Eq
+{
+}
 
 
-impl<T: AddressLen + PartialOrd> PartialOrd for StaticRoute<T> {
+impl<T> PartialOrd for StaticRoute<T>
+where T: AddressLen + PartialOrd
+{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.prefix.partial_cmp(&other.prefix)
     }
 }
 
-impl<T: AddressLen + Ord> Ord for StaticRoute<T> {
+impl<T> Ord for StaticRoute<T>
+where T: AddressLen + Ord
+{
     fn cmp(&self, other: &Self) -> Ordering {
         self.prefix.cmp(&other.prefix)
     }
