@@ -6,7 +6,6 @@
 //
 
 use std::io;
-//use std::io::{Error, ErrorKind};
 use std::str;
 use std::str::FromStr;
 use std::mem::{size_of, zeroed};
@@ -61,7 +60,7 @@ fn nlmsg_dump(h: &Nlmsghdr) {
     }
 }
 
-fn nlmsg_align(len: usize) -> usize {
+pub fn nlmsg_align(len: usize) -> usize {
     (len + NLMSG_ALIGNTO - 1) & !(NLMSG_ALIGNTO - 1)
 }
 
@@ -93,54 +92,6 @@ fn nlmsg_attr_ok(buf: &[u8]) -> bool {
         }
     } else {
         false
-    }
-}
-
-fn addattr_ptr(ptr: *const libc::c_void, offset: usize, maxlen: usize,
-               rta_type: libc::c_int, rta_len: usize, src_ptr: *const libc::c_void, alen: usize) {
-    unsafe {
-        let rta = ptr.offset(offset as isize) as *mut Rtattr;
-        let rta_ptr = rta as *const _ as *mut libc::c_void;
-        let dst_ptr = rta_ptr.offset(size_of::<Rtattr>() as isize);
-
-        (*rta).rta_len = rta_len as u16;
-        (*rta).rta_type = rta_type as u16;
-        
-        copy(src_ptr, dst_ptr, alen);
-    }
-}
-
-fn addattr_l(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
-    let rta_len = rta_length(alen);
-    let offset = nlmsg_align(h.nlmsg_len as usize);
-
-    if offset + rta_len > maxlen {
-        false
-    } else {
-        let ptr = h as *const _ as *const libc::c_void;
-        let src_ptr = src as *const _ as *const libc::c_void;
-
-        addattr_ptr(ptr, offset, maxlen, rta_type, rta_len, src_ptr, alen);
-        h.nlmsg_len = (offset + rta_len) as u32;
-
-        true
-    }
-}
-
-fn addattr32(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: u32) -> bool {
-    let rta_len = rta_length(size_of::<u32>());
-    let offset = nlmsg_align(h.nlmsg_len as usize);
-
-    if offset + rta_len > maxlen {
-        false
-    } else {
-        let ptr = h as *const _ as *const libc::c_void;
-        let src_ptr = &src as *const _ as *mut libc::c_void;
-
-        addattr_ptr(ptr, offset, maxlen, rta_type, rta_len, src_ptr, size_of::<u32>());
-        h.nlmsg_len = (offset + rta_len) as u32;
-
-        true
     }
 }
 
@@ -179,8 +130,8 @@ fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
 }
 
 /// Typedefs.
-type Nlmsghdr = libc::nlmsghdr;
-type AttrMap<'a> = HashMap<c_int, &'a [u8]>;
+pub type Nlmsghdr = libc::nlmsghdr;
+pub type AttrMap<'a> = HashMap<c_int, &'a [u8]>;
 
 /// struct rtmsg from rtnetlink.h.
 #[repr(C)]
