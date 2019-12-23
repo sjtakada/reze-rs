@@ -96,53 +96,49 @@ fn nlmsg_attr_ok(buf: &[u8]) -> bool {
     }
 }
 
-fn addattr_l(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
-    let len = rta_length(alen);
-    let ptr = h as *const _ as *const libc::c_void;
+fn addattr_ptr(ptr: *const libc::c_void, offset: usize, maxlen: usize,
+               rta_type: libc::c_int, rta_len: usize, src_ptr: *const libc::c_void, alen: usize) {
+    unsafe {
+        let rta = ptr.offset(offset as isize) as *mut Rtattr;
+        let rta_ptr = rta as *const _ as *mut libc::c_void;
+        let dst_ptr = rta_ptr.offset(size_of::<Rtattr>() as isize);
 
-    if nlmsg_align(h.nlmsg_len as usize) + len > maxlen {
+        (*rta).rta_len = rta_len as u16;
+        (*rta).rta_type = rta_type as u16;
+        
+        copy(src_ptr, dst_ptr, alen);
+    }
+}
+
+fn addattr_l(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
+    let rta_len = rta_length(alen);
+    let offset = nlmsg_align(h.nlmsg_len as usize);
+
+    if offset + rta_len > maxlen {
         false
     } else {
-        unsafe {
-            let src_ptr = src as *const _ as *mut libc::c_void;
+        let ptr = h as *const _ as *const libc::c_void;
+        let src_ptr = src as *const _ as *const libc::c_void;
 
-            let rta = ptr.offset(nlmsg_align(h.nlmsg_len as usize) as isize) as *mut Rtattr;
-            let rta_ptr = rta as *const _ as *mut libc::c_void;
-            let dst_ptr = rta_ptr.offset(size_of::<Rtattr>() as isize);
-
-            (*rta).rta_len = len as u16;
-            (*rta).rta_type = rta_type as u16;
-            
-            copy(src_ptr, dst_ptr, alen);
-
-            h.nlmsg_len = (nlmsg_align(h.nlmsg_len as usize) + len) as u32;
-        }
+        addattr_ptr(ptr, offset, maxlen, rta_type, rta_len, src_ptr, alen);
+        h.nlmsg_len = (offset + rta_len) as u32;
 
         true
     }
 }
 
 fn addattr32(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: u32) -> bool {
-    let len = rta_length(size_of::<u32>());
-    let ptr = h as *const _ as *const libc::c_void;
+    let rta_len = rta_length(size_of::<u32>());
+    let offset = nlmsg_align(h.nlmsg_len as usize);
 
-    if nlmsg_align(h.nlmsg_len as usize) + len > maxlen {
+    if offset + rta_len > maxlen {
         false
     } else {
-        unsafe {
-            let src_ptr = &src as *const _ as *mut libc::c_void;
+        let ptr = h as *const _ as *const libc::c_void;
+        let src_ptr = &src as *const _ as *mut libc::c_void;
 
-            let rta = ptr.offset(nlmsg_align(h.nlmsg_len as usize) as isize) as *mut Rtattr;
-            let rta_ptr = rta as *const _ as *mut libc::c_void;
-            let dst_ptr = rta_ptr.offset(size_of::<Rtattr>() as isize);
-
-            (*rta).rta_len = len as u16;
-            (*rta).rta_type = rta_type as u16;
-            
-            copy(src_ptr, dst_ptr, size_of::<u32>());
-
-            h.nlmsg_len = (nlmsg_align(h.nlmsg_len as usize) + len) as u32;
-        }
+        addattr_ptr(ptr, offset, maxlen, rta_type, rta_len, src_ptr, size_of::<u32>());
+        h.nlmsg_len = (offset + rta_len) as u32;
 
         true
     }
@@ -267,6 +263,13 @@ pub struct Netlink {
     callbacks: KernelCallbacks,
 }
 
+#[repr(C)]
+struct Request {
+    nlmsghdr: Nlmsghdr,
+    rtmsg: Rtmsg,
+    buf: [u8; 4096],	// XXX
+}
+
 impl Netlink {
     /// Constructor - open Netlink socket and bind.
     pub fn new(callbacks: KernelCallbacks) -> Result<Netlink, io::Error> {
@@ -322,7 +325,9 @@ impl Netlink {
     }
 
     /// Install route to kernel.
-    pub fn install<T: AddressLen + Clone + FromStr + Eq + Hash>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
+    pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: AddressLen + Clone + FromStr + Eq + Hash
+    {
 
         match self.route_msg::<T>(libc::RTM_NEWROUTE as i32, prefix, rib) {
             Ok(_) => {},
@@ -330,16 +335,61 @@ impl Netlink {
         }
     }
 
-    /// Build route message.
-    fn route_msg<T: AddressLen + Clone + FromStr + Eq + Hash>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError> {
-        debug!("Route message");
+    /// Build singlpath nexthop attrbute.
+    fn route_single_path<T>(&self, req: &mut Request, bytelen: usize, nexthops: &Vec<Nexthop<T>>) -> usize
+    where T: AddressLen
+    {
+        let mut num = 0;
 
-        #[repr(C)]
-        struct Request {
-            nlmsghdr: Nlmsghdr,
-            rtmsg: Rtmsg,
-            buf: [u8; 4096],	// XXX
+        for nexthop in nexthops {
+            match nexthop  {
+                Nexthop::Address::<T>(address) => {
+                    let octets: &[u8] = address.octets_ref();
+
+                    addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
+                              libc::RTA_GATEWAY as i32, &octets[..], bytelen);
+                },
+                Nexthop::Ifname(_ifname) => { },
+                Nexthop::Network::<T>(_prefix) => { },
+            }
+
+            num += 1;
+            break;
         }
+
+        num
+    }
+
+    /// Build multipath nexthop attrbute.
+    fn route_multi_path<T>(&self, req: &mut Request, bytelen: usize, nexthops: &Vec<Nexthop<T>>) -> usize
+    where T: AddressLen
+    {
+        let mut num = 0;
+
+        for nexthop in nexthops {
+            match nexthop  {
+                Nexthop::Address::<T>(address) => {
+                    let octets: &[u8] = address.octets_ref();
+
+                    addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
+                              libc::RTA_GATEWAY as i32, &octets[..], bytelen);
+                },
+                Nexthop::Ifname(_ifname) => { },
+                Nexthop::Network::<T>(_prefix) => { },
+            }
+
+            num += 1;
+            break;
+        }
+
+        num
+    }
+
+    /// Build route message.
+    fn route_msg<T>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError>
+    where T: AddressLen + Clone + FromStr + Eq + Hash
+    {
+        debug!("Route message");
 
         let bytelen = prefix.bytelen() as usize;
 
@@ -368,20 +418,14 @@ impl Netlink {
         // Metric.
         addattr32(&mut req.nlmsghdr, size_of::<Request>(), libc::RTA_PRIORITY as i32, 20); // XXX
 
-        // Nexthops. TBD should handle multiple nexthops.
-        for nexthop in rib.nexthops() {
-            req.rtmsg.rtm_scope = libc::RT_SCOPE_UNIVERSE as u8; // XXX
-            match nexthop  {
-                Nexthop::Address::<T>(address) => {
-                    let octets: &[u8] = address.octets_ref();
+        req.rtmsg.rtm_scope = libc::RT_SCOPE_UNIVERSE as u8; // XXX
 
-                    addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
-                              libc::RTA_GATEWAY as i32, &octets[..], bytelen);
-                },
-                Nexthop::Ifname(_ifname) => { },
-                Nexthop::Network::<T>(_prefix) => { },
-            }
-            break;
+        // Singlepath.
+        if rib.nexthops().len() == 1 {
+            self.route_single_path(&mut req, bytelen, rib.nexthops());
+        // Multipath.
+        } else if rib.nexthops().len() > 1 {
+            self.route_multi_path(&mut req, bytelen, rib.nexthops());
         }
 
         // Send command message through Netlink socket.

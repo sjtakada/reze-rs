@@ -53,7 +53,9 @@ pub struct Rib<T: AddressLen> {
     _instant: time::Instant,
 }
 
-impl<T: AddressLen + Clone + FromStr + Eq + Hash> Rib<T> {
+impl<T> Rib<T>
+where T: AddressLen + Clone + FromStr + Eq + Hash
+{
     /// Constructor.
     pub fn new(rib_type: RibType, distance: u8, tag: u32) -> Rib<T> {
         Rib {
@@ -101,7 +103,9 @@ pub struct RibTable<T: AddressLen + Clone> {
     tree: Tree<Prefix<T>, Vec<Rib<T>>>,
 }
 
-impl<T: AddressLen + Clone + FromStr + Hash + Eq + fmt::Debug> RibTable<T> {
+impl<T> RibTable<T>
+where T: AddressLen + Clone + FromStr + Hash + Eq + fmt::Debug
+{
     /// Constructor.
     pub fn new() -> RibTable<T> {
         RibTable {
