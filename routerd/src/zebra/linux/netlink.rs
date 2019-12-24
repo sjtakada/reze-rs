@@ -9,7 +9,7 @@ use std::io;
 use std::str;
 use std::str::FromStr;
 use std::mem::{size_of, zeroed};
-use std::ptr::copy;
+//use std::ptr::copy;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::cell::Cell;
@@ -315,47 +315,34 @@ impl Netlink {
     fn route_multi_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> usize
     where T: Addressable
     {
-        let buf: [u8; 4096] = [0; 4096];
-        let mut rta = &buf as *const _ as *mut Rtattr;
-        let mut ptr = rta as *const _ as *mut libc::c_void;
+        #[repr(C)]
+        struct RtattrBuf {
+            rta: Rtattr,
+            buf: [u8; 4096],
+        }
 
+        let mut rtab = unsafe { zeroed::<RtattrBuf>() };
         let mut num = 0;
-        unsafe {
-            let mut rtnh = ptr.offset(rta_data() as isize) as *mut Rtnexthop;
+        rtab.rta.rta_len = rta_length(0) as u16;
 
-            (*rta).rta_type = libc::RTA_MULTIPATH;
-            (*rta).rta_len = rta_length(0) as u16;
+        for nexthop in nexthops {
+            match nexthop  {
+                Nexthop::Address::<T>(address) => {
+                    let octets: &[u8] = address.octets_ref();
 
-            for nexthop in nexthops {
-                (*rtnh).rtnh_len = size_of::<Rtnexthop>() as u16;
-                (*rtnh).rtnh_flags = 0;
-                (*rtnh).rtnh_hops = 0;
+                    rta_addrtnh(&mut rtab.rta, rtab.buf.len(), libc::RTA_GATEWAY as i32,
+                                &octets[..], T::byte_len() as usize);
 
-                (*rta).rta_len += (*rtnh).rtnh_len;
-
-                match nexthop  {
-                    Nexthop::Address::<T>(address) => {
-                        let octets: &[u8] = address.octets_ref();
-
-                        rta_addattr_l(rta, buf.len(),
-                                      libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
-
-                        (*rtnh).rtnh_len += 8;
-                    },
-                    Nexthop::Ifname(_ifname) => { },
-                    Nexthop::Network::<T>(_prefix) => { },
-                }
-
-                rtnh = ptr.offset((rta_data() + (*rtnh).rtnh_len as usize) as isize) as *mut Rtnexthop;
-                num += 1;
+                },
+                Nexthop::Ifname(_ifname) => { },
+                Nexthop::Network::<T>(_prefix) => { },
             }
+
+            num += 1;
         }
 
-        unsafe {
-            addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
-                      libc::RTA_MULTIPATH as i32, &buf[4..], ((*rta).rta_len - 4) as usize);
-        }
-
+        addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
+                  libc::RTA_MULTIPATH as i32, &rtab.buf[..], (rtab.rta.rta_len - 4) as usize);
         num
     }
 
@@ -398,6 +385,9 @@ impl Netlink {
         // Multipath.
         } else if rib.nexthops().len() > 1 {
             self.route_multi_path(&mut req, rib.nexthops());
+        // TBD
+        } else {
+
         }
 
         // Send command message through Netlink socket.

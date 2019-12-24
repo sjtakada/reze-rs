@@ -79,24 +79,24 @@ pub fn addattr_l(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: &[
     }
 }
 
-pub fn rta_addattr_l(rta: *mut Rtattr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
+/*
+pub fn rta_addattr_l(rta: &mut Rtattr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
     let rta_len = rta_length(alen);
-    unsafe {
-        let offset = rta_align((*rta).rta_len as usize);
+    let offset = rta_align(rta.rta_len as usize);
 
-        if offset + rta_len > maxlen {
-            false
-        } else {
-            let ptr = rta as *const _ as *const libc::c_void;
-            let src_ptr = src as *const _ as *const libc::c_void;
+    if offset + rta_len > maxlen {
+        false
+    } else {
+        let ptr = rta as *const _ as *const libc::c_void;
+        let src_ptr = src as *const _ as *const libc::c_void;
 
-            addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, alen);
-            (*rta).rta_len = (offset + rta_len) as u16;
+        addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, alen);
+        rta.rta_len = (offset + rta_len) as u16;
 
-            true
-        }
+        true
     }
 }
+*/
 
 pub fn addattr32(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: u32) -> bool {
     let rta_len = rta_length(size_of::<u32>());
@@ -110,6 +110,36 @@ pub fn addattr32(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: u3
 
         addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, size_of::<u32>());
         h.nlmsg_len = (offset + rta_len) as u32;
+
+        true
+    }
+}
+
+pub fn rta_addrtnh(rta: &mut Rtattr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
+    let rta_len = rta_length(alen);
+    let rtnh_len = size_of::<Rtnexthop>();
+    let mut offset = rta_align(rta.rta_len as usize);
+
+    if offset + rta_len + rtnh_len > maxlen {
+        false
+    } else {
+        let ptr = rta as *const _ as *const libc::c_void;
+        let src_ptr = src as *const _ as *const libc::c_void;
+
+        offset += rtnh_len;
+
+        unsafe {
+            let mut rtnh = ptr.offset(rta.rta_len as isize) as *mut Rtnexthop;
+
+            rta.rta_len += rtnh_len as u16;
+
+            addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, alen);
+            rta.rta_len = (offset + rta_len) as u16;
+
+            (*rtnh).rtnh_len = (rtnh_len + alen + size_of::<Rtattr>()) as u16;
+            (*rtnh).rtnh_flags = 0;
+            (*rtnh).rtnh_hops = 0;
+        }
 
         true
     }
