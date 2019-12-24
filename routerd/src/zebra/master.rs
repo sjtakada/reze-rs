@@ -150,7 +150,9 @@ impl ZebraMaster {
         self.rib_ipv4.borrow_mut().add(rib, &prefix);
     }
 
-    pub fn rib_install_kernel<T: AddressLen + Clone + FromStr + Hash + Eq>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
+    pub fn rib_install_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable + Clone + FromStr + Hash + Eq
+    {
         self.kernel.borrow_mut().install(prefix, rib);
     }
 

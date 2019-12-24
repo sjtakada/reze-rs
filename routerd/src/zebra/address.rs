@@ -31,7 +31,7 @@ impl AddressFamily for Ipv6Addr {
 
 /// Trait IP address handler.
 pub trait AddressHandler {
-    fn get_addresses_all<T: AddressFamily + AddressLen + FromStr>(&self) ->  Result<(), ZebraError>;
+    fn get_addresses_all<T: AddressFamily + Addressable + FromStr>(&self) ->  Result<(), ZebraError>;
 }
 
 /// Connected Address.

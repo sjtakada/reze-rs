@@ -122,7 +122,7 @@ impl Config for Ipv4StaticRoute {
 
 
 /// Static route.
-pub struct StaticRoute<T: AddressLen> {
+pub struct StaticRoute<T: Addressable> {
 
     /// Prefix.
     prefix: Prefix<T>,
@@ -132,7 +132,7 @@ pub struct StaticRoute<T: AddressLen> {
 }
 
 impl<T> StaticRoute<T>
-where T: Clone + AddressLen + Eq + Hash + FromStr
+where T: Clone + Addressable + Eq + Hash + FromStr
 {
 
     /// Construct static route from JSON.
@@ -220,7 +220,7 @@ where T: Clone + AddressLen + Eq + Hash + FromStr
 }
 
 impl<T> PartialEq for StaticRoute<T>
-where T: AddressLen + PartialEq
+where T: Addressable + PartialEq
 {
     fn eq(&self, other: &Self) -> bool {
         self.prefix == other.prefix
@@ -228,13 +228,13 @@ where T: AddressLen + PartialEq
 }
 
 impl<T> Eq for StaticRoute<T>
-where T: AddressLen + Eq
+where T: Addressable + Eq
 {
 }
 
 
 impl<T> PartialOrd for StaticRoute<T>
-where T: AddressLen + PartialOrd
+where T: Addressable + PartialOrd
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.prefix.partial_cmp(&other.prefix)
@@ -242,7 +242,7 @@ where T: AddressLen + PartialOrd
 }
 
 impl<T> Ord for StaticRoute<T>
-where T: AddressLen + Ord
+where T: Addressable + Ord
 {
     fn cmp(&self, other: &Self) -> Ordering {
         self.prefix.cmp(&other.prefix)

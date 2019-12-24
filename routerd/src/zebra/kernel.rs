@@ -56,7 +56,9 @@ impl Kernel {
         // route ipv6
     }
 
-    pub fn install<T: AddressLen + Clone + FromStr + Eq + Hash>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
+    pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable + Clone + FromStr + Eq + Hash
+    {
         self.driver.install(prefix, rib);
     }
 }

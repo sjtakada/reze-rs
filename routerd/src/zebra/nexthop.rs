@@ -11,7 +11,7 @@ use rtable::prefix::*;
 
 /// Nexthop.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum Nexthop<T: AddressLen> {
+pub enum Nexthop<T: Addressable> {
     /// IP Address.
     Address(T),
 
@@ -22,7 +22,7 @@ pub enum Nexthop<T: AddressLen> {
     Network(Prefix<T>),
 }
 
-impl<T: Clone + AddressLen + FromStr> Nexthop<T> {
+impl<T: Clone + Addressable + FromStr> Nexthop<T> {
     /// Construct Nexthop from IP address.
     pub fn from_address(address: &T) -> Nexthop<T> {
         Nexthop::<T>::Address(address.clone())
@@ -42,7 +42,7 @@ impl<T: Clone + AddressLen + FromStr> Nexthop<T> {
     }
 }
 
-impl<T: AddressLen + fmt::Debug> fmt::Display for Nexthop<T> {
+impl<T: Addressable + fmt::Debug> fmt::Display for Nexthop<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Nexthop::<T>::Address(address) => {

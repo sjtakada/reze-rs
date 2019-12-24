@@ -60,6 +60,13 @@
                     },
                     "tag": 0,
                     "distance": 1
+                  },
+                  {
+                    "nexthop": {
+                      "ipv4_address": "10.0.2.101"
+                    },
+                    "tag": 0,
+                    "distance": 10
                   }
                 ]
               }

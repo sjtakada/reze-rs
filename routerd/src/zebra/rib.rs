@@ -36,7 +36,7 @@ pub enum RibType {
 }
 
 /// RIB.
-pub struct Rib<T: AddressLen> {
+pub struct Rib<T: Addressable> {
     /// Type.
     _rib_type: RibType,
 
@@ -54,7 +54,7 @@ pub struct Rib<T: AddressLen> {
 }
 
 impl<T> Rib<T>
-where T: AddressLen + Clone + FromStr + Eq + Hash
+where T: Addressable + Clone + FromStr + Eq + Hash
 {
     /// Constructor.
     pub fn new(rib_type: RibType, distance: u8, tag: u32) -> Rib<T> {
@@ -95,7 +95,7 @@ where T: AddressLen + Clone + FromStr + Eq + Hash
 }
 
 /// RIB table.
-pub struct RibTable<T: AddressLen + Clone> {
+pub struct RibTable<T: Addressable + Clone> {
     /// Zebra master.
     master: Weak<ZebraMaster>,
 
@@ -104,7 +104,7 @@ pub struct RibTable<T: AddressLen + Clone> {
 }
 
 impl<T> RibTable<T>
-where T: AddressLen + Clone + FromStr + Hash + Eq + fmt::Debug
+where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
 {
     /// Constructor.
     pub fn new() -> RibTable<T> {
