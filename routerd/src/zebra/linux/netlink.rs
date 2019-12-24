@@ -315,22 +315,45 @@ impl Netlink {
     fn route_multi_path<T>(&self, req: &mut Request, bytelen: usize, nexthops: &Vec<Nexthop<T>>) -> usize
     where T: AddressLen
     {
+        let buf: [u8; 4096] = [0; 4096];
+        let mut rta = &buf as *const _ as *mut Rtattr;
+        let mut ptr = rta as *const _ as *mut libc::c_void;
+
         let mut num = 0;
+        unsafe {
+            let mut rtnh = ptr.offset(rta_data() as isize) as *mut Rtnexthop;
 
-        for nexthop in nexthops {
-            match nexthop  {
-                Nexthop::Address::<T>(address) => {
-                    let octets: &[u8] = address.octets_ref();
+            (*rta).rta_type = libc::RTA_MULTIPATH;
+            (*rta).rta_len = rta_length(0) as u16;
 
-                    addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
-                              libc::RTA_GATEWAY as i32, &octets[..], bytelen);
-                },
-                Nexthop::Ifname(_ifname) => { },
-                Nexthop::Network::<T>(_prefix) => { },
+            for nexthop in nexthops {
+                (*rtnh).rtnh_len = size_of::<Rtnexthop>() as u16;
+                (*rtnh).rtnh_flags = 0;
+                (*rtnh).rtnh_hops = 0;
+
+                (*rta).rta_len += (*rtnh).rtnh_len;
+
+                match nexthop  {
+                    Nexthop::Address::<T>(address) => {
+                        let octets: &[u8] = address.octets_ref();
+
+                        rta_addattr_l(rta, buf.len(),
+                                      libc::RTA_GATEWAY as i32, &octets[..], bytelen);
+
+                        (*rtnh).rtnh_len += 8;
+                    },
+                    Nexthop::Ifname(_ifname) => { },
+                    Nexthop::Network::<T>(_prefix) => { },
+                }
+
+                rtnh = ptr.offset((rta_data() + (*rtnh).rtnh_len as usize) as isize) as *mut Rtnexthop;
+                num += 1;
             }
+        }
 
-            num += 1;
-            break;
+        unsafe {
+        addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
+                  libc::RTA_MULTIPATH as i32, &buf[4..], ((*rta).rta_len - 4) as usize);
         }
 
         num

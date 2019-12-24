@@ -79,20 +79,22 @@ pub fn addattr_l(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: &[
     }
 }
 
-pub fn rta_addattr_l(rta: &mut Rtattr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
+pub fn rta_addattr_l(rta: *mut Rtattr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
     let rta_len = rta_length(alen);
-    let offset = rta_align(rta.rta_len as usize);
+    unsafe {
+        let offset = rta_align((*rta).rta_len as usize);
 
-    if offset + rta_len > maxlen {
-        false
-    } else {
-        let ptr = rta as *const _ as *const libc::c_void;
-        let src_ptr = src as *const _ as *const libc::c_void;
+        if offset + rta_len > maxlen {
+            false
+        } else {
+            let ptr = rta as *const _ as *const libc::c_void;
+            let src_ptr = src as *const _ as *const libc::c_void;
 
-        addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, alen);
-        rta.rta_len = (offset + rta_len) as u16;
+            addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, alen);
+            (*rta).rta_len = (offset + rta_len) as u16;
 
-        true
+            true
+        }
     }
 }
 
@@ -111,5 +113,25 @@ pub fn addattr32(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: u3
 
         true
     }
+}
+
+
+const RTNH_ALIGNTO: usize = 4usize;
+
+/// struct rtnexthop
+#[repr(C)]
+pub struct Rtnexthop {
+    pub rtnh_len: u16,
+    pub rtnh_flags: u8,
+    pub rtnh_hops: u8,
+    pub rtnh_ifindex: i32,
+}
+
+pub fn rtnh_align(len: usize) -> usize {
+    (len + RTNH_ALIGNTO - 1) & !(RTNH_ALIGNTO - 1)
+}
+
+pub fn rtnh_length(len: usize) -> usize {
+    rtnh_align(size_of::<Rtnexthop>()) + len
 }
 
