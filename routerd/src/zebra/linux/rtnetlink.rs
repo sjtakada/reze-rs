@@ -59,19 +59,20 @@ pub fn nlmsg_addattr_l(nlmsg_len: &mut u32, buf: &mut [u8],
 
 /// Add Rtattr with arbitrary data to buffer.
 pub fn addattr_l(buf: &mut [u8], rta_type: i32, data: &[u8], alen: usize) -> Result<usize, ZebraError> {
+    let header_len = size_of::<Rtattr>();
     let rta_len = rta_length(alen);
 
     if rta_len > buf.len() {
         Err(ZebraError::Encode("buffer overflow".to_string()))
     } else {
+        // RTA length.
+        encode_num::<u16>(&mut buf[..], rta_len as u16);
+
         // RTA type.
         encode_num::<u16>(&mut buf[2..], rta_type as u16);
 
         // RTA payload.
-        encode_data(&mut buf[4..], data);
-
-        // RTA length.
-        encode_num::<u16>(&mut buf[..], rta_len as u16);
+        encode_data(&mut buf[header_len..], data);
 
         Ok(rta_len)
     }
@@ -89,7 +90,7 @@ where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
 }
 
 /// Add Rtattr with payload encoded by encoder to buffer.
-pub fn addattr_payload<F>(buf: &mut [u8], rta_type: i32, encode_payload: F) -> Result<usize, ZebraError>
+pub fn addattr_payload<F>(buf: &mut [u8], rta_type: i32, encoder: F) -> Result<usize, ZebraError>
 where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
 {
     let header_len = size_of::<Rtattr>();
@@ -101,7 +102,7 @@ where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
         encode_num::<u16>(&mut buf[2..], rta_type as u16);
 
         // RTA payload.
-        let payload_len = encode_payload(&mut buf[header_len..])?;
+        let payload_len = encoder(&mut buf[header_len..])?;
 
         // RTA length.
         encode_num::<u16>(&mut buf[..], (payload_len + header_len) as u16);
@@ -179,7 +180,7 @@ pub fn nlmsg_add_rtnexthop<T: Addressable>(buf: &mut [u8], address: &T) -> Resul
         Err(ZebraError::Encode("buffer overflow".to_string()))
     } else {
         // rtnh_len
-        encode_num::<u16>(&mut buf[..], 16 as u16);
+        encode_num::<u16>(&mut buf[..], rtnh_len as u16);
 
         // rtnh_flags
         encode_num::<u8>(&mut buf[2..], 0 as u8);
@@ -191,7 +192,7 @@ pub fn nlmsg_add_rtnexthop<T: Addressable>(buf: &mut [u8], address: &T) -> Resul
         encode_num::<u32>(&mut buf[4..], 0 as u32);
 
         // RTA Gataway.
-        addattr_l(&mut buf[8..], libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
+        addattr_l(&mut buf[8..], libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize)?;
 
         Ok(rtnh_len)
     }

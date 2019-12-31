@@ -329,36 +329,35 @@ impl Netlink {
     }
 
     /// Build singlpath nexthop attrbute.
-    fn route_single_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> usize
+    fn route_single_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> Result<usize, ZebraError>
     where T: Addressable
     {
-        let mut num = 0;
         let pos = 0; // XXX
+        let mut len = 0;
 
         for nexthop in nexthops {
             match nexthop  {
                 Nexthop::Address::<T>(address) => {
                     let octets: &[u8] = address.octets_ref();
 
-                    nlmsg_addattr_l(&mut req.nlmsghdr.nlmsg_len,
-                              &mut req.buf[pos..], libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
+                    len = nlmsg_addattr_l(&mut req.nlmsghdr.nlmsg_len,
+                                          &mut req.buf[pos..], libc::RTA_GATEWAY as i32,
+                                          &octets[..], T::byte_len() as usize)?;
                 },
                 Nexthop::Ifname(_ifname) => { },
                 Nexthop::Network::<T>(_prefix) => { },
             }
 
-            num += 1;
             break;
         }
 
-        num
+        Ok(len)
     }
 
     /// Build multipath nexthop attrbute.
-    fn route_multi_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> usize
+    fn route_multi_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> Result<usize, ZebraError>
     where T: Addressable
     {
-        let mut num = 0;
         let offset = req.offset();
 
         // XXX/ Should handle error
@@ -377,9 +376,7 @@ impl Netlink {
             }
 
             Ok(rta_len)
-        });
-
-        num
+        })
     }
 
     /// Build route message.
@@ -410,20 +407,20 @@ impl Netlink {
         let pos = req.offset();
         nlmsg_addattr_l(&mut req.nlmsghdr.nlmsg_len,
                         &mut req.buf[pos..], libc::RTA_DST as i32,
-                        prefix.octets(), T::byte_len() as usize);
+                        prefix.octets(), T::byte_len() as usize)?;
         // Metric.
         let pos = req.offset();
         nlmsg_addattr32(&mut req.nlmsghdr.nlmsg_len,
-                        &mut req.buf[pos..], libc::RTA_PRIORITY as i32, 20); // XXX
+                        &mut req.buf[pos..], libc::RTA_PRIORITY as i32, 20)?;
 
         req.rtmsg.rtm_scope = libc::RT_SCOPE_UNIVERSE as u8; // XXX
 
         // Singlepath.
         if rib.nexthops().len() == 1 {
-            self.route_single_path(&mut req, rib.nexthops());
+            self.route_single_path(&mut req, rib.nexthops())?;
         // Multipath.
         } else if rib.nexthops().len() > 1 {
-            self.route_multi_path(&mut req, rib.nexthops());
+            self.route_multi_path(&mut req, rib.nexthops())?;
         // TBD
         } else {
 
