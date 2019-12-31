@@ -21,9 +21,9 @@
 */
 
 use std::mem::size_of;
-//use std::ptr::copy;
 
-//use super::netlink::*;
+use rtable::prefix::*;
+
 use super::encode::*;
 use super::super::error::ZebraError;
 
@@ -75,6 +75,17 @@ pub fn addattr_l(buf: &mut [u8], rta_type: i32, data: &[u8], alen: usize) -> Res
 
         Ok(rta_len)
     }
+}
+
+pub fn nlmsg_addattr_payload<F>(nlmsg_len: &mut u32, buf: &mut [u8],
+                                rta_type: i32,  encode_payload: F) -> Result<usize, ZebraError>
+where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
+{
+    let len = addattr_payload(buf, rta_type, encode_payload)?;
+
+    *nlmsg_len += len as u32;
+
+    Ok(len)
 }
 
 /// Add Rtattr with payload encoded by encoder to buffer.
@@ -160,3 +171,28 @@ pub fn rtnh_length(len: usize) -> usize {
     rtnh_align(size_of::<Rtnexthop>()) + len
 }
 
+pub fn nlmsg_add_rtnexthop<T: Addressable>(buf: &mut [u8], address: &T) -> Result<usize, ZebraError> {
+    let octets: &[u8] = address.octets_ref();
+    let rtnh_len = size_of::<Rtnexthop>() + size_of::<Rtattr>() + T::byte_len() as usize;  // XXX probably should align.
+
+    if rtnh_len > buf.len() {
+        Err(ZebraError::Encode("buffer overflow".to_string()))
+    } else {
+        // rtnh_len
+        encode_num::<u16>(&mut buf[..], 16 as u16);
+
+        // rtnh_flags
+        encode_num::<u8>(&mut buf[2..], 0 as u8);
+
+        // rtnh_hops
+        encode_num::<u8>(&mut buf[3..], 0 as u8);
+
+        // rtnn_index
+        encode_num::<u32>(&mut buf[4..], 0 as u32);
+
+        // RTA Gataway.
+        addattr_l(&mut buf[8..], libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
+
+        Ok(rtnh_len)
+    }
+}

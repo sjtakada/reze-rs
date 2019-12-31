@@ -33,9 +33,6 @@ use super::super::address::*;
 use super::super::rib::*;
 use super::super::nexthop::*;
 
-// XXX TO be moved
-use super::encode::*;
-
 const RTMGRP_LINK: libc::c_int = 1;
 const RTMGRP_IPV4_IFADDR: libc::c_int = 0x10;
 const RTMGRP_IPV4_ROUTE: libc::c_int = 0x40;
@@ -364,31 +361,14 @@ impl Netlink {
         let mut num = 0;
         let offset = req.offset();
 
-        if let Ok(len) = addattr_payload(&mut req.buf[offset..], libc::RTA_MULTIPATH as i32, |buf: &mut [u8]| -> Result<usize, ZebraError> {
+        // XXX/ Should handle error
+        nlmsg_addattr_payload(&mut req.nlmsghdr.nlmsg_len, &mut req.buf[offset..], libc::RTA_MULTIPATH as i32, |buf: &mut [u8]| -> Result<usize, ZebraError> {
             let mut rta_len = 0;
 
             for nexthop in nexthops {
                 match nexthop  {
                     Nexthop::Address::<T>(address) => {
-                        let octets: &[u8] = address.octets_ref();
-
-                        // rtnh_len
-                        encode_num::<u16>(&mut buf[rta_len..], 16 as u16);
-
-                        // rtnh_flags,
-                        encode_num::<u8>(&mut buf[rta_len + 2..], 0 as u8);
-
-                        // rtnh_hops,
-                        encode_num::<u8>(&mut buf[rta_len + 3..], 0 as u8);
-
-                        // rtnn_index,
-                        encode_num::<u32>(&mut buf[rta_len + 4..], 0 as u32);
-
-                        // RTA Gataway.
-                        addattr_l(&mut buf[rta_len + 8..], libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
-
-                        // XXX update rtnh_len
-                        let add_len = size_of::<Rtnexthop>() + size_of::<Rtattr>() + T::byte_len() as usize;
+                        let add_len = nlmsg_add_rtnexthop(&mut buf[rta_len..], address)?;
                         rta_len += add_len;
                     },
                     Nexthop::Ifname(_ifname) => { },
@@ -397,10 +377,7 @@ impl Netlink {
             }
 
             Ok(rta_len)
-        }) {
-            // update nlmsg nlmsg_len
-            req.nlmsghdr.nlmsg_len += len as u32;
-        }
+        });
 
         num
     }
