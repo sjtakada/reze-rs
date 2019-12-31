@@ -33,6 +33,9 @@ use super::super::address::*;
 use super::super::rib::*;
 use super::super::nexthop::*;
 
+// XXX TO be moved
+use super::encode::*;
+
 const RTMGRP_LINK: libc::c_int = 1;
 const RTMGRP_IPV4_IFADDR: libc::c_int = 0x10;
 const RTMGRP_IPV4_ROUTE: libc::c_int = 0x40;
@@ -130,10 +133,45 @@ fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
 }
 
 /// Typedefs.
-pub type Nlmsghdr = libc::nlmsghdr;
 pub type AttrMap<'a> = HashMap<c_int, &'a [u8]>;
 
+
+/// struct nlmsghdr from /usr/include/linux/netlink.h.
+///
+///   0                   1                   2                   3
+///   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                          nlmsg_len                            |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |          nlmsg_type           |          nlmsg_flags          |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                          nlmsg_seq                            |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                          nlmsg_pid                            |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///
+pub struct Nlmsghdr {
+    pub nlmsg_len: u32,
+    pub nlmsg_type: u16,
+    pub nlmsg_flags: u16,
+    pub nlmsg_seq: u32,
+    pub nlmsg_pid: u32,
+}
+
+
 /// struct rtmsg from rtnetlink.h.
+///
+///   0                   1                   2                   3
+///   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |  rtm_family   |  rtm_dst_len  |  rtm_src_len  |    rtm_tos    |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |  rtm_table    |  rtm_protocol |   rtm_scope   |    rtm_type   |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                          rtm_flags                            |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///
+
 #[repr(C)]
 struct Rtmsg {
     rtm_family: u8,
@@ -221,6 +259,12 @@ struct Request {
     buf: [u8; 4096],	// XXX
 }
 
+impl Request {
+    pub fn offset(&self) -> usize {
+        (self.nlmsghdr.nlmsg_len as usize) - (size_of::<Nlmsghdr>() + size_of::<Rtmsg>())
+    }
+}
+
 impl Netlink {
     /// Constructor - open Netlink socket and bind.
     pub fn new(callbacks: KernelCallbacks) -> Result<Netlink, io::Error> {
@@ -291,14 +335,15 @@ impl Netlink {
     where T: Addressable
     {
         let mut num = 0;
+        let pos = 0; // XXX
 
         for nexthop in nexthops {
             match nexthop  {
                 Nexthop::Address::<T>(address) => {
                     let octets: &[u8] = address.octets_ref();
 
-                    addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
-                              libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
+                    nlmsg_addattr_l(&mut req.nlmsghdr.nlmsg_len,
+                              &mut req.buf[pos..], libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
                 },
                 Nexthop::Ifname(_ifname) => { },
                 Nexthop::Network::<T>(_prefix) => { },
@@ -311,6 +356,7 @@ impl Netlink {
         num
     }
 
+/*
     /// Build multipath nexthop attrbute.
     fn route_multi_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> usize
     where T: Addressable
@@ -330,8 +376,8 @@ impl Netlink {
                 Nexthop::Address::<T>(address) => {
                     let octets: &[u8] = address.octets_ref();
 
-                    rta_addrtnh(&mut rtab.rta, rtab.buf.len(), libc::RTA_GATEWAY as i32,
-                                &octets[..], T::byte_len() as usize);
+//                    rta_addrtnh(&mut rtab.rta, rtab.buf.len(), libc::RTA_GATEWAY as i32,
+//                                &octets[..], T::byte_len() as usize);
 
                 },
                 Nexthop::Ifname(_ifname) => { },
@@ -341,8 +387,57 @@ impl Netlink {
             num += 1;
         }
 
-        addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
-                  libc::RTA_MULTIPATH as i32, &rtab.buf[..], (rtab.rta.rta_len - 4) as usize);
+//        addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
+//                  libc::RTA_MULTIPATH as i32, &rtab.buf[..], (rtab.rta.rta_len - 4) as usize);
+        num
+    }
+
+*/
+    /// Build multipath nexthop attrbute.
+    fn route_multi_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> usize
+    where T: Addressable
+    {
+        let mut num = 0;
+        let mut offset = req.offset();
+        let rta_len: usize = size_of::<Rtattr>();
+
+        for nexthop in nexthops {
+            match nexthop  {
+                Nexthop::Address::<T>(address) => {
+                    let octets: &[u8] = address.octets_ref();
+
+                    if let Ok(len) =
+                        addattr_payload(&mut req.buf[offset..], libc::RTA_MULTIPATH as i32, |buf: &mut [u8]| -> Result<usize, ZebraError> {
+                            let len = size_of::<Rtnexthop>() + T::byte_len() as usize;
+
+                            // rtnh_len
+                            encode_num::<u16>(&mut buf[..], 8 as u16);
+
+                            // rtnh_flags,
+                            encode_num::<u8>(&mut buf[2..], 0 as u8);
+
+                            // rtnh_hops,
+                            encode_num::<u8>(&mut buf[3..], 0 as u8);
+
+                            // RTA Gataway.
+                            addattr_l(&mut buf[4..], libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
+
+                            // XXX update rtnh_len
+
+                            Ok(len)
+                        }) {
+                            // update nlmsg nlmsg_len
+                            req.nlmsghdr.nlmsg_len += len as u32;
+                        }
+
+                },
+                Nexthop::Ifname(_ifname) => { },
+                Nexthop::Network::<T>(_prefix) => { },
+            }
+
+            num += 1;
+        }
+
         num
     }
 
@@ -371,11 +466,14 @@ impl Netlink {
         }
 
         // Destination address.
-        addattr_l(&mut req.nlmsghdr, size_of::<Request>(), libc::RTA_DST as i32,
-                  prefix.octets(), T::byte_len() as usize);
-
+        let pos = req.offset();
+        nlmsg_addattr_l(&mut req.nlmsghdr.nlmsg_len,
+                        &mut req.buf[pos..], libc::RTA_DST as i32,
+                        prefix.octets(), T::byte_len() as usize);
         // Metric.
-        addattr32(&mut req.nlmsghdr, size_of::<Request>(), libc::RTA_PRIORITY as i32, 20); // XXX
+        let pos = req.offset();
+        nlmsg_addattr32(&mut req.nlmsghdr.nlmsg_len,
+                        &mut req.buf[pos..], libc::RTA_PRIORITY as i32, 20); // XXX
 
         req.rtmsg.rtm_scope = libc::RT_SCOPE_UNIVERSE as u8; // XXX
 

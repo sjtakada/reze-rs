@@ -30,6 +30,10 @@ quick_error! {
             description("Address error")
             display(r#"Address error {}"#, s)
         }
+        Encode(s: String) {
+            description("Encode error")
+            display(r#"Encode error {}"#, s)
+        }
     }
 }
 

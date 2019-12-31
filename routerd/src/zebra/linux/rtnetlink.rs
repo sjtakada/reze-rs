@@ -24,7 +24,8 @@ use std::mem::size_of;
 use std::ptr::copy;
 
 use super::netlink::*;
-
+use super::encode::*;
+use super::super::error::ZebraError;
 
 const RTA_ALIGNTO: usize = 4usize;
 
@@ -48,6 +49,7 @@ pub struct Rtattr {
 }
 
 
+/*
 fn addattr_ptr(ptr: *const libc::c_void, offset: usize,
                rta_type: libc::c_int, rta_len: usize, src_ptr: *const libc::c_void, alen: usize) {
     unsafe {
@@ -61,21 +63,56 @@ fn addattr_ptr(ptr: *const libc::c_void, offset: usize,
         copy(src_ptr, dst_ptr, alen);
     }
 }
+*/
 
-pub fn addattr_l(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
+pub fn nlmsg_addattr_l(nlmsg_len: &mut u32, buf: &mut [u8],
+                       rta_type: i32, data: &[u8], alen: usize) -> Result<usize, ZebraError> {
+    let len = addattr_l(buf, rta_type, data, alen)?;
+
+    *nlmsg_len += len as u32;
+
+    Ok(len)
+}
+
+/// Add RtAttr to buffer.
+pub fn addattr_l(buf: &mut [u8], rta_type: i32, data: &[u8], alen: usize) -> Result<usize, ZebraError> {
     let rta_len = rta_length(alen);
-    let offset = nlmsg_align(h.nlmsg_len as usize);
 
-    if offset + rta_len > maxlen {
-        false
+    if rta_len > buf.len() {
+        Err(ZebraError::Encode("buffer overflow".to_string()))
     } else {
-        let ptr = h as *const _ as *const libc::c_void;
-        let src_ptr = src as *const _ as *const libc::c_void;
+        // RTA type.
+        encode_num::<u16>(&mut buf[2..], rta_type as u16);
 
-        addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, alen);
-        h.nlmsg_len = (offset + rta_len) as u32;
+        // RTA payload.
+        encode_data(&mut buf[4..], data);
 
-        true
+        // RTA length.
+        encode_num::<u16>(&mut buf[..], rta_len as u16);
+
+        Ok(rta_len)
+    }
+}
+
+/// Add RtAttr to buffer with given payload encoder.
+pub fn addattr_payload<F>(buf: &mut [u8], rta_type: i32, encode_payload: F) -> Result<usize, ZebraError>
+where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
+{
+    let header_len = size_of::<Rtattr>();
+
+    if header_len > buf.len() {
+        Err(ZebraError::Encode("buffer overflow".to_string()))
+    } else {
+        // RTA type.
+        encode_num::<u16>(&mut buf[2..], rta_type as u16);
+
+        // RTA payload.
+        let payload_len = encode_payload(&mut buf[header_len..])?;
+
+        // RTA length.
+        encode_num::<u16>(&mut buf[..], (payload_len + header_len) as u16);
+
+        Ok(payload_len + header_len)
     }
 }
 
@@ -98,23 +135,35 @@ pub fn rta_addattr_l(rta: &mut Rtattr, maxlen: usize, rta_type: libc::c_int, src
 }
 */
 
-pub fn addattr32(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: u32) -> bool {
+pub fn nlmsg_addattr32(nlmsg_len: &mut u32, buf: &mut [u8],
+                       rta_type: i32, src: u32) -> Result<usize, ZebraError> {
+    let len = addattr32(buf, rta_type, src)?;
+
+    *nlmsg_len += len as u32;
+
+    Ok(len)
+}
+
+pub fn addattr32(buf: &mut [u8], rta_type: libc::c_int, src: u32) -> Result<usize, ZebraError> {
     let rta_len = rta_length(size_of::<u32>());
-    let offset = nlmsg_align(h.nlmsg_len as usize);
 
-    if offset + rta_len > maxlen {
-        false
+    if rta_len > buf.len() {
+        Err(ZebraError::Encode("buffer overflow".to_string()))
     } else {
-        let ptr = h as *const _ as *const libc::c_void;
-        let src_ptr = &src as *const _ as *mut libc::c_void;
+        // RTA type.
+        encode_num::<u16>(&mut buf[2..], rta_type as u16);
 
-        addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, size_of::<u32>());
-        h.nlmsg_len = (offset + rta_len) as u32;
+        // RTA payload.
+        encode_num::<u32>(&mut buf[4..], src);
 
-        true
+        // RTA length.
+        encode_num::<u16>(&mut buf[..], rta_len as u16);
+
+        Ok(rta_len)
     }
 }
 
+/*
 pub fn rta_addrtnh(rta: &mut Rtattr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
     let rta_len = rta_length(alen);
     let rtnh_len = size_of::<Rtnexthop>();
@@ -144,6 +193,7 @@ pub fn rta_addrtnh(rta: &mut Rtattr, maxlen: usize, rta_type: libc::c_int, src: 
         true
     }
 }
+*/
 
 
 const RTNH_ALIGNTO: usize = 4usize;
