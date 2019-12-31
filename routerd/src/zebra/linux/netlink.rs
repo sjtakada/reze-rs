@@ -150,6 +150,7 @@ pub type AttrMap<'a> = HashMap<c_int, &'a [u8]>;
 ///  |                          nlmsg_pid                            |
 ///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ///
+#[repr(C)]
 pub struct Nlmsghdr {
     pub nlmsg_len: u32,
     pub nlmsg_type: u16,
@@ -356,86 +357,49 @@ impl Netlink {
         num
     }
 
-/*
-    /// Build multipath nexthop attrbute.
-    fn route_multi_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> usize
-    where T: Addressable
-    {
-        #[repr(C)]
-        struct RtattrBuf {
-            rta: Rtattr,
-            buf: [u8; 4096],
-        }
-
-        let mut rtab = unsafe { zeroed::<RtattrBuf>() };
-        let mut num = 0;
-        rtab.rta.rta_len = rta_length(0) as u16;
-
-        for nexthop in nexthops {
-            match nexthop  {
-                Nexthop::Address::<T>(address) => {
-                    let octets: &[u8] = address.octets_ref();
-
-//                    rta_addrtnh(&mut rtab.rta, rtab.buf.len(), libc::RTA_GATEWAY as i32,
-//                                &octets[..], T::byte_len() as usize);
-
-                },
-                Nexthop::Ifname(_ifname) => { },
-                Nexthop::Network::<T>(_prefix) => { },
-            }
-
-            num += 1;
-        }
-
-//        addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
-//                  libc::RTA_MULTIPATH as i32, &rtab.buf[..], (rtab.rta.rta_len - 4) as usize);
-        num
-    }
-
-*/
     /// Build multipath nexthop attrbute.
     fn route_multi_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> usize
     where T: Addressable
     {
         let mut num = 0;
-        let mut offset = req.offset();
-        let rta_len: usize = size_of::<Rtattr>();
+        let offset = req.offset();
 
-        for nexthop in nexthops {
-            match nexthop  {
-                Nexthop::Address::<T>(address) => {
-                    let octets: &[u8] = address.octets_ref();
+        if let Ok(len) = addattr_payload(&mut req.buf[offset..], libc::RTA_MULTIPATH as i32, |buf: &mut [u8]| -> Result<usize, ZebraError> {
+            let mut rta_len = 0;
 
-                    if let Ok(len) =
-                        addattr_payload(&mut req.buf[offset..], libc::RTA_MULTIPATH as i32, |buf: &mut [u8]| -> Result<usize, ZebraError> {
-                            let len = size_of::<Rtnexthop>() + T::byte_len() as usize;
+            for nexthop in nexthops {
+                match nexthop  {
+                    Nexthop::Address::<T>(address) => {
+                        let octets: &[u8] = address.octets_ref();
 
-                            // rtnh_len
-                            encode_num::<u16>(&mut buf[..], 8 as u16);
+                        // rtnh_len
+                        encode_num::<u16>(&mut buf[rta_len..], 16 as u16);
 
-                            // rtnh_flags,
-                            encode_num::<u8>(&mut buf[2..], 0 as u8);
+                        // rtnh_flags,
+                        encode_num::<u8>(&mut buf[rta_len + 2..], 0 as u8);
 
-                            // rtnh_hops,
-                            encode_num::<u8>(&mut buf[3..], 0 as u8);
+                        // rtnh_hops,
+                        encode_num::<u8>(&mut buf[rta_len + 3..], 0 as u8);
 
-                            // RTA Gataway.
-                            addattr_l(&mut buf[4..], libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
+                        // rtnn_index,
+                        encode_num::<u32>(&mut buf[rta_len + 4..], 0 as u32);
 
-                            // XXX update rtnh_len
+                        // RTA Gataway.
+                        addattr_l(&mut buf[rta_len + 8..], libc::RTA_GATEWAY as i32, &octets[..], T::byte_len() as usize);
 
-                            Ok(len)
-                        }) {
-                            // update nlmsg nlmsg_len
-                            req.nlmsghdr.nlmsg_len += len as u32;
-                        }
-
-                },
-                Nexthop::Ifname(_ifname) => { },
-                Nexthop::Network::<T>(_prefix) => { },
+                        // XXX update rtnh_len
+                        let add_len = size_of::<Rtnexthop>() + size_of::<Rtattr>() + T::byte_len() as usize;
+                        rta_len += add_len;
+                    },
+                    Nexthop::Ifname(_ifname) => { },
+                    Nexthop::Network::<T>(_prefix) => { },
+                }
             }
 
-            num += 1;
+            Ok(rta_len)
+        }) {
+            // update nlmsg nlmsg_len
+            req.nlmsghdr.nlmsg_len += len as u32;
         }
 
         num

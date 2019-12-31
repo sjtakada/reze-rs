@@ -20,7 +20,7 @@ use serde_json;
 use log::{debug, error};
 use rtable::prefix::*;
 
-use crate::core::protocols::ProtocolType;
+//use crate::core::protocols::ProtocolType;
 use crate::core::config::*;
 use crate::core::error::*;
 use super::master::ZebraMaster;

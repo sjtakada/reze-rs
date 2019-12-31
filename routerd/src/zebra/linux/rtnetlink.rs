@@ -21,9 +21,9 @@
 */
 
 use std::mem::size_of;
-use std::ptr::copy;
+//use std::ptr::copy;
 
-use super::netlink::*;
+//use super::netlink::*;
 use super::encode::*;
 use super::super::error::ZebraError;
 
@@ -48,23 +48,6 @@ pub struct Rtattr {
     pub rta_type: u16,
 }
 
-
-/*
-fn addattr_ptr(ptr: *const libc::c_void, offset: usize,
-               rta_type: libc::c_int, rta_len: usize, src_ptr: *const libc::c_void, alen: usize) {
-    unsafe {
-        let rta = ptr.offset(offset as isize) as *mut Rtattr;
-        let rta_ptr = rta as *const _ as *mut libc::c_void;
-        let dst_ptr = rta_ptr.offset(size_of::<Rtattr>() as isize);
-
-        (*rta).rta_len = rta_len as u16;
-        (*rta).rta_type = rta_type as u16;
-
-        copy(src_ptr, dst_ptr, alen);
-    }
-}
-*/
-
 pub fn nlmsg_addattr_l(nlmsg_len: &mut u32, buf: &mut [u8],
                        rta_type: i32, data: &[u8], alen: usize) -> Result<usize, ZebraError> {
     let len = addattr_l(buf, rta_type, data, alen)?;
@@ -74,7 +57,7 @@ pub fn nlmsg_addattr_l(nlmsg_len: &mut u32, buf: &mut [u8],
     Ok(len)
 }
 
-/// Add RtAttr to buffer.
+/// Add Rtattr with arbitrary data to buffer.
 pub fn addattr_l(buf: &mut [u8], rta_type: i32, data: &[u8], alen: usize) -> Result<usize, ZebraError> {
     let rta_len = rta_length(alen);
 
@@ -94,7 +77,7 @@ pub fn addattr_l(buf: &mut [u8], rta_type: i32, data: &[u8], alen: usize) -> Res
     }
 }
 
-/// Add RtAttr to buffer with given payload encoder.
+/// Add Rtattr with payload encoded by encoder to buffer.
 pub fn addattr_payload<F>(buf: &mut [u8], rta_type: i32, encode_payload: F) -> Result<usize, ZebraError>
 where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
 {
@@ -116,25 +99,6 @@ where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
     }
 }
 
-/*
-pub fn rta_addattr_l(rta: &mut Rtattr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
-    let rta_len = rta_length(alen);
-    let offset = rta_align(rta.rta_len as usize);
-
-    if offset + rta_len > maxlen {
-        false
-    } else {
-        let ptr = rta as *const _ as *const libc::c_void;
-        let src_ptr = src as *const _ as *const libc::c_void;
-
-        addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, alen);
-        rta.rta_len = (offset + rta_len) as u16;
-
-        true
-    }
-}
-*/
-
 pub fn nlmsg_addattr32(nlmsg_len: &mut u32, buf: &mut [u8],
                        rta_type: i32, src: u32) -> Result<usize, ZebraError> {
     let len = addattr32(buf, rta_type, src)?;
@@ -144,6 +108,7 @@ pub fn nlmsg_addattr32(nlmsg_len: &mut u32, buf: &mut [u8],
     Ok(len)
 }
 
+/// Add Rtattr with u32 value to buffer.
 pub fn addattr32(buf: &mut [u8], rta_type: libc::c_int, src: u32) -> Result<usize, ZebraError> {
     let rta_len = rta_length(size_of::<u32>());
 
@@ -163,42 +128,22 @@ pub fn addattr32(buf: &mut [u8], rta_type: libc::c_int, src: u32) -> Result<usiz
     }
 }
 
-/*
-pub fn rta_addrtnh(rta: &mut Rtattr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
-    let rta_len = rta_length(alen);
-    let rtnh_len = size_of::<Rtnexthop>();
-    let mut offset = rta_align(rta.rta_len as usize);
-
-    if offset + rta_len + rtnh_len > maxlen {
-        false
-    } else {
-        let ptr = rta as *const _ as *const libc::c_void;
-        let src_ptr = src as *const _ as *const libc::c_void;
-
-        offset += rtnh_len;
-
-        unsafe {
-            let mut rtnh = ptr.offset(rta.rta_len as isize) as *mut Rtnexthop;
-
-            rta.rta_len += rtnh_len as u16;
-
-            addattr_ptr(ptr, offset, rta_type, rta_len, src_ptr, alen);
-            rta.rta_len = (offset + rta_len) as u16;
-
-            (*rtnh).rtnh_len = (rtnh_len + alen + size_of::<Rtattr>()) as u16;
-            (*rtnh).rtnh_flags = 0;
-            (*rtnh).rtnh_hops = 0;
-        }
-
-        true
-    }
-}
-*/
-
-
 const RTNH_ALIGNTO: usize = 4usize;
 
-/// struct rtnexthop
+/// struct rtnexthop from rtnetlink.h.
+///
+///   0                   1                   2                   3
+///   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |           rtnh_len            |  rtnh_flags   |   rtnh_hops   |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                          rtnh_ifindex                         |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                            Rtattr  ...                        |
+///  |                                                               |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///
+
 #[repr(C)]
 pub struct Rtnexthop {
     pub rtnh_len: u16,

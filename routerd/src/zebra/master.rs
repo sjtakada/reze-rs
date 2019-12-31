@@ -34,7 +34,7 @@ use super::address::*;
 use super::kernel::*;
 use super::static_route::*;
 use super::rib::*;
-use super::nexthop::*;
+//use super::nexthop::*;
 
 /// Store Zebra Client related information.
 struct ClientTuple {
