@@ -50,12 +50,23 @@
         "actions": [
           {
             "http": {
-              "method": "POST",
+              "method": "PUT",
               "path": "route_ipv4/:IPV4-ADDRESS:3.1/:IPV4-ADDRESS:3.2",
               "params": {
                 "nexthops" : [
                   {
-                    "ipv4_address": ":IPV4-ADDRESS:4.0"
+                    "nexthop": {
+                      "ipv4_address": ":IPV4-ADDRESS:4.0"
+                    },
+                    "tag": 0,
+                    "distance": 1
+                  },
+                  {
+                    "nexthop": {
+                      "ipv4_address": "10.0.2.101"
+                    },
+                    "tag": 0,
+                    "distance": 10
                   }
                 ]
               }

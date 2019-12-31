@@ -6,17 +6,17 @@
 //
 
 use std::io;
-//use std::io::{Error, ErrorKind};
 use std::str;
 use std::str::FromStr;
 use std::mem::{size_of, zeroed};
-use std::ptr::copy;
+//use std::ptr::copy;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::net::{Ipv4Addr, Ipv6Addr};
+use std::hash::Hash;
 use libc::{self, c_int/*, c_void, c_uchar*/};
 use log::debug;
 use log::info;
@@ -60,7 +60,7 @@ fn nlmsg_dump(h: &Nlmsghdr) {
     }
 }
 
-fn nlmsg_align(len: usize) -> usize {
+pub fn nlmsg_align(len: usize) -> usize {
     (len + NLMSG_ALIGNTO - 1) & !(NLMSG_ALIGNTO - 1)
 }
 
@@ -92,58 +92,6 @@ fn nlmsg_attr_ok(buf: &[u8]) -> bool {
         }
     } else {
         false
-    }
-}
-
-fn addattr_l(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: &[u8], alen: usize) -> bool {
-    let len = rta_length(alen);
-    let ptr = h as *const _ as *const libc::c_void;
-
-    if nlmsg_align(h.nlmsg_len as usize) + len > maxlen {
-        false
-    } else {
-        unsafe {
-            let src_ptr = src as *const _ as *mut libc::c_void;
-
-            let rta = ptr.offset(nlmsg_align(h.nlmsg_len as usize) as isize) as *mut Rtattr;
-            let rta_ptr = rta as *const _ as *mut libc::c_void;
-            let dst_ptr = rta_ptr.offset(size_of::<Rtattr>() as isize);
-
-            (*rta).rta_len = len as u16;
-            (*rta).rta_type = rta_type as u16;
-            
-            copy(src_ptr, dst_ptr, alen);
-
-            h.nlmsg_len = (nlmsg_align(h.nlmsg_len as usize) + len) as u32;
-        }
-
-        true
-    }
-}
-
-fn addattr32(h: &mut Nlmsghdr, maxlen: usize, rta_type: libc::c_int, src: u32) -> bool {
-    let len = rta_length(size_of::<u32>());
-    let ptr = h as *const _ as *const libc::c_void;
-
-    if nlmsg_align(h.nlmsg_len as usize) + len > maxlen {
-        false
-    } else {
-        unsafe {
-            let src_ptr = &src as *const _ as *mut libc::c_void;
-
-            let rta = ptr.offset(nlmsg_align(h.nlmsg_len as usize) as isize) as *mut Rtattr;
-            let rta_ptr = rta as *const _ as *mut libc::c_void;
-            let dst_ptr = rta_ptr.offset(size_of::<Rtattr>() as isize);
-
-            (*rta).rta_len = len as u16;
-            (*rta).rta_type = rta_type as u16;
-            
-            copy(src_ptr, dst_ptr, size_of::<u32>());
-
-            h.nlmsg_len = (nlmsg_align(h.nlmsg_len as usize) + len) as u32;
-        }
-
-        true
     }
 }
 
@@ -182,10 +130,46 @@ fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
 }
 
 /// Typedefs.
-type Nlmsghdr = libc::nlmsghdr;
-type AttrMap<'a> = HashMap<c_int, &'a [u8]>;
+pub type AttrMap<'a> = HashMap<c_int, &'a [u8]>;
+
+
+/// struct nlmsghdr from /usr/include/linux/netlink.h.
+///
+///   0                   1                   2                   3
+///   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                          nlmsg_len                            |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |          nlmsg_type           |          nlmsg_flags          |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                          nlmsg_seq                            |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                          nlmsg_pid                            |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///
+#[repr(C)]
+pub struct Nlmsghdr {
+    pub nlmsg_len: u32,
+    pub nlmsg_type: u16,
+    pub nlmsg_flags: u16,
+    pub nlmsg_seq: u32,
+    pub nlmsg_pid: u32,
+}
+
 
 /// struct rtmsg from rtnetlink.h.
+///
+///   0                   1                   2                   3
+///   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |  rtm_family   |  rtm_dst_len  |  rtm_src_len  |    rtm_tos    |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |  rtm_table    |  rtm_protocol |   rtm_scope   |    rtm_type   |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///  |                          rtm_flags                            |
+///  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+///
+
 #[repr(C)]
 struct Rtmsg {
     rtm_family: u8,
@@ -266,6 +250,19 @@ pub struct Netlink {
     callbacks: KernelCallbacks,
 }
 
+#[repr(C)]
+struct Request {
+    nlmsghdr: Nlmsghdr,
+    rtmsg: Rtmsg,
+    buf: [u8; 4096],	// XXX
+}
+
+impl Request {
+    pub fn offset(&self) -> usize {
+        (self.nlmsghdr.nlmsg_len as usize) - (size_of::<Nlmsghdr>() + size_of::<Rtmsg>())
+    }
+}
+
 impl Netlink {
     /// Constructor - open Netlink socket and bind.
     pub fn new(callbacks: KernelCallbacks) -> Result<Netlink, io::Error> {
@@ -321,7 +318,9 @@ impl Netlink {
     }
 
     /// Install route to kernel.
-    pub fn install<T: AddressLen + Clone>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
+    pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable + Clone + FromStr + Eq + Hash
+    {
 
         match self.route_msg::<T>(libc::RTM_NEWROUTE as i32, prefix, rib) {
             Ok(_) => {},
@@ -329,18 +328,62 @@ impl Netlink {
         }
     }
 
-    /// Build route message.
-    fn route_msg<T: AddressLen + Clone>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError> {
-        debug!("Route message");
+    /// Build singlpath nexthop attrbute.
+    fn route_single_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> Result<usize, ZebraError>
+    where T: Addressable
+    {
+        let pos = 0; // XXX
+        let mut len = 0;
 
-        #[repr(C)]
-        struct Request {
-            nlmsghdr: Nlmsghdr,
-            rtmsg: Rtmsg,
-            buf: [u8; 4096],	// XXX
+        for nexthop in nexthops {
+            match nexthop  {
+                Nexthop::Address::<T>(address) => {
+                    let octets: &[u8] = address.octets_ref();
+
+                    len = nlmsg_addattr_l(&mut req.nlmsghdr.nlmsg_len,
+                                          &mut req.buf[pos..], libc::RTA_GATEWAY as i32,
+                                          &octets[..], T::byte_len() as usize)?;
+                },
+                Nexthop::Ifname(_ifname) => { },
+                Nexthop::Network::<T>(_prefix) => { },
+            }
+
+            break;
         }
 
-        let bytelen = prefix.bytelen() as usize;
+        Ok(len)
+    }
+
+    /// Build multipath nexthop attrbute.
+    fn route_multi_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> Result<usize, ZebraError>
+    where T: Addressable
+    {
+        let offset = req.offset();
+
+        // XXX/ Should handle error
+        nlmsg_addattr_payload(&mut req.nlmsghdr.nlmsg_len, &mut req.buf[offset..], libc::RTA_MULTIPATH as i32, |buf: &mut [u8]| -> Result<usize, ZebraError> {
+            let mut rta_len = 0;
+
+            for nexthop in nexthops {
+                match nexthop  {
+                    Nexthop::Address::<T>(address) => {
+                        let add_len = nlmsg_add_rtnexthop(&mut buf[rta_len..], address)?;
+                        rta_len += add_len;
+                    },
+                    Nexthop::Ifname(_ifname) => { },
+                    Nexthop::Network::<T>(_prefix) => { },
+                }
+            }
+
+            Ok(rta_len)
+        })
+    }
+
+    /// Build route message.
+    fn route_msg<T>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError>
+    where T: Addressable + Clone + FromStr + Eq + Hash
+    {
+        debug!("Route message");
 
         // XXX should only initialize nlmsghdr and rtmsg
         let mut req = unsafe { zeroed::<Request>() };
@@ -361,26 +404,26 @@ impl Netlink {
         }
 
         // Destination address.
-        addattr_l(&mut req.nlmsghdr, size_of::<Request>(), libc::RTA_DST as i32,
-                  prefix.octets(), bytelen);
-
+        let pos = req.offset();
+        nlmsg_addattr_l(&mut req.nlmsghdr.nlmsg_len,
+                        &mut req.buf[pos..], libc::RTA_DST as i32,
+                        prefix.octets(), T::byte_len() as usize)?;
         // Metric.
-        addattr32(&mut req.nlmsghdr, size_of::<Request>(), libc::RTA_PRIORITY as i32, 20); // XXX
+        let pos = req.offset();
+        nlmsg_addattr32(&mut req.nlmsghdr.nlmsg_len,
+                        &mut req.buf[pos..], libc::RTA_PRIORITY as i32, 20)?;
 
-        // Nexthops. TBD should handle multiple nexthops.
-        for nexthop in rib.nexthops() {
-            req.rtmsg.rtm_scope = libc::RT_SCOPE_UNIVERSE as u8; // XXX
-            match nexthop  {
-                Nexthop::Address::<T>(address) => {
-                    let octets: &[u8] = address.octets_ref();
+        req.rtmsg.rtm_scope = libc::RT_SCOPE_UNIVERSE as u8; // XXX
 
-                    addattr_l(&mut req.nlmsghdr, size_of::<Request>(),
-                              libc::RTA_GATEWAY as i32, &octets[..], bytelen);
-                },
-                Nexthop::Ifname(_ifname) => { },
-                Nexthop::Network::<T>(_prefix) => { },
-            }
-            break;
+        // Singlepath.
+        if rib.nexthops().len() == 1 {
+            self.route_single_path(&mut req, rib.nexthops())?;
+        // Multipath.
+        } else if rib.nexthops().len() > 1 {
+            self.route_multi_path(&mut req, rib.nexthops())?;
+        // TBD
+        } else {
+
         }
 
         // Send command message through Netlink socket.
@@ -601,7 +644,7 @@ impl Netlink {
     }
 
     fn parse_interface_address<T>(&self, h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> bool
-    where T: AddressFamily + AddressLen + FromStr {
+    where T: AddressFamily + Addressable + FromStr {
         assert!(h.nlmsg_type == libc::RTM_NEWADDR || h.nlmsg_type == libc::RTM_DELADDR);
 
         if ifa.ifa_family as i32 != T::address_family() {
@@ -706,7 +749,7 @@ impl LinkHandler for Netlink {
 impl AddressHandler for Netlink {
     /// Get all addresses per Address Family from kernel.
     fn get_addresses_all<T>(&self) -> Result<(), ZebraError>
-    where T: AddressFamily + AddressLen + FromStr {
+    where T: AddressFamily + Addressable + FromStr {
         debug!("Get address all");
 
         if let Err(err) = self.send_request(T::address_family(), libc::RTM_GETADDR as i32) {

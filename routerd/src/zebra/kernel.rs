@@ -7,6 +7,8 @@
 
 use std::rc::Rc;
 use std::net::{Ipv4Addr, Ipv6Addr};
+use std::str::FromStr;
+use std::hash::Hash;
 
 use rtable::prefix::*;
 
@@ -54,7 +56,9 @@ impl Kernel {
         // route ipv6
     }
 
-    pub fn install<T: AddressLen + Clone>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
+    pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable + Clone + FromStr + Eq + Hash
+    {
         self.driver.install(prefix, rib);
     }
 }

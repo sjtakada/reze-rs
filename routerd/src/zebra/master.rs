@@ -8,10 +8,13 @@
 use log::{debug, error};
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::str::FromStr;
+use std::hash::Hash;
 
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
+use std::sync::Arc;
 use std::sync::mpsc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
@@ -31,7 +34,7 @@ use super::address::*;
 use super::kernel::*;
 use super::static_route::*;
 use super::rib::*;
-use super::nexthop::*;
+//use super::nexthop::*;
 
 /// Store Zebra Client related information.
 struct ClientTuple {
@@ -137,40 +140,19 @@ impl ZebraMaster {
         }
     }
 
-    pub fn rib_add_static_ipv4(&self, addr_str: &str, mask_str: &str, params: &serde_json::Value) {
-        debug!("RIB add static IPv4 {} {} {:?}", addr_str, mask_str, params);
+    pub fn rib_add_static_ipv4(&self, sr: Arc<StaticRoute<Ipv4Addr>>) {
+        debug!("RIB add static IPv4 {:?}", sr.prefix());
 
-        if let Ok(prefix) = prefix_ipv4_from(addr_str, mask_str) {
-            let distance = 1;
-            let tag = 0;
-            let mut rib = Rib::<Ipv4Addr>::new(RibType::Static, distance, tag);
+        let prefix = sr.prefix().clone();
+        let rib = Rib::<Ipv4Addr>::from_static_route(sr);
 
-            // Add nexthops.
-            if params.is_object() && params["nexthops"].is_array() {
-                for nexthop in params["nexthops"].as_array().unwrap() {
-                    if nexthop.is_object() {
-                        for key in nexthop.as_object().unwrap().keys() {
-                            match key.as_ref() {
-                                "ipv4_address" => {
-                                    match Nexthop::<Ipv4Addr>::from_address_str(nexthop[key].as_str().unwrap()) {
-                                        Some(address) => rib.add_nexthop(address),
-                                        None => {}
-                                    }
-                                },
-                                _ => {}
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            // TBD: handle return value
-            self.rib_ipv4.borrow_mut().add(rib, &prefix);
-        }
+        // TBD: handle return value
+        self.rib_ipv4.borrow_mut().add(rib, &prefix);
     }
 
-    pub fn rib_install_kernel<T: AddressLen + Clone>(&self, prefix: &Prefix<T>, rib: &Rib<T>) {
+    pub fn rib_install_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable + Clone + FromStr + Hash + Eq
+    {
         self.kernel.borrow_mut().install(prefix, rib);
     }
 
@@ -237,7 +219,7 @@ impl ZebraMaster {
 
                         match self.config.borrow_mut().apply(method, &path, body) {
                             Ok(_) => { }
-                            Err(_) => error!("config apply error"),
+                            Err(err) => error!("{}", err.to_string()),
                         }
                     },
                     NexusToProto::ProtoTermination => {

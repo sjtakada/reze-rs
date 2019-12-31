@@ -5,31 +5,40 @@
 // Zebra - Static route.
 //
 
+use std::cmp::Ordering;
 use std::rc::Rc;
 use std::sync::Arc;
+use std::cell::RefCell;
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::net::Ipv4Addr;
 //use std::net::Ipv6Addr;
 use std::str::FromStr;
+use std::hash::Hash;
 
 use serde_json;
-
-use log::debug;
+use log::{debug, error};
 use rtable::prefix::*;
 
-use crate::core::protocols::ProtocolType;
+//use crate::core::protocols::ProtocolType;
 use crate::core::config::*;
 use crate::core::error::*;
 use super::master::ZebraMaster;
 use super::nexthop::*;
 
+/// Constants.
+const ZEBRA_ADMINISTRATIVE_DISTANCE_DEFAULT: u8 = 1;
+const ZEBRA_STATIC_ROUTE_TAG_DEFAULT: u32 = 0;
+
+
 /// IPv4 Static route configs.
 pub struct Ipv4StaticRoute {
+
     /// Zebra master.
     master: Rc<ZebraMaster>,
 
     /// Config.
-    _config: BTreeMap<Prefix<Ipv4Addr>, Arc<StaticRoute<Ipv4Addr>>>,
+    config: RefCell<BTreeMap<Prefix<Ipv4Addr>, Arc<StaticRoute<Ipv4Addr>>>>,
 }
 
 impl Ipv4StaticRoute {
@@ -37,9 +46,27 @@ impl Ipv4StaticRoute {
     pub fn new(master: Rc<ZebraMaster>) -> Ipv4StaticRoute {
         Ipv4StaticRoute {
             master: master,
-            _config: BTreeMap::new(),
+            config: RefCell::new(BTreeMap::new()),
         }
     }
+
+    /// Lookup a static route by prefix.
+    pub fn lookup(&self, p: &Prefix<Ipv4Addr>) -> Option<Arc<StaticRoute<Ipv4Addr>>> {
+        match self.config.borrow_mut().get(p) {
+            Some(sr) => Some(sr.clone()),
+            None => None,
+        }
+    }
+
+    /// Add a static route config into the tree.
+    pub fn add(&self, p: Prefix<Ipv4Addr>, s: Arc<StaticRoute<Ipv4Addr>>) -> Option<Arc<StaticRoute<Ipv4Addr>>> {
+        self.config.borrow_mut().insert(p, s)
+    }
+
+    // Delete a static route config into the tree.
+//    pub fn delete(&mut self, p: Prefix<Ipv4Addr>, s: Arc<StaticRoute<Ipv4Addr>>) {
+//        self.config.delete(&p);
+//    }
 }
 
 impl Config for Ipv4StaticRoute {
@@ -48,34 +75,44 @@ impl Config for Ipv4StaticRoute {
         "route_ipv4"
     }
 
-    /// Handle POST method.
-    fn post(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+    /// Handle PUT method.
+    fn put(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
         match params {
             Some(json_str) => {
-                debug!("Configuring IPv4 static routes");
+                debug!("Configuring an IPv4 static route");
 
                 match split_id_and_path(path) {
                     Some((addr_str, none_or_mask_str)) => {
                         // TODO: should handle error.
                         let json: serde_json::Value = serde_json::from_str(&json_str).unwrap();
-
-                        match none_or_mask_str {
-                            Some(mask_str) => {
-                                // Trim leading "/" from mask_str.
-                                self.master.rib_add_static_ipv4(&addr_str, &mask_str[1..], &json);
-                            },
-                            None => {
-                                self.master.rib_add_static_ipv4(&addr_str, "255.255.255.255", &json);
-                            }
+                        let mask_str = match none_or_mask_str {
+                            Some(mask_str) => mask_str,
+                            None => "/255.255.255.255".to_string(),
                         };
+
+                        // Trim leading "/" from mask_str.
+                        if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
+                            match self.lookup(&prefix) {
+                                Some(_sr) => {
+
+                                },
+                                None => {
+                                    let sr = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
+                                    let _config_old = self.add(prefix, sr.clone());
+                                    self.master.rib_add_static_ipv4(sr);
+                                }
+                            }
+                        } else {
+                            return Err(CoreError::CommandExec(format!("Invalid address or mask {} {}", addr_str, mask_str)))
+                        }
                     },
                     None => {
-                        debug!("Invalid path");
+                        return Err(CoreError::CommandExec(format!("Invalid path")));
                     }
                 }
             },
             None => {
-                debug!("No parameters")
+                return Err(CoreError::CommandExec(format!("No parameters")));
             },
         }
 
@@ -85,45 +122,165 @@ impl Config for Ipv4StaticRoute {
 
 
 /// Static route.
-pub struct StaticRoute<T: AddressLen> {
+pub struct StaticRoute<T: Addressable> {
+
     /// Prefix.
     prefix: Prefix<T>,
 
-    /// Administrative distance.
-    distance: u8,
-
-    /// Route tag.
-    tag: u32,
-
     /// Nexthop(s).
-    nexthops: Vec<Nexthop<T>>,
+    nexthops: HashMap<Nexthop<T>, StaticRouteInfo>,
 }
 
-impl<T: Clone + AddressLen + FromStr> StaticRoute<T> {
-    pub fn new(prefix: Prefix<T>, distance: u8, tag: u32) -> StaticRoute<T> {
-        StaticRoute {
-            prefix,
-            distance,
-            tag,
-            nexthops: Vec::new(),
+impl<T> StaticRoute<T>
+where T: Clone + Addressable + Eq + Hash + FromStr
+{
+
+    /// Construct static route from JSON.
+    pub fn from_json(prefix: &Prefix<T>, params: &serde_json::Value) -> Result<StaticRoute<T>, CoreError> {
+        let mut nexthops: HashMap<Nexthop<T>, StaticRouteInfo> = HashMap::new();
+
+        if !params.is_object() {
+            return Err(CoreError::CommandExec("JSON params is not object".to_string()))
         }
+
+        let params = params.as_object().unwrap();
+        if let Some(v_nexthops) = params.get("nexthops") {
+            if !v_nexthops.is_array() {
+                return Err(CoreError::CommandExec("No nexthop array in params".to_string()))
+            }
+
+            for v_nh in v_nexthops.as_array().unwrap() {
+                if !v_nh.is_object() {
+                    error!("Nexthop is not object");
+                    continue;
+                }
+
+                let mut nexthop = None;
+                let mut distance = ZEBRA_ADMINISTRATIVE_DISTANCE_DEFAULT;
+                let mut tag = ZEBRA_STATIC_ROUTE_TAG_DEFAULT;
+
+                if let Some(nh) = v_nh.get("nexthop") {
+                    if nh.is_object() {
+                        if let Some(v) = nh.get("ipv4_address") {
+                            if let Some(address) = Nexthop::<T>::from_address_str(v.as_str().unwrap()) {
+                                nexthop = Some(address.clone());
+                            }
+                        }
+
+                        if let Some(_v) = nh.get("interface") {
+                            // TBD
+                        }
+                    }
+                }
+
+                if let Some(v) = v_nh["distance"].as_u64() {
+                    distance = v as u8;
+                }
+
+                if let Some(v) = v_nh["tag"].as_u64() {
+                    tag = v as u32;
+                }
+
+                if let Some(nexthop) = nexthop {
+                    nexthops.insert(nexthop, StaticRouteInfo { distance, tag});
+                }
+            }
+        } else {
+            return Err(CoreError::CommandExec("No nexthop in params".to_string()))
+        }
+
+        if nexthops.len() == 0 {
+            return Err(CoreError::CommandExec("No valid nexthops".to_string()))
+        }
+
+        Ok(StaticRoute { prefix: prefix.clone(), nexthops: nexthops })
     }
 
     pub fn prefix(&self) -> &Prefix<T> {
         &self.prefix
     }
 
-    pub fn distance(&self) -> u8 {
-        self.distance
+//    pub fn distance(&self) -> u8 {
+//        self.distance
+//    }
+
+//    pub fn tag(&self) -> u32 {
+//        self.tag
+//    }
+
+    pub fn nexthops(&self) -> &HashMap<Nexthop<T>, StaticRouteInfo> {
+        &self.nexthops
     }
 
-    pub fn tag(&self) -> u32 {
-        self.tag
+//    pub fn add_nexthop_address(&mut self, address: &T) {
+//        let nexthop = Nexthop::from_address(address);
+//
+//        self.nexthops.push(nexthop);
+//    }
+}
+
+impl<T> PartialEq for StaticRoute<T>
+where T: Addressable + PartialEq
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.prefix == other.prefix
     }
+}
 
-    pub fn add_nexthop_address(&mut self, address: &T) {
-        let nexthop = Nexthop::from_address(address);
+impl<T> Eq for StaticRoute<T>
+where T: Addressable + Eq
+{
+}
 
-        self.nexthops.push(nexthop);
+
+impl<T> PartialOrd for StaticRoute<T>
+where T: Addressable + PartialOrd
+{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.prefix.partial_cmp(&other.prefix)
+    }
+}
+
+impl<T> Ord for StaticRoute<T>
+where T: Addressable + Ord
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.prefix.cmp(&other.prefix)
+    }
+}
+
+/// Static route info.
+pub struct StaticRouteInfo {
+    /// Administrative distance.
+    distance: u8,
+
+    /// Route tag,
+    tag: u32,
+}
+
+///
+/// Unit tests for StaticRoute.
+///
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn test_ipv4_static_route_cmp() {
+        let p1 = Prefix::<Ipv4Addr>::from_str("10.0.0.0/24").unwrap();
+        let p2 = Prefix::<Ipv4Addr>::from_str("10.0.0.0/16").unwrap();
+        let p3 = Prefix::<Ipv4Addr>::from_str("10.10.0.0/24").unwrap();
+
+        assert_eq!(p1 > p2, true);
+        assert_eq!(p1 < p3, true);
+        assert_eq!(p2 < p3, true);
+
+        let s1 = StaticRoute::<Ipv4Addr>::new(p1, 30, 0);
+        let s2 = StaticRoute::<Ipv4Addr>::new(p2, 20, 0);
+        let s3 = StaticRoute::<Ipv4Addr>::new(p3, 10, 0);
+
+        assert_eq!(s1 > s2, true);
+        assert_eq!(s1 < s3, true);
+        assert_eq!(s2 < s3, true);
     }
 }

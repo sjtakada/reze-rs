@@ -8,7 +8,10 @@
 use std::time;
 use std::fmt;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::rc::Weak;
+use std::str::FromStr;
+use std::hash::Hash;
 
 use log::debug;
 
@@ -17,6 +20,7 @@ use rtable::tree::*;
 
 use super::master::*;
 use super::nexthop::*;
+use super::static_route::*;
 
 /// RIB type.
 pub enum RibType {
@@ -32,7 +36,7 @@ pub enum RibType {
 }
 
 /// RIB.
-pub struct Rib<T: AddressLen> {
+pub struct Rib<T: Addressable> {
     /// Type.
     _rib_type: RibType,
 
@@ -49,7 +53,10 @@ pub struct Rib<T: AddressLen> {
     _instant: time::Instant,
 }
 
-impl<T: AddressLen> Rib<T> {
+impl<T> Rib<T>
+where T: Addressable + Clone + FromStr + Eq + Hash
+{
+    /// Constructor.
     pub fn new(rib_type: RibType, distance: u8, tag: u32) -> Rib<T> {
         Rib {
             _rib_type: rib_type,
@@ -58,6 +65,24 @@ impl<T: AddressLen> Rib<T> {
             _distance: distance,
             _instant: time::Instant::now(),
         }
+    }
+
+    /// Construct RIB from static route config.
+    pub fn from_static_route(sr: Arc<StaticRoute<T>>) -> Rib<T> {
+        let mut rib = Rib::<T>::new(RibType::Static, 0, 0);
+        for (nexthop, info) in sr.nexthops() {
+            match nexthop {
+                Nexthop::Address(_address) => {
+                    rib.add_nexthop(nexthop.clone());
+                },
+                Nexthop::Ifname(_ifname) => {
+                },
+                Nexthop::Network::<T>(_network) => {
+                },
+            }
+        }
+
+        rib
     }
 
     pub fn nexthops(&self) -> &Vec<Nexthop<T>> {
@@ -70,7 +95,7 @@ impl<T: AddressLen> Rib<T> {
 }
 
 /// RIB table.
-pub struct RibTable<T: AddressLen + Clone> {
+pub struct RibTable<T: Addressable + Clone> {
     /// Zebra master.
     master: Weak<ZebraMaster>,
 
@@ -78,7 +103,10 @@ pub struct RibTable<T: AddressLen + Clone> {
     tree: Tree<Prefix<T>, Vec<Rib<T>>>,
 }
 
-impl<T: AddressLen + Clone + fmt::Debug> RibTable<T> {
+impl<T> RibTable<T>
+where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
+{
+    /// Constructor.
     pub fn new() -> RibTable<T> {
         RibTable {
             master: Default::default(),
