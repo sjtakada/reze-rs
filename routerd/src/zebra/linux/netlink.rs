@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Zebra - Netlink abstraction.
 //
@@ -25,6 +25,7 @@ use log::error;
 use rtable::prefix::*;
 
 use super::rtnetlink::*;
+use super::encode::*;
 use super::super::error::*;
 use super::super::master::ZebraMaster;
 use super::super::kernel::*;
@@ -32,6 +33,7 @@ use super::super::link::*;
 use super::super::address::*;
 use super::super::rib::*;
 use super::super::nexthop::*;
+
 
 const RTMGRP_LINK: libc::c_int = 1;
 const RTMGRP_IPV4_IFADDR: libc::c_int = 0x10;
@@ -93,18 +95,6 @@ fn nlmsg_attr_ok(buf: &[u8]) -> bool {
     } else {
         false
     }
-}
-
-fn get_u32(p: &[u8]) -> u32 {
-    unsafe { *(p as *const _ as *const u32) }
-}
-
-fn _get_u16(p: &[u8]) -> u16 {
-    unsafe { *(p as *const _ as *const u16) }
-}
-
-fn _get_u8(p: &[u8]) -> u8 {
-    unsafe { *(p as *const _ as *const u8) }
 }
 
 fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
@@ -360,8 +350,8 @@ impl Netlink {
     {
         let offset = req.offset();
 
-        // XXX/ Should handle error
-        nlmsg_addattr_payload(&mut req.nlmsghdr.nlmsg_len, &mut req.buf[offset..], libc::RTA_MULTIPATH as i32, |buf: &mut [u8]| -> Result<usize, ZebraError> {
+        nlmsg_addattr_payload(&mut req.nlmsghdr.nlmsg_len, &mut req.buf[offset..], libc::RTA_MULTIPATH as i32,
+                              |buf: &mut [u8]| -> Result<usize, ZebraError> {
             let mut rta_len = 0;
 
             for nexthop in nexthops {
@@ -615,7 +605,7 @@ impl Netlink {
         };
 
         let mtu = match attr.get(&(libc::IFLA_MTU as i32)) {
-            Some(mtu) => get_u32(*mtu),
+            Some(mtu) => decode_num::<u32>(*mtu),
             None => 0u32,  // maybe set default?
         };
         let ifname = match attr.get(&(libc::IFLA_IFNAME as i32)) {
