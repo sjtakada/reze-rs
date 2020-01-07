@@ -156,6 +156,19 @@ impl ZebraMaster {
         self.kernel.borrow_mut().install(prefix, rib);
     }
 
+    pub fn rib_update_kernel<T>(&self, prefix: &Prefix<T>, new: &Rib<T>, old: &Rib<T>)
+    where T: Addressable + Clone + FromStr + Hash + Eq
+    {
+        self.kernel.borrow_mut().uninstall(prefix, old);
+        self.kernel.borrow_mut().install(prefix, old);
+    }
+
+    pub fn rib_uninstall_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable + Clone + FromStr + Hash + Eq
+    {
+        self.kernel.borrow_mut().uninstall(prefix, rib);
+    }
+
     pub fn init(master: Rc<ZebraMaster>) {
         ZebraMaster::kernel_init(master.clone());
         ZebraMaster::config_init(master.clone());

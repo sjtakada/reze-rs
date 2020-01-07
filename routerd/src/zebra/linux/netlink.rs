@@ -311,8 +311,17 @@ impl Netlink {
     pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
     where T: Addressable + Clone + FromStr + Eq + Hash
     {
-
         match self.route_msg::<T>(libc::RTM_NEWROUTE as i32, prefix, rib) {
+            Ok(_) => {},
+            Err(err) => error!("{}", err.to_string())
+        }
+    }
+
+    /// Unnstall route to kernel.
+    pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable + Clone + FromStr + Eq + Hash
+    {
+        match self.route_msg::<T>(libc::RTM_DELROUTE as i32, prefix, rib) {
             Ok(_) => {},
             Err(err) => error!("{}", err.to_string())
         }
@@ -322,7 +331,7 @@ impl Netlink {
     fn route_single_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> Result<usize, ZebraError>
     where T: Addressable
     {
-        let pos = 0; // XXX
+        let pos = req.offset();
         let mut len = 0;
 
         for nexthop in nexthops {
@@ -349,6 +358,8 @@ impl Netlink {
     where T: Addressable
     {
         let offset = req.offset();
+
+        debug!("*** multipath");
 
         nlmsg_addattr_payload(&mut req.nlmsghdr.nlmsg_len, &mut req.buf[offset..], libc::RTA_MULTIPATH as i32,
                               |buf: &mut [u8]| -> Result<usize, ZebraError> {

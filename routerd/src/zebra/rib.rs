@@ -126,13 +126,12 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
             debug!("Prefix {:?} exists", prefix);
         }
 
-        debug!("rib add");
+        debug!("rib add {:?}", prefix);
 
         let it = self.tree.lookup_exact(prefix);
         if let Some(ref node) = *it.node() {
             // TBD: compare existing RIB with the same type, and replace it if they are different
             // and then run RIB update process.
-
 
             if let Some(master) = self.master.upgrade() {
                 master.rib_install_kernel(prefix, &rib);

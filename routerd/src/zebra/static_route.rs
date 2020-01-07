@@ -63,7 +63,7 @@ impl Ipv4StaticRoute {
     pub fn add(&self, p: Prefix<Ipv4Addr>, sr_new: Arc<StaticRoute<Ipv4Addr>>) -> Arc<StaticRoute<Ipv4Addr>> {
         match self.lookup(&p) {
             Some(sr) => {
-                while let Some((nh, info)) = sr_new.pop_nexthop() {
+                for (nh, info) in sr_new.nexthops.borrow_mut().drain() {
                     sr.nexthops.borrow_mut().insert(nh, info);
                 }
 
@@ -105,17 +105,9 @@ impl Config for Ipv4StaticRoute {
 
                         // Trim leading "/" from mask_str.
                         if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
-                            match self.lookup(&prefix) {
-                                Some(_sr) => {
-
-                                },
-                                None => {
-                                    // TBD: may not need temporary SR.
-                                    let sr_new = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
-                                    let sr = self.add(prefix, sr_new);
-                                    self.master.rib_add_static_ipv4(sr);
-                                }
-                            }
+                            let sr_new = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
+                            let sr = self.add(prefix, sr_new);
+                            self.master.rib_add_static_ipv4(sr);
                         } else {
                             return Err(CoreError::CommandExec(format!("Invalid address or mask {} {}", addr_str, mask_str)))
                         }
@@ -153,15 +145,6 @@ where T: Clone + Addressable + Eq + Hash + FromStr
         StaticRoute {
             prefix,
             nexthops: RefCell::new(nexthops),
-        }
-    }
-
-    /// Pop one nexthop from static route.
-    pub fn pop_nexthop(&self) -> Option<(Nexthop<T>, StaticRouteInfo)> {
-        if let Some((nh, _)) = self.nexthops.borrow_mut().iter().next() {
-            self.nexthops.borrow_mut().remove_entry(&nh)
-        } else {
-            None
         }
     }
 
@@ -212,7 +195,7 @@ where T: Clone + Addressable + Eq + Hash + FromStr
                 }
 
                 if let Some(nexthop) = nexthop {
-                    nexthops.insert(nexthop, StaticRouteInfo { distance, tag});
+                    nexthops.insert(nexthop, StaticRouteInfo { distance, tag });
                 }
             }
         } else {
