@@ -9,6 +9,7 @@ use std::cmp::Ordering;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::cell::RefCell;
+use std::cell::RefMut;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
@@ -59,8 +60,20 @@ impl Ipv4StaticRoute {
     }
 
     /// Add a static route config into the tree.
-    pub fn add(&self, p: Prefix<Ipv4Addr>, s: Arc<StaticRoute<Ipv4Addr>>) -> Option<Arc<StaticRoute<Ipv4Addr>>> {
-        self.config.borrow_mut().insert(p, s)
+    pub fn add(&self, p: Prefix<Ipv4Addr>, sr_new: Arc<StaticRoute<Ipv4Addr>>) -> Arc<StaticRoute<Ipv4Addr>> {
+        match self.lookup(&p) {
+            Some(sr) => {
+                while let Some((nh, info)) = sr_new.pop_nexthop() {
+                    sr.nexthops.borrow_mut().insert(nh, info);
+                }
+
+                sr.clone()
+            },
+            None => {
+                self.config.borrow_mut().insert(p, sr_new.clone());
+                sr_new.clone()
+            }
+        }
     }
 
     // Delete a static route config into the tree.
@@ -97,8 +110,9 @@ impl Config for Ipv4StaticRoute {
 
                                 },
                                 None => {
-                                    let sr = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
-                                    let _config_old = self.add(prefix, sr.clone());
+                                    // TBD: may not need temporary SR.
+                                    let sr_new = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
+                                    let sr = self.add(prefix, sr_new);
                                     self.master.rib_add_static_ipv4(sr);
                                 }
                             }
@@ -128,19 +142,35 @@ pub struct StaticRoute<T: Addressable> {
     prefix: Prefix<T>,
 
     /// Nexthop(s).
-    nexthops: HashMap<Nexthop<T>, StaticRouteInfo>,
+    nexthops: RefCell<HashMap<Nexthop<T>, StaticRouteInfo>>,
 }
 
 impl<T> StaticRoute<T>
 where T: Clone + Addressable + Eq + Hash + FromStr
 {
+    /// Constructor.
+    pub fn new(prefix: Prefix<T>, nexthops: HashMap<Nexthop<T>, StaticRouteInfo>) -> StaticRoute<T> {
+        StaticRoute {
+            prefix,
+            nexthops: RefCell::new(nexthops),
+        }
+    }
+
+    /// Pop one nexthop from static route.
+    pub fn pop_nexthop(&self) -> Option<(Nexthop<T>, StaticRouteInfo)> {
+        if let Some((nh, _)) = self.nexthops.borrow_mut().iter().next() {
+            self.nexthops.borrow_mut().remove_entry(&nh)
+        } else {
+            None
+        }
+    }
 
     /// Construct static route from JSON.
     pub fn from_json(prefix: &Prefix<T>, params: &serde_json::Value) -> Result<StaticRoute<T>, CoreError> {
         let mut nexthops: HashMap<Nexthop<T>, StaticRouteInfo> = HashMap::new();
 
         if !params.is_object() {
-            return Err(CoreError::CommandExec("JSON params is not object".to_string()))
+            return Err(CoreError::CommandExec("JSON param is not an object".to_string()))
         }
 
         let params = params.as_object().unwrap();
@@ -151,7 +181,7 @@ where T: Clone + Addressable + Eq + Hash + FromStr
 
             for v_nh in v_nexthops.as_array().unwrap() {
                 if !v_nh.is_object() {
-                    error!("Nexthop is not object");
+                    error!("Nexthop is not an object");
                     continue;
                 }
 
@@ -193,7 +223,7 @@ where T: Clone + Addressable + Eq + Hash + FromStr
             return Err(CoreError::CommandExec("No valid nexthops".to_string()))
         }
 
-        Ok(StaticRoute { prefix: prefix.clone(), nexthops: nexthops })
+        Ok(StaticRoute::new(prefix.clone(), nexthops))
     }
 
     pub fn prefix(&self) -> &Prefix<T> {
@@ -208,15 +238,9 @@ where T: Clone + Addressable + Eq + Hash + FromStr
 //        self.tag
 //    }
 
-    pub fn nexthops(&self) -> &HashMap<Nexthop<T>, StaticRouteInfo> {
-        &self.nexthops
+    pub fn nexthops(&self) -> RefMut<HashMap<Nexthop<T>, StaticRouteInfo>> {
+        self.nexthops.borrow_mut()
     }
-
-//    pub fn add_nexthop_address(&mut self, address: &T) {
-//        let nexthop = Nexthop::from_address(address);
-//
-//        self.nexthops.push(nexthop);
-//    }
 }
 
 impl<T> PartialEq for StaticRoute<T>
@@ -250,6 +274,7 @@ where T: Addressable + Ord
 }
 
 /// Static route info.
+#[derive(Clone)]
 pub struct StaticRouteInfo {
     /// Administrative distance.
     distance: u8,

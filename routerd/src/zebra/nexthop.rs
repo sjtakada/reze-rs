@@ -57,3 +57,4 @@ impl<T: Addressable + fmt::Debug> fmt::Display for Nexthop<T> {
         }
     }
 }
+

@@ -70,7 +70,8 @@ where T: Addressable + Clone + FromStr + Eq + Hash
     /// Construct RIB from static route config.
     pub fn from_static_route(sr: Arc<StaticRoute<T>>) -> Rib<T> {
         let mut rib = Rib::<T>::new(RibType::Static, 0, 0);
-        for (nexthop, info) in sr.nexthops() {
+
+        for (nexthop, info) in sr.nexthops().iter() {
             match nexthop {
                 Nexthop::Address(_address) => {
                     rib.add_nexthop(nexthop.clone());
