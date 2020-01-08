@@ -359,8 +359,6 @@ impl Netlink {
     {
         let offset = req.offset();
 
-        debug!("*** multipath");
-
         nlmsg_addattr_payload(&mut req.nlmsghdr.nlmsg_len, &mut req.buf[offset..], libc::RTA_MULTIPATH as i32,
                               |buf: &mut [u8]| -> Result<usize, ZebraError> {
             let mut rta_len = 0;

@@ -76,10 +76,23 @@ impl Ipv4StaticRoute {
         }
     }
 
-    // Delete a static route config into the tree.
-//    pub fn delete(&mut self, p: Prefix<Ipv4Addr>, s: Arc<StaticRoute<Ipv4Addr>>) {
-//        self.config.delete(&p);
-//    }
+    /// Delete a static route config from the tree.
+    pub fn delete_config(&self, p: Prefix<Ipv4Addr>, sr_new: Arc<StaticRoute<Ipv4Addr>>) -> Option<Arc<StaticRoute<Ipv4Addr>>> {
+        match self.lookup(&p) {
+            Some(sr) => {
+                for (nh, info) in sr_new.nexthops.borrow_mut().drain() {
+                    sr.nexthops.borrow_mut().remove(&nh);
+                }
+
+                if sr.nexthops.borrow_mut().len() == 0 {
+                    None
+                } else {
+                    Some(sr)
+                }
+            },
+            None => None,
+        }
+    }
 }
 
 impl Config for Ipv4StaticRoute {
@@ -108,6 +121,48 @@ impl Config for Ipv4StaticRoute {
                             let sr_new = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
                             let sr = self.add(prefix, sr_new);
                             self.master.rib_add_static_ipv4(sr);
+                        } else {
+                            return Err(CoreError::CommandExec(format!("Invalid address or mask {} {}", addr_str, mask_str)))
+                        }
+                    },
+                    None => {
+                        return Err(CoreError::CommandExec(format!("Invalid path")));
+                    }
+                }
+            },
+            None => {
+                return Err(CoreError::CommandExec(format!("No parameters")));
+            },
+        }
+
+        Ok(())
+    }
+
+    /// Handle DELETE method.
+    fn delete(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+        match params {
+            Some(json_str) => {
+                debug!("Unconfiguring an IPv4 static route");
+
+                match split_id_and_path(path) {
+                    Some((addr_str, none_or_mask_str)) => {
+                        // TODO: should handle error.
+                        let json: serde_json::Value = serde_json::from_str(&json_str).unwrap();
+                        let mask_str = match none_or_mask_str {
+                            Some(mask_str) => mask_str,
+                            None => "/255.255.255.255".to_string(),
+                        };
+
+                        // Trim leading "/" from mask_str.
+                        if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
+                            let sr_new = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
+                            match self.delete_config(prefix.clone(), sr_new) {
+                                Some(sr) => {
+                                    self.master.rib_add_static_ipv4(sr);
+                                }
+                                None => {
+                                }
+                            }
                         } else {
                             return Err(CoreError::CommandExec(format!("Invalid address or mask {} {}", addr_str, mask_str)))
                         }
