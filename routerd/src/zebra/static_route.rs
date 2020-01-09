@@ -77,7 +77,7 @@ impl Ipv4StaticRoute {
     }
 
     /// Delete a static route config from the tree.
-    pub fn delete_config(&self, p: Prefix<Ipv4Addr>, sr_new: Arc<StaticRoute<Ipv4Addr>>) -> Option<Arc<StaticRoute<Ipv4Addr>>> {
+    pub fn delete(&self, p: Prefix<Ipv4Addr>, sr_new: Arc<StaticRoute<Ipv4Addr>>) -> Option<Arc<StaticRoute<Ipv4Addr>>> {
         match self.lookup(&p) {
             Some(sr) => {
                 for (nh, info) in sr_new.nexthops.borrow_mut().drain() {
@@ -102,7 +102,7 @@ impl Config for Ipv4StaticRoute {
     }
 
     /// Handle PUT method.
-    fn put(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_put(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
         match params {
             Some(json_str) => {
                 debug!("Configuring an IPv4 static route");
@@ -139,7 +139,7 @@ impl Config for Ipv4StaticRoute {
     }
 
     /// Handle DELETE method.
-    fn delete(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_delete(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
         match params {
             Some(json_str) => {
                 debug!("Unconfiguring an IPv4 static route");
@@ -156,11 +156,12 @@ impl Config for Ipv4StaticRoute {
                         // Trim leading "/" from mask_str.
                         if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
                             let sr_new = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
-                            match self.delete_config(prefix.clone(), sr_new) {
+                            match self.delete(prefix.clone(), sr_new.clone()) {
                                 Some(sr) => {
                                     self.master.rib_add_static_ipv4(sr);
                                 }
                                 None => {
+                                    self.master.rib_delete_static_ipv4(sr_new);
                                 }
                             }
                         } else {

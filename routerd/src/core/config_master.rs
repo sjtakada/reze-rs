@@ -49,11 +49,11 @@ impl ConfigMaster {
                         match config_or_protocol {
                             ConfigOrProtocol::Local(config) => {
                                 match method {
-                                    Method::Get => config.get(&path, body),
-                                    Method::Post => config.post(&path, body),
-                                    Method::Put => config.put(&path, body),
-                                    Method::Delete => config.delete(&path, body),
-                                    Method::Patch => config.patch(&path, body),
+                                    Method::Get => config.handle_get(&path, body),
+                                    Method::Post => config.handle_post(&path, body),
+                                    Method::Put => config.handle_put(&path, body),
+                                    Method::Delete => config.handle_delete(&path, body),
+                                    Method::Patch => config.handle_patch(&path, body),
                                 }
                             },
                             _ => {

@@ -120,7 +120,7 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
         self.master = Rc::downgrade(&master);
     }
 
-    pub fn add(&mut self, rib: Rib<T>, prefix: &Prefix<T>) {
+    pub fn add(&mut self, prefix: &Prefix<T>, rib: Rib<T>) {
         let v = Vec::new();
         if let Some(_) = self.tree.insert(prefix, v) {
             debug!("Prefix {:?} exists", prefix);
@@ -137,11 +137,36 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
                 master.rib_install_kernel(prefix, &rib);
             }
 
+            // TBD: we should do route selection here or somewhere else.
             match *node.data() {
                 Some(ref mut v) => {
                     v.push(rib);
                 }
                 None => {}
+            }
+        }
+    }
+
+    pub fn delete(&mut self, prefix: &Prefix<T>) {
+        debug!("rib delete {:?}", prefix);
+
+        let it = self.tree.lookup_exact(prefix);
+        if let Some(ref node) = *it.node() {
+            // TBD: compare existing RIB with the same type, and replace it if they are different
+            // and then run RIB update process.
+
+            // TBD: we should do route selection here.
+            if let Some(master) = self.master.upgrade() {
+                match *node.data() {
+                    Some(ref mut v) => {
+                        let rib = v.iter().next().unwrap();
+
+                        master.rib_uninstall_kernel(prefix, &rib);
+
+//                        v.drain();
+                    },
+                    None => {},
+                }
             }
         }
     }
