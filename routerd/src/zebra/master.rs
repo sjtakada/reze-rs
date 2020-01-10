@@ -150,7 +150,18 @@ impl ZebraMaster {
             self.rib_ipv4.borrow_mut().add(&prefix, rib);
         }
 
-        self.rib_ipv4.borrow_mut().process(&prefix);
+        self.rib_ipv4.borrow_mut().process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
+            if let Some(ref mut fib) = *entry.fib() {
+                self.rib_uninstall_kernel(prefix, &fib);
+            }
+
+            if let Some((_, selected)) = entry.ribs().iter().next() {
+                self.rib_install_kernel(prefix, &selected);
+                Some(selected.clone())
+            } else {
+                None
+            }
+        });
     }
 
     pub fn rib_delete_static_ipv4(&self, sr: Arc<StaticRoute<Ipv4Addr>>) {
@@ -163,7 +174,18 @@ impl ZebraMaster {
             self.rib_ipv4.borrow_mut().delete(&prefix, rib);
         }
 
-        self.rib_ipv4.borrow_mut().process(&prefix);
+        self.rib_ipv4.borrow_mut().process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
+            if let Some(ref mut fib) = *entry.fib() {
+                self.rib_uninstall_kernel(prefix, &fib);
+            }
+
+            if let Some((_, selected)) = entry.ribs().iter().next() {
+                self.rib_install_kernel(prefix, &selected);
+                Some(selected.clone())
+            } else {
+                None
+            }
+        });
     }
 
     pub fn rib_install_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)

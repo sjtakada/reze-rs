@@ -258,7 +258,9 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
 
     /// Process route selection algorithm per prefix.
     /// Core part of routing mechanism, including nexthop activation check.
-    pub fn process(&mut self, prefix: &Prefix<T>) {
+    pub fn process<F>(&mut self, prefix: &Prefix<T>, kfunc: F)
+    where F: Fn(&Prefix<T>, &RibEntry<T>) -> Option<Rib<T>>
+    {
         debug!("rib process {:?}", prefix);
 
         let it = self.tree.lookup_exact(prefix);
@@ -276,17 +278,9 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
                     entry.ribs().remove(&key);
                 }
 
-                if let Some(master) = self.master.upgrade() {
-                    if let Some(ref mut fib) = *entry.fib() {
-                        master.rib_uninstall_kernel(prefix, &fib);
-                    }
-
-                    if let Some((_, selected)) = entry.ribs().iter().next() {
-                        master.rib_install_kernel(prefix, &selected);
-
-                        let fib = selected.clone();
-                        entry.fib().replace(fib);
-                    }
+                // Call kernel function to install/unistall selected route.
+                if let Some(fib) = kfunc(prefix, entry) {
+                    entry.fib().replace(fib);
                 }
             }
         }
