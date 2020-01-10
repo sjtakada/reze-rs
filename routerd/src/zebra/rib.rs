@@ -12,6 +12,7 @@ use std::sync::Arc;
 use std::rc::Weak;
 use std::str::FromStr;
 use std::hash::Hash;
+use std::collections::HashMap;
 
 use log::debug;
 
@@ -43,47 +44,51 @@ pub struct Rib<T: Addressable> {
     /// Nexthops.
     nexthops: Vec<Nexthop<T>>,
 
-    /// Tag.
-    _tag: u32,
-
     /// Administrative distance.
-    _distance: u8,
+    distance: u8,
 
     /// Time updated.
     _instant: time::Instant,
+
+    /// Tag -- TBD placeholder.
+    _tag: u32,
 }
 
 impl<T> Rib<T>
 where T: Addressable + Clone + FromStr + Eq + Hash
 {
     /// Constructor.
-    pub fn new(rib_type: RibType, distance: u8, tag: u32) -> Rib<T> {
+    pub fn new(rib_type: RibType, distance: u8) -> Rib<T> {
         Rib {
             _rib_type: rib_type,
             nexthops: Vec::new(),
-            _tag: tag,
-            _distance: distance,
+            distance: distance,
             _instant: time::Instant::now(),
+            _tag: 0,
         }
     }
 
     /// Construct RIB from static route config.
-    pub fn from_static_route(sr: Arc<StaticRoute<T>>) -> Rib<T> {
-        let mut rib = Rib::<T>::new(RibType::Static, 0, 0);
+    /// Classify static routes by distance, may return multiple RIBs.
+    pub fn from_static_route(sr: Arc<StaticRoute<T>>) -> HashMap<u8, Rib<T>> {
+        let mut map = HashMap::<u8, Rib<T>>::new();
 
         for (nexthop, info) in sr.nexthops().iter() {
-            match nexthop {
-                Nexthop::Address(_address) => {
-                    rib.add_nexthop(nexthop.clone());
-                },
-                Nexthop::Ifname(_ifname) => {
-                },
-                Nexthop::Network::<T>(_network) => {
-                },
-            }
+            let distance = info.distance();
+
+            let rib = match map.get_mut(&distance) {
+                Some(rib) => rib,
+                None => {
+                    let rib = Rib::<T>::new(RibType::Static, distance);
+                    map.insert(distance, rib);
+                    map.get_mut(&distance).unwrap()
+                }
+            };
+
+            rib.add_nexthop(nexthop.clone());
         }
 
-        rib
+        map
     }
 
     pub fn nexthops(&self) -> &Vec<Nexthop<T>> {
@@ -96,7 +101,11 @@ where T: Addressable + Clone + FromStr + Eq + Hash
 }
 
 /// RIB table.
+///   Each RIB entry is indexed by prefix (address + prefix length). Multiple RIB entries may
+///   be stored in each prefix, per different protocol type and distance.
+///
 pub struct RibTable<T: Addressable + Clone> {
+
     /// Zebra master.
     master: Weak<ZebraMaster>,
 

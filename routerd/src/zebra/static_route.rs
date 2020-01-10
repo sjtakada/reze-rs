@@ -322,6 +322,14 @@ pub struct StaticRouteInfo {
     tag: u32,
 }
 
+impl StaticRouteInfo {
+
+    /// Return distance.
+    pub fn distance(&self) -> u8 {
+        self.distance
+    }
+}
+
 ///
 /// Unit tests for StaticRoute.
 ///
