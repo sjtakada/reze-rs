@@ -147,19 +147,23 @@ impl ZebraMaster {
         let mut map = Rib::<Ipv4Addr>::from_static_route(sr);
 
         for (_, rib) in map.drain() {
-
-            // TBD: handle return value
             self.rib_ipv4.borrow_mut().add(&prefix, rib);
         }
+
+        self.rib_ipv4.borrow_mut().process(&prefix);
     }
 
     pub fn rib_delete_static_ipv4(&self, sr: Arc<StaticRoute<Ipv4Addr>>) {
         debug!("RIB delete static IPv4 {:?}", sr.prefix());
 
         let prefix = sr.prefix().clone();
+        let mut map = Rib::<Ipv4Addr>::from_static_route(sr);
 
-        // TBD: handle return value
-        self.rib_ipv4.borrow_mut().delete(&prefix);
+        for (_, rib) in map.drain() {
+            self.rib_ipv4.borrow_mut().delete(&prefix, rib);
+        }
+
+        self.rib_ipv4.borrow_mut().process(&prefix);
     }
 
     pub fn rib_install_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)

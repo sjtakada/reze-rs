@@ -7,12 +7,16 @@
 
 use std::time;
 use std::fmt;
+use std::cell::Cell;
+use std::cell::RefCell;
+use std::cell::RefMut;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::rc::Weak;
 use std::str::FromStr;
 use std::hash::Hash;
 use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use log::debug;
 
@@ -24,6 +28,7 @@ use super::nexthop::*;
 use super::static_route::*;
 
 /// RIB type.
+#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
 pub enum RibType {
     System,
     Kernel,
@@ -36,22 +41,29 @@ pub enum RibType {
     Bgp,
 }
 
-/// RIB.
+/// RIB, store essential routing information with nexthops per single protocol type.
+#[derive(Clone)]
 pub struct Rib<T: Addressable> {
     /// Type.
-    _rib_type: RibType,
-
-    /// Nexthops.
-    nexthops: Vec<Nexthop<T>>,
+    rib_type: RibType,
 
     /// Administrative distance.
     distance: u8,
 
     /// Time updated.
-    _instant: time::Instant,
+    instant: time::Instant,
 
     /// Tag -- TBD placeholder.
     _tag: u32,
+
+    /// TBD: Flag selected.
+    selected: Cell<bool>,
+
+    /// TBD: Flag FIB. 
+    fib: Cell<bool>,
+
+    /// Nexthops.
+    nexthops: RefCell<Vec<Nexthop<T>>>,
 }
 
 impl<T> Rib<T>
@@ -60,11 +72,13 @@ where T: Addressable + Clone + FromStr + Eq + Hash
     /// Constructor.
     pub fn new(rib_type: RibType, distance: u8) -> Rib<T> {
         Rib {
-            _rib_type: rib_type,
-            nexthops: Vec::new(),
+            rib_type: rib_type,
             distance: distance,
-            _instant: time::Instant::now(),
+            instant: time::Instant::now(),
             _tag: 0,
+            selected: Cell::new(false),
+            fib: Cell::new(false),
+            nexthops: RefCell::new(Vec::new()),
         }
     }
 
@@ -91,14 +105,95 @@ where T: Addressable + Clone + FromStr + Eq + Hash
         map
     }
 
-    pub fn nexthops(&self) -> &Vec<Nexthop<T>> {
-        &self.nexthops
+    pub fn key(&self) -> RibKey {
+        (self.distance, self.rib_type)
     }
 
-    pub fn add_nexthop(&mut self, nexthop: Nexthop<T>) {
-        self.nexthops.push(nexthop);
+    pub fn rib_type(&self) -> RibType {
+        self.rib_type
+    }
+
+    pub fn distance(&self) -> u8 {
+        self.distance
+    }
+
+    pub fn uptime(&self) -> time::Duration {
+        time::Instant::now() - self.instant
+    }
+
+    pub fn set_selected(&self, selected: bool) {
+        self.selected.set(selected)
+    }
+
+    pub fn set_fib(&self, fib: bool) {
+        self.fib.set(fib)
+    }
+
+    pub fn nexthops(&self) -> RefMut<Vec<Nexthop<T>>> {
+        self.nexthops.borrow_mut()
+    }
+
+    pub fn add_nexthop(&self, nexthop: Nexthop<T>) {
+        self.nexthops.borrow_mut().push(nexthop);
+    }
+
+    pub fn delete_nexthop(&self, nexthop: &Nexthop<T>) {
+        let nexthops = self.nexthops.replace(Vec::new());
+        for nh in nexthops {
+            if nh != *nexthop {
+                self.nexthops.borrow_mut().push(nh);
+            }
+        }
     }
 }
+
+/// RIB candidate key.
+///
+type RibKey = (u8, RibType);
+
+/// RIB entry.
+///   Store a selected FIB, as well as all candidates per RibKey (distance, RibType).
+///
+pub struct RibEntry<T: Addressable> {
+
+    /// FIB.
+    fib: RefCell<Option<Rib<T>>>,
+
+    /// Candidate RIBs.
+    ribs: RefCell<BTreeMap<RibKey, Rib<T>>>,
+
+    /// Updated.
+    updated: Cell<bool>,
+}
+
+impl<T> RibEntry<T>
+where T: Addressable
+{
+    /// Constructor.
+    pub fn new() -> RibEntry<T> {
+        RibEntry {
+            fib: RefCell::new(None),
+            ribs: RefCell::new(BTreeMap::new()),
+            updated: Cell::new(false),
+        }
+    }
+
+    /// FIB.
+    pub fn fib(&self) -> RefMut<Option<Rib<T>>> {
+        self.fib.borrow_mut()
+    }
+
+    /// Candidates.
+    pub fn ribs(&self) -> RefMut<BTreeMap<RibKey, Rib<T>>> {
+        self.ribs.borrow_mut()
+    }
+
+    /// Is any of RIBs updated?
+    pub fn is_updated(&self) -> bool {
+        self.updated.get()
+    }
+}
+
 
 /// RIB table.
 ///   Each RIB entry is indexed by prefix (address + prefix length). Multiple RIB entries may
@@ -110,7 +205,8 @@ pub struct RibTable<T: Addressable + Clone> {
     master: Weak<ZebraMaster>,
 
     /// Table tree.
-    tree: Tree<Prefix<T>, Vec<Rib<T>>>,
+    //tree: Tree<Prefix<T>, Vec<Rib<T>>>,
+    tree: Tree<Prefix<T>, RibEntry<T>>,
 }
 
 impl<T> RibTable<T>
@@ -129,52 +225,62 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
         self.master = Rc::downgrade(&master);
     }
 
+    /// Add given RIBs into tree per prefix.
     pub fn add(&mut self, prefix: &Prefix<T>, rib: Rib<T>) {
-        let v = Vec::new();
-        if let Some(_) = self.tree.insert(prefix, v) {
-            debug!("Prefix {:?} exists", prefix);
-        }
+        debug!("rib add {:?} type {:?} distance {:?}", prefix, rib.rib_type(), rib.distance());
 
-        debug!("rib add {:?}", prefix);
+        // Create RIB entry if it doesn't exist.
+        let it = self.tree.get_node_ctor(prefix, || { RibEntry::new() });
 
-        let it = self.tree.lookup_exact(prefix);
         if let Some(ref node) = *it.node() {
-            // TBD: compare existing RIB with the same type, and replace it if they are different
-            // and then run RIB update process.
-
-            if let Some(master) = self.master.upgrade() {
-                master.rib_install_kernel(prefix, &rib);
-            }
-
-            // TBD: we should do route selection here or somewhere else.
-            match *node.data() {
-                Some(ref mut v) => {
-                    v.push(rib);
-                }
-                None => {}
+            // Node data must be present.
+            if let Some(ref mut entry) = *node.data() {
+                entry.ribs().insert(rib.key(), rib);
             }
         }
     }
 
-    pub fn delete(&mut self, prefix: &Prefix<T>) {
-        debug!("rib delete {:?}", prefix);
+    /// Delete given RIBs from tree per prefix.
+    pub fn delete(&mut self, prefix: &Prefix<T>, rib: Rib<T>) {
+        debug!("rib delete {:?} type {:?} distance {:?}", prefix, rib.rib_type(), rib.distance());
 
         let it = self.tree.lookup_exact(prefix);
         if let Some(ref node) = *it.node() {
-            // TBD: compare existing RIB with the same type, and replace it if they are different
-            // and then run RIB update process.
+            if let Some(ref mut entry) = *node.data() {
+                if let Some(rib_old) = entry.ribs().get(&rib.key()) {
+                    for nh in rib.nexthops().iter() {
+                        rib_old.delete_nexthop(&nh);
+                    }
+                }
+            }
+        }
+    }
 
-            // TBD: we should do route selection here.
-            if let Some(master) = self.master.upgrade() {
-                match *node.data() {
-                    Some(ref mut v) => {
-                        let rib = v.iter().next().unwrap();
+    /// Process route selection algorithm per prefix.
+    /// Core part of routing mechanism, including nexthop activation check.
+    pub fn process(&mut self, prefix: &Prefix<T>) {
+        debug!("rib process {:?}", prefix);
 
-                        master.rib_uninstall_kernel(prefix, &rib);
+        let it = self.tree.lookup_exact(prefix);
+        if let Some(ref node) = *it.node() {
+            if let Some (ref mut entry) = *node.data() {
+                for (key, rib) in entry.ribs().iter() {
+                    if rib.nexthops().len() == 0 {
+                        entry.ribs().remove(&key);
+                    }
+                }
 
-//                        v.drain();
-                    },
-                    None => {},
+                if let Some(master) = self.master.upgrade() {
+                    if let Some(ref mut fib) = *entry.fib() {
+                        master.rib_uninstall_kernel(prefix, &fib);
+                    }
+
+                    if let Some((_, selected)) = entry.ribs().iter().next() {
+                        master.rib_install_kernel(prefix, &selected);
+
+                        let fib = selected.clone();
+                        entry.fib().replace(fib);
+                    }
                 }
             }
         }

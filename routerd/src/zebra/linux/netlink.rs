@@ -416,10 +416,10 @@ impl Netlink {
 
         // Singlepath.
         if rib.nexthops().len() == 1 {
-            self.route_single_path(&mut req, rib.nexthops())?;
+            self.route_single_path(&mut req, &rib.nexthops())?;
         // Multipath.
         } else if rib.nexthops().len() > 1 {
-            self.route_multi_path(&mut req, rib.nexthops())?;
+            self.route_multi_path(&mut req, &rib.nexthops())?;
         // TBD
         } else {
 
