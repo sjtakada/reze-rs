@@ -230,7 +230,7 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
         debug!("rib add {:?} type {:?} distance {:?}", prefix, rib.rib_type(), rib.distance());
 
         // Create RIB entry if it doesn't exist.
-        let it = self.tree.get_node_ctor(prefix, || { RibEntry::new() });
+        let it = self.tree.get_node_ctor(prefix, Some(|| { RibEntry::new() }));
 
         if let Some(ref node) = *it.node() {
             // Node data must be present.
@@ -264,10 +264,16 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
         let it = self.tree.lookup_exact(prefix);
         if let Some(ref node) = *it.node() {
             if let Some (ref mut entry) = *node.data() {
+                let mut to_be_removed = Vec::new();
+
                 for (key, rib) in entry.ribs().iter() {
                     if rib.nexthops().len() == 0 {
-                        entry.ribs().remove(&key);
+                        to_be_removed.push(key.clone());
                     }
+                }
+
+                for key in to_be_removed {
+                    entry.ribs().remove(&key);
                 }
 
                 if let Some(master) = self.master.upgrade() {
