@@ -155,9 +155,9 @@ impl ZebraMaster {
                 self.rib_uninstall_kernel(prefix, &fib);
             }
 
-            if let Some((_, selected)) = entry.ribs().iter().next() {
+            if let Some(selected) = entry.select() {
                 self.rib_install_kernel(prefix, &selected);
-                Some(selected.clone())
+                Some(selected)
             } else {
                 None
             }
@@ -179,9 +179,9 @@ impl ZebraMaster {
                 self.rib_uninstall_kernel(prefix, &fib);
             }
 
-            if let Some((_, selected)) = entry.ribs().iter().next() {
+            if let Some(selected) = entry.select() {
                 self.rib_install_kernel(prefix, &selected);
-                Some(selected.clone())
+                Some(selected)
             } else {
                 None
             }

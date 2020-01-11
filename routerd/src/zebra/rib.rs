@@ -42,7 +42,6 @@ pub enum RibType {
 }
 
 /// RIB, store essential routing information with nexthops per single protocol type.
-#[derive(Clone)]
 pub struct Rib<T: Addressable> {
     /// Type.
     rib_type: RibType,
@@ -64,6 +63,22 @@ pub struct Rib<T: Addressable> {
 
     /// Nexthops.
     nexthops: RefCell<Vec<Nexthop<T>>>,
+}
+
+impl<T> Clone for Rib<T>
+where T: Addressable + Clone
+{
+    fn clone(&self) -> Self {
+        Rib::<T> {
+            rib_type: self.rib_type,
+            distance: self.distance,
+            instant: self.instant,
+            _tag: self._tag,
+            selected: Cell::new(self.selected.get()),
+            fib: Cell::new(self.fib.get()),
+            nexthops: RefCell::new(self.nexthops.borrow().to_vec()),
+        }
+    }
 }
 
 impl<T> Rib<T>
@@ -167,7 +182,7 @@ pub struct RibEntry<T: Addressable> {
 }
 
 impl<T> RibEntry<T>
-where T: Addressable
+where T: Addressable + Clone
 {
     /// Constructor.
     pub fn new() -> RibEntry<T> {
@@ -192,6 +207,17 @@ where T: Addressable
     pub fn is_updated(&self) -> bool {
         self.updated.get()
     }
+
+    /// Select RIB.
+    /// TBD: Right now select head of candidate RIBs.
+    ///      We have to do nexthop activate check.
+    pub fn select(&self) -> Option<Rib<T>> {
+        if let Some((_, rib)) = self.ribs().iter().next() {
+            Some(rib.clone())
+        } else {
+            None
+        }
+    }
 }
 
 
@@ -205,7 +231,6 @@ pub struct RibTable<T: Addressable + Clone> {
     master: Weak<ZebraMaster>,
 
     /// Table tree.
-    //tree: Tree<Prefix<T>, Vec<Rib<T>>>,
     tree: Tree<Prefix<T>, RibEntry<T>>,
 }
 
@@ -281,6 +306,8 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
                 // Call kernel function to install/unistall selected route.
                 if let Some(fib) = kfunc(prefix, entry) {
                     entry.fib().replace(fib);
+                } else {
+                    entry.fib().take();
                 }
             }
         }
