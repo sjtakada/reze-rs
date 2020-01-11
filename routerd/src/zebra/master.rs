@@ -224,8 +224,6 @@ impl ZebraMaster {
     }
 
     fn rib_init(master: Rc<ZebraMaster>) {
-        master.rib_ipv4.borrow_mut().set_master(master.clone());
-        master.rib_ipv6.borrow_mut().set_master(master.clone());
     }
 
     pub fn start(&self,

@@ -12,7 +12,6 @@ use std::cell::RefCell;
 use std::cell::RefMut;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::rc::Weak;
 use std::str::FromStr;
 use std::hash::Hash;
 use std::collections::HashMap;
@@ -23,7 +22,6 @@ use log::debug;
 use rtable::prefix::*;
 use rtable::tree::*;
 
-use super::master::*;
 use super::nexthop::*;
 use super::static_route::*;
 
@@ -227,9 +225,6 @@ where T: Addressable + Clone
 ///
 pub struct RibTable<T: Addressable + Clone> {
 
-    /// Zebra master.
-    master: Weak<ZebraMaster>,
-
     /// Table tree.
     tree: Tree<Prefix<T>, RibEntry<T>>,
 }
@@ -240,14 +235,8 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
     /// Constructor.
     pub fn new() -> RibTable<T> {
         RibTable {
-            master: Default::default(),
             tree: Tree::new(),
         }
-    }
-
-    /// Set ZebraMaster.
-    pub fn set_master(&mut self, master: Rc<ZebraMaster>) {
-        self.master = Rc::downgrade(&master);
     }
 
     /// Add given RIBs into tree per prefix.
