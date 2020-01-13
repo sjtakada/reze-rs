@@ -9,6 +9,7 @@ use std::io;
 use std::str;
 use std::str::FromStr;
 use std::mem::{size_of, zeroed};
+use std::fmt;
 //use std::ptr::copy;
 use std::rc::Rc;
 use std::rc::Weak;
@@ -309,7 +310,7 @@ impl Netlink {
 
     /// Install route to kernel.
     pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash
+    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
     {
         match self.route_msg::<T>(libc::RTM_NEWROUTE as i32, prefix, rib) {
             Ok(_) => {},
@@ -319,7 +320,7 @@ impl Netlink {
 
     /// Unnstall route to kernel.
     pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash
+    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
     {
         match self.route_msg::<T>(libc::RTM_DELROUTE as i32, prefix, rib) {
             Ok(_) => {},
@@ -380,7 +381,7 @@ impl Netlink {
 
     /// Build route message.
     fn route_msg<T>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError>
-    where T: Addressable + Clone + FromStr + Eq + Hash
+    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
     {
         debug!("Route message");
 

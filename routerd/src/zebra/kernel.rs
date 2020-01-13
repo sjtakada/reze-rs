@@ -8,6 +8,7 @@
 use std::rc::Rc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
+use std::fmt;
 use std::hash::Hash;
 
 use rtable::prefix::*;
@@ -57,13 +58,13 @@ impl Kernel {
     }
 
     pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash
+    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
     {
         self.driver.install(prefix, rib);
     }
 
     pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash
+    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
     {
         self.driver.uninstall(prefix, rib);
     }

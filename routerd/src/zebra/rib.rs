@@ -7,6 +7,7 @@
 
 use std::time;
 use std::fmt;
+use std::fmt::Debug;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::cell::RefMut;
@@ -16,6 +17,8 @@ use std::str::FromStr;
 use std::hash::Hash;
 use std::collections::HashMap;
 use std::collections::BTreeMap;
+use std::net::Ipv4Addr;
+//use std::net::Ipv6Addr;
 
 use log::debug;
 
@@ -40,7 +43,9 @@ pub enum RibType {
 }
 
 /// RIB, store essential routing information with nexthops per single protocol type.
-pub struct Rib<T: Addressable> {
+pub struct Rib<T: Addressable>
+//where T: Addressable + Clone + fmt::Debug
+{
     /// Type.
     rib_type: RibType,
 
@@ -80,7 +85,7 @@ where T: Addressable + Clone
 }
 
 impl<T> Rib<T>
-where T: Addressable + Clone + FromStr + Eq + Hash
+where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
 {
     /// Constructor.
     pub fn new(rib_type: RibType, distance: u8) -> Rib<T> {
@@ -167,8 +172,8 @@ type RibKey = (u8, RibType);
 /// RIB entry.
 ///   Store a selected FIB, as well as all candidates per RibKey (distance, RibType).
 ///
-pub struct RibEntry<T: Addressable> {
-
+pub struct RibEntry<T: Addressable>
+{
     /// FIB.
     fib: RefCell<Option<Rib<T>>>,
 
@@ -179,8 +184,7 @@ pub struct RibEntry<T: Addressable> {
     updated: Cell<bool>,
 }
 
-impl<T> RibEntry<T>
-where T: Addressable + Clone
+impl<T: Addressable + Clone> RibEntry<T>
 {
     /// Constructor.
     pub fn new() -> RibEntry<T> {
@@ -194,6 +198,14 @@ where T: Addressable + Clone
     /// FIB.
     pub fn fib(&self) -> RefMut<Option<Rib<T>>> {
         self.fib.borrow_mut()
+    }
+
+    /// FIB type.
+    pub fn fib_type(&self) -> Option<RibType> {
+        match self.fib.borrow().as_ref() {
+            Some(fib) => Some(fib.rib_type),
+            None => None,
+        }
     }
 
     /// Candidates.
@@ -223,10 +235,10 @@ where T: Addressable + Clone
 ///   Each RIB entry is indexed by prefix (address + prefix length). Multiple RIB entries may
 ///   be stored in each prefix, per different protocol type and distance.
 ///
-pub struct RibTable<T: Addressable + Clone> {
-
+pub struct RibTable<T: Addressable + Clone>
+{
     /// Table tree.
-    tree: Tree<Prefix<T>, RibEntry<T>>,
+    tree: Tree<Prefix<T>, Rc<RibEntry<T>>>,
 }
 
 impl<T> RibTable<T>
@@ -244,7 +256,7 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
         debug!("rib add {:?} type {:?} distance {:?}", prefix, rib.rib_type(), rib.distance());
 
         // Create RIB entry if it doesn't exist.
-        let it = self.tree.get_node_ctor(prefix, Some(|| { RibEntry::new() }));
+        let it = self.tree.get_node_ctor(prefix, Some(|| { Rc::new(RibEntry::new()) }));
 
         if let Some(ref node) = *it.node() {
             // Node data must be present.
@@ -271,7 +283,7 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
     }
 
     /// Process route selection algorithm per prefix.
-    /// Core part of routing mechanism, including nexthop activation check.
+    /// Core part of decision mechanism, including nexthop activity check.
     pub fn process<F>(&mut self, prefix: &Prefix<T>, kfunc: F)
     where F: Fn(&Prefix<T>, &RibEntry<T>) -> Option<Rib<T>>
     {
@@ -299,6 +311,79 @@ where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
                     entry.fib().take();
                 }
             }
+        }
+    }
+
+    /// Lookup RIB entry per prefix.
+    pub fn lookup_exact(&self, prefix: &Prefix<T>) -> Option<Rc<RibEntry<T>>> {
+        let it = self.tree.lookup_exact(prefix);
+        if let Some(ref node) = *it.node() {
+            node.data().clone()
+        } else {
+            None
+        }
+    }
+}
+
+
+///
+/// Unit tests for RIB.
+///
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn test_rib_process() {
+        let mut table = RibTable::<Ipv4Addr>::new();
+        let rib1 = Rib::<Ipv4Addr>::new(RibType::Static, 1);
+        let rib2 = Rib::<Ipv4Addr>::new(RibType::Static, 200);
+        let rib3 = Rib::<Ipv4Addr>::new(RibType::Ospf, 110);
+        let p = Prefix::<Ipv4Addr>::from_str("10.10.10.0/24").unwrap();
+        let addr = "1.1.1.1".parse().unwrap();
+        let nh = Nexthop::<Ipv4Addr>::from_address(&addr);
+
+        rib1.add_nexthop(nh.clone());
+        rib2.add_nexthop(nh.clone());
+        rib3.add_nexthop(nh.clone());
+
+        let rib1_clone = rib1.clone();
+
+        table.add(&p, rib1);
+        let entry = table.lookup_exact(&p).unwrap();
+        if let Some(ref mut fib) = *entry.clone().fib() {
+            assert!(false);
+        }
+
+        {
+            table.process(&p, |_, _| { entry.select() });
+            let mut fib = entry.fib();
+            assert_eq!(fib.is_some(), true);
+            assert_eq!((*fib).as_ref().unwrap().rib_type(), RibType::Static);
+        }
+
+        {
+            table.add(&p, rib2);
+            table.process(&p, |_, _| { entry.select() });
+            let mut fib = entry.fib();
+            assert_eq!(fib.is_some(), true);
+            assert_eq!((*fib).as_ref().unwrap().rib_type(), RibType::Static);
+        }
+
+        {
+            table.add(&p, rib3);
+            table.process(&p, |_, _| { entry.select() });
+            let mut fib = entry.fib();
+            assert_eq!(fib.is_some(), true);
+            assert_eq!((*fib).as_ref().unwrap().rib_type(), RibType::Static);
+        }
+
+        {
+            table.delete(&p, rib1_clone);
+            table.process(&p, |_, _| { entry.select() });
+//            let mut fib = entry.fib();
+//            assert_eq!(fib.is_some(), true);
+            assert_eq!(entry.fib_type(), Some(RibType::Static));
         }
     }
 }

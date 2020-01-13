@@ -10,6 +10,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::hash::Hash;
+use std::fmt;
 
 use std::collections::HashMap;
 use std::thread;
@@ -189,20 +190,20 @@ impl ZebraMaster {
     }
 
     pub fn rib_install_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Hash + Eq
+    where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
     {
         self.kernel.borrow_mut().install(prefix, rib);
     }
 
     pub fn rib_update_kernel<T>(&self, prefix: &Prefix<T>, new: &Rib<T>, old: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Hash + Eq
+    where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
     {
         self.kernel.borrow_mut().uninstall(prefix, old);
         self.kernel.borrow_mut().install(prefix, old);
     }
 
     pub fn rib_uninstall_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Hash + Eq
+    where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
     {
         self.kernel.borrow_mut().uninstall(prefix, rib);
     }

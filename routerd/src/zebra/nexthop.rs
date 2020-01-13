@@ -7,6 +7,7 @@
 
 use std::fmt;
 use std::str::FromStr;
+
 use rtable::prefix::*;
 
 /// Nexthop.
@@ -22,7 +23,9 @@ pub enum Nexthop<T: Addressable> {
     Network(Prefix<T>),
 }
 
-impl<T: Clone + Addressable + FromStr> Nexthop<T> {
+impl<T> Nexthop<T>
+where T: Clone + Addressable + FromStr
+{
     /// Construct Nexthop from IP address.
     pub fn from_address(address: &T) -> Nexthop<T> {
         Nexthop::<T>::Address(address.clone())
@@ -42,7 +45,9 @@ impl<T: Clone + Addressable + FromStr> Nexthop<T> {
     }
 }
 
-impl<T: Addressable + fmt::Debug> fmt::Display for Nexthop<T> {
+impl<T> fmt::Display for Nexthop<T>
+where T: Addressable + fmt::Debug
+{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Nexthop::<T>::Address(address) => {
@@ -58,3 +63,20 @@ impl<T: Addressable + fmt::Debug> fmt::Display for Nexthop<T> {
     }
 }
 
+impl<T> fmt::Debug for Nexthop<T>
+where T: Addressable + fmt::Debug
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Nexthop::<T>::Address(address) => {
+                write!(f, "{:?}", address)
+            },
+            Nexthop::<T>::Ifname(ifname) => {
+                write!(f, "{}", ifname)
+            },
+            Nexthop::<T>::Network(prefix) => {
+                write!(f, "{:?}", prefix)
+            },
+        }
+    }
+}

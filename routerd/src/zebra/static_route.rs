@@ -260,14 +260,6 @@ where T: Clone + Addressable + Eq + Hash + FromStr
         &self.prefix
     }
 
-//    pub fn distance(&self) -> u8 {
-//        self.distance
-//    }
-
-//    pub fn tag(&self) -> u32 {
-//        self.tag
-//    }
-
     pub fn nexthops(&self) -> RefMut<HashMap<Nexthop<T>, StaticRouteInfo>> {
         self.nexthops.borrow_mut()
     }
@@ -306,6 +298,7 @@ where T: Addressable + Ord
 /// Static route info.
 #[derive(Clone)]
 pub struct StaticRouteInfo {
+
     /// Administrative distance.
     distance: u8,
 
@@ -338,9 +331,15 @@ mod tests {
         assert_eq!(p1 < p3, true);
         assert_eq!(p2 < p3, true);
 
-        let s1 = StaticRoute::<Ipv4Addr>::new(p1, 30, 0);
-        let s2 = StaticRoute::<Ipv4Addr>::new(p2, 20, 0);
-        let s3 = StaticRoute::<Ipv4Addr>::new(p3, 10, 0);
+        let addr = "1.1.1.1".parse().unwrap();
+        let nh = Nexthop::<Ipv4Addr>::from_address(&addr);
+        let si = StaticRouteInfo { distance: 1, tag: 0 };
+        let mut m: HashMap<Nexthop<Ipv4Addr>, StaticRouteInfo> = HashMap::new();
+        m.insert(nh, si);
+
+        let s1 = StaticRoute::<Ipv4Addr>::new(p1, m.clone());
+        let s2 = StaticRoute::<Ipv4Addr>::new(p2, m.clone());
+        let s3 = StaticRoute::<Ipv4Addr>::new(p3, m.clone());
 
         assert_eq!(s1 > s2, true);
         assert_eq!(s1 < s3, true);
