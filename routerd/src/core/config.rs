@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Core - Config.
 //
@@ -72,31 +72,31 @@ pub trait Config {
     }
 
     /// Handle GET method.
-    fn get(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_get(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle POST method.
-    fn post(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_post(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle PUT method.
-    fn put(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_put(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle DELETE method.
-    fn delete(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_delete(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }
 
     /// Handle PATCH method.
-    fn patch(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_patch(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
         Ok(())
     }

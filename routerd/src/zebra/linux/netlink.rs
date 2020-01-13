@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Zebra - Netlink abstraction.
 //
@@ -9,6 +9,7 @@ use std::io;
 use std::str;
 use std::str::FromStr;
 use std::mem::{size_of, zeroed};
+use std::fmt;
 //use std::ptr::copy;
 use std::rc::Rc;
 use std::rc::Weak;
@@ -25,6 +26,7 @@ use log::error;
 use rtable::prefix::*;
 
 use super::rtnetlink::*;
+use super::encode::*;
 use super::super::error::*;
 use super::super::master::ZebraMaster;
 use super::super::kernel::*;
@@ -32,6 +34,7 @@ use super::super::link::*;
 use super::super::address::*;
 use super::super::rib::*;
 use super::super::nexthop::*;
+
 
 const RTMGRP_LINK: libc::c_int = 1;
 const RTMGRP_IPV4_IFADDR: libc::c_int = 0x10;
@@ -93,18 +96,6 @@ fn nlmsg_attr_ok(buf: &[u8]) -> bool {
     } else {
         false
     }
-}
-
-fn get_u32(p: &[u8]) -> u32 {
-    unsafe { *(p as *const _ as *const u32) }
-}
-
-fn _get_u16(p: &[u8]) -> u16 {
-    unsafe { *(p as *const _ as *const u16) }
-}
-
-fn _get_u8(p: &[u8]) -> u8 {
-    unsafe { *(p as *const _ as *const u8) }
 }
 
 fn nlmsg_parse_attr<'a>(buf: &'a [u8]) -> AttrMap {
@@ -319,10 +310,19 @@ impl Netlink {
 
     /// Install route to kernel.
     pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash
+    where T: Addressable
     {
-
         match self.route_msg::<T>(libc::RTM_NEWROUTE as i32, prefix, rib) {
+            Ok(_) => {},
+            Err(err) => error!("{}", err.to_string())
+        }
+    }
+
+    /// Unnstall route to kernel.
+    pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable
+    {
+        match self.route_msg::<T>(libc::RTM_DELROUTE as i32, prefix, rib) {
             Ok(_) => {},
             Err(err) => error!("{}", err.to_string())
         }
@@ -332,7 +332,7 @@ impl Netlink {
     fn route_single_path<T>(&self, req: &mut Request, nexthops: &Vec<Nexthop<T>>) -> Result<usize, ZebraError>
     where T: Addressable
     {
-        let pos = 0; // XXX
+        let pos = req.offset();
         let mut len = 0;
 
         for nexthop in nexthops {
@@ -360,8 +360,8 @@ impl Netlink {
     {
         let offset = req.offset();
 
-        // XXX/ Should handle error
-        nlmsg_addattr_payload(&mut req.nlmsghdr.nlmsg_len, &mut req.buf[offset..], libc::RTA_MULTIPATH as i32, |buf: &mut [u8]| -> Result<usize, ZebraError> {
+        nlmsg_addattr_payload(&mut req.nlmsghdr.nlmsg_len, &mut req.buf[offset..], libc::RTA_MULTIPATH as i32,
+                              |buf: &mut [u8]| -> Result<usize, ZebraError> {
             let mut rta_len = 0;
 
             for nexthop in nexthops {
@@ -381,7 +381,7 @@ impl Netlink {
 
     /// Build route message.
     fn route_msg<T>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError>
-    where T: Addressable + Clone + FromStr + Eq + Hash
+    where T: Addressable
     {
         debug!("Route message");
 
@@ -417,10 +417,10 @@ impl Netlink {
 
         // Singlepath.
         if rib.nexthops().len() == 1 {
-            self.route_single_path(&mut req, rib.nexthops())?;
+            self.route_single_path(&mut req, &rib.nexthops())?;
         // Multipath.
         } else if rib.nexthops().len() > 1 {
-            self.route_multi_path(&mut req, rib.nexthops())?;
+            self.route_multi_path(&mut req, &rib.nexthops())?;
         // TBD
         } else {
 
@@ -615,7 +615,7 @@ impl Netlink {
         };
 
         let mtu = match attr.get(&(libc::IFLA_MTU as i32)) {
-            Some(mtu) => get_u32(*mtu),
+            Some(mtu) => decode_num::<u32>(*mtu),
             None => 0u32,  // maybe set default?
         };
         let ifname = match attr.get(&(libc::IFLA_IFNAME as i32)) {
@@ -644,7 +644,7 @@ impl Netlink {
     }
 
     fn parse_interface_address<T>(&self, h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> bool
-    where T: AddressFamily + Addressable + FromStr {
+    where T: AddressFamily + Addressable {
         assert!(h.nlmsg_type == libc::RTM_NEWADDR || h.nlmsg_type == libc::RTM_DELADDR);
 
         if ifa.ifa_family as i32 != T::address_family() {
@@ -749,7 +749,7 @@ impl LinkHandler for Netlink {
 impl AddressHandler for Netlink {
     /// Get all addresses per Address Family from kernel.
     fn get_addresses_all<T>(&self) -> Result<(), ZebraError>
-    where T: AddressFamily + Addressable + FromStr {
+    where T: AddressFamily + Addressable {
         debug!("Get address all");
 
         if let Err(err) = self.send_request(T::address_family(), libc::RTM_GETADDR as i32) {

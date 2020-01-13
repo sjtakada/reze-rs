@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Zebra Master
 //
@@ -10,6 +10,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::hash::Hash;
+use std::fmt;
 
 use std::collections::HashMap;
 use std::thread;
@@ -144,16 +145,67 @@ impl ZebraMaster {
         debug!("RIB add static IPv4 {:?}", sr.prefix());
 
         let prefix = sr.prefix().clone();
-        let rib = Rib::<Ipv4Addr>::from_static_route(sr);
+        let mut map = Rib::<Ipv4Addr>::from_static_route(sr);
 
-        // TBD: handle return value
-        self.rib_ipv4.borrow_mut().add(rib, &prefix);
+        for (_, rib) in map.drain() {
+            self.rib_ipv4.borrow_mut().add(&prefix, rib);
+        }
+
+        self.rib_ipv4.borrow_mut().process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
+            if let Some(ref mut fib) = *entry.fib() {
+                self.rib_uninstall_kernel(prefix, &fib);
+            }
+
+            if let Some(selected) = entry.select() {
+                self.rib_install_kernel(prefix, &selected);
+                Some(selected)
+            } else {
+                None
+            }
+        });
+    }
+
+    pub fn rib_delete_static_ipv4(&self, sr: Arc<StaticRoute<Ipv4Addr>>) {
+        debug!("RIB delete static IPv4 {:?}", sr.prefix());
+
+        let prefix = sr.prefix().clone();
+        let mut map = Rib::<Ipv4Addr>::from_static_route(sr);
+
+        for (_, rib) in map.drain() {
+            self.rib_ipv4.borrow_mut().delete(&prefix, rib);
+        }
+
+        self.rib_ipv4.borrow_mut().process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
+            if let Some(ref mut fib) = *entry.fib() {
+                self.rib_uninstall_kernel(prefix, &fib);
+            }
+
+            if let Some(selected) = entry.select() {
+                self.rib_install_kernel(prefix, &selected);
+                Some(selected)
+            } else {
+                None
+            }
+        });
     }
 
     pub fn rib_install_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Hash + Eq
+    where T: Addressable
     {
         self.kernel.borrow_mut().install(prefix, rib);
+    }
+
+    pub fn rib_update_kernel<T>(&self, prefix: &Prefix<T>, new: &Rib<T>, old: &Rib<T>)
+    where T: Addressable
+    {
+        self.kernel.borrow_mut().uninstall(prefix, old);
+        self.kernel.borrow_mut().install(prefix, old);
+    }
+
+    pub fn rib_uninstall_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable
+    {
+        self.kernel.borrow_mut().uninstall(prefix, rib);
     }
 
     pub fn init(master: Rc<ZebraMaster>) {
@@ -173,8 +225,6 @@ impl ZebraMaster {
     }
 
     fn rib_init(master: Rc<ZebraMaster>) {
-        master.rib_ipv4.borrow_mut().set_master(master.clone());
-        master.rib_ipv6.borrow_mut().set_master(master.clone());
     }
 
     pub fn start(&self,

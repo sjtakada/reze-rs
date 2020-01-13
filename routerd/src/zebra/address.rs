@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Zebra - IPv4 and IPv6 address handler.
 //
@@ -35,7 +35,7 @@ pub trait AddressHandler {
 }
 
 /// Connected Address.
-pub struct Connected<T> {
+pub struct Connected<T: Addressable> {
     /// Address prefix.
     address: Prefix<T>,
 
@@ -52,7 +52,7 @@ pub struct Connected<T> {
     _label: Option<String>,
 }
 
-impl<T> Connected<T> {
+impl<T: Addressable> Connected<T> {
     pub fn new(prefix: Prefix<T>) -> Connected<T> {
         Connected::<T> {
             address: prefix,

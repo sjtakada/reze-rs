@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Zebra - IPv4/IPv6 RIB manager, Kernel Interface.
 //

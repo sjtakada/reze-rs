@@ -1,17 +1,19 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Zebra - Nexthop.
 //
 
 use std::fmt;
 use std::str::FromStr;
+
 use rtable::prefix::*;
 
 /// Nexthop.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum Nexthop<T: Addressable> {
+
     /// IP Address.
     Address(T),
 
@@ -22,7 +24,9 @@ pub enum Nexthop<T: Addressable> {
     Network(Prefix<T>),
 }
 
-impl<T: Clone + Addressable + FromStr> Nexthop<T> {
+impl<T> Nexthop<T>
+where T: Addressable
+{
     /// Construct Nexthop from IP address.
     pub fn from_address(address: &T) -> Nexthop<T> {
         Nexthop::<T>::Address(address.clone())
@@ -42,7 +46,27 @@ impl<T: Clone + Addressable + FromStr> Nexthop<T> {
     }
 }
 
-impl<T: Addressable + fmt::Debug> fmt::Display for Nexthop<T> {
+impl<T> fmt::Display for Nexthop<T>
+where T: Addressable
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Nexthop::<T>::Address(address) => {
+                write!(f, "{:?}", address)
+            },
+            Nexthop::<T>::Ifname(ifname) => {
+                write!(f, "{}", ifname)
+            },
+            Nexthop::<T>::Network(prefix) => {
+                write!(f, "{:?}", prefix)
+            },
+        }
+    }
+}
+
+impl<T> fmt::Debug for Nexthop<T>
+where T: Addressable
+{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Nexthop::<T>::Address(address) => {

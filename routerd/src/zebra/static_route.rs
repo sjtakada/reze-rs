@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Zebra - Static route.
 //
@@ -9,6 +9,7 @@ use std::cmp::Ordering;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::cell::RefCell;
+use std::cell::RefMut;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
@@ -59,14 +60,35 @@ impl Ipv4StaticRoute {
     }
 
     /// Add a static route config into the tree.
-    pub fn add(&self, p: Prefix<Ipv4Addr>, s: Arc<StaticRoute<Ipv4Addr>>) -> Option<Arc<StaticRoute<Ipv4Addr>>> {
-        self.config.borrow_mut().insert(p, s)
+    pub fn add(&self, p: Prefix<Ipv4Addr>, sr_new: Arc<StaticRoute<Ipv4Addr>>) -> Arc<StaticRoute<Ipv4Addr>> {
+        match self.lookup(&p) {
+            Some(sr) => {
+                for (nh, info) in sr_new.nexthops.borrow_mut().drain() {
+                    sr.nexthops.borrow_mut().insert(nh, info);
+                }
+
+                sr.clone()
+            },
+            None => {
+                self.config.borrow_mut().insert(p, sr_new.clone());
+                sr_new.clone()
+            }
+        }
     }
 
-    // Delete a static route config into the tree.
-//    pub fn delete(&mut self, p: Prefix<Ipv4Addr>, s: Arc<StaticRoute<Ipv4Addr>>) {
-//        self.config.delete(&p);
-//    }
+    /// Delete a static route config from the tree.
+    pub fn delete(&self, p: Prefix<Ipv4Addr>, sr_new: Arc<StaticRoute<Ipv4Addr>>) -> Arc<StaticRoute<Ipv4Addr>> {
+        match self.lookup(&p) {
+            Some(sr) => {
+                for (nh, info) in sr_new.nexthops.borrow_mut().iter() {
+                    sr.nexthops.borrow_mut().remove(&nh);
+                }
+            },
+            None => {},
+        }
+
+        sr_new
+    }
 }
 
 impl Config for Ipv4StaticRoute {
@@ -76,7 +98,7 @@ impl Config for Ipv4StaticRoute {
     }
 
     /// Handle PUT method.
-    fn put(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_put(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
         match params {
             Some(json_str) => {
                 debug!("Configuring an IPv4 static route");
@@ -92,16 +114,47 @@ impl Config for Ipv4StaticRoute {
 
                         // Trim leading "/" from mask_str.
                         if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
-                            match self.lookup(&prefix) {
-                                Some(_sr) => {
+                            let sr_new = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
+                            let sr = self.add(prefix, sr_new);
+                            self.master.rib_add_static_ipv4(sr);
+                        } else {
+                            return Err(CoreError::CommandExec(format!("Invalid address or mask {} {}", addr_str, mask_str)))
+                        }
+                    },
+                    None => {
+                        return Err(CoreError::CommandExec(format!("Invalid path")));
+                    }
+                }
+            },
+            None => {
+                return Err(CoreError::CommandExec(format!("No parameters")));
+            },
+        }
 
-                                },
-                                None => {
-                                    let sr = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
-                                    let _config_old = self.add(prefix, sr.clone());
-                                    self.master.rib_add_static_ipv4(sr);
-                                }
-                            }
+        Ok(())
+    }
+
+    /// Handle DELETE method.
+    fn handle_delete(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+        match params {
+            Some(json_str) => {
+                debug!("Unconfiguring an IPv4 static route");
+
+                match split_id_and_path(path) {
+                    Some((addr_str, none_or_mask_str)) => {
+                        // TODO: should handle error.
+                        let json: serde_json::Value = serde_json::from_str(&json_str).unwrap();
+                        let mask_str = match none_or_mask_str {
+                            Some(mask_str) => mask_str,
+                            None => "/255.255.255.255".to_string(),
+                        };
+
+                        // Trim leading "/" from mask_str.
+                        if let Ok(prefix) = prefix_ipv4_from(&addr_str, &mask_str[1..]) {
+                            let sr_new = Arc::new(StaticRoute::<Ipv4Addr>::from_json(&prefix, &json)?);
+                            let sr_new = self.delete(prefix.clone(), sr_new);
+
+                            self.master.rib_delete_static_ipv4(sr_new);
                         } else {
                             return Err(CoreError::CommandExec(format!("Invalid address or mask {} {}", addr_str, mask_str)))
                         }
@@ -128,19 +181,26 @@ pub struct StaticRoute<T: Addressable> {
     prefix: Prefix<T>,
 
     /// Nexthop(s).
-    nexthops: HashMap<Nexthop<T>, StaticRouteInfo>,
+    nexthops: RefCell<HashMap<Nexthop<T>, StaticRouteInfo>>,
 }
 
 impl<T> StaticRoute<T>
-where T: Clone + Addressable + Eq + Hash + FromStr
+where T: Addressable
 {
+    /// Constructor.
+    pub fn new(prefix: Prefix<T>, nexthops: HashMap<Nexthop<T>, StaticRouteInfo>) -> StaticRoute<T> {
+        StaticRoute {
+            prefix,
+            nexthops: RefCell::new(nexthops),
+        }
+    }
 
     /// Construct static route from JSON.
     pub fn from_json(prefix: &Prefix<T>, params: &serde_json::Value) -> Result<StaticRoute<T>, CoreError> {
         let mut nexthops: HashMap<Nexthop<T>, StaticRouteInfo> = HashMap::new();
 
         if !params.is_object() {
-            return Err(CoreError::CommandExec("JSON params is not object".to_string()))
+            return Err(CoreError::CommandExec("JSON param is not an object".to_string()))
         }
 
         let params = params.as_object().unwrap();
@@ -151,7 +211,7 @@ where T: Clone + Addressable + Eq + Hash + FromStr
 
             for v_nh in v_nexthops.as_array().unwrap() {
                 if !v_nh.is_object() {
-                    error!("Nexthop is not object");
+                    error!("Nexthop is not an object");
                     continue;
                 }
 
@@ -182,7 +242,7 @@ where T: Clone + Addressable + Eq + Hash + FromStr
                 }
 
                 if let Some(nexthop) = nexthop {
-                    nexthops.insert(nexthop, StaticRouteInfo { distance, tag});
+                    nexthops.insert(nexthop, StaticRouteInfo { distance, tag });
                 }
             }
         } else {
@@ -193,34 +253,20 @@ where T: Clone + Addressable + Eq + Hash + FromStr
             return Err(CoreError::CommandExec("No valid nexthops".to_string()))
         }
 
-        Ok(StaticRoute { prefix: prefix.clone(), nexthops: nexthops })
+        Ok(StaticRoute::new(prefix.clone(), nexthops))
     }
 
     pub fn prefix(&self) -> &Prefix<T> {
         &self.prefix
     }
 
-//    pub fn distance(&self) -> u8 {
-//        self.distance
-//    }
-
-//    pub fn tag(&self) -> u32 {
-//        self.tag
-//    }
-
-    pub fn nexthops(&self) -> &HashMap<Nexthop<T>, StaticRouteInfo> {
-        &self.nexthops
+    pub fn nexthops(&self) -> RefMut<HashMap<Nexthop<T>, StaticRouteInfo>> {
+        self.nexthops.borrow_mut()
     }
-
-//    pub fn add_nexthop_address(&mut self, address: &T) {
-//        let nexthop = Nexthop::from_address(address);
-//
-//        self.nexthops.push(nexthop);
-//    }
 }
 
 impl<T> PartialEq for StaticRoute<T>
-where T: Addressable + PartialEq
+where T: Addressable
 {
     fn eq(&self, other: &Self) -> bool {
         self.prefix == other.prefix
@@ -228,7 +274,7 @@ where T: Addressable + PartialEq
 }
 
 impl<T> Eq for StaticRoute<T>
-where T: Addressable + Eq
+where T: Addressable
 {
 }
 
@@ -250,12 +296,22 @@ where T: Addressable + Ord
 }
 
 /// Static route info.
+#[derive(Clone)]
 pub struct StaticRouteInfo {
+
     /// Administrative distance.
     distance: u8,
 
     /// Route tag,
     tag: u32,
+}
+
+impl StaticRouteInfo {
+
+    /// Return distance.
+    pub fn distance(&self) -> u8 {
+        self.distance
+    }
 }
 
 ///
@@ -275,9 +331,15 @@ mod tests {
         assert_eq!(p1 < p3, true);
         assert_eq!(p2 < p3, true);
 
-        let s1 = StaticRoute::<Ipv4Addr>::new(p1, 30, 0);
-        let s2 = StaticRoute::<Ipv4Addr>::new(p2, 20, 0);
-        let s3 = StaticRoute::<Ipv4Addr>::new(p3, 10, 0);
+        let addr = "1.1.1.1".parse().unwrap();
+        let nh = Nexthop::<Ipv4Addr>::from_address(&addr);
+        let si = StaticRouteInfo { distance: 1, tag: 0 };
+        let mut m: HashMap<Nexthop<Ipv4Addr>, StaticRouteInfo> = HashMap::new();
+        m.insert(nh, si);
+
+        let s1 = StaticRoute::<Ipv4Addr>::new(p1, m.clone());
+        let s2 = StaticRoute::<Ipv4Addr>::new(p2, m.clone());
+        let s3 = StaticRoute::<Ipv4Addr>::new(p3, m.clone());
 
         assert_eq!(s1 > s2, true);
         assert_eq!(s1 < s3, true);

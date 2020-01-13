@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - ReZe CLI
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Main
 //
@@ -14,7 +14,7 @@ use cli::cli::Cli;
 use cli::config::Config;
 
 const CLI_VERSION: &str = "1.0";
-const COPYRIGHT: &str = "Copyright (C) 2018,2019 Toshiaki Takada";
+const COPYRIGHT: &str = "Copyright (C) 2018-2020 Toshiaki Takada";
 
 // Help.
 fn print_help(program: &str, opts: Options) {

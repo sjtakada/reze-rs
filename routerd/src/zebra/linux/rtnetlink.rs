@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Zebra - Rtattributes abstraction.
 //
@@ -188,7 +188,7 @@ pub fn nlmsg_add_rtnexthop<T: Addressable>(buf: &mut [u8], address: &T) -> Resul
         // rtnh_hops
         encode_num::<u8>(&mut buf[3..], 0 as u8);
 
-        // rtnn_index
+        // rtnh_index
         encode_num::<u32>(&mut buf[4..], 0 as u32);
 
         // RTA Gataway.

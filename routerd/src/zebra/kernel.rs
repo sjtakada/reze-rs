@@ -1,6 +1,6 @@
 //
 // ReZe.Rs - Router Daemon
-//   Copyright (C) 2018,2019 Toshiaki Takada
+//   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Zebra - Kernel driver
 //
@@ -8,6 +8,7 @@
 use std::rc::Rc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
+use std::fmt;
 use std::hash::Hash;
 
 use rtable::prefix::*;
@@ -57,8 +58,14 @@ impl Kernel {
     }
 
     pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash
+    where T: Addressable
     {
         self.driver.install(prefix, rib);
+    }
+
+    pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    where T: Addressable
+    {
+        self.driver.uninstall(prefix, rib);
     }
 }
