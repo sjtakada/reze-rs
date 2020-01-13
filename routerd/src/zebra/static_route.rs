@@ -185,7 +185,7 @@ pub struct StaticRoute<T: Addressable> {
 }
 
 impl<T> StaticRoute<T>
-where T: Clone + Addressable + Eq + Hash + FromStr
+where T: Addressable
 {
     /// Constructor.
     pub fn new(prefix: Prefix<T>, nexthops: HashMap<Nexthop<T>, StaticRouteInfo>) -> StaticRoute<T> {
@@ -266,7 +266,7 @@ where T: Clone + Addressable + Eq + Hash + FromStr
 }
 
 impl<T> PartialEq for StaticRoute<T>
-where T: Addressable + PartialEq
+where T: Addressable
 {
     fn eq(&self, other: &Self) -> bool {
         self.prefix == other.prefix
@@ -274,7 +274,7 @@ where T: Addressable + PartialEq
 }
 
 impl<T> Eq for StaticRoute<T>
-where T: Addressable + Eq
+where T: Addressable
 {
 }
 

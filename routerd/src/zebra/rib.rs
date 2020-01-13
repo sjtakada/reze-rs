@@ -44,7 +44,6 @@ pub enum RibType {
 
 /// RIB, store essential routing information with nexthops per single protocol type.
 pub struct Rib<T: Addressable>
-//where T: Addressable + Clone + fmt::Debug
 {
     /// Type.
     rib_type: RibType,
@@ -69,7 +68,7 @@ pub struct Rib<T: Addressable>
 }
 
 impl<T> Clone for Rib<T>
-where T: Addressable + Clone
+where T: Addressable
 {
     fn clone(&self) -> Self {
         Rib::<T> {
@@ -85,7 +84,7 @@ where T: Addressable + Clone
 }
 
 impl<T> Rib<T>
-where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
+where T: Addressable
 {
     /// Constructor.
     pub fn new(rib_type: RibType, distance: u8) -> Rib<T> {
@@ -184,7 +183,8 @@ pub struct RibEntry<T: Addressable>
     updated: Cell<bool>,
 }
 
-impl<T: Addressable + Clone> RibEntry<T>
+impl<T> RibEntry<T>
+where T: Addressable
 {
     /// Constructor.
     pub fn new() -> RibEntry<T> {
@@ -235,14 +235,14 @@ impl<T: Addressable + Clone> RibEntry<T>
 ///   Each RIB entry is indexed by prefix (address + prefix length). Multiple RIB entries may
 ///   be stored in each prefix, per different protocol type and distance.
 ///
-pub struct RibTable<T: Addressable + Clone>
+pub struct RibTable<T: Addressable>
 {
     /// Table tree.
     tree: Tree<Prefix<T>, Rc<RibEntry<T>>>,
 }
 
 impl<T> RibTable<T>
-where T: Addressable + Clone + FromStr + Hash + Eq + fmt::Debug
+where T: Addressable
 {
     /// Constructor.
     pub fn new() -> RibTable<T> {
@@ -381,9 +381,7 @@ mod tests {
         {
             table.delete(&p, rib1_clone);
             table.process(&p, |_, _| { entry.select() });
-//            let mut fib = entry.fib();
-//            assert_eq!(fib.is_some(), true);
-            assert_eq!(entry.fib_type(), Some(RibType::Static));
+            assert_eq!(entry.fib_type(), Some(RibType::Ospf));
         }
     }
 }

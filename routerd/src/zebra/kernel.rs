@@ -58,13 +58,13 @@ impl Kernel {
     }
 
     pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
+    where T: Addressable
     {
         self.driver.install(prefix, rib);
     }
 
     pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
+    where T: Addressable
     {
         self.driver.uninstall(prefix, rib);
     }

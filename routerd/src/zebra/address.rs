@@ -35,7 +35,7 @@ pub trait AddressHandler {
 }
 
 /// Connected Address.
-pub struct Connected<T> {
+pub struct Connected<T: Addressable> {
     /// Address prefix.
     address: Prefix<T>,
 
@@ -52,7 +52,7 @@ pub struct Connected<T> {
     _label: Option<String>,
 }
 
-impl<T> Connected<T> {
+impl<T: Addressable> Connected<T> {
     pub fn new(prefix: Prefix<T>) -> Connected<T> {
         Connected::<T> {
             address: prefix,

@@ -310,7 +310,7 @@ impl Netlink {
 
     /// Install route to kernel.
     pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
+    where T: Addressable
     {
         match self.route_msg::<T>(libc::RTM_NEWROUTE as i32, prefix, rib) {
             Ok(_) => {},
@@ -320,7 +320,7 @@ impl Netlink {
 
     /// Unnstall route to kernel.
     pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
+    where T: Addressable
     {
         match self.route_msg::<T>(libc::RTM_DELROUTE as i32, prefix, rib) {
             Ok(_) => {},
@@ -381,7 +381,7 @@ impl Netlink {
 
     /// Build route message.
     fn route_msg<T>(&self, cmd: libc::c_int, prefix: &Prefix<T>, rib: &Rib<T>) -> Result<(), ZebraError>
-    where T: Addressable + Clone + FromStr + Eq + Hash + fmt::Debug
+    where T: Addressable
     {
         debug!("Route message");
 
@@ -644,7 +644,7 @@ impl Netlink {
     }
 
     fn parse_interface_address<T>(&self, h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> bool
-    where T: AddressFamily + Addressable + FromStr {
+    where T: AddressFamily + Addressable {
         assert!(h.nlmsg_type == libc::RTM_NEWADDR || h.nlmsg_type == libc::RTM_DELADDR);
 
         if ifa.ifa_family as i32 != T::address_family() {
@@ -749,7 +749,7 @@ impl LinkHandler for Netlink {
 impl AddressHandler for Netlink {
     /// Get all addresses per Address Family from kernel.
     fn get_addresses_all<T>(&self) -> Result<(), ZebraError>
-    where T: AddressFamily + Addressable + FromStr {
+    where T: AddressFamily + Addressable {
         debug!("Get address all");
 
         if let Err(err) = self.send_request(T::address_family(), libc::RTM_GETADDR as i32) {
