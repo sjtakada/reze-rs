@@ -5,7 +5,7 @@ authors = ["Toshiaki Takada <toshi@reze.rs>"]
 edition = "2018"
 
 [dependencies]
-getopts = "0.2.18"
+getopts = "0.2.21"
 log = "0.4.6"
 simplelog = "0.7.0"
 quick-error = "1.2.3"
@@ -20,7 +20,6 @@ mio-uds = "0.6.7"
 
 rtable = "0.2.1"
 #rtable = { git = "https://github.com/sjtakada/rtable" }
-
 
 common = { path = "../common" }
 

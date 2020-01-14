@@ -411,7 +411,7 @@ impl Cli {
     pub fn stream_send(&self, message: &str) {
         match self.stream.borrow_mut().as_ref() {
             Some(mut s) => {
-                s.write_all(message.as_bytes());
+                let _ = s.write_all(message.as_bytes());
             },
             None => {
             }

@@ -14,7 +14,7 @@ use std::collections::HashMap;
 
 //use serde_json;
 
-use super::error::CliError;
+//use super::error::CliError;
 use super::node::CliNode;
 use super::node::Value;
 use super::collate::*;
