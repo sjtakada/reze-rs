@@ -389,7 +389,7 @@ impl Cli {
     fn init_server_connect(&self) -> Result<(), CliError> {
         // Initialize connection to server.
         let mut path = env::temp_dir();
-        path.push(CLI_UDS_FILENAME);
+        path.push(ROUTERD_CONFIG_UDS_FILENAME);
 
         let _stream = match UnixStream::connect(path) {
             Ok(stream) => {

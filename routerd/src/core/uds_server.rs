@@ -85,7 +85,7 @@ impl UdsServerEntry {
 
 impl Drop for UdsServerEntry {
     fn drop(&mut self) {
-        println!("Drop UdsServerEntry");
+        debug!("Drop UdsServerEntry");
     }
 }
 
