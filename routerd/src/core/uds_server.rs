@@ -19,8 +19,8 @@ use mio::Token;
 use mio_uds::UnixListener;
 use mio_uds::UnixStream;
 
-use super::error::*;
-use super::event::*;
+use common::error::*;
+use common::event::*;
 
 // Trait UdsServer callbacks.
 pub trait UdsServerHandler {

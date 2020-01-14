@@ -19,7 +19,7 @@ use std::cell::RefCell;
 use std::time::Duration;
 //use std::time::Instant;
 
-use super::event::*;
+use common::event::*;
 
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;

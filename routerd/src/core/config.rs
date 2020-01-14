@@ -13,7 +13,7 @@ use log::debug;
 use regex::Regex;
 
 //use super::protocols::ProtocolType;
-use super::error::*;
+use common::error::*;
 
 pub enum Method {
     Get,

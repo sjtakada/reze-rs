@@ -8,9 +8,6 @@
 use log::{debug, error};
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::str::FromStr;
-use std::hash::Hash;
-use std::fmt;
 
 use std::collections::HashMap;
 use std::thread;
@@ -64,7 +61,7 @@ pub struct ZebraMaster {
     rib_ipv4: RefCell<RibTable<Ipv4Addr>>,
 
     /// IPv6 RIB.
-    rib_ipv6: RefCell<RibTable<Ipv6Addr>>,
+    _rib_ipv6: RefCell<RibTable<Ipv6Addr>>,
 }
 
 impl ZebraMaster {
@@ -85,7 +82,7 @@ impl ZebraMaster {
             links: RefCell::new(HashMap::new()),
             _name2ifindex: HashMap::new(),
             rib_ipv4: RefCell::new(RibTable::<Ipv4Addr>::new()),
-            rib_ipv6: RefCell::new(RibTable::<Ipv6Addr>::new()),
+            _rib_ipv6: RefCell::new(RibTable::<Ipv6Addr>::new()),
         }
     }
 
@@ -199,7 +196,7 @@ impl ZebraMaster {
     where T: Addressable
     {
         self.kernel.borrow_mut().uninstall(prefix, old);
-        self.kernel.borrow_mut().install(prefix, old);
+        self.kernel.borrow_mut().install(prefix, new);
     }
 
     pub fn rib_uninstall_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
@@ -224,7 +221,7 @@ impl ZebraMaster {
         master.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
     }
 
-    fn rib_init(master: Rc<ZebraMaster>) {
+    fn rib_init(_master: Rc<ZebraMaster>) {
     }
 
     pub fn start(&self,

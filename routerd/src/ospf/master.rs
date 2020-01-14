@@ -13,8 +13,8 @@ use std::sync::Arc;
 use std::sync::Weak;
 use std::cell::RefCell;
 
-use crate::core::error::*;
-use crate::core::event::*;
+use common::error::*;
+use common::event::*;
 
 use crate::core::master::ProtocolMaster;
 use crate::core::master::MasterInner;

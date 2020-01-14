@@ -13,10 +13,10 @@ use simplelog::*;
 use getopts::Options;
 
 use common::consts::*;
+use common::error::*;
+use common::event::*;
 
-use routerd::core::error::*;
 use routerd::core::signal::*;
-use routerd::core::event::*;
 use routerd::core::nexus::*;
 use routerd::core::uds_server::*;
 

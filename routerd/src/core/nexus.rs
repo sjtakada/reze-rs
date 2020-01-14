@@ -24,9 +24,10 @@ use std::cell::RefCell;
 use std::time::Duration;
 use std::str::FromStr;
 
+use common::event::*;
+use common::error::*;
+
 use super::signal;
-use super::error::*;
-use super::event::*;
 use super::uds_server::*;
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
@@ -234,7 +235,7 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
-    fn clone_sender_p2z(&self) -> mpsc::Sender<ProtoToZebra> {
+    fn _clone_sender_p2z(&self) -> mpsc::Sender<ProtoToZebra> {
         if let Some(ref mut sender_p2z) = *self.sender_p2z.borrow_mut() {
             return mpsc::Sender::clone(&sender_p2z)
         }

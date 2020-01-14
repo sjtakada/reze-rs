@@ -7,9 +7,6 @@
 
 use std::rc::Rc;
 use std::net::{Ipv4Addr, Ipv6Addr};
-use std::str::FromStr;
-use std::fmt;
-use std::hash::Hash;
 
 use rtable::prefix::*;
 

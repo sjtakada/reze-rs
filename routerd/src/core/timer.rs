@@ -14,9 +14,10 @@ use std::time::Instant;
 use std::time::Duration;
 use std::sync::Mutex;
 
+use common::event;
+
 use super::protocols::ProtocolType;
 use super::master::ProtocolMaster;
-use super::event;
 
 /// Timer entry
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -52,8 +53,6 @@ impl Server {
         let entry = Entry { protocol: protocol, expiration: Instant::now() + d, token: token };
         self.heap.push(entry);
     }
-
-//    pub fn unregister(&self)
 
     pub fn pop_if_expired(&mut self) -> Option<Entry> {
         match self.heap.peek() {

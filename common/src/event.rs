@@ -11,9 +11,9 @@ use std::cell::RefCell;
 use std::sync::Arc;
 use std::time::Duration;
 
-use super::error::*;
-
 use mio::*;
+
+use super::error::*;
 
 /// Event types.
 pub enum EventType {

@@ -10,7 +10,8 @@ use std::collections::HashMap;
 
 use log::error;
 
-use super::error::*;
+use common::error::*;
+
 use super::config::*;
 use super::protocols::ProtocolType;
 
