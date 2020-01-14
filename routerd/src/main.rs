@@ -15,10 +15,10 @@ use getopts::Options;
 use common::consts::*;
 use common::error::*;
 use common::event::*;
+use common::uds_server::*;
 
 use routerd::core::signal::*;
 use routerd::core::nexus::*;
-use routerd::core::uds_server::*;
 
 const ROUTERD_VERSION: &str = "0.1.0";
 

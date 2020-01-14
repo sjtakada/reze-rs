@@ -26,9 +26,9 @@ use std::str::FromStr;
 
 use common::event::*;
 use common::error::*;
+use common::uds_server::*;
 
 use super::signal;
-use super::uds_server::*;
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
 use super::message::nexus::NexusToProto;

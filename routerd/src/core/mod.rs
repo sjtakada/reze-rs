@@ -11,5 +11,4 @@ pub mod master;
 pub mod protocols;
 pub mod message;
 pub mod timer;
-pub mod uds_server;
 pub mod config_master;
