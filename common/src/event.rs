@@ -24,41 +24,48 @@ pub enum EventType {
     ErrorEvent,
 }
 
-/// Event parameters.
+/// Event parameters -- TBD maybe not needed any more.
 pub enum EventParam {
-    Param(String)
+    String(String),
+    Number(i64),
 }
 
 /// Event Handler trait.
+/// Token is associated with EventHandler and certain event expected.
 pub trait EventHandler {
+
+    /// Handle event.
     fn handle(&self, event_type: EventType, param: Option<Arc<EventParam>>) -> Result<(), CoreError>;
 
+    /// Set token to event handler.
     fn set_token(&self, _token: Token) {
         // Placeholder
     }
 
+    /// Get token from event handler.
     fn get_token(&self) -> Token {
         // Placeholder
         Token(0)
     }
 }
 
-///
+/// EventManager inner.
 pub struct EventManagerInner {
-    // Token index.
+
+    /// Token index.
     index: usize,
 
-    // Token to handler map.
+    /// Token to handler map.
     handlers: HashMap<Token, Arc<dyn EventHandler + Send + Sync>>,
 
-    // mio::Poll
+    /// mio::Poll
     poll: Poll,
 
-    // poll timeout in msecs
+    /// poll timeout in msecs
     timeout: Duration,
 }
 
-///
+/// Event Manager.
 pub struct EventManager {
     pub inner: RefCell<EventManagerInner>,
 }
@@ -83,7 +90,7 @@ impl EventManager {
         inner.handlers.insert(token, handler);
         inner.poll.register(fd, token, Ready::readable(), PollOpt::edge()).unwrap();
 
-        // TODO: consider rollover?
+        // TODO: consider index wrap around?
         inner.index += 1;
     }
 
@@ -97,7 +104,7 @@ impl EventManager {
         inner.handlers.insert(token, handler);
         inner.poll.register(fd, token, Ready::readable(), PollOpt::level()).unwrap();
 
-        // TODO: consider rollover?
+        // TODO: consider index wrap around?
         inner.index += 1;
     }
 
