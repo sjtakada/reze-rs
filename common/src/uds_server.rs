@@ -24,6 +24,7 @@ use super::event::*;
 
 // Trait UdsServer callbacks.
 pub trait UdsServerHandler {
+
     // callback when server accepts client connection.
     fn handle_connect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
 
@@ -39,6 +40,7 @@ unsafe impl Sync for UdsServerEntry {}
 
 // Unix Domain Socket server entry, created per connect.
 pub struct UdsServerEntry {
+
     // EventHandler token.
     token: Cell<Token>,
 
@@ -162,6 +164,7 @@ unsafe impl Sync for UdsServerInner {}
 
 /// UdsServer Message Server.
 pub struct UdsServer {
+
     /// UdsServer Inner.
     inner: RefCell<Option<Arc<UdsServerInner>>>,
 }

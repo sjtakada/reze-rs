@@ -128,7 +128,7 @@ impl UdsServerHandler for RouterNexus {
 
                     // register sender_z2p to Zebra thread
             } else if command == "quit" {
-                return Err(CoreError::NexusTermination)
+                return Err(CoreError::SystemShutdown)
             } else {
                 return Err(CoreError::CommandNotFound(command.to_string()))
             }
@@ -272,7 +272,7 @@ impl RouterNexus {
 
             // Process events.
             match event_manager.poll() {
-                Err(CoreError::NexusTermination) => break 'main,
+                Err(CoreError::SystemShutdown) => break 'main,
                 _ => {}
             }
 
@@ -326,7 +326,7 @@ impl RouterNexus {
         }
 
         // Nexus terminated.
-        Err(CoreError::NexusTermination)
+        Err(CoreError::SystemShutdown)
     }
 
     //

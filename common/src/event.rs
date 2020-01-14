@@ -77,7 +77,8 @@ impl EventManager {
 
     pub fn register_listen(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
         let mut inner = self.inner.borrow_mut();
-        let token = Token(inner.index);
+        let index = inner.index;
+        let token = Token(index);
 
         inner.handlers.insert(token, handler);
         inner.poll.register(fd, token, Ready::readable(), PollOpt::edge()).unwrap();
@@ -88,7 +89,8 @@ impl EventManager {
 
     pub fn register_read(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
         let mut inner = self.inner.borrow_mut();
-        let token = Token(inner.index);
+        let index = inner.index;
+        let token = Token(index);
 
         handler.set_token(token);
 
@@ -96,6 +98,19 @@ impl EventManager {
         inner.poll.register(fd, token, Ready::readable(), PollOpt::level()).unwrap();
 
         // TODO: consider rollover?
+        inner.index += 1;
+    }
+
+    pub fn register_write(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
+        let mut inner = self.inner.borrow_mut();
+        let index = inner.index;
+        let token = Token(index);
+
+        handler.set_token(token);
+
+        inner.handlers.insert(token, handler);
+        inner.poll.register(fd, token, Ready::writable(), PollOpt::level()).unwrap();
+
         inner.index += 1;
     }
 
@@ -134,7 +149,16 @@ impl EventManager {
             if let Some(handler) = self.poll_get_handler(event) {
                 if event.readiness() == Ready::readable() {
                     match handler.handle(EventType::ReadEvent, None) {
-                        Err(CoreError::NexusTermination) => {
+                        Err(CoreError::SystemShutdown) => {
+                            terminated = true
+                        },
+                        _ => {
+                        }
+                    }
+                }
+                else if event.readiness() == Ready::writable() {
+                    match handler.handle(EventType::WriteEvent, None) {
+                        Err(CoreError::SystemShutdown) => {
                             terminated = true
                         },
                         _ => {
@@ -143,7 +167,7 @@ impl EventManager {
                 }
                 else {
                     match handler.handle(EventType::ErrorEvent, None) {
-                        Err(CoreError::NexusTermination) => {
+                        Err(CoreError::SystemShutdown) => {
                             terminated = true
                         },
                         _ => {
@@ -154,7 +178,7 @@ impl EventManager {
         }
 
         if terminated {
-            return Err(CoreError::NexusTermination);
+            return Err(CoreError::SystemShutdown);
         }
 
         Ok(())

@@ -109,7 +109,7 @@ fn start() {
 
     // Start nexus.
     match nexus.start(event_manager) {
-        Err(CoreError::NexusTermination) => {
+        Err(CoreError::SystemShutdown) => {
             info!("Nexus terminated")
         },
         _ => {

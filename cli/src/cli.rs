@@ -136,17 +136,6 @@ impl Cli {
                     println!("Error: {:?}", err);
                 }
             };
-
-            /*
-            stdout().write(b"> ");
-            stdout().flush();
-
-            let mut buffer = String::new();
-            stdin().read_line(&mut buffer);
-
-            stream.write(buffer.as_ref());
-            stream.flush();
-             */
         }
     }
 
