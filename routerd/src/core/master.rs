@@ -84,9 +84,8 @@ impl ProtocolMaster {
 
                             match self.timer_handler_get(token) {
                                 Some(handler) => {
-                                    match handler.handle(EventType::TimerEvent, None) {
-                                        Ok(_) => {},
-                                        Err(_) => {}
+                                    if let Err(err) = handler.handle(EventType::TimerEvent) {
+                                        error!("Timer handler error {}", err);
                                     }
                                 },
                                 None => {

@@ -97,7 +97,7 @@ impl Ospf {
 }
 
 impl EventHandler for OspfHelloTimer {
-    fn handle(&self, e: EventType, _param: Option<Arc<EventParam>>) -> Result<(), CoreError> {
+    fn handle(&self, e: EventType) -> Result<(), CoreError> {
         match e {
             EventType::TimerEvent => {
                 debug!("Hello Timer fired");

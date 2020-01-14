@@ -24,18 +24,12 @@ pub enum EventType {
     ErrorEvent,
 }
 
-/// Event parameters -- TBD maybe not needed any more.
-pub enum EventParam {
-    String(String),
-    Number(i64),
-}
-
 /// Event Handler trait.
 /// Token is associated with EventHandler and certain event expected.
 pub trait EventHandler {
 
     /// Handle event.
-    fn handle(&self, event_type: EventType, param: Option<Arc<EventParam>>) -> Result<(), CoreError>;
+    fn handle(&self, event_type: EventType) -> Result<(), CoreError>;
 
     /// Set token to event handler.
     fn set_token(&self, _token: Token) {
@@ -155,7 +149,7 @@ impl EventManager {
         for event in events.iter() {
             if let Some(handler) = self.poll_get_handler(event) {
                 if event.readiness() == Ready::readable() {
-                    match handler.handle(EventType::ReadEvent, None) {
+                    match handler.handle(EventType::ReadEvent) {
                         Err(CoreError::SystemShutdown) => {
                             terminated = true
                         },
@@ -164,7 +158,7 @@ impl EventManager {
                     }
                 }
                 else if event.readiness() == Ready::writable() {
-                    match handler.handle(EventType::WriteEvent, None) {
+                    match handler.handle(EventType::WriteEvent) {
                         Err(CoreError::SystemShutdown) => {
                             terminated = true
                         },
@@ -173,7 +167,7 @@ impl EventManager {
                     }
                 }
                 else {
-                    match handler.handle(EventType::ErrorEvent, None) {
+                    match handler.handle(EventType::ErrorEvent) {
                         Err(CoreError::SystemShutdown) => {
                             terminated = true
                         },

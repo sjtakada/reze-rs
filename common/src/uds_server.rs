@@ -92,7 +92,7 @@ impl Drop for UdsServerEntry {
 }
 
 impl EventHandler for UdsServerEntry {
-    fn handle(&self, e: EventType, _param: Option<Arc<EventParam>>) -> Result<(), CoreError> {
+    fn handle(&self, e: EventType) -> Result<(), CoreError> {
         match e {
             EventType::ReadEvent => {
                 let server = self.server.borrow_mut();
@@ -209,20 +209,20 @@ impl UdsServer {
 }
 
 impl EventHandler for UdsServerInner {
-    fn handle(&self, e: EventType, _param: Option<Arc<EventParam>>) -> Result<(), CoreError> {
+    fn handle(&self, e: EventType) -> Result<(), CoreError> {
         let server = self.server.borrow_mut();
 
         match e {
             EventType::ReadEvent => {
                 match self.listener.accept() {
                     Ok(Some((stream, _addr))) => {
-                        debug!("Accept a message client: {:?}", _addr);
+                        debug!("Accept a UDS client: {:?}", _addr);
 
                         let entry = Arc::new(UdsServerEntry::new(server.clone()));
                         let event_manager = self.event_manager.borrow();
 
                         if let Err(_) = self.handler.borrow_mut().handle_connect(server.clone(), &entry) {
-                            // TBD
+                            error!("UDS Server handler error");
                         }
 
                         event_manager.register_read(&stream, entry.clone());
