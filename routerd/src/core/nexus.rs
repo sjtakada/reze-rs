@@ -26,11 +26,12 @@ use std::time::Instant;
 use std::time::Duration;
 
 use common::event::*;
+use common::timer::*;
 use common::error::*;
 use common::uds_server::*;
 
-use super::timer;
 use super::signal;
+use super::timer;
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
 use super::message::nexus::NexusToProto;
@@ -57,6 +58,7 @@ struct MasterTuple {
 
 /// Router Nexus.
 pub struct RouterNexus {
+
     /// Global config.
     config: RefCell<ConfigMaster>,
 
@@ -64,7 +66,7 @@ pub struct RouterNexus {
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
     /// Timer server
-    timer_server: RefCell<timer::Server>,
+    timer_server: RefCell<TimerServer>,
 
     /// Sender channel for ProtoToNexus
     sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
@@ -169,7 +171,7 @@ impl EventHandler for TimerEntry {
     }
 }
 
-impl timer::TimerHandler for TimerEntry {
+impl TimerHandler for TimerEntry {
 
     fn expiration(&self) -> Instant {
         self.expiration
@@ -188,7 +190,7 @@ impl RouterNexus {
         RouterNexus {
             config: RefCell::new(ConfigMaster::new()),
             masters: RefCell::new(HashMap::new()),
-            timer_server: RefCell::new(timer::Server::new()),
+            timer_server: RefCell::new(TimerServer::new()),
             sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
         }

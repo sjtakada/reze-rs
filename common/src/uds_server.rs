@@ -1,5 +1,5 @@
 //
-// ReZe.Rs - Router Daemon
+// ReZe.Rs - Common
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Unix Domain Socket Server

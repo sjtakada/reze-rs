@@ -5,87 +5,15 @@
 // Simple Timer
 //
 
-use std::collections::BinaryHeap;
 use std::collections::HashMap;
-use std::rc::Rc;
 use std::sync::Arc;
 use std::cell::RefCell;
-use std::time::Instant;
 use std::time::Duration;
 use std::sync::Mutex;
-use std::cmp::Ordering;
 
 use common::event::*;
 
 use super::master::ProtocolMaster;
-
-/// TimerHandler trait
-pub trait TimerHandler: EventHandler {
-
-    /// Get expiration time.
-    fn expiration(&self) -> Instant;
-
-    /// Set expiration time.
-    fn set_expiration(&mut self, d: Duration) -> ();
-}
-
-impl Ord for dyn TimerHandler {
-    fn cmp(&self, other: &Self) -> Ordering {
-	other.expiration().cmp(&self.expiration())
-    }
-}
-
-impl PartialOrd for dyn TimerHandler {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-	Some(self.cmp(other))
-    }
-}
-
-impl Eq for dyn TimerHandler {
-}
-
-impl PartialEq for dyn TimerHandler {
-    fn eq(&self, other: &Self) -> bool {
-        other.expiration() == self.expiration()
-    }
-}
-
-/// Timer server
-pub struct Server {
-
-    /// Ordering handler by expiration time.
-    heap: RefCell<BinaryHeap<Rc<dyn TimerHandler>>>
-}
-
-impl Server {
-    pub fn new() -> Server {
-        Server {
-            heap: RefCell::new(BinaryHeap::new())
-        }
-    }
-
-    pub fn register(&self, d: Duration, mut handler: Rc<dyn TimerHandler>) {
-        Rc::get_mut(&mut handler).unwrap().set_expiration(d);
-        self.heap.borrow_mut().push(handler);
-    }
-
-    pub fn pop_if_expired(&mut self) -> Option<Rc<dyn TimerHandler>> {
-        if match self.heap.borrow_mut().peek() {
-            Some(handler) if handler.expiration() < Instant::now() => true,
-            _ => false,
-        } {
-            self.heap.borrow_mut().pop()
-        } else {
-            None
-        }
-    }
-
-    pub fn run(&mut self) {
-        while let Some(handler) = self.pop_if_expired() {
-            let _ = handler.handle(EventType::TimerEvent);
-        }
-    }
-}
 
 /// Timer client
 pub struct Client {

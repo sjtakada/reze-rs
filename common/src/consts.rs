@@ -1,5 +1,5 @@
 //
-// ReZe.Rs - ReZe CLI
+// ReZe.Rs - Common
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // Constants
