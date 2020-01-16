@@ -243,7 +243,7 @@ impl RouterNexus {
     }
 
     // Construct MasterInner instance and spawn a thread.
-    fn _spawn_protocol(&self, p: ProtocolType,
+    fn spawn_protocol(&self, p: ProtocolType,
                       sender_p2n: mpsc::Sender<ProtoToNexus>,
                       sender_p2z: mpsc::Sender<ProtoToZebra>)
                       -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ZebraToProto>) {
@@ -274,17 +274,16 @@ impl RouterNexus {
     //
     fn finish_protocol(&self, proto: &ProtocolType) {
         if let Some(tuple) = self.masters.borrow_mut().remove(&proto) {
-            match tuple.sender.send(NexusToProto::ProtoTermination) {
-                Ok(_) => {},
-                Err(_) => {},
+            if let Err(err) = tuple.sender.send(NexusToProto::ProtoTermination) {
+                error!("Send protocol termination {:?}", err);
             }
 
             match tuple.handle.join() {
                 Ok(_ret) => {
                     debug!("protocol join succeeded");
                 },
-                Err(_err) => {
-                    debug!("protocol join failed");
+                Err(err) => {
+                    error!("protocol join failed {:?}", err);
                 }
             }
         }
@@ -325,8 +324,15 @@ impl RouterNexus {
         self.sender_p2z.borrow_mut().replace(sender_p2z);
         self.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
+
+        // XXX spawn OSPF
+//        let (handle, sender, _sender_z2p) = self.spawn_protocol(ProtocolType::Ospf,
+//                                                               self.clone_sender_p2n(),
+//                                                               self._clone_sender_p2z());
+//        self.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
+
         // Message Queue for NexusToProto.
-        let queue: Rc<VecDeque<ProtoMessageEntry>> = Rc::new(VecDeque::new());
+        let mut queue: Rc<VecDeque<ProtoMessageEntry>> = Rc::new(VecDeque::new());
 
         // Event loop.
         'main: loop {
@@ -362,7 +368,13 @@ impl RouterNexus {
             self.timer_server.borrow_mut().run();
 
             // Process message queue.
-//          let _ = self.sender.send(NexusToProto::TimerExpiration(self.token));
+            while let Some(entry) = Rc::get_mut(&mut queue).unwrap().pop_front() {
+                if let Some(tuple) = self.masters.borrow_mut().get(&entry.protocol) {
+                    if let Err(err) = tuple.sender.send(entry.message) {
+                        error!("Sender send message {:?}", err);
+                    }
+                }
+            }
         }
 
         // Send termination message to all threads first.
