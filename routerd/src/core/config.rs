@@ -15,6 +15,7 @@ use regex::Regex;
 //use super::protocols::ProtocolType;
 use common::error::*;
 
+#[derive(Copy, Clone)]
 pub enum Method {
     Get,
     Post,

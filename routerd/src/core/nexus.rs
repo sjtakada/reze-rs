@@ -13,21 +13,24 @@
 use log::debug;
 use log::error;
 
-use std::collections::HashMap;
 use std::thread;
 use std::thread::JoinHandle;
+use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::boxed::Box;
 use std::cell::RefCell;
-use std::time::Duration;
 use std::str::FromStr;
+use std::time::Instant;
+use std::time::Duration;
 
 use common::event::*;
 use common::error::*;
 use common::uds_server::*;
 
+use super::timer;
 use super::signal;
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
@@ -42,15 +45,26 @@ use crate::zebra::master::ZebraMaster;
 use crate::bgp::master::BgpMaster;
 use crate::ospf::master::OspfMasterInner;
 
-use super::timer;
 
 /// Thread handle and Channel tuple.
 struct MasterTuple {
+
     /// Thread Join handle
     handle: JoinHandle<()>,
 
     /// Channel sender from Master To Protocol
     sender: mpsc::Sender<NexusToProto>,
+}
+
+/// Message Entry to bridge message from other event to channel.
+#[derive(Clone)]
+pub struct ProtoMessageEntry {
+
+    /// Protocol Type.
+    protocol: ProtocolType,
+
+    /// Message.
+    message: NexusToProto,
 }
 
 /// Router Nexus.
@@ -144,6 +158,54 @@ impl UdsServerHandler for RouterNexus {
 
         debug!("handle_disconnect");
         Ok(())
+    }
+}
+
+/// Timer entry
+pub struct TimerEntry {
+    pub queue: RefCell<Rc<VecDeque<ProtoMessageEntry>>>,
+    pub protocol: ProtocolType,
+    pub expiration: Instant,
+    pub token: u32,
+}
+
+impl TimerEntry {
+    pub fn new(p: ProtocolType, queue: Rc<VecDeque<ProtoMessageEntry>>, d: Duration, token: u32) -> TimerEntry {
+        TimerEntry {
+            queue: RefCell::new(queue),
+            protocol: p,
+            expiration: Instant::now() + d,
+            token: token,
+        }
+    }
+}
+
+impl EventHandler for TimerEntry {
+
+    fn handle(&self, e: EventType) -> Result<(), CoreError> {
+        match e {
+            EventType::TimerEvent => {
+                Rc::get_mut(&mut self.queue.borrow_mut()).unwrap().push_back(ProtoMessageEntry {
+                    protocol: self.protocol,
+                    message: NexusToProto::TimerExpiration(self.token),
+                });
+            },
+            _ => {
+                error!("Unknown event");
+            }
+        }
+        Ok(())
+    }
+}
+
+impl timer::TimerHandler for TimerEntry {
+
+    fn expiration(&self) -> Instant {
+        self.expiration
+    }
+
+    fn set_expiration(&mut self, d: Duration) {
+        self.expiration = Instant::now() + d;
     }
 }
 
@@ -263,6 +325,9 @@ impl RouterNexus {
         self.sender_p2z.borrow_mut().replace(sender_p2z);
         self.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
+        // Message Queue for NexusToProto.
+        let queue: Rc<VecDeque<ProtoMessageEntry>> = Rc::new(VecDeque::new());
+
         // Event loop.
         'main: loop {
             // Signal is caught.
@@ -282,7 +347,8 @@ impl RouterNexus {
                     ProtoToNexus::TimerRegistration((p, d, token)) => {
                         debug!("Received Timer Registration {} {}", p, token);
 
-                        self.timer_server.borrow_mut().register(p, d, token);
+                        let entry = TimerEntry::new(p, queue.clone(), d, token);
+                        self.timer_server.borrow_mut().register(d, Rc::new(entry));
                     },
                     ProtoToNexus::ProtoException(s) => {
                         debug!("Received Exception {}", s);
@@ -292,26 +358,11 @@ impl RouterNexus {
 
             thread::sleep(Duration::from_millis(10));
 
-            // Process timer
-            match self.timer_server.borrow_mut().pop_if_expired() {
-                Some(entry) => {
-                    match self.masters.borrow_mut().get(&entry.protocol) {
-                        Some(tuple) => {
-                            let result =
-                                tuple.sender.send(NexusToProto::TimerExpiration(entry.token));
-                            // TODO
-                            match result {
-                                Ok(_ret) => {},
-                                Err(_err) => {}
-                            }
-                        }
-                        None => {
-                            panic!("Unexpected error");
-                        }
-                    }
-                },
-                None => { }
-            }
+            // Process timer.
+            self.timer_server.borrow_mut().run();
+
+            // Process message queue.
+//          let _ = self.sender.send(NexusToProto::TimerExpiration(self.token));
         }
 
         // Send termination message to all threads first.
