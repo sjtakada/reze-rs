@@ -70,11 +70,13 @@ impl Server {
     }
 
     pub fn pop_if_expired(&mut self) -> Option<Rc<dyn TimerHandler>> {
-        match self.heap.borrow_mut().peek() {
-            Some(handler) if handler.expiration() < Instant::now() => {
-                self.heap.borrow_mut().pop()
-            },
-            _ => None,
+        if match self.heap.borrow_mut().peek() {
+            Some(handler) if handler.expiration() < Instant::now() => true,
+            _ => false,
+        } {
+            self.heap.borrow_mut().pop()
+        } else {
+            None
         }
     }
 
