@@ -10,9 +10,6 @@
 //   Run timer server and notify clients.
 //
 
-use log::debug;
-use log::error;
-
 use std::thread;
 use std::thread::JoinHandle;
 use std::collections::HashMap;
@@ -24,6 +21,9 @@ use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Instant;
 use std::time::Duration;
+
+use log::debug;
+use log::error;
 
 use common::event::*;
 use common::timer::*;
@@ -37,10 +37,10 @@ use super::message::nexus::ProtoToNexus;
 use super::message::nexus::NexusToProto;
 use super::message::zebra::ProtoToZebra;
 use super::message::zebra::ZebraToProto;
-
 use super::master::ProtocolMaster;
 use super::config::*;
 use super::config_master::*;
+
 use crate::zebra::master::ZebraMaster;
 use crate::bgp::master::BgpMaster;
 use crate::ospf::master::OspfMasterInner;
@@ -75,8 +75,10 @@ pub struct RouterNexus {
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 }
 
+/// UdsServerHandler implementation for RouterNexus.
 impl UdsServerHandler for RouterNexus {
-    // Process command.
+
+    /// Process command.
     fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
         if let Some(command) = entry.stream_read() {
             let mut lines = command.lines();
@@ -122,11 +124,13 @@ impl UdsServerHandler for RouterNexus {
         }
     }
 
+    /// Handle connect placeholder.
     fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
         debug!("handle_connect");
         Ok(())
     }
 
+    /// Handle disconnect placeholder.
     fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
         server.shutdown_entry(entry);
 
@@ -135,7 +139,7 @@ impl UdsServerHandler for RouterNexus {
     }
 }
 
-/// Timer entry
+/// Timer entry.
 pub struct TimerEntry {
     pub sender: mpsc::Sender<NexusToProto>,
     pub protocol: ProtocolType,
@@ -143,7 +147,10 @@ pub struct TimerEntry {
     pub token: u32,
 }
 
+/// Timer entry implementation.
 impl TimerEntry {
+
+    /// Constructor.
     pub fn new(p: ProtocolType, sender: mpsc::Sender<NexusToProto>, d: Duration, token: u32) -> TimerEntry {
         TimerEntry {
             sender: sender,
@@ -154,8 +161,10 @@ impl TimerEntry {
     }
 }
 
+/// EventHandler implementation for TimerEntry.
 impl EventHandler for TimerEntry {
 
+    /// Event handler.
     fn handle(&self, e: EventType) -> Result<(), CoreError> {
         match e {
             EventType::TimerEvent => {
@@ -167,16 +176,20 @@ impl EventHandler for TimerEntry {
                 error!("Unknown event");
             }
         }
+
         Ok(())
     }
 }
 
+/// TimerHandler implementation for TimerEntry.
 impl TimerHandler for TimerEntry {
 
+    /// Get expiration.
     fn expiration(&self) -> Instant {
         self.expiration
     }
 
+    /// Set expiration.
     fn set_expiration(&mut self, d: Duration) {
         self.expiration = Instant::now() + d;
     }
@@ -196,7 +209,7 @@ impl RouterNexus {
         }
     }
 
-    // Construct MasterInner instance and spawn a thread.
+    /// Construct MasterInner instance and spawn a thread.
     fn spawn_zebra(&self, sender_p2n: mpsc::Sender<ProtoToNexus>)
                    -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ProtoToZebra>) {
         // Clone global config.
@@ -264,6 +277,7 @@ impl RouterNexus {
         }
     }
 
+    /// Clone P2N sender mpsc.
     fn clone_sender_p2n(&self) -> mpsc::Sender<ProtoToNexus> {
         if let Some(ref mut sender_p2n) = *self.sender_p2n.borrow_mut() {
             return mpsc::Sender::clone(&sender_p2n);
@@ -271,6 +285,7 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
+    /// Clone P2Z sender mpsc.
     fn _clone_sender_p2z(&self) -> mpsc::Sender<ProtoToZebra> {
         if let Some(ref mut sender_p2z) = *self.sender_p2z.borrow_mut() {
             return mpsc::Sender::clone(&sender_p2z)
@@ -278,6 +293,7 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
+    /// Initialize config.
     fn config_init(&self) {
         self.config.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
         self.config.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);

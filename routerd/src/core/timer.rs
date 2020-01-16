@@ -18,20 +18,20 @@ use super::master::ProtocolMaster;
 /// Timer client
 pub struct Client {
 
-    /// Parent  
+    /// Parent.
     _master: RefCell<Arc<ProtocolMaster>>,
 
-    /// Token
+    /// Token.
     token: u32,
 
-    /// Token to EventHandler map
+    /// Token to EventHandler map.
     timers: Mutex<HashMap<u32, Arc<dyn EventHandler + Send + Sync>>>,
 }
 
-/// Timer client implementation
+/// Timer client implementation.
 impl Client {
 
-    /// Constructor
+    /// Constructor.
     pub fn new(master: Arc<ProtocolMaster>) -> Client {
         Client {
             _master: RefCell::new(master),

@@ -61,9 +61,12 @@ pub struct EventManagerInner {
 
 /// Event Manager.
 pub struct EventManager {
+
+    /// Event manager inner.
     pub inner: RefCell<EventManagerInner>,
 }
 
+/// EventManager implementation.
 impl EventManager {
     pub fn new() -> EventManager {
         EventManager {
@@ -76,6 +79,7 @@ impl EventManager {
         }
     }
 
+    /// Register listen socket.
     pub fn register_listen(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
         let mut inner = self.inner.borrow_mut();
         let index = inner.index;
@@ -88,6 +92,7 @@ impl EventManager {
         inner.index += 1;
     }
 
+    /// Register read socket.
     pub fn register_read(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
         let mut inner = self.inner.borrow_mut();
         let index = inner.index;
@@ -102,6 +107,7 @@ impl EventManager {
         inner.index += 1;
     }
 
+    /// Register write socket.
     pub fn register_write(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
         let mut inner = self.inner.borrow_mut();
         let index = inner.index;
@@ -115,6 +121,7 @@ impl EventManager {
         inner.index += 1;
     }
 
+    /// Unregister read socket.
     pub fn unregister_read(&self, fd: &dyn Evented, token: Token) {
         let mut inner = self.inner.borrow_mut();
 
@@ -122,6 +129,7 @@ impl EventManager {
         inner.poll.deregister(fd).unwrap();
     }
 
+    /// Poll and return events ready to read or write.
     pub fn poll_get_events(&self) -> Events {
         let inner = self.inner.borrow_mut();
         let mut events = Events::with_capacity(1024);
@@ -134,6 +142,7 @@ impl EventManager {
         events
     }
 
+    /// Return handler associated with token.
     pub fn poll_get_handler(&self, event: Event) -> Option<Arc<dyn EventHandler + Send + Sync>> {
         let inner = self.inner.borrow_mut();
         match inner.handlers.get(&event.token()) {
@@ -142,6 +151,7 @@ impl EventManager {
         }
     }
 
+    /// Poll and handle events.
     pub fn poll(&self) -> Result<(), CoreError> {
         let events = self.poll_get_events();
         let mut terminated = false;

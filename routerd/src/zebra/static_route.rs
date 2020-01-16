@@ -21,7 +21,6 @@ use log::{debug, error};
 use rtable::prefix::*;
 use common::error::*;
 
-//use crate::core::protocols::ProtocolType;
 use crate::core::config::*;
 use super::master::ZebraMaster;
 use super::nexthop::*;

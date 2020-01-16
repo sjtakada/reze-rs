@@ -12,9 +12,9 @@ use std::rc::Rc;
 use log::debug;
 use regex::Regex;
 
-//use super::protocols::ProtocolType;
 use common::error::*;
 
+/// Method: equivalent to HTTP Method.
 #[derive(Copy, Clone)]
 pub enum Method {
     Get,
@@ -24,6 +24,7 @@ pub enum Method {
     Patch,
 }
 
+/// FromStr.
 impl FromStr for Method {
     type Err = CoreError;
 
@@ -41,7 +42,10 @@ impl FromStr for Method {
     }
 }
 
+/// Display.
 impl fmt::Display for Method {
+
+    /// Format method.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match self {
             Method::Get => "GET",
@@ -57,6 +61,7 @@ impl fmt::Display for Method {
 
 /// Config trait.
 pub trait Config {
+
     /// Return unique identifier, this is used to register to parent as a key.
     fn id(&self) -> &str;
 

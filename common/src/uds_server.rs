@@ -2,19 +2,17 @@
 // ReZe.Rs - Common
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
-// Unix Domain Socket Server
+// Unix Domain Socket Server.
 //
 
-use log::{debug, error};
-
 use std::io::Read;
-
 use std::sync::Arc;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::net::Shutdown;
 
+use log::{debug, error};
 use mio::Token;
 use mio_uds::UnixListener;
 use mio_uds::UnixStream;
@@ -22,36 +20,39 @@ use mio_uds::UnixStream;
 use super::error::*;
 use super::event::*;
 
-// Trait UdsServer callbacks.
+/// Trait UdsServer callbacks.
 pub trait UdsServerHandler {
 
-    // callback when server accepts client connection.
+    /// callback when server accepts client connection.
     fn handle_connect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
 
-    // callback when server detects client disconnected.
+    /// callback when server detects client disconnected.
     fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
 
-    // callback when server entry received message.
+    /// callback when server entry received message.
     fn handle_message(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError>;
 }
 
 unsafe impl Send for UdsServerEntry {}
 unsafe impl Sync for UdsServerEntry {}
 
-// Unix Domain Socket server entry, created per connect.
+/// Unix Domain Socket server entry, created per connect.
 pub struct UdsServerEntry {
 
-    // EventHandler token.
+    /// EventHandler token.
     token: Cell<Token>,
 
-    // Pointer to UdsServer.
+    /// Pointer to UdsServer.
     server: RefCell<Arc<UdsServer>>,
 
-    // mio UnixStream.
+    /// mio UnixStream.
     stream: RefCell<Option<UnixStream>>,
 }
 
+/// UdsServerEntry implementation.
 impl UdsServerEntry {
+
+    /// Constructor.
     pub fn new(server: Arc<UdsServer>) -> UdsServerEntry {
         UdsServerEntry {
             token: Cell::new(Token(0)),
@@ -60,6 +61,7 @@ impl UdsServerEntry {
         }
     }
 
+    /// Read stream and return String - TBD.
     pub fn stream_read(&self) -> Option<String> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
@@ -85,13 +87,17 @@ impl UdsServerEntry {
     }
 }
 
+/// Drop implementation.
 impl Drop for UdsServerEntry {
     fn drop(&mut self) {
         debug!("Drop UdsServerEntry");
     }
 }
 
+/// EventHandler implementation for UdsServerEntry.
 impl EventHandler for UdsServerEntry {
+
+    /// Handle event.
     fn handle(&self, e: EventType) -> Result<(), CoreError> {
         match e {
             EventType::ReadEvent => {
@@ -118,10 +124,12 @@ impl EventHandler for UdsServerEntry {
         Ok(())
     }
 
+    /// Set token to entry.
     fn set_token(&self, token: Token) {
         self.token.replace(token);
     }
 
+    /// Get token from entry.
     fn get_token(&self) -> Token {
         self.token.get()
     }
@@ -129,6 +137,7 @@ impl EventHandler for UdsServerEntry {
 
 /// UdsServer Inner.
 pub struct UdsServerInner {
+
     /// UdsServer
     server: RefCell<Arc<UdsServer>>,
 
@@ -142,6 +151,7 @@ pub struct UdsServerInner {
     listener: UnixListener,
 }
 
+/// UdsServerInner implementation.
 impl UdsServerInner {
     pub fn new(server: Arc<UdsServer>, event_manager: Arc<EventManager>,
                handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> UdsServerInner {
@@ -169,13 +179,17 @@ pub struct UdsServer {
     inner: RefCell<Option<Arc<UdsServerInner>>>,
 }
   
+/// UdsServer implementation.
 impl UdsServer {
+
+    /// Constructor.
     fn new() -> UdsServer {
         UdsServer {
             inner: RefCell::new(None),
         }
     }
 
+    /// Return UdsServerInner.
     pub fn get_inner(&self) -> Arc<UdsServerInner> {
         if let Some(ref mut inner) = *self.inner.borrow_mut() {
             return inner.clone()
@@ -185,6 +199,7 @@ impl UdsServer {
         panic!();
     }
 
+    /// Start UdsServer.
     pub fn start(event_manager: Arc<EventManager>, handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
         let server = Arc::new(UdsServer::new());
         let inner = Arc::new(UdsServerInner::new(server.clone(), event_manager.clone(), handler.clone(), path));
@@ -195,6 +210,7 @@ impl UdsServer {
         server
     }
 
+    /// Shutdown UdsServerEntry.
     pub fn shutdown_entry(&self, entry: &UdsServerEntry) {
         if let Some(ref mut stream) = *entry.stream.borrow_mut() {
             self.get_inner().event_manager.borrow().unregister_read(stream, entry.get_token());
@@ -208,7 +224,10 @@ impl UdsServer {
     }
 }
 
+/// EventHandler implementation for UdsServerInner.
 impl EventHandler for UdsServerInner {
+
+    /// Event handler.
     fn handle(&self, e: EventType) -> Result<(), CoreError> {
         let server = self.server.borrow_mut();
 

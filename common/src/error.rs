@@ -2,7 +2,7 @@
 // ReZe.Rs - Common
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
-// Core Error
+// Error
 //
 
 use quick_error::*;

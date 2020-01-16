@@ -21,19 +21,24 @@ pub enum ConfigOrProtocol {
     Proto(ProtocolType),
 }
 
-/// Global config.
+/// Config master
 pub struct ConfigMaster {
+
     /// Top level config storage.
     map: HashMap<String, ConfigOrProtocol>,
 }
 
+/// ConfigMaster implementation.
 impl ConfigMaster {
+
+    /// Constructor.
     pub fn new() -> ConfigMaster {
         ConfigMaster {
             map: HashMap::new(),
         }
     }
 
+    /// Lookup config with path.
     pub fn lookup(&self, path: &str) -> Option<&ConfigOrProtocol> {
         if let Some((id, _path)) = split_id_and_path(path) {
             self.map.get(&id)
@@ -42,6 +47,7 @@ impl ConfigMaster {
         }
     }
 
+    /// Deliver config to given path.
     pub fn apply(&self, method: Method, path: &str, body: Option<Box<String>>) -> Result<(), CoreError> {
         if let Some((id, path)) = split_id_and_path(path) {
             match path {

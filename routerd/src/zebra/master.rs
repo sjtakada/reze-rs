@@ -16,8 +16,6 @@ use std::sync::Arc;
 use std::sync::mpsc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-//use crate::core::event::*;
-
 use rtable::prefix::*;
 
 use crate::core::protocols::ProtocolType;
@@ -36,12 +34,14 @@ use super::rib::*;
 
 /// Store Zebra Client related information.
 struct ClientTuple {
+
     /// Channel sender from Zebra to Protocol
     _sender: mpsc::Sender<ZebraToProto>,
 }
 
 /// Zebra Master.
 pub struct ZebraMaster {
+
     /// Reference config tree.
     config: RefCell<ConfigMaster>,
 
@@ -64,7 +64,10 @@ pub struct ZebraMaster {
     _rib_ipv6: RefCell<RibTable<Ipv6Addr>>,
 }
 
+/// Zebra Master implementation.
 impl ZebraMaster {
+
+    /// Constructor.
     pub fn new() -> ZebraMaster {
         let callbacks = KernelCallbacks {
             add_link: &ZebraMaster::add_link,
@@ -86,6 +89,7 @@ impl ZebraMaster {
         }
     }
 
+    /// Add link.
     pub fn add_link(&self, link: Link) {
         debug!("New Link");
 
@@ -94,6 +98,7 @@ impl ZebraMaster {
         // TODO: notify this to other protocols.
     }
 
+    /// Delete link.
     pub fn delete_link(&self, _link: Link) {
         debug!("Delete Link");
 
@@ -102,6 +107,7 @@ impl ZebraMaster {
         // TODO: notify this to other protocols.
     }
 
+    /// Add IPv4 address.
     pub fn add_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
         debug!("Add IPv4 Address");
 
@@ -111,6 +117,7 @@ impl ZebraMaster {
         }
     }
 
+    /// Delete IPv4 address.
     pub fn delete_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
         debug!("Delete IPv4 Address");
 
@@ -120,6 +127,7 @@ impl ZebraMaster {
         }
     }
 
+    /// Add IPv6 address.
     pub fn add_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
         debug!("Add IPv6 Address");
 
@@ -129,6 +137,7 @@ impl ZebraMaster {
         }
     }
 
+    /// Delete IPv6 address.
     pub fn delete_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
         debug!("Delete IPv6 Address");
 
@@ -138,6 +147,7 @@ impl ZebraMaster {
         }
     }
 
+    /// Add RIB for IPv4 static route.
     pub fn rib_add_static_ipv4(&self, sr: Arc<StaticRoute<Ipv4Addr>>) {
         debug!("RIB add static IPv4 {:?}", sr.prefix());
 
@@ -162,6 +172,7 @@ impl ZebraMaster {
         });
     }
 
+    /// Delete RIB for IPv4 static route.
     pub fn rib_delete_static_ipv4(&self, sr: Arc<StaticRoute<Ipv4Addr>>) {
         debug!("RIB delete static IPv4 {:?}", sr.prefix());
 
@@ -186,12 +197,14 @@ impl ZebraMaster {
         });
     }
 
+    /// Install a route for given RIB to kernel.
     pub fn rib_install_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
     where T: Addressable
     {
         self.kernel.borrow_mut().install(prefix, rib);
     }
 
+    /// Update a route for given RIB to kkernel.
     pub fn rib_update_kernel<T>(&self, prefix: &Prefix<T>, new: &Rib<T>, old: &Rib<T>)
     where T: Addressable
     {
@@ -199,31 +212,37 @@ impl ZebraMaster {
         self.kernel.borrow_mut().install(prefix, new);
     }
 
+    /// Uninstall a route for given RIB from kernel.
     pub fn rib_uninstall_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
     where T: Addressable
     {
         self.kernel.borrow_mut().uninstall(prefix, rib);
     }
 
+    /// Initialization.
     pub fn init(master: Rc<ZebraMaster>) {
         ZebraMaster::kernel_init(master.clone());
         ZebraMaster::config_init(master.clone());
         ZebraMaster::rib_init(master.clone());
     }
 
+    /// Kernel layer initialization.
     fn kernel_init(master: Rc<ZebraMaster>) {
         // Init Kernel driver.
         master.kernel.borrow_mut().init(master.clone());
     }
 
+    /// Initiialize configuration.
     fn config_init(master: Rc<ZebraMaster>) {
         let ipv4_routes = Ipv4StaticRoute::new(master.clone());
         master.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
     }
 
+    /// Initialize RIB.
     fn rib_init(_master: Rc<ZebraMaster>) {
     }
 
+    /// Entry point of zebra master.
     pub fn start(&self,
                  _sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
