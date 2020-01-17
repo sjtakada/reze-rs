@@ -8,13 +8,13 @@
 use std::env;
 use getopts::Options;
 
+use common::consts::COPYRIGHT;
+
 use cli::cli::Cli;
+use cli::config::Config;
 //use cli::error::CliError;
 
-use cli::config::Config;
-
 const CLI_VERSION: &str = "1.0";
-const COPYRIGHT: &str = "Copyright (C) 2018-2020 Toshiaki Takada";
 
 // Help.
 fn print_help(program: &str, opts: Options) {

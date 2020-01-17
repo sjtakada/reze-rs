@@ -5,7 +5,6 @@
 // CLI Node.
 //
 
-use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::rc::Rc;
@@ -59,10 +58,10 @@ impl Display for Value {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self {
             Value::Null => write!(f, "None"),
-            Value::Bool(b) => write!(f, "bool"),
+            Value::Bool(b) => write!(f, "bool {}", b),
             Value::Number(i) => write!(f, "{}", i),
             Value::String(s) => write!(f, "{}", s),
-            Value::Array(v) => write!(f, "array"),
+            Value::Array(_v) => write!(f, "array"),
         }
     }
 }

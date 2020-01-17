@@ -6,19 +6,14 @@
 //
 
 use std::time;
-use std::fmt;
 use std::fmt::Debug;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::cell::RefMut;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::str::FromStr;
-use std::hash::Hash;
 use std::collections::HashMap;
 use std::collections::BTreeMap;
-use std::net::Ipv4Addr;
-//use std::net::Ipv6Addr;
 
 use log::debug;
 
@@ -331,6 +326,8 @@ where T: Addressable
 ///
 #[cfg(test)]
 mod tests {
+    use std::net::Ipv4Addr;
+//use std::net::Ipv6Addr;
     use super::*;
 
     #[test]

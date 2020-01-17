@@ -38,6 +38,19 @@ pub enum NexusToProto {
     ProtoTermination,
 }
 
+impl Clone for NexusToProto {
+    fn clone(&self) -> Self {
+        match self {
+            NexusToProto::TimerExpiration(v) =>
+                NexusToProto::TimerExpiration(*v),
+            NexusToProto::SendConfig((m, s, opt)) =>
+                 NexusToProto::SendConfig((m.clone(), s.clone(), opt.clone())),
+            NexusToProto::ProtoTermination =>
+                NexusToProto::ProtoTermination
+        }
+    }
+}
+
 /// Message from Protocol to Nexus.
 pub enum ProtoToNexus {
     /// Register timer to server.

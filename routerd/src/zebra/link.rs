@@ -2,18 +2,18 @@
 // ReZe.Rs - Router Daemon
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
-// Zebra - Link handler
+// Zebra - Link handler.
 //
 
 use std::cell::RefCell;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-//use super::master::*;
 use super::address::*;
 use super::error::*;
 
 /// Abstracted event handler between Zebra and OS.
 pub trait LinkHandler {
+
     /// Get all links from kernel.
     fn get_links_all(&self) -> Result<(), ZebraError>;
 
@@ -29,6 +29,7 @@ pub trait LinkHandler {
 
 /// Generic Link information
 pub struct Link {
+
     /// Interface index.
     index: i32,
 
@@ -49,7 +50,10 @@ pub struct Link {
     addr6: RefCell<Vec<Connected<Ipv6Addr>>>,
 }
 
+/// Link implementaiton.
 impl Link {
+
+    /// Constructor.
     pub fn new(index: i32, name: &str, hwtype: u16, hwaddr: [u8; 6], mtu: u32) -> Link {
         Link {
             index,

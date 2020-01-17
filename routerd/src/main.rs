@@ -8,16 +8,17 @@ use std::sync::Arc;
 use std::fs;
 
 use log::info;
+use log::error;
 use simplelog::*;
 use getopts::Options;
 
 use common::consts::*;
+use common::error::*;
+use common::event::*;
+use common::uds_server::*;
 
-use routerd::core::error::*;
 use routerd::core::signal::*;
-use routerd::core::event::*;
 use routerd::core::nexus::*;
-use routerd::core::uds_server::*;
 
 const ROUTERD_VERSION: &str = "0.1.0";
 
@@ -97,25 +98,27 @@ fn main() {
 // Initialize objects and associate them.
 // TODO: probably take config or command line parameters.
 fn start() {
-    // Create Unix Domain Socket to accept commands.
-    let mut path = env::temp_dir();
-    path.push(CLI_UDS_FILENAME);
+    // Create Unix Domain Socket to accept configuration.
+    let mut config_uds_path = env::temp_dir();
+    config_uds_path.push(ROUTERD_CONFIG_UDS_FILENAME);
 
     // Prepare some objects.
     let event_manager = Arc::new(EventManager::new());
     let nexus = Arc::new(RouterNexus::new());
-    let _uds_server = UdsServer::start(event_manager.clone(), nexus.clone(), &path);
+    let _uds_server = UdsServer::start(event_manager.clone(), nexus.clone(), &config_uds_path);
 
     // Start nexus.
     match nexus.start(event_manager) {
-        Err(CoreError::NexusTermination) => {
+        Err(CoreError::SystemShutdown) => {
+            info!("Nexus terminated")
         },
         _ => {
+            error!("Nexus stopped unexpectedly")
         }
     }
 
     // Cleanup.
-    if let Err(_) = fs::remove_file(path) {
+    if let Err(_) = fs::remove_file(config_uds_path) {
 
     }
 

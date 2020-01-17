@@ -9,17 +9,16 @@
 //   Run timer server and notify clients.
 //
 
-use log::{debug, error};
-
 use std::thread;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::boxed::Box;
 use std::cell::RefCell;
 use std::time::Duration;
-//use std::time::Instant;
 
-use super::event::*;
+use log::{debug, error};
+
+use common::event::*;
 
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
@@ -29,21 +28,26 @@ use super::message::zebra::ZebraToProto;
 
 use super::timer;
 
+/// ProtocolMaster.
 pub struct ProtocolMaster {
-    // Protocol specific inner
+
+    /// Protocol specific inner.
     inner: RefCell<Option<Box<dyn MasterInner>>>,
 
-    // Sender channel for ProtoToNexus Message
+    /// Sender channel for ProtoToNexus Message.
     sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
 
-    // Sender channel for ProtoToZebra Message
+    /// Sender channel for ProtoToZebra Message.
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 
-    // Timer Client
+    /// Timer Client.
     timer_client: RefCell<Option<timer::Client>>,
 }
 
+/// ProtocolMaster implementation.
 impl ProtocolMaster {
+
+    /// Constructor.
     pub fn new(_p: ProtocolType) -> ProtocolMaster {
         ProtocolMaster {
             inner: RefCell::new(None),
@@ -53,6 +57,7 @@ impl ProtocolMaster {
         }
     }
 
+    /// TBD
     fn timer_handler_get(&self, token: u32) -> Option<Arc<dyn EventHandler + Send + Sync>> {
         let mut some_handler = None;
         if let Some(ref mut timer_client) = *self.timer_client.borrow_mut() {
@@ -61,6 +66,7 @@ impl ProtocolMaster {
         some_handler
     }
 
+    /// Entry point of protocol master.
     pub fn start(&self,
                  sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
@@ -84,9 +90,8 @@ impl ProtocolMaster {
 
                             match self.timer_handler_get(token) {
                                 Some(handler) => {
-                                    match handler.handle(EventType::TimerEvent, None) {
-                                        Ok(_) => {},
-                                        Err(_) => {}
+                                    if let Err(err) = handler.handle(EventType::TimerEvent) {
+                                        error!("Timer handler error {}", err);
                                     }
                                 },
                                 None => {
@@ -134,15 +139,18 @@ impl ProtocolMaster {
         }
     }
 
+    /// Set inner to master.
     pub fn inner_set(&self, inner: Box<dyn MasterInner>) {
         self.inner.borrow_mut().replace(inner);
     }
 
+    /// Set timers to master.
     pub fn timers_set(&self, timers: timer::Client) {
         self.timer_client.borrow_mut().replace(timers);
     }
 }
 
+/// MasterInner trait.
 pub trait MasterInner {
     fn start(&self);
 //    fn finish(&self);

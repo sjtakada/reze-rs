@@ -136,17 +136,6 @@ impl Cli {
                     println!("Error: {:?}", err);
                 }
             };
-
-            /*
-            stdout().write(b"> ");
-            stdout().flush();
-
-            let mut buffer = String::new();
-            stdin().read_line(&mut buffer);
-
-            stream.write(buffer.as_ref());
-            stream.flush();
-             */
         }
     }
 
@@ -389,7 +378,7 @@ impl Cli {
     fn init_server_connect(&self) -> Result<(), CliError> {
         // Initialize connection to server.
         let mut path = env::temp_dir();
-        path.push(CLI_UDS_FILENAME);
+        path.push(ROUTERD_CONFIG_UDS_FILENAME);
 
         let _stream = match UnixStream::connect(path) {
             Ok(stream) => {
@@ -411,7 +400,7 @@ impl Cli {
     pub fn stream_send(&self, message: &str) {
         match self.stream.borrow_mut().as_ref() {
             Some(mut s) => {
-                s.write_all(message.as_bytes());
+                let _ = s.write_all(message.as_bytes());
             },
             None => {
             }

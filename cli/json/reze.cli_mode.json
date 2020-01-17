@@ -1,11 +1,21 @@
 {
   "EXEC-MODE": {
     "type": "exec",
+    "server": {
+      "transport": "unix",
+      "socket": "/tmp/routerd.cli",
+      "path-prefix": "/exec"
+    },
     "exit-to-quit": true
   },
   "CONFIG-MODE": {
     "type": "config",
     "prompt": "(config)",
+    "server": {
+      "transport": "unix",
+      "socket": "/tmp/routerd.cli",
+      "path-prefix": "/config"
+    },
     "exit-to-end": true,
     "children": {
       "CONFIG-IF-MODE": {

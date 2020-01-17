@@ -1,5 +1,5 @@
 //
-// ReZe.Rs - ReZe CLI
+// ReZe.Rs - Common
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
 // ACL: Access Control List
@@ -17,44 +17,44 @@ use std::net::Ipv4Addr;
 use std::net::AddrParseError;
 use std::fmt;
 
-//
-// Type definitions.
-//
+///
+/// Type definitions.
+///
 
-// (permit|deny)
+/// (permit|deny)
 #[derive(PartialEq)]
 pub enum AclPerm {
     Permit,
     Deny
 }
 
-// (A.B.C.D|any)
+/// (A.B.C.D|any)
 pub enum AclRuleAddr {
     Addr(Ipv4Addr),
     Any
 }
 
-// Basic ACL rule: (permit|deny) (A.B.C.D|any)
+/// Basic ACL rule: (permit|deny) (A.B.C.D|any)
 pub struct AclRule {
     perm: AclPerm,
     addr: AclRuleAddr,
 }
 
-// List of ACL rules.
+/// List of ACL rules.
 pub struct Acl {
     rules: Vec<AclRule>,
 }
 
-// Collections of ACLs.
+/// Collections of ACLs.
 pub struct AclCollection {
     acls: HashMap<String, Acl>,
 }
 
-//
-// Implementations.
-//
+///
+/// Implementations.
+///
 
-// AclPerm
+/// AclPerm
 impl AclPerm {
     pub fn to_string(&self) -> &str {
         match *self {
@@ -70,7 +70,7 @@ impl fmt::Debug for AclPerm {
     }
 }
 
-// AclRuleAddr
+/// AclRuleAddr
 impl AclRuleAddr {
     pub fn from_str(s: &str) -> Result<AclRuleAddr, AddrParseError> {
         match s {
@@ -92,14 +92,14 @@ impl AclRuleAddr {
     }
 }
 
-// AclRule
+/// AclRule
 impl AclRule {
     pub fn new(perm: AclPerm, addr: AclRuleAddr) -> Self {
         AclRule { perm, addr }
     }
 }
 
-// Acl
+/// Acl
 impl Acl {
     pub fn new() -> Self {
         Acl{ rules: Vec::new() }
@@ -133,7 +133,7 @@ impl Acl {
     }
 }
 
-// AclCollection
+/// AclCollection
 impl AclCollection {
     pub fn new() -> Self {
         AclCollection { acls: HashMap::new() }
@@ -173,10 +173,9 @@ impl AclCollection {
     }
 }
 
-//
-// Tests.
-//
-
+///
+/// Unit Tests.
+///
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -185,10 +184,10 @@ mod tests {
     pub fn test_acl () {
         let mut ac = AclCollection::new();
 
-        ac.get_mut("100").add_rule(AclPerm::Permit, "1.1.1.1");
-        ac.get_mut("100").add_rule(AclPerm::Deny, "2.2.2.2");
-        ac.get_mut("100").add_rule(AclPerm::Deny, "3.3.3.3");
-        ac.get_mut("100").add_rule(AclPerm::Deny, "any");
+        let _ = ac.get_mut("100").add_rule(AclPerm::Permit, "1.1.1.1");
+        let _ = ac.get_mut("100").add_rule(AclPerm::Deny, "2.2.2.2");
+        let _ = ac.get_mut("100").add_rule(AclPerm::Deny, "3.3.3.3");
+        let _ = ac.get_mut("100").add_rule(AclPerm::Deny, "any");
 
         let a = Ipv4Addr::from_str("1.1.1.1").unwrap();
         assert_eq!(&AclPerm::Permit, ac.check("100", &a));
@@ -204,10 +203,10 @@ mod tests {
     pub fn test_acl_permit_any () {
         let mut ac = AclCollection::new();
 
-        ac.get_mut("100").add_rule(AclPerm::Permit, "any");
-        ac.get_mut("100").add_rule(AclPerm::Deny, "1.1.1.1");
-        ac.get_mut("100").add_rule(AclPerm::Deny, "2.2.2.2");
-        ac.get_mut("100").add_rule(AclPerm::Deny, "3.3.3.3");
+        let _ = ac.get_mut("100").add_rule(AclPerm::Permit, "any");
+        let _ = ac.get_mut("100").add_rule(AclPerm::Deny, "1.1.1.1");
+        let _ = ac.get_mut("100").add_rule(AclPerm::Deny, "2.2.2.2");
+        let _ = ac.get_mut("100").add_rule(AclPerm::Deny, "3.3.3.3");
 
         let a = Ipv4Addr::from_str("1.1.1.1").unwrap();
         assert_eq!(&AclPerm::Permit, ac.check("100", &a));

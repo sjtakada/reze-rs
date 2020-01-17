@@ -14,16 +14,14 @@ use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
 //use std::net::Ipv6Addr;
-use std::str::FromStr;
-use std::hash::Hash;
 
 use serde_json;
 use log::{debug, error};
-use rtable::prefix::*;
 
-//use crate::core::protocols::ProtocolType;
+use rtable::prefix::*;
+use common::error::*;
+
 use crate::core::config::*;
-use crate::core::error::*;
 use super::master::ZebraMaster;
 use super::nexthop::*;
 
@@ -80,7 +78,7 @@ impl Ipv4StaticRoute {
     pub fn delete(&self, p: Prefix<Ipv4Addr>, sr_new: Arc<StaticRoute<Ipv4Addr>>) -> Arc<StaticRoute<Ipv4Addr>> {
         match self.lookup(&p) {
             Some(sr) => {
-                for (nh, info) in sr_new.nexthops.borrow_mut().iter() {
+                for (nh, _info) in sr_new.nexthops.borrow_mut().iter() {
                     sr.nexthops.borrow_mut().remove(&nh);
                 }
             },

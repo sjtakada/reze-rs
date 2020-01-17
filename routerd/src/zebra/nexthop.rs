@@ -6,7 +6,6 @@
 //
 
 use std::fmt;
-use std::str::FromStr;
 
 use rtable::prefix::*;
 

@@ -7,17 +7,13 @@
 
 use std::io;
 use std::str;
-use std::str::FromStr;
 use std::mem::{size_of, zeroed};
-use std::fmt;
-//use std::ptr::copy;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::net::{Ipv4Addr, Ipv6Addr};
-use std::hash::Hash;
 use libc::{self, c_int/*, c_void, c_uchar*/};
 use log::debug;
 use log::info;
@@ -562,8 +558,8 @@ impl Netlink {
                 match nlmsg_type  {
                     libc::NLMSG_DONE => break 'outer,
                     libc::NLMSG_ERROR => {
-                        let errbuf = &buf[nlmsg_data()..];
-                        let nlmsgerr = buf as *const _ as *const libc::nlmsgerr;
+                        let _errbuf = &buf[nlmsg_data()..];
+                        let _nlmsgerr = buf as *const _ as *const libc::nlmsgerr;
 
                         return Err(ZebraError::System("Error from kernel".to_string()))
                     },

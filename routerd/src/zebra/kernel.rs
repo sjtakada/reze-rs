@@ -2,25 +2,21 @@
 // ReZe.Rs - Router Daemon
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
-// Zebra - Kernel driver
+// Zebra - Kernel abstraction layer.
 //
 
 use std::rc::Rc;
 use std::net::{Ipv4Addr, Ipv6Addr};
-use std::str::FromStr;
-use std::fmt;
-use std::hash::Hash;
 
 use rtable::prefix::*;
+
+//use log::error;
 
 use super::rib::*;
 use super::master::*;
 use super::link::*;
 use super::address::*;
-
 use super::linux::netlink::*;
-
-//use log::error;
 
 /// Kernel Callbacks.
 pub struct KernelCallbacks {
@@ -38,7 +34,10 @@ pub struct Kernel {
     driver: Netlink,
 }
 
+/// Kernel implementation.
 impl Kernel {
+
+    /// Constructor.
     pub fn new(callbacks: KernelCallbacks) -> Kernel {
         let netlink = Netlink::new(callbacks).unwrap();
 
@@ -47,6 +46,7 @@ impl Kernel {
         }
     }
 
+    /// Initialization.
     pub fn init(&mut self, master: Rc<ZebraMaster>) {
         self.driver.set_master(master);
 
@@ -57,12 +57,14 @@ impl Kernel {
         // route ipv6
     }
 
+    /// Install route to kernel.
     pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
     where T: Addressable
     {
         self.driver.install(prefix, rib);
     }
 
+    /// Uninstall route from kernel.
     pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
     where T: Addressable
     {

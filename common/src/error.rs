@@ -1,8 +1,8 @@
 //
-// ReZe.Rs - Router Daemon
+// ReZe.Rs - Common
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
-// Core Error
+// Error
 //
 
 use quick_error::*;
@@ -10,9 +10,9 @@ use quick_error::*;
 quick_error! {
     #[derive(Debug)]
     pub enum CoreError {
-        NexusTermination {
-            description("Nexus is terminated")
-            display(r#"Nexus is terminated"#)
+        SystemShutdown {
+            description("System shutdown")
+            display(r#"System shutdown"#)
         }
         RequestInvalid(s: String) {
             description("Command request is invalid")
