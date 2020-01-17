@@ -49,7 +49,7 @@ use crate::ospf::master::OspfMasterInner;
 /// Thread handle and Channel tuple.
 struct MasterTuple {
 
-    /// Thread Join handle
+    /// Thread Join handle.
     handle: JoinHandle<()>,
 
     /// Channel sender from Master To Protocol
@@ -62,16 +62,16 @@ pub struct RouterNexus {
     /// Global config.
     config: RefCell<ConfigMaster>,
 
-    /// MasterInner map
+    /// MasterInner map.
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
-    /// Timer server
+    /// Timer server.
     timer_server: RefCell<TimerServer>,
 
-    /// Sender channel for ProtoToNexus
+    /// Sender channel for ProtoToNexus.
     sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
 
-    /// Sender channel for ProtoToZebra
+    /// Sender channel for ProtoToZebra.
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 }
 

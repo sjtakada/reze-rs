@@ -10,4 +10,5 @@ pub mod error;
 pub mod event;
 pub mod timer;
 pub mod uds_server;
+pub mod uds_client;
 pub mod acl;

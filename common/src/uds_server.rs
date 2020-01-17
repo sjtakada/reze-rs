@@ -20,7 +20,7 @@ use mio_uds::UnixStream;
 use super::error::*;
 use super::event::*;
 
-/// Trait UdsServer callbacks.
+/// Trait UdsServer handler.
 pub trait UdsServerHandler {
 
     /// callback when server accepts client connection.
@@ -57,7 +57,7 @@ impl UdsServerEntry {
         UdsServerEntry {
             token: Cell::new(Token(0)),
             server: RefCell::new(server),
-            stream: RefCell::new(None)
+            stream: RefCell::new(None),
         }
     }
 
@@ -153,6 +153,7 @@ pub struct UdsServerInner {
 
 /// UdsServerInner implementation.
 impl UdsServerInner {
+
     pub fn new(server: Arc<UdsServer>, event_manager: Arc<EventManager>,
                handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> UdsServerInner {
         let listener = match UnixListener::bind(path) {
@@ -235,7 +236,7 @@ impl EventHandler for UdsServerInner {
             EventType::ReadEvent => {
                 match self.listener.accept() {
                     Ok(Some((stream, _addr))) => {
-                        debug!("Accept a UDS client: {:?}", _addr);
+                        debug!("Accept a UDS client");
 
                         let entry = Arc::new(UdsServerEntry::new(server.clone()));
                         let event_manager = self.event_manager.borrow();
