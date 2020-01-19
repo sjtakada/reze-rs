@@ -7,7 +7,6 @@
 
 use std::io::BufReader;
 use std::io::Read;
-//use std::io::Write;
 use std::fs;
 use std::fs::File;
 use std::path::Path;
@@ -21,7 +20,6 @@ use std::sync::Arc;
 use serde_json;
 use rustyline::error::ReadlineError;
 
-//use common::error::*;
 use common::uds_client::*;
 
 use super::config::Config;
@@ -108,10 +106,7 @@ impl Cli {
         // Start CLI.
         self.run(readline);
 
-        // TBD: Connect server or send.
-        //        self.init_server_connect()?;
-
-        // 
+        // Successfully finished.
         Ok(())
     }
 
@@ -383,9 +378,6 @@ impl Cli {
     pub fn stream_send(&self, message: &str) {
         let uds_client = self.uds_client();
         uds_client.stream_send(message);
-//        if let Some(stream) = uds_client.stream() {
-//            stream.write_all(message.as_bytes());
-//        }
     }
 }
 

@@ -7,6 +7,7 @@
 
 use std::env;
 use std::thread;
+use std::sync::mpsc;
 use std::sync::Arc;
 use std::cell::RefCell;
 use std::time::Duration;
@@ -46,7 +47,7 @@ impl CliMaster {
     pub fn start(config: Config) -> Result<(), CliError> {
         // Initialize master and UDS client.
         let master = Arc::new(CliMaster::new());
-        let _ = master.init_signals();
+        master.init_signals()?;
 
         let mut path = env::temp_dir();
         path.push(ROUTERD_CONFIG_UDS_FILENAME);
@@ -54,13 +55,17 @@ impl CliMaster {
         let client = UdsClient::start(event_manager.clone(), master.clone(), &path);
         master.uds_client.borrow_mut().replace(client.clone());
 
-        // Spawn another thread.
+        let (sender, receiver) = mpsc::channel::<bool>();
+
+        // Run CLI parser in another thread.
         let handle = thread::spawn(move || {
             let mut cli = Cli::new(client.clone());
             match cli.start(config) {
                 Ok(_) => {},
                 Err(err) => panic!("CLI Init error: {}", err),
             }
+
+            sender.send(true).unwrap();
         });
 
         // Event loop.
@@ -70,7 +75,11 @@ impl CliMaster {
                 _ => {}
             }
 
-            thread::sleep(Duration::from_millis(10));
+            thread::sleep(Duration::from_millis(EVENT_MANAGER_TICK));
+
+            if let Ok(_) = receiver.try_recv() {
+                break 'main
+            }
         }
 
         // CLI is done.

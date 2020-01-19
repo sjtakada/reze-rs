@@ -5,12 +5,9 @@
 // Unix Domain Socket Client.
 //
 
-//use std::io::Read;
 use std::io::Write;
 use std::sync::Arc;
-//use std::cell::Cell;
 use std::cell::RefCell;
-//use std::cell::RefMut;
 use std::path::PathBuf;
 //use std::net::Shutdown;
 
@@ -86,11 +83,6 @@ impl UdsClient {
             }
         }
     }
-
-    // Return stream.
-//    pub fn stream(&self) -> Option<&UnixStream> {
-//        self.stream.borrow_mut().as_ref()
-//    }
 }
 
 /// EventHandler implementation for UdsClient.
