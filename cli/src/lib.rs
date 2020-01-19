@@ -4,6 +4,7 @@
 //
 
 pub mod error;
+pub mod master;
 pub mod cli;
 pub mod config;
 pub mod parser;

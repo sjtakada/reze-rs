@@ -100,6 +100,7 @@ impl CliAction for CliActionHttp {
         // build json body.
         let request = format!("{} {}\n\n", self.method, path);
 
+        // If only debug.
         println!("{}", request);
         println!("{}", body);
 

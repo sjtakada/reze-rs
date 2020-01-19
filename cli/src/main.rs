@@ -10,7 +10,7 @@ use getopts::Options;
 
 use common::consts::COPYRIGHT;
 
-use cli::cli::Cli;
+use cli::master::CliMaster;
 use cli::config::Config;
 //use cli::error::CliError;
 
@@ -85,8 +85,7 @@ fn main() {
         config.set_debug(true);
     }
 
-    let mut cli = Cli::new();
-    match cli.init(config) {
+    match CliMaster::start(config) {
         Ok(_) => {},
         Err(err) => panic!("CLI Init error: {}", err),
     };

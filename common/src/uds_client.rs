@@ -6,9 +6,11 @@
 //
 
 //use std::io::Read;
+use std::io::Write;
 use std::sync::Arc;
 //use std::cell::Cell;
 use std::cell::RefCell;
+//use std::cell::RefMut;
 use std::path::PathBuf;
 //use std::net::Shutdown;
 
@@ -57,7 +59,7 @@ impl UdsClient {
 
     /// Start connecting to server.
     pub fn start(event_manager: Arc<EventManager>,
-                 handler: Arc<dyn UdsClientHandler>, path: &PathBuf) -> Result<Arc<UdsClient>, CoreError> {
+                 handler: Arc<dyn UdsClientHandler>, path: &PathBuf) -> Arc<UdsClient> {
         let client = Arc::new(UdsClient::new(handler));
         match UnixStream::connect(path) {
             Ok(stream) => {
@@ -67,12 +69,28 @@ impl UdsClient {
             },
             Err(err) => {
                 error!("Error connecting to server {:?}", err);
-                return Err(CoreError::UdsConnectError);
             }
         }
 
-        Ok(client)
+        client
     }
+
+    /// Send message.
+    pub fn stream_send(&self, message: &str) {
+        match *self.stream.borrow_mut() {
+            Some(ref mut stream) => {
+                let _ = stream.write_all(message.as_bytes());
+            },
+            None => {
+                error!("No stream");
+            }
+        }
+    }
+
+    // Return stream.
+//    pub fn stream(&self) -> Option<&UnixStream> {
+//        self.stream.borrow_mut().as_ref()
+//    }
 }
 
 /// EventHandler implementation for UdsClient.
@@ -88,6 +106,7 @@ impl EventHandler for UdsClient {
                 return handler.handle_message(self);
             },
             EventType::ErrorEvent => {
+                self.stream.borrow_mut().take();
                 let handler = self.handler.borrow_mut();
 
                 // Dispatch message to Server message handler.
