@@ -66,9 +66,6 @@ pub struct RouterNexus {
     /// MasterInner map.
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
-    /// Timer server.
-    timer_server: RefCell<TimerServer>,
-
     /// Sender channel for ProtoToNexus.
     sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
 
@@ -209,7 +206,6 @@ impl RouterNexus {
         RouterNexus {
             config: RefCell::new(ConfigMaster::new()),
             masters: RefCell::new(HashMap::new()),
-            timer_server: RefCell::new(TimerServer::new()),
             sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
         }
@@ -349,7 +345,7 @@ impl RouterNexus {
 
                         if let Some(tuple) = self.masters.borrow_mut().get(&p) {
                             let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
-                            self.timer_server.borrow_mut().register(d, Arc::new(entry));
+                            event_manager.register_timer(d, Arc::new(entry));
                         }
                     },
                     ProtoToNexus::ProtoException(s) => {
@@ -361,7 +357,7 @@ impl RouterNexus {
             thread::sleep(Duration::from_millis(10));
 
             // Process timer.
-            self.timer_server.borrow_mut().run();
+            event_manager.poll_timer();
         }
 
         // Send termination message to all threads first.

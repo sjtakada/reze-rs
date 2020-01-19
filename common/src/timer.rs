@@ -9,7 +9,6 @@
 
 use std::collections::BinaryHeap;
 use std::sync::Arc;
-use std::cell::RefCell;
 use std::time::Instant;
 use std::time::Duration;
 use std::cmp::Ordering;
@@ -58,7 +57,7 @@ impl PartialEq for dyn TimerHandler {
 pub struct TimerServer {
 
     /// Ordering handler by expiration time.
-    heap: RefCell<BinaryHeap<Arc<dyn TimerHandler>>>
+    heap: BinaryHeap<Arc<dyn TimerHandler>>
 }
 
 /// TimerServer implementation.
@@ -67,23 +66,23 @@ impl TimerServer {
     /// Constructor.
     pub fn new() -> TimerServer {
         TimerServer {
-            heap: RefCell::new(BinaryHeap::new())
+            heap: BinaryHeap::new()
         }
     }
 
     /// Register timer handler.
-    pub fn register(&self, d: Duration, mut handler: Arc<dyn TimerHandler>) {
+    pub fn register(&mut self, d: Duration, mut handler: Arc<dyn TimerHandler>) {
         Arc::get_mut(&mut handler).unwrap().set_expiration(d);
-        self.heap.borrow_mut().push(handler);
+        self.heap.push(handler);
     }
 
     /// Pop a timer handler if it is expired.
-    pub fn pop_if_expired(&mut self) -> Option<Arc<dyn TimerHandler>> {
-        if match self.heap.borrow_mut().peek() {
+    fn pop_if_expired(&mut self) -> Option<Arc<dyn TimerHandler>> {
+        if match self.heap.peek() {
             Some(handler) if handler.expiration() < Instant::now() => true,
             _ => false,
         } {
-            self.heap.borrow_mut().pop()
+            self.heap.pop()
         } else {
             None
         }

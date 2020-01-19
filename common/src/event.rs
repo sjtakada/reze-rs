@@ -204,9 +204,16 @@ impl EventManager {
         Ok(())
     }
 
-//    /// Register timer.
-//    pub fn register_timer(&self, d: Duration, mut handler: Rc<dyn TimerHandler>) {
-//
-//    }
+    /// Register timer.
+    pub fn register_timer(&self, d: Duration, handler: Arc<dyn TimerHandler>) {
+        let mut timers = self.timers.borrow_mut();
+        timers.register(d, handler);
+    }
+
+    /// Poll timers.
+    pub fn poll_timer(&self) {
+        let mut timers = self.timers.borrow_mut();
+        timers.run();
+    }
 }
 
