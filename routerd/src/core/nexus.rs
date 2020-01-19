@@ -16,6 +16,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::boxed::Box;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -140,8 +141,11 @@ impl UdsServerHandler for RouterNexus {
 }
 
 /// Timer entry.
-pub struct TimerEntry {
-    pub sender: mpsc::Sender<NexusToProto>,
+pub struct TimerEntry
+where Self: Send,
+      Self: Sync
+{
+    pub sender: Mutex<mpsc::Sender<NexusToProto>>,
     pub protocol: ProtocolType,
     pub expiration: Instant,
     pub token: u32,
@@ -153,7 +157,7 @@ impl TimerEntry {
     /// Constructor.
     pub fn new(p: ProtocolType, sender: mpsc::Sender<NexusToProto>, d: Duration, token: u32) -> TimerEntry {
         TimerEntry {
-            sender: sender,
+            sender: Mutex::new(sender),
             protocol: p,
             expiration: Instant::now() + d,
             token: token,
@@ -168,7 +172,9 @@ impl EventHandler for TimerEntry {
     fn handle(&self, e: EventType) -> Result<(), CoreError> {
         match e {
             EventType::TimerEvent => {
-                if let Err(err) = self.sender.send(NexusToProto::TimerExpiration(self.token)) {
+                let sender = self.sender.lock().unwrap();
+
+                if let Err(err) = sender.send(NexusToProto::TimerExpiration(self.token)) {
                     error!("Sending message to protocol {:?} {:?}", self.token, err);
                 }
             },
@@ -330,7 +336,7 @@ impl RouterNexus {
             }
 
             // Process events.
-            match event_manager.poll() {
+            match event_manager.poll_fd() {
                 Err(CoreError::SystemShutdown) => break 'main,
                 _ => {}
             }
@@ -343,7 +349,7 @@ impl RouterNexus {
 
                         if let Some(tuple) = self.masters.borrow_mut().get(&p) {
                             let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
-                            self.timer_server.borrow_mut().register(d, Rc::new(entry));
+                            self.timer_server.borrow_mut().register(d, Arc::new(entry));
                         }
                     },
                     ProtoToNexus::ProtoException(s) => {

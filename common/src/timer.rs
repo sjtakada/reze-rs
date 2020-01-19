@@ -8,7 +8,7 @@
 //
 
 use std::collections::BinaryHeap;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::cell::RefCell;
 use std::time::Instant;
 use std::time::Duration;
@@ -18,8 +18,10 @@ use super::event::*;
 
 
 /// TimerHandler trait.
-pub trait TimerHandler: EventHandler {
-
+pub trait TimerHandler: EventHandler
+where Self: Send,
+      Self: Sync
+{
     /// Get expiration time.
     fn expiration(&self) -> Instant;
 
@@ -56,7 +58,7 @@ impl PartialEq for dyn TimerHandler {
 pub struct TimerServer {
 
     /// Ordering handler by expiration time.
-    heap: RefCell<BinaryHeap<Rc<dyn TimerHandler>>>
+    heap: RefCell<BinaryHeap<Arc<dyn TimerHandler>>>
 }
 
 /// TimerServer implementation.
@@ -70,13 +72,13 @@ impl TimerServer {
     }
 
     /// Register timer handler.
-    pub fn register(&self, d: Duration, mut handler: Rc<dyn TimerHandler>) {
-        Rc::get_mut(&mut handler).unwrap().set_expiration(d);
+    pub fn register(&self, d: Duration, mut handler: Arc<dyn TimerHandler>) {
+        Arc::get_mut(&mut handler).unwrap().set_expiration(d);
         self.heap.borrow_mut().push(handler);
     }
 
     /// Pop a timer handler if it is expired.
-    pub fn pop_if_expired(&mut self) -> Option<Rc<dyn TimerHandler>> {
+    pub fn pop_if_expired(&mut self) -> Option<Arc<dyn TimerHandler>> {
         if match self.heap.borrow_mut().peek() {
             Some(handler) if handler.expiration() < Instant::now() => true,
             _ => false,

@@ -70,7 +70,7 @@ impl CliMaster {
 
         // Event loop.
         'main: loop {
-            match event_manager.poll() {
+            match event_manager.poll_fd() {
                 Err(_err) => break 'main,
                 _ => {}
             }
