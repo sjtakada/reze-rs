@@ -13,6 +13,8 @@ use std::time::Instant;
 use std::time::Duration;
 use std::cmp::Ordering;
 
+use log::error;
+
 use super::event::*;
 
 
@@ -91,7 +93,16 @@ impl TimerServer {
     /// Run all expired event handler.
     pub fn run(&mut self) {
         while let Some(handler) = self.pop_if_expired() {
-            let _ = handler.handle(EventType::TimerEvent);
+            let result = handler.handle(EventType::TimerEvent);
+
+            match result {
+                Err(err) => {
+                    error!("Poll timer {:?}", err);
+                }
+                _ => {
+
+                }
+            }
         }
     }
 }
