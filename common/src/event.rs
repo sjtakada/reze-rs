@@ -12,6 +12,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use mio::*;
+use log::error;
 
 use super::error::*;
 use super::timer::*;
@@ -53,7 +54,7 @@ pub struct FdEvent {
     index: usize,
 
     /// Token to handler map.
-    handlers: HashMap<Token, Arc<dyn EventHandler + Send + Sync>>,
+    handlers: HashMap<Token, Arc<dyn EventHandler>>,
 
     /// mio::Poll
     poll: Poll,
@@ -89,7 +90,7 @@ impl EventManager {
     }
 
     /// Register listen socket.
-    pub fn register_listen(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
+    pub fn register_listen(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler>) {
         let mut fd_events = self.fd_events.borrow_mut();
         let index = fd_events.index;
         let token = Token(index);
@@ -102,7 +103,7 @@ impl EventManager {
     }
 
     /// Register read socket.
-    pub fn register_read(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
+    pub fn register_read(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler>) {
         let mut fd_events = self.fd_events.borrow_mut();
         let index = fd_events.index;
         let token = Token(index);
@@ -117,7 +118,7 @@ impl EventManager {
     }
 
     /// Register write socket.
-    pub fn register_write(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler + Send + Sync>) {
+    pub fn register_write(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler>) {
         let mut fd_events = self.fd_events.borrow_mut();
         let index = fd_events.index;
         let token = Token(index);
@@ -152,7 +153,7 @@ impl EventManager {
     }
 
     /// Return handler associated with token.
-    pub fn poll_get_handler(&self, event: Event) -> Option<Arc<dyn EventHandler + Send + Sync>> {
+    pub fn poll_get_handler(&self, event: Event) -> Option<Arc<dyn EventHandler>> {
         let fd_events = self.fd_events.borrow_mut();
         match fd_events.handlers.get(&event.token()) {
             Some(handler) => Some(handler.clone()),
@@ -160,38 +161,30 @@ impl EventManager {
         }
     }
 
-    /// Poll and handle events.
+    /// Poll FDs and handle events.
     pub fn poll_fd(&self) -> Result<(), CoreError> {
         let events = self.poll_get_events();
         let mut terminated = false;
 
         for event in events.iter() {
             if let Some(handler) = self.poll_get_handler(event) {
-                if event.readiness() == Ready::readable() {
-                    match handler.handle(EventType::ReadEvent) {
-                        Err(CoreError::SystemShutdown) => {
-                            terminated = true
-                        },
-                        _ => {
-                        }
+                let result = if event.readiness() == Ready::readable() {
+                    handler.handle(EventType::ReadEvent)
+                } else if event.readiness() == Ready::writable() {
+                    handler.handle(EventType::WriteEvent)
+                } else {
+                    handler.handle(EventType::ErrorEvent)
+                };
+
+                match result {
+                    Err(CoreError::SystemShutdown) => {
+                        terminated = true;
                     }
-                }
-                else if event.readiness() == Ready::writable() {
-                    match handler.handle(EventType::WriteEvent) {
-                        Err(CoreError::SystemShutdown) => {
-                            terminated = true
-                        },
-                        _ => {
-                        }
+                    Err(err) => {
+                        error!("Poll fd {:?}", err);
                     }
-                }
-                else {
-                    match handler.handle(EventType::ErrorEvent) {
-                        Err(CoreError::SystemShutdown) => {
-                            terminated = true
-                        },
-                        _ => {
-                        }
+                    _ => {
+
                     }
                 }
             }
@@ -210,7 +203,7 @@ impl EventManager {
         timers.register(d, handler);
     }
 
-    /// Poll timers.
+    /// Poll timers and handle events.
     pub fn poll_timer(&self) {
         let mut timers = self.timers.borrow_mut();
         timers.run();
