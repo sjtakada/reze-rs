@@ -108,7 +108,7 @@ fn start() {
     let _uds_server = UdsServer::start(event_manager.clone(), nexus.clone(), &config_uds_path);
 
     // Start nexus.
-    match nexus.start(event_manager) {
+    match RouterNexus::start(nexus, event_manager) {
         Err(CoreError::SystemShutdown) => {
             info!("Nexus terminated")
         },

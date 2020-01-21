@@ -71,6 +71,9 @@ pub struct EventManager {
 
     /// Timer Events.
     timers: RefCell<TimerServer>,
+
+    /// Channel handler function.
+    channel_handler: RefCell<Option<Box<dyn Fn(&EventManager) -> Result<(), CoreError>>>>,
 }
 
 /// EventManager implementation.
@@ -86,7 +89,21 @@ impl EventManager {
                 timeout: Duration::from_millis(10),
             }),
             timers: RefCell::new(TimerServer::new()),
+            channel_handler: RefCell::new(None),
         }
+    }
+
+    /// Set channel handler.
+    pub fn set_channel_handler(&self, handler: Box<dyn Fn(&EventManager) -> Result<(), CoreError>>) {
+        self.channel_handler.borrow_mut().replace(handler);
+    }
+
+    /// Poll channel handler.
+    pub fn poll_channel(&self) -> Result<(), CoreError> {
+        if let Some(ref mut handler) = *self.channel_handler.borrow_mut() {
+            handler(self);
+        }
+        Ok(())
     }
 
     /// Register listen socket.
