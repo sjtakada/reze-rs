@@ -199,38 +199,6 @@ impl TimerHandler for TimerEntry {
     }
 }
 
-/// 
-struct NexusChannelManager {
-    receiver: mpsc::Receiver<ProtoToNexus>,
-}
-
-///
-impl ChannelManager for NexusChannelManager {
-    fn poll_channel(&self) -> Result<(), CoreError> {
-        Ok(())
-    }
-}
-
-fn poll_channel(nexus: &RouterNexus, event_manager: &EventManager,
-                receiver: &mpsc::Receiver<ProtoToNexus>) {
-    while let Ok(d) = receiver.try_recv() {
-        match d {
-            ProtoToNexus::TimerRegistration((p, d, token)) => {
-                debug!("Received Timer Registration {} {}", p, token);
-
-                if let Some(tuple) = nexus.masters.borrow_mut().get(&p) {
-                    let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
-                    event_manager.register_timer(d, Arc::new(entry));
-                }
-            },
-            ProtoToNexus::ProtoException(s) => {
-                debug!("Received Exception {}", s);
-            },
-        }
-    }
-}
-
-
 /// RouterNexus implementation.
 impl RouterNexus {
 
@@ -360,46 +328,18 @@ impl RouterNexus {
         // Register channel handler to event manager.
         let nexus_clone = nexus.clone();
         let handler = move |event_manager: &EventManager| -> Result<(), CoreError> {
-            while let Ok(d) = receiver.try_recv() {
-                match d {
-                    ProtoToNexus::TimerRegistration((p, d, token)) => {
-                        debug!("Received Timer Registration {} {}", p, token);
-
-                        if let Some(tuple) = nexus_clone.masters.borrow_mut().get(&p) {
-                            let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
-                            event_manager.register_timer(d, Arc::new(entry));
-                        }
-                    },
-                    ProtoToNexus::ProtoException(s) => {
-                        debug!("Received Exception {}", s);
-                    },
-                }
-            }
+            nexus_clone.handle_nexus_message(&receiver, event_manager);
             Ok(())
         };
-
         event_manager.set_channel_handler(Box::new(handler));
 
-        // Event loop.
-        'main: loop {
-            // Signal is caught.
-            if signal::is_sigint_caught() {
-                break 'main;
+        // Main event loop.
+        while !signal::is_sigint_caught() {
+            match event_manager.run() {
+                Err(CoreError::SystemShutdown) => break,
+                _ => {
+                }
             }
-
-            // Process events.
-            match event_manager.poll_fd() {
-                Err(CoreError::SystemShutdown) => break 'main,
-                _ => {}
-            }
-
-            // Process ProtoToNexus messages through channels.
-            event_manager.poll_channel();
-
-            thread::sleep(Duration::from_millis(10));
-
-            // Process timer.
-            event_manager.poll_timer();
         }
 
         // Send termination message to all threads first.
@@ -415,6 +355,26 @@ impl RouterNexus {
 
         // Nexus terminated.
         Err(CoreError::SystemShutdown)
+    }
+
+    /// Handle ProtoToNexus channel messsages.
+    fn handle_nexus_message(&self, receiver: &mpsc::Receiver<ProtoToNexus>,
+                            event_manager: &EventManager) {
+        while let Ok(d) = receiver.try_recv() {
+            match d {
+                ProtoToNexus::TimerRegistration((p, d, token)) => {
+                    debug!("Received Timer Registration {} {}", p, token);
+
+                    if let Some(tuple) = self.masters.borrow_mut().get(&p) {
+                        let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
+                        event_manager.register_timer(d, Arc::new(entry));
+                    }
+                },
+                ProtoToNexus::ProtoException(s) => {
+                    debug!("Received Exception {}", s);
+                },
+            }
+        }
     }
 
     /// Dispatch command request from Uds stream to protocol channel.

@@ -6,6 +6,7 @@
 //  Fd Event manager
 //
 
+use std::thread;
 use std::collections::HashMap;
 use std::cell::RefCell;
 use std::sync::Arc;
@@ -91,19 +92,6 @@ impl EventManager {
             timers: RefCell::new(TimerServer::new()),
             channel_handler: RefCell::new(None),
         }
-    }
-
-    /// Set channel handler.
-    pub fn set_channel_handler(&self, handler: Box<dyn Fn(&EventManager) -> Result<(), CoreError>>) {
-        self.channel_handler.borrow_mut().replace(handler);
-    }
-
-    /// Poll channel handler.
-    pub fn poll_channel(&self) -> Result<(), CoreError> {
-        if let Some(ref mut handler) = *self.channel_handler.borrow_mut() {
-            handler(self);
-        }
-        Ok(())
     }
 
     /// Register listen socket.
@@ -201,17 +189,17 @@ impl EventManager {
                         error!("Poll fd {:?}", err);
                     }
                     _ => {
-
+                        error!("Poll fd unknown error");
                     }
                 }
             }
         }
 
         if terminated {
-            return Err(CoreError::SystemShutdown);
+            Err(CoreError::SystemShutdown)
+        } else {
+            Ok(())
         }
-
-        Ok(())
     }
 
     /// Register timer.
@@ -221,9 +209,51 @@ impl EventManager {
     }
 
     /// Poll timers and handle events.
-    pub fn poll_timer(&self) {
+    pub fn poll_timer(&self) -> Result<(), CoreError> {
         let mut timers = self.timers.borrow_mut();
         timers.run();
+
+        Ok(())
+    }
+
+    /// Set channel handler.
+    pub fn set_channel_handler(&self, handler: Box<dyn Fn(&EventManager) -> Result<(), CoreError>>) {
+        self.channel_handler.borrow_mut().replace(handler);
+    }
+
+    /// Poll channel handler.
+    pub fn poll_channel(&self) -> Result<(), CoreError> {
+        if let Some(ref mut handler) = *self.channel_handler.borrow_mut() {
+            handler(self);
+        }
+        Ok(())
+    }
+
+    /// Sleep certain period to have other events to occur.
+    pub fn sleep(&self) {
+        thread::sleep(Duration::from_millis(10));
+    }
+
+    /// Event loop, but just a single iteration of all possible events.
+    pub fn run(&self) -> Result<(), CoreError> {
+        // Process events.
+        if let Err(err) = self.poll_fd() {
+            return Err(err)
+        }
+
+        // Process ProtoToNexus messages through channels.
+        if let Err(err) = self.poll_channel() {
+            return Err(err)
+        }
+
+        // Process timer.
+        if let Err(err) = self.poll_timer() {
+            return Err(err)
+        }
+
+        // Wait a little bit.
+        self.sleep();
+
+        Ok(())
     }
 }
-
