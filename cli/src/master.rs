@@ -54,6 +54,8 @@ impl CliMaster {
         let client = UdsClient::start(event_manager.clone(), master.clone(), &path);
         master.uds_client.borrow_mut().replace(client.clone());
 
+        client.connect();
+
         let (sender, receiver) = mpsc::channel::<bool>();
 
         // Run CLI parser in another thread.
@@ -126,3 +128,7 @@ impl UdsClientHandler for CliMaster {
     }
 }
 
+/// UDS client connect timer.
+pub struct UdsClientTimer {
+
+}

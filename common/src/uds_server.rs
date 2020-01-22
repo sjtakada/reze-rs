@@ -197,11 +197,12 @@ impl UdsServer {
         }
 
         // should not happen.
-        panic!();
+        panic!("No inner exists");
     }
 
     /// Start UdsServer.
-    pub fn start(event_manager: Arc<EventManager>, handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
+    pub fn start(event_manager: Arc<EventManager>,
+                 handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> Arc<UdsServer> {
         let server = Arc::new(UdsServer::new());
         let inner = Arc::new(UdsServerInner::new(server.clone(), event_manager.clone(), handler.clone(), path));
 
