@@ -7,7 +7,7 @@
 //   Initiate routing threads.
 //   Handle messages from controller.
 //   Dispatch commands to each protocol.
-//   Run timer server and notify clients.
+//   Run event manger to handle async events.
 //
 
 use std::thread;
@@ -16,7 +16,9 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::boxed::Box;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Instant;
@@ -49,7 +51,7 @@ use crate::ospf::master::OspfMasterInner;
 /// Thread handle and Channel tuple.
 struct MasterTuple {
 
-    /// Thread Join handle
+    /// Thread Join handle.
     handle: JoinHandle<()>,
 
     /// Channel sender from Master To Protocol
@@ -62,16 +64,13 @@ pub struct RouterNexus {
     /// Global config.
     config: RefCell<ConfigMaster>,
 
-    /// MasterInner map
+    /// MasterInner map.
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
-    /// Timer server
-    timer_server: RefCell<TimerServer>,
-
-    /// Sender channel for ProtoToNexus
+    /// Sender channel for ProtoToNexus.
     sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
 
-    /// Sender channel for ProtoToZebra
+    /// Sender channel for ProtoToZebra.
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
 }
 
@@ -140,10 +139,13 @@ impl UdsServerHandler for RouterNexus {
 }
 
 /// Timer entry.
-pub struct TimerEntry {
-    pub sender: mpsc::Sender<NexusToProto>,
+pub struct TimerEntry
+where Self: Send,
+      Self: Sync
+{
+    pub sender: Mutex<mpsc::Sender<NexusToProto>>,
     pub protocol: ProtocolType,
-    pub expiration: Instant,
+    pub expiration: Mutex<Cell<Instant>>,
     pub token: u32,
 }
 
@@ -153,9 +155,9 @@ impl TimerEntry {
     /// Constructor.
     pub fn new(p: ProtocolType, sender: mpsc::Sender<NexusToProto>, d: Duration, token: u32) -> TimerEntry {
         TimerEntry {
-            sender: sender,
+            sender: Mutex::new(sender),
             protocol: p,
-            expiration: Instant::now() + d,
+            expiration: Mutex::new(Cell::new(Instant::now() + d)),
             token: token,
         }
     }
@@ -168,7 +170,9 @@ impl EventHandler for TimerEntry {
     fn handle(&self, e: EventType) -> Result<(), CoreError> {
         match e {
             EventType::TimerEvent => {
-                if let Err(err) = self.sender.send(NexusToProto::TimerExpiration(self.token)) {
+                let sender = self.sender.lock().unwrap();
+
+                if let Err(err) = sender.send(NexusToProto::TimerExpiration(self.token)) {
                     error!("Sending message to protocol {:?} {:?}", self.token, err);
                 }
             },
@@ -186,12 +190,12 @@ impl TimerHandler for TimerEntry {
 
     /// Get expiration.
     fn expiration(&self) -> Instant {
-        self.expiration
+        self.expiration.lock().unwrap().get()
     }
 
     /// Set expiration.
-    fn set_expiration(&mut self, d: Duration) {
-        self.expiration = Instant::now() + d;
+    fn set_expiration(&self, d: Duration) {
+        self.expiration.lock().unwrap().set(Instant::now() + d);
     }
 }
 
@@ -203,7 +207,6 @@ impl RouterNexus {
         RouterNexus {
             config: RefCell::new(ConfigMaster::new()),
             masters: RefCell::new(HashMap::new()),
-            timer_server: RefCell::new(TimerServer::new()),
             sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
         }
@@ -302,75 +305,76 @@ impl RouterNexus {
     }
 
     /// Entry point to start RouterNexus.
-    pub fn start(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
+    pub fn start(nexus: Arc<RouterNexus>, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
-        self.sender_p2n.borrow_mut().replace(sender_p2n);
+        nexus.sender_p2n.borrow_mut().replace(sender_p2n);
 
         // Config init.
-        self.config_init();
+        nexus.config_init();
 
         // Spawn zebra instance
-        let (handle, sender, sender_p2z) = self.spawn_zebra(self.clone_sender_p2n());
-        self.sender_p2z.borrow_mut().replace(sender_p2z);
-        self.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
+        let (handle, sender, sender_p2z) = nexus.spawn_zebra(nexus.clone_sender_p2n());
+        nexus.sender_p2z.borrow_mut().replace(sender_p2z);
+        nexus.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
 
         // XXX spawn OSPF
-        let (handle, sender, _sender_z2p) = self.spawn_protocol(ProtocolType::Ospf,
-                                                               self.clone_sender_p2n(),
-                                                               self._clone_sender_p2z());
-        self.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
+        let (handle, sender, _sender_z2p) = nexus.spawn_protocol(ProtocolType::Ospf,
+                                                               nexus.clone_sender_p2n(),
+                                                               nexus._clone_sender_p2z());
+        nexus.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
 
-        // Event loop.
-        'main: loop {
-            // Signal is caught.
-            if signal::is_sigint_caught() {
-                break 'main;
-            }
+        // Register channel handler to event manager.
+        let nexus_clone = nexus.clone();
+        let handler = move |event_manager: &EventManager| -> Result<(), CoreError> {
+            nexus_clone.handle_nexus_message(&receiver, event_manager);
+            Ok(())
+        };
+        event_manager.set_channel_handler(Box::new(handler));
 
-            // Process events.
-            match event_manager.poll() {
-                Err(CoreError::SystemShutdown) => break 'main,
-                _ => {}
-            }
-
-            // Process ProtoToNexus messages through channels.
-            while let Ok(d) = receiver.try_recv() {
-                match d {
-                    ProtoToNexus::TimerRegistration((p, d, token)) => {
-                        debug!("Received Timer Registration {} {}", p, token);
-
-                        if let Some(tuple) = self.masters.borrow_mut().get(&p) {
-                            let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
-                            self.timer_server.borrow_mut().register(d, Rc::new(entry));
-                        }
-                    },
-                    ProtoToNexus::ProtoException(s) => {
-                        debug!("Received Exception {}", s);
-                    },
+        // Main event loop.
+        while !signal::is_sigint_caught() {
+            match event_manager.run() {
+                Err(CoreError::SystemShutdown) => break,
+                _ => {
                 }
             }
-
-            thread::sleep(Duration::from_millis(10));
-
-            // Process timer.
-            self.timer_server.borrow_mut().run();
         }
 
         // Send termination message to all threads first.
         // TODO: is there better way to iterate hashmap and remove it at the same time?
         let mut v = Vec::new();
-        for (proto, _tuple) in self.masters.borrow_mut().iter_mut() {
+        for (proto, _tuple) in nexus.masters.borrow_mut().iter_mut() {
             v.push(proto.clone());
         }
 
         for proto in &v {
-            self.finish_protocol(proto);
+            nexus.finish_protocol(proto);
         }
 
         // Nexus terminated.
         Err(CoreError::SystemShutdown)
+    }
+
+    /// Handle ProtoToNexus channel messsages.
+    fn handle_nexus_message(&self, receiver: &mpsc::Receiver<ProtoToNexus>,
+                            event_manager: &EventManager) {
+        while let Ok(d) = receiver.try_recv() {
+            match d {
+                ProtoToNexus::TimerRegistration((p, d, token)) => {
+                    debug!("Received Timer Registration {} {}", p, token);
+
+                    if let Some(tuple) = self.masters.borrow_mut().get(&p) {
+                        let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
+                        event_manager.register_timer(d, Arc::new(entry));
+                    }
+                },
+                ProtoToNexus::ProtoException(s) => {
+                    debug!("Received Exception {}", s);
+                },
+            }
+        }
     }
 
     /// Dispatch command request from Uds stream to protocol channel.

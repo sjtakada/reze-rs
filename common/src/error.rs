@@ -14,6 +14,14 @@ quick_error! {
             description("System shutdown")
             display(r#"System shutdown"#)
         }
+        UnknownEvent {
+            description("Unknown event")
+            display(r#"Unknown event"#)
+        }
+        UdsConnectError {
+            description("UDS connect error")
+            display(r#"UDS connect error"#)
+        }
         RequestInvalid(s: String) {
             description("Command request is invalid")
             display(r#"Command request {} is invalid"#, s)

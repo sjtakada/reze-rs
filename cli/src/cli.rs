@@ -2,14 +2,11 @@
 // ReZe.Rs - ReZe CLI
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
-// CLI Main
+// CLI - Core Shell functions.
 //
 
-use std::env;
-//use std::io;
 use std::io::BufReader;
 use std::io::Read;
-use std::io::Write;
 use std::fs;
 use std::fs::File;
 use std::path::Path;
@@ -18,19 +15,18 @@ use std::collections::HashMap;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
 
-use mio_uds::UnixStream;
 use serde_json;
 use rustyline::error::ReadlineError;
 
-use common::consts::*;
+use common::uds_client::*;
 
 use super::config::Config;
 use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
 use super::builtins;
-use super::signal;
 
 // Constants.
 const CLI_INITIAL_MODE: &str = "EXEC-MODE";
@@ -40,49 +36,55 @@ const CLI_MODE_FILE: &str = "reze.cli_mode.json";
 // Main container of CLI
 //
 pub struct Cli {
-    // HashMap from mode name to CLI tree.
+
+    /// HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
 
-    // Built-in functions.
+    /// Built-in functions.
     builtins: HashMap<String, Box<dyn Fn(&Cli, &Vec<String>) -> Result<(), CliError>>>,
 
-    // Current mode name.
+    /// Current mode name.
     mode: RefCell<String>,
 
-    // Prompt.
+    /// Prompt.
     prompt: RefCell<String>,
 
-    // Current privilege.
+    /// Current privilege.
     privilege: Cell<u8>,
 
-    // Server stream.
-    stream: RefCell<Option<UnixStream>>,
+    /// UDS client.
+    uds_client: Arc<UdsClient>,
 
-    // Debug mode.
+    /// Debug mode.
     debug: bool,
 }
 
+/// CLI.
 impl Cli {
-    // Constructor.
-    pub fn new() -> Cli {
+
+    /// Constructor.
+    pub fn new(uds_client: Arc<UdsClient>) -> Cli {
         Cli {
             trees: HashMap::new(),
             builtins: HashMap::new(),
             mode: RefCell::new(String::new()),
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
-            stream: RefCell::new(None),
+            uds_client: uds_client,
             debug: false,
         }
     }
 
-    // Entry point of shell initialization.
-    pub fn init(&mut self, config: Config) -> Result<(), CliError> {
+    /// Return UDS client.
+    pub fn uds_client(&self) -> Arc<UdsClient> {
+        self.uds_client.clone()
+    }
+
+    /// Entry point of shell initialization.
+    pub fn start(&mut self, config: Config) -> Result<(), CliError> {
+
         self.debug = config.debug();
 
-        // Initlaize signals.
-        self.init_signals()?;
-        
         // TBD: Terminal init
 
         // Initialize CLI modes.
@@ -98,20 +100,17 @@ impl Cli {
         self.init_cli_commands(&path)?;
         self.set_mode(CLI_INITIAL_MODE)?;
 
-        // TBD: Connect server or send.
-        self.init_server_connect()?;
-
         // Init readline.
         let readline = CliReadline::new(&self);
 
         // Start CLI.
         self.run(readline);
 
-        // 
+        // Successfully finished.
         Ok(())
     }
 
-    // Run command loop.
+    /// Run command loop.
     pub fn run(&self, readline: CliReadline) {
         loop {
             // TODO, we'll get API URL and parameters here to send to server.
@@ -139,7 +138,7 @@ impl Cli {
         }
     }
 
-    // TBD: probably should be initialized in builtins.rs.
+    /// TBD: probably should be initialized in builtins.rs.
     fn init_builtins(&mut self) -> Result<(), CliError> {
         self.builtins.insert("help".to_string(), Box::new(builtins::help));
         self.builtins.insert("exit".to_string(), Box::new(builtins::exit));
@@ -375,36 +374,10 @@ impl Cli {
         Ok(())
     }
 
-    fn init_server_connect(&self) -> Result<(), CliError> {
-        // Initialize connection to server.
-        let mut path = env::temp_dir();
-        path.push(ROUTERD_CONFIG_UDS_FILENAME);
-
-        let _stream = match UnixStream::connect(path) {
-            Ok(stream) => {
-                self.stream.borrow_mut().replace(stream);
-            },
-            Err(_) => return Err(CliError::ConnectError),
-        };
-        
-        Ok(())
-    }
-
-    fn init_signals(&self) -> Result<(), CliError> {
-        // Ignore TSTP suspend signal.
-        signal::ignore_sigtstp_handler();
-
-        Ok(())
-    }
-
+    /// Send message througm stream.
     pub fn stream_send(&self, message: &str) {
-        match self.stream.borrow_mut().as_ref() {
-            Some(mut s) => {
-                let _ = s.write_all(message.as_bytes());
-            },
-            None => {
-            }
-        }
+        let uds_client = self.uds_client();
+        uds_client.stream_send(message);
     }
 }
 
