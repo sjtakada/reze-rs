@@ -29,7 +29,6 @@ use log::error;
 
 use common::event::*;
 use common::timer::*;
-use common::channel::*;
 use common::error::*;
 use common::uds_server::*;
 

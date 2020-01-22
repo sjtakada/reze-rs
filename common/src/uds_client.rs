@@ -125,10 +125,10 @@ pub struct UdsClientInner {
     reconnect: Cell<Instant>,
 }
 
-/// impl
+/// UdsClientInner implementation.
 impl UdsClientInner {
 
-    ///
+    /// Constructdor.
     pub fn new(client: Arc<UdsClient>, event_manager: Arc<EventManager>,
                handler: Arc<dyn UdsClientHandler>, path: &PathBuf) -> UdsClientInner {
         UdsClientInner {
@@ -141,6 +141,7 @@ impl UdsClientInner {
         }
     }
 
+    /// Connect to server.
     pub fn connect(&self) -> Result<(), CoreError> {
         let client = self.client.borrow_mut();
 
@@ -157,11 +158,12 @@ impl UdsClientInner {
         }
     }
 
-    ///
+    /// Return event manager.
     pub fn get_event_manager(&self) -> Arc<EventManager> {
         self.event_manager.borrow_mut().clone()
     }
 
+    /// Send message through UnixStream.
     pub fn stream_send(&self, message: &str) {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
@@ -190,12 +192,13 @@ impl EventHandler for UdsClientInner {
             EventType::ReadEvent => {
                 let handler = self.handler.borrow_mut();
 
-                // Dispatch message to Server message handler.
+                // Dispatch message to message handler.
                 handler.handle_message(&self.client.borrow())
             },
             EventType::ErrorEvent => {
                 self.stream.borrow_mut().take();
 
+                // TBD: want to schedule reconnect timer.
                 let client = self.client.borrow_mut().clone();
                 client.connect();
 

@@ -14,7 +14,7 @@ use std::time::Instant;
 use std::time::Duration;
 use std::cmp::Ordering;
 
-use log::error;
+//use log::error;
 
 use super::event::*;
 

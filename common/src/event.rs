@@ -211,7 +211,6 @@ impl EventManager {
 
     /// Poll timers and handle events.
     pub fn poll_timer(&self) -> Result<(), CoreError> {
-
         while let Some(handler) = self.timers.borrow().run() {
             let result = handler.handle(EventType::TimerEvent);
 
