@@ -18,6 +18,7 @@ use std::sync::mpsc;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::boxed::Box;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Instant;
@@ -145,7 +146,7 @@ where Self: Send,
 {
     pub sender: Mutex<mpsc::Sender<NexusToProto>>,
     pub protocol: ProtocolType,
-    pub expiration: Instant,
+    pub expiration: Mutex<Cell<Instant>>,
     pub token: u32,
 }
 
@@ -157,7 +158,7 @@ impl TimerEntry {
         TimerEntry {
             sender: Mutex::new(sender),
             protocol: p,
-            expiration: Instant::now() + d,
+            expiration: Mutex::new(Cell::new(Instant::now() + d)),
             token: token,
         }
     }
@@ -190,12 +191,12 @@ impl TimerHandler for TimerEntry {
 
     /// Get expiration.
     fn expiration(&self) -> Instant {
-        self.expiration
+        self.expiration.lock().unwrap().get()
     }
 
     /// Set expiration.
-    fn set_expiration(&mut self, d: Duration) {
-        self.expiration = Instant::now() + d;
+    fn set_expiration(&self, d: Duration) {
+        self.expiration.lock().unwrap().set(Instant::now() + d);
     }
 }
 

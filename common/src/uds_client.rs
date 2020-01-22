@@ -7,8 +7,11 @@
 
 use std::io::Write;
 use std::sync::Arc;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::path::PathBuf;
+use std::time::Instant;
+use std::time::Duration;
 //use std::net::Shutdown;
 
 use log::{debug, error};
@@ -16,6 +19,7 @@ use mio_uds::UnixStream;
 
 use super::error::*;
 use super::event::*;
+use super::timer::*;
 
 /// Trait UdsClient handler.
 pub trait UdsClientHandler {
@@ -84,7 +88,8 @@ impl UdsClient {
                 }
             },
             Err(_) => {
-                // probably reconnect timer.
+                let d = Duration::from_secs(5);
+                event_manager.register_timer(d, inner.clone());
             },
         }
     }
@@ -115,6 +120,9 @@ pub struct UdsClientInner {
 
     /// Client stream.
     stream: RefCell<Option<UnixStream>>,
+
+    /// Reconnect timer.
+    reconnect: Cell<Instant>,
 }
 
 /// impl
@@ -129,6 +137,7 @@ impl UdsClientInner {
             event_manager: RefCell::new(event_manager),
             handler: RefCell::new(handler),
             stream: RefCell::new(None),
+            reconnect: Cell::new(Instant::now()),
         }
     }
 
@@ -171,6 +180,13 @@ impl EventHandler for UdsClientInner {
     /// Handle event.
     fn handle(&self, e: EventType) -> Result<(), CoreError> {
         match e {
+            EventType::TimerEvent => {
+                // Reconnect timer expired.
+                let client = self.client.borrow_mut().clone();
+                client.connect();
+
+                Ok(())
+            },
             EventType::ReadEvent => {
                 let handler = self.handler.borrow_mut();
 
@@ -179,6 +195,10 @@ impl EventHandler for UdsClientInner {
             },
             EventType::ErrorEvent => {
                 self.stream.borrow_mut().take();
+
+                let client = self.client.borrow_mut().clone();
+                client.connect();
+
                 let handler = self.handler.borrow_mut();
 
                 // Dispatch message to Server message handler.
@@ -189,5 +209,16 @@ impl EventHandler for UdsClientInner {
                 Err(CoreError::UnknownEvent)
             }
         }
+    }
+}
+
+impl TimerHandler for UdsClientInner {
+
+    fn expiration(&self) -> Instant {
+        self.reconnect.get()
+    }
+
+    fn set_expiration(&self, d: Duration) {
+        self.reconnect.set(Instant::now() + d);
     }
 }

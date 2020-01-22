@@ -205,14 +205,25 @@ impl EventManager {
 
     /// Register timer.
     pub fn register_timer(&self, d: Duration, handler: Arc<dyn TimerHandler>) {
-        let mut timers = self.timers.borrow_mut();
+        let timers = self.timers.borrow();
         timers.register(d, handler);
     }
 
     /// Poll timers and handle events.
     pub fn poll_timer(&self) -> Result<(), CoreError> {
-        let mut timers = self.timers.borrow_mut();
-        timers.run();
+
+        while let Some(handler) = self.timers.borrow().run() {
+            let result = handler.handle(EventType::TimerEvent);
+
+            match result {
+                Err(err) => {
+                    error!("Poll timer {:?}", err);
+                }
+                _ => {
+
+                }
+            }
+        }
 
         Ok(())
     }

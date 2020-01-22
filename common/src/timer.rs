@@ -8,6 +8,7 @@
 //
 
 use std::collections::BinaryHeap;
+use std::cell::RefCell;
 use std::sync::Arc;
 use std::time::Instant;
 use std::time::Duration;
@@ -16,7 +17,6 @@ use std::cmp::Ordering;
 use log::error;
 
 use super::event::*;
-
 
 /// TimerHandler trait.
 pub trait TimerHandler: EventHandler
@@ -27,7 +27,7 @@ where Self: Send,
     fn expiration(&self) -> Instant;
 
     /// Set expiration time.
-    fn set_expiration(&mut self, d: Duration) -> ();
+    fn set_expiration(&self, d: Duration) -> ();
 }
 
 /// Ord implementation for TimerHandler.
@@ -59,7 +59,7 @@ impl PartialEq for dyn TimerHandler {
 pub struct TimerServer {
 
     /// Ordering handler by expiration time.
-    heap: BinaryHeap<Arc<dyn TimerHandler>>
+    heap: RefCell<BinaryHeap<Arc<dyn TimerHandler>>>
 }
 
 /// TimerServer implementation.
@@ -68,42 +68,31 @@ impl TimerServer {
     /// Constructor.
     pub fn new() -> TimerServer {
         TimerServer {
-            heap: BinaryHeap::new()
+            heap: RefCell::new(BinaryHeap::new())
         }
     }
 
     /// Register timer handler.
-    pub fn register(&mut self, d: Duration, mut handler: Arc<dyn TimerHandler>) {
-        Arc::get_mut(&mut handler).unwrap().set_expiration(d);
-        self.heap.push(handler);
+    pub fn register(&self, d: Duration, handler: Arc<dyn TimerHandler>) {
+        handler.set_expiration(d);
+        self.heap.borrow_mut().push(handler);
     }
 
     /// Pop a timer handler if it is expired.
-    fn pop_if_expired(&mut self) -> Option<Arc<dyn TimerHandler>> {
-        if match self.heap.peek() {
+    fn pop_if_expired(&self) -> Option<Arc<dyn TimerHandler>> {
+        if match self.heap.borrow_mut().peek() {
             Some(handler) if handler.expiration() < Instant::now() => true,
             _ => false,
         } {
-            self.heap.pop()
+            self.heap.borrow_mut().pop()
         } else {
             None
         }
     }
 
     /// Run all expired event handler.
-    pub fn run(&mut self) {
-        while let Some(handler) = self.pop_if_expired() {
-            let result = handler.handle(EventType::TimerEvent);
-
-            match result {
-                Err(err) => {
-                    error!("Poll timer {:?}", err);
-                }
-                _ => {
-
-                }
-            }
-        }
+    pub fn run(&self) -> Option<Arc<dyn TimerHandler>> {
+        self.pop_if_expired()
     }
 }
 
