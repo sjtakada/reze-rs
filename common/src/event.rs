@@ -15,6 +15,7 @@ use std::time::Duration;
 use mio::*;
 use log::error;
 
+use super::consts::*;
 use super::error::*;
 use super::timer::*;
 
@@ -87,7 +88,7 @@ impl EventManager {
                 index: 1,	// Reserve 0
                 handlers: HashMap::new(),
                 poll: Poll::new().unwrap(),
-                timeout: Duration::from_millis(10),
+                timeout: Duration::from_millis(EVENT_MANAGER_TICK),
             }),
             timers: RefCell::new(TimerServer::new()),
             channel_handler: RefCell::new(None),
@@ -224,14 +225,16 @@ impl EventManager {
     /// Poll channel handler.
     pub fn poll_channel(&self) -> Result<(), CoreError> {
         if let Some(ref mut handler) = *self.channel_handler.borrow_mut() {
-            handler(self);
+            handler(self)
+        } else {
+            Ok(())
         }
-        Ok(())
     }
 
     /// Sleep certain period to have other events to occur.
     pub fn sleep(&self) {
-        thread::sleep(Duration::from_millis(10));
+        // TBD: we should sleep MIN(earlist timer, Tick).
+        thread::sleep(Duration::from_millis(EVENT_MANAGER_TICK));
     }
 
     /// Event loop, but just a single iteration of all possible events.
@@ -241,7 +244,7 @@ impl EventManager {
             return Err(err)
         }
 
-        // Process ProtoToNexus messages through channels.
+        // Process messages through channels.
         if let Err(err) = self.poll_channel() {
             return Err(err)
         }

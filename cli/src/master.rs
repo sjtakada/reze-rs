@@ -10,7 +10,6 @@ use std::thread;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::cell::RefCell;
-use std::time::Duration;
 
 use common::error::*;
 use common::consts::*;
@@ -65,20 +64,24 @@ impl CliMaster {
                 Err(err) => panic!("CLI Init error: {}", err),
             }
 
+            // Notify main thread to terminate.
             sender.send(true).unwrap();
         });
 
+        let handler = move |_event_manager: &EventManager| -> Result<(), CoreError> {
+            if let Ok(_) = receiver.try_recv() {
+                Err(CoreError::SystemShutdown)
+            } else {
+                Ok(())
+            }
+        };
+        event_manager.set_channel_handler(Box::new(handler));
+
         // Event loop.
         'main: loop {
-            match event_manager.poll_fd() {
-                Err(_err) => break 'main,
-                _ => {}
-            }
-
-            thread::sleep(Duration::from_millis(EVENT_MANAGER_TICK));
-
-            if let Ok(_) = receiver.try_recv() {
-                break 'main
+            match event_manager.run() {
+                Err(CoreError::SystemShutdown) => break 'main,
+                _ => {},
             }
         }
 
