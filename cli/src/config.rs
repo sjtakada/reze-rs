@@ -74,7 +74,7 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            debug: true,
+            debug: false,
             json: Some(String::from(".")),
             server_ip: Some(String::from("localhost")),
             api_prefix: Some(String::from("/")),

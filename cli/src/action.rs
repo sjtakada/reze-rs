@@ -101,8 +101,10 @@ impl CliAction for CliActionHttp {
         let request = format!("{} {}\n\n", self.method, path);
 
         // If only debug.
-        println!("{}", request);
-        println!("{}", body);
+        if cli.is_debug() {
+            println!("{}", request);
+            println!("{}", body);
+        }
 
         cli.stream_send(&request);
         cli.stream_send(&body);

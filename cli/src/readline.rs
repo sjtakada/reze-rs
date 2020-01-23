@@ -317,8 +317,6 @@ impl<'a> CliReadline<'a> {
 
     fn handle_actions(&self, parser: &mut CliParser) -> Result<(), CliError> {
         // Populate mode params first.
-        println!("** handle_actions");
-
         let node = parser.node_executable().unwrap();
         let params = parser.params_get();
 

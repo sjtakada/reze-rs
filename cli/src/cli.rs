@@ -84,6 +84,9 @@ impl Cli {
     pub fn start(&mut self, config: Config) -> Result<(), CliError> {
 
         self.debug = config.debug();
+        if self.debug {
+            println!("% Debug mode");
+        }
 
         // TBD: Terminal init
 
