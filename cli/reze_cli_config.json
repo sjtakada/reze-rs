@@ -9,7 +9,7 @@
   "remote": {
     "config": {
       "transport": "unix",
-      "socket": "/tmp/routerd_confiig.sock",
+      "socket": "routerd_config.sock",
       "protocol": "reze",
       "prefix": "/config",
       "authentication": {
@@ -20,7 +20,7 @@
     },
     "exec": {
       "transport": "unix",
-      "socket": "/tmp/routerd_exec.sock",
+      "socket": "routerd_exec.sock",
       "protocol": "reze",
       "prefix": "/exec"
     }

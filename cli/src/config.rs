@@ -256,6 +256,19 @@ impl ConfigRemote {
     pub fn set_prefix(&mut self, prefix: &str) {
         self.prefix.replace(String::from(prefix));
     }
+
+    /// Return UDS socket filename.
+    pub fn uds_socket_file(&self) -> Option<&str> {
+        if let Some(transport) = &self.transport {
+            if transport == "unix" {
+                if let Some(socket) = &self.socket {
+                    return Some(&socket[..])
+                }
+            }
+        }
+
+        None
+    }
 }
 
 /// Default implementation for ConfigRemote.

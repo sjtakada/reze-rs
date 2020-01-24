@@ -44,16 +44,27 @@ impl CliMaster {
 
     /// Start Master.
     pub fn start(config: Config) -> Result<(), CliError> {
-        // Initialize master and UDS client.
+
+        // Initialize master.
         let master = Arc::new(CliMaster::new());
         master.init_signals()?;
-
-        let mut path = env::temp_dir();
-        path.push(ROUTERD_CONFIG_UDS_FILENAME);
         let event_manager = master.event_manager.borrow_mut();
+
+        // Create config client.
+        let mut path = env::temp_dir();
+        let socket_file = if let Some(remote) = config.remote("config") {
+            remote.uds_socket_file()
+        } else {
+            None
+        };
+
+        match socket_file {
+            Some(socket_file) => path.push(socket_file),
+            None => path.push(ROUTERD_CONFIG_UDS_FILENAME),
+        }
+
         let client = UdsClient::start(event_manager.clone(), master.clone(), &path);
         master.uds_client.borrow_mut().replace(client.clone());
-
         client.connect();
 
         let (sender, receiver) = mpsc::channel::<bool>();
