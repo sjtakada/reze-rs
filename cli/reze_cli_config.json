@@ -1,0 +1,28 @@
+{
+  "description": "ReZe CLI Meta config",
+  "config_schema_version": "0.1",
+  "debug": false,
+  "cli_definition": {
+    "directory": "json",
+    "recursive": true
+  },
+  "remote": {
+    "config": {
+      "transport": "unix",
+      "socket": "/tmp/routerd_confiig.sock",
+      "protocol": "reze",
+      "prefix": "/config"
+      "authentication": {
+        "method": "basic",
+        "username": "hoge",
+        "password": "hogehoge"
+      }
+    },
+    "exec": {
+      "transport": "unix",
+      "socket": "/tmp/routerd_exec.sock",
+      "protocol": "reze",
+      "prefix": "/exec"
+    }
+  }
+}

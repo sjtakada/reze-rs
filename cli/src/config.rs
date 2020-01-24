@@ -6,80 +6,267 @@
 //
 
 use std::default::Default;
+use std::collections::HashMap;
 
-// Global CLI configuration, populated through command line or file.
+/// Global CLI configuration, populated through command line or file.
 pub struct Config {
-    // CLI debug mode.
+
+    /// CLI debug mode.
     debug: bool,
 
-    // CLI defintion JSON directory.
-    json: Option<String>,
+    /// CLI defintion JSON directory.
+    cli_definition_dir: Option<String>,
 
-    // API server IP address.
-    server_ip: Option<String>,
-
-    // API prefix for CliActionHttp.
-    api_prefix: Option<String>,
-
-    // Username and password for API.
-    user_pass: Option<String>,
+    /// Configs for remote endpoint.
+    remote: HashMap<String, ConfigRemote>,
 }
     
+/// Global CLI config.
 impl Config {
+
+    /// Constructor.
     pub fn new() -> Config {
         Config::default()
     }
 
+    /// Parse config from JSON.
+    pub fn from_json(json: &serde_json::Value) -> Config {
+        let mut config = Config::new();
+
+        if json.is_object() {
+            for k in json.as_object().unwrap().keys() {
+                match k.as_ref() {
+                    "debug" => {
+                        if let Some(v) = json.get(k).unwrap().as_bool() {
+                            config.set_debug(v);
+                        }
+                    },
+                    "cli-definition" => {
+                        if let Some(v) = json.get(k).unwrap().as_str() {
+                            config.set_cli_definition_dir(v);
+                        }
+                    },
+                    "remote" => {
+                        if let Some(v) = json.get(k).unwrap().as_object() {
+                            for name in v.keys() {
+                                let remote = match config.remote(name) {
+                                    Some(r) => r,
+                                    None => {
+                                        config.set_remote(name);
+                                        config.remote(name).unwrap()
+                                    }
+                                };
+
+                                remote.from_json(v.get(name).unwrap());
+                            }
+                        }
+                    },
+                    _ => {
+                        println!("Unknown keyword in global CLI config {:?}", k);
+                    }
+                }
+            }
+        }
+
+        config
+    }
+
+    /// Return debug flag.
     pub fn debug(&self) -> bool {
         self.debug
     }
 
-    pub fn json(&self) -> Option<&str> {
-        self.json.as_ref().map(|s| &s[..])
+    /// Return CLI definition directory.
+    pub fn cli_definition_dir(&self) -> Option<&str> {
+        self.cli_definition_dir.as_ref().map(|s| &s[..])
     }
 
-    pub fn server_ip(&self) -> Option<&str> {
-        self.server_ip.as_ref().map(|s| &s[..])
+    /// Return config for remote endpoint.
+    pub fn remote(&self, name: &str) -> Option<&ConfigRemote> {
+        self.remote.get(name)
     }
 
-    pub fn api_prefix(&self) -> Option<&str> {
-        self.api_prefix.as_ref().map(|s| &s[..])
-    }
-
-    pub fn user_pass(&self) -> Option<&str> {
-        self.user_pass.as_ref().map(|s| &s[..])
-    }
-
+    /// Set debug flag.
     pub fn set_debug(&mut self, debug: bool) {
         self.debug = debug;
     }
 
-    pub fn set_json(&mut self, json: &str) {
-        self.json.replace(String::from(json));
+    /// Set CLI definition directory.
+    pub fn set_cli_definition_dir(&mut self, cli_definition_dir: &str) {
+        self.cli_definition_dir.replace(String::from(cli_definition_dir));
     }
 
-    pub fn set_server_ip(&mut self, server_ip: &str) {
-        self.server_ip.replace(String::from(server_ip));
-    }
-
-    pub fn set_api_prefix(&mut self, api_prefix: &str) {
-        self.api_prefix.replace(String::from(api_prefix));
-    }
-
-    pub fn set_user_pass(&mut self, user_pass: &str) {
-        self.user_pass.replace(String::from(user_pass));
+    /// Set config for remote endpoint.
+    pub fn set_remote(&mut self, name: &str) {
+        self.remote.insert(String::from(name), ConfigRemote::default());
     }
 }
 
+/// Default implementation for Config.
 impl Default for Config {
+
+    /// Return instance with default value.
     fn default() -> Self {
         Self {
             debug: false,
-            json: Some(String::from(".")),
-            server_ip: Some(String::from("localhost")),
-            api_prefix: Some(String::from("/")),
-            user_pass: None,
+            cli_definition_dir: Some(String::from("./json")),
+            remote: HashMap::new(),
         }
     }
 }
 
+/// Remote endpoint config.
+pub struct ConfigRemote {
+
+    /// Transport.
+    transport: Option<String>,
+
+    /// Socket path for UNIX domain socket.
+    socket: Option<String>,
+
+    /// Server IP for TCP.
+    server_ip: Option<String>,
+
+    /// Server port.
+    server_port: Option<u16>,
+
+    /// Protocol, data format of remote access.
+    protocol: Option<String>,
+
+    /// Prefix for API.
+    prefix: Option<String>,
+
+ // Authentication.
+}
+
+/// ConfigRemote implementation.
+impl ConfigRemote {
+
+    /// Constructor.
+    pub fn new() -> ConfigRemote {
+        ConfigRemote::default()
+    }
+
+    /// Parse config from JSON.
+    pub fn from_json(&self, json: &serde_json::Value) -> ConfigRemote {
+        let mut config = ConfigRemote::new();
+
+        if json.is_object() {
+            for k in json.as_object().unwrap().keys() {
+                match k.as_ref() {
+                    "transport" => {
+                        if let Some(v) = json.get(k).unwrap().as_str() {
+                            config.set_transport(v);
+                        }
+                    },
+                    "socket" => {
+                        if let Some(v) = json.get(k).unwrap().as_str() {
+                            config.set_socket(v);
+                        }
+                    },
+                    "server_ip" => {
+                        if let Some(v) = json.get(k).unwrap().as_str() {
+                            config.set_server_ip(v);
+                        }
+                    },
+                    "server_port" => {
+                        if let Some(v) = json.get(k).unwrap().as_u64() {
+                            config.set_server_port(v as u16);
+                        }
+                    },
+                    "protocol" => {
+                        if let Some(v) = json.get(k).unwrap().as_str() {
+                            config.set_protocol(v);
+                        }
+                    },
+                    "prefix" => {
+                        if let Some(v) = json.get(k).unwrap().as_str() {
+                            config.set_prefix(v);
+                        }
+                    },
+                    _ => {
+                        println!("Unknown keyword in remote config {:?}", k);
+                    }
+                }
+            }
+        }
+
+        config
+    }
+
+    /// Return transport.
+    pub fn transport(&self) -> Option<&str> {
+        self.transport.as_ref().map(|s| &s[..])
+    }
+
+    /// Return socket path for UNIX domain socket.
+    pub fn socket(&self) -> Option<&str> {
+        self.socket.as_ref().map(|s| &s[..])
+    }
+
+    /// Return server IP for TCP.
+    pub fn server_ip(&self) -> Option<&str> {
+        self.server_ip.as_ref().map(|s| &s[..])
+    }
+
+    /// Return server port.
+    pub fn server_port(&self) -> Option<u16> {
+        self.server_port
+    }
+
+    /// Return protocol, data format of remote access.
+    pub fn protocol(&self) -> Option<&str> {
+        self.protocol.as_ref().map(|s| &s[..])
+    }
+
+    /// Return prefix for API.
+    pub fn prefix(&self) -> Option<&str> {
+        self.prefix.as_ref().map(|s| &s[..])
+    }
+
+    /// Set transport.
+    pub fn set_transport(&mut self, transport: &str) {
+        self.transport.replace(String::from(transport));
+    }
+
+    /// Set socket path for UNIX domain socket.
+    pub fn set_socket(&mut self, socket: &str) {
+        self.socket.replace(String::from(socket));
+    }
+
+    /// Set server IP for TCP.
+    pub fn set_server_ip(&mut self, server_ip: &str) {
+        self.server_ip.replace(String::from(server_ip));
+    }
+
+    /// Set server port.
+    pub fn set_server_port(&mut self, server_port: u16) {
+        self.server_port.replace(server_port);
+    }
+
+    /// Set protocol, data format of remote access.
+    pub fn set_protocol(&mut self, protocol: &str) {
+        self.protocol.replace(String::from(protocol));
+    }
+
+    /// Set prefix for API.
+    pub fn set_prefix(&mut self, prefix: &str) {
+        self.prefix.replace(String::from(prefix));
+    }
+}
+
+/// Default implementation for ConfigRemote.
+impl Default for ConfigRemote {
+
+    /// Return instance with default value.
+    fn default() -> Self {
+        Self {
+            transport: None,
+            socket: None,
+            server_ip: None,
+            server_port: None,
+            protocol: None,
+            prefix: None,
+        }
+    }
+}

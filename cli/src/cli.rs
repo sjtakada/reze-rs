@@ -5,12 +5,9 @@
 // CLI - Core Shell functions.
 //
 
-use std::io::BufReader;
-use std::io::Read;
-use std::fs;
-use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
+use std::fs;
 use std::collections::HashMap;
 use std::cell::Cell;
 use std::cell::RefCell;
@@ -22,6 +19,7 @@ use rustyline::error::ReadlineError;
 
 use common::uds_client::*;
 
+use super::utils::*;
 use super::config::Config;
 use super::error::CliError;
 use super::readline::*;
@@ -91,7 +89,7 @@ impl Cli {
         // TBD: Terminal init
 
         // Initialize CLI modes.
-        let mut path = PathBuf::from(config.json().unwrap());
+        let mut path = PathBuf::from(config.cli_definition_dir().unwrap());
         path.push(CLI_MODE_FILE);
         self.init_cli_modes(&path)?;
 
@@ -99,7 +97,7 @@ impl Cli {
         self.init_builtins()?;
 
         // Initialize CLI comand definitions.
-        let path = PathBuf::from(config.json().unwrap());
+        let path = PathBuf::from(config.cli_definition_dir().unwrap());
         self.init_cli_commands(&path)?;
         self.set_mode(CLI_INITIAL_MODE)?;
 
@@ -250,38 +248,9 @@ impl Cli {
         Ok(())
     }
 
-    // Read and return JSON, if it fails, return None.
-    fn json_read(&self, path: &Path) -> Option<serde_json::Value> {
-        let file = match File::open(path) {
-            Ok(file) => file,
-            Err(err) => {
-                println!("Unable to open file: {:?}: {:?}", path, err);
-                return None
-            }
-        };
-
-        let mut buf_reader = BufReader::new(file);
-        let mut json_str = String::new();
-        match buf_reader.read_to_string(&mut json_str) {
-            Ok(_) => {},
-            Err(err) => {
-                println!("Unable to read file: {:?}: {:?}", path, err);
-                return None
-            }
-        };
-
-        match serde_json::from_str(&json_str) {
-            Ok(value) => value,
-            Err(err) => {
-                println!("Unable to parse string as JSON: {:?}: {:?}", path, err);
-                None
-            }
-        }
-    }
-
     // Initialize CLI modes.
     fn init_cli_modes(&mut self, path: &Path) -> Result<(), CliError> {
-        match self.json_read(path) {
+        match json_read(path) {
             Some(root) => {
                 if root.is_object() {
                     self.build_mode(&root, None)?;
@@ -340,7 +309,7 @@ impl Cli {
     }
 
     fn load_cli_json(&mut self, path: &Path) {
-        if let Some(json) = self.json_read(path) {
+        if let Some(json) = json_read(path) {
             if json.is_object() {
                 for k in json.as_object().unwrap().keys() {
                     if let Some(attr) = json[k].as_object() {
@@ -406,25 +375,25 @@ mod tests {
         let pathbuf = PathBuf::from(TMP_FILE);
 
         // No file written yet.
-        let ret = cli.json_read(pathbuf.as_path());
+        let ret = json_read(pathbuf.as_path());
         assert_eq!(ret, None);
 
         // Write non UTF text to file.
         let no_utf_txt = &[0xe9, 0x5a, 0xe9, 0x4a];
         write_tmp_file(no_utf_txt);
-        let ret = cli.json_read(pathbuf.as_path());
+        let ret = json_read(pathbuf.as_path());
         assert_eq!(ret, None);
 
         // UTF but not JSON.
         let utf_txt = "饂飩";
         write_tmp_file(utf_txt.as_bytes());
-        let ret = cli.json_read(pathbuf.as_path());
+        let ret = json_read(pathbuf.as_path());
         assert_eq!(ret, None);
 
         // Proper UTF JSON.
         let json_txt = "{\"noodle\":\"饂飩\"}";
         write_tmp_file(json_txt.as_bytes());
-        let ret = cli.json_read(pathbuf.as_path());
+        let ret = json_read(pathbuf.as_path());
         let v = serde_json::from_str(json_txt).unwrap();
         assert_eq!(ret, v);
 
