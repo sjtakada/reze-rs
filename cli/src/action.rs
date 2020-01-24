@@ -47,19 +47,19 @@ impl CliAction for CliActionMode {
 }
 
 // Http action.
-pub struct CliActionHttp {
+pub struct CliActionRemote {
     method: String,
     path: String,
     params: String,
 }
 
-impl CliActionHttp {
-    pub fn new(value: &serde_json::Value) -> CliActionHttp {
+impl CliActionRemote {
+    pub fn new(value: &serde_json::Value) -> CliActionRemote {
         let method = value["method"].as_str().unwrap_or("GET");
         let path = value["path"].as_str().unwrap_or("");
         let params = value["params"].to_string();
 
-        CliActionHttp {
+        CliActionRemote {
             method: String::from(method),
             path: String::from(path),
             params: params,
@@ -67,7 +67,7 @@ impl CliActionHttp {
     }
 }
 
-impl CliAction for CliActionHttp {
+impl CliAction for CliActionRemote {
     fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
         let config_client = cli.config_client();
         let config_prefix = config_client.prefix();

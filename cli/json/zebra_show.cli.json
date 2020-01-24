@@ -25,7 +25,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "GET",
               "path": "",
               "params": {
@@ -72,7 +73,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -114,7 +116,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -199,7 +202,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -241,7 +245,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -283,7 +288,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -325,7 +331,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -362,7 +369,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -399,7 +407,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -446,7 +455,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -505,7 +515,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -552,7 +563,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -611,7 +623,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -667,7 +680,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -735,7 +749,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -791,7 +806,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -859,7 +875,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -911,7 +928,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -975,7 +993,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1027,7 +1046,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1091,7 +1111,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1152,7 +1173,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1225,7 +1247,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1286,7 +1309,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1359,7 +1383,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1396,7 +1421,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1443,7 +1469,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1528,7 +1555,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1570,7 +1598,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1612,7 +1641,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1654,7 +1684,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1691,7 +1722,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
