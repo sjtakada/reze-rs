@@ -69,9 +69,10 @@ impl CliActionHttp {
 
 impl CliAction for CliActionHttp {
     fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
-        let config_prefix = "/config";
+        let config_client = cli.config_client();
+        let config_prefix = config_client.prefix();
 
-        // replace path with params.
+        // Replace path with params.
         let path = self.path.split('/').map(|p| {
             if &p[0..1] == ":" {
                 match params.get(&p[1..]) {
@@ -102,8 +103,7 @@ impl CliAction for CliActionHttp {
 
         // If only debug.
         if cli.is_debug() {
-            println!("{}", request);
-            println!("{}", body);
+            println!("{}{}", request, body);
         }
 
         cli.config_send(&request);

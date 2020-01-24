@@ -45,12 +45,89 @@ impl ConfigClient {
         let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path);
         uds_client.connect();
 
-        let prefix = String::from("");
+        let prefix = match config.remote("config") {
+            Some(remote) => {
+                match remote.prefix() {
+                    Some(prefix) => prefix.to_string(),
+                    None => ROUTERD_CONFIG_API_PREFIX.to_string(),
+                }
+            },
+            None => ROUTERD_CONFIG_API_PREFIX.to_string(),
+        };
 
         ConfigClient {
             uds_client: uds_client,
             prefix: prefix
         }
+    }
+
+    /// Return API prefix.
+    pub fn prefix(&self) -> &str {
+        &self.prefix
+    }
+
+    /// Connect config server.
+    pub fn connect(&self) {
+        self.uds_client.connect();
+    }
+
+    /// Send message to config server.
+    pub fn stream_send(&self, message: &str) {
+        self.uds_client.stream_send(message);
+    }
+}
+
+
+/// Exec client.
+pub struct ExecClient {
+
+    /// UDS client.
+    uds_client: Arc<UdsClient>,
+
+    /// API path prefix.
+    prefix: String,
+}
+
+/// Exec client implementation.
+impl ExecClient {
+
+    /// Constructor.
+    pub fn new(master: Arc<CliMaster>, config: &Config) -> ExecClient {
+
+        let mut path = env::temp_dir();
+        let socket_file = if let Some(remote) = config.remote("exec") {
+            remote.uds_socket_file()
+        } else {
+            None
+        };
+
+        match socket_file {
+            Some(socket_file) => path.push(socket_file),
+            None => path.push(ROUTERD_EXEC_UDS_FILENAME),
+        }
+
+        let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path);
+        uds_client.connect();
+
+        let prefix = match config.remote("exec") {
+            Some(remote) => {
+                match remote.prefix() {
+                    Some(prefix) => prefix.to_string(),
+                    None => ROUTERD_EXEC_API_PREFIX.to_string(),
+                }
+            },
+            None => ROUTERD_EXEC_API_PREFIX.to_string(),
+        };
+
+        ExecClient {
+            uds_client: uds_client,
+            prefix: prefix
+        }
+    }
+
+    /// Return API prefix.
+    pub fn prefix(&self) -> &str {
+        &self.prefix
     }
 
     /// Connect config server.
