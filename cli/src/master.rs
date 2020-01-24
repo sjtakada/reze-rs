@@ -5,18 +5,17 @@
 // CLI Master
 //
 
-use std::env;
 use std::thread;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::cell::RefCell;
 
 use common::error::*;
-use common::consts::*;
 use common::event::*;
 use common::uds_client::*;
 
 use super::cli::*;
+use super::client::*;
 use super::signal;
 use super::config::Config;
 use super::error::CliError;
@@ -27,8 +26,10 @@ pub struct CliMaster {
     /// Event Manager.
     event_manager: RefCell<Arc<EventManager>>,
 
-    /// UDS Client.
-    uds_client: RefCell<Option<Arc<UdsClient>>>,
+    /// Config Client.
+    config_client: RefCell<Option<Arc<ConfigClient>>>,
+
+    // Exec Client.
 }
 
 /// CLI Master implementation.
@@ -38,7 +39,7 @@ impl CliMaster {
     pub fn new() -> CliMaster {
         CliMaster {
             event_manager: RefCell::new(Arc::new(EventManager::new())),
-            uds_client: RefCell::new(None),
+            config_client: RefCell::new(None),
         }
     }
 
@@ -48,30 +49,16 @@ impl CliMaster {
         // Initialize master.
         let master = Arc::new(CliMaster::new());
         master.init_signals()?;
-        let event_manager = master.event_manager.borrow_mut();
+        let event_manager = master.event_manager();
 
-        // Create config client.
-        let mut path = env::temp_dir();
-        let socket_file = if let Some(remote) = config.remote("config") {
-            remote.uds_socket_file()
-        } else {
-            None
-        };
-
-        match socket_file {
-            Some(socket_file) => path.push(socket_file),
-            None => path.push(ROUTERD_CONFIG_UDS_FILENAME),
-        }
-
-        let client = UdsClient::start(event_manager.clone(), master.clone(), &path);
-        master.uds_client.borrow_mut().replace(client.clone());
-        client.connect();
+        let config_client = Arc::new(ConfigClient::new(master.clone(), &config));
+        master.set_config_client(config_client.clone());
 
         let (sender, receiver) = mpsc::channel::<bool>();
 
         // Run CLI parser in another thread.
         let handle = thread::spawn(move || {
-            let mut cli = Cli::new(client.clone());
+            let mut cli = Cli::new(config_client.clone());
             match cli.start(config) {
                 Ok(_) => {},
                 Err(err) => panic!("CLI Init error: {}", err),
@@ -112,6 +99,16 @@ impl CliMaster {
         signal::ignore_sigtstp_handler();
 
         Ok(())
+    }
+
+    /// Set config client.
+    pub fn set_config_client(&self, config_client: Arc<ConfigClient>) {
+        self.config_client.borrow_mut().replace(config_client);
+    }
+
+    /// Return event manager.
+    pub fn event_manager(&self) -> Arc<EventManager> {
+        self.event_manager.borrow_mut().clone()
     }
 }
 

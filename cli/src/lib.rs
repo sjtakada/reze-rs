@@ -8,6 +8,7 @@ pub mod master;
 pub mod cli;
 pub mod utils;
 pub mod config;
+pub mod client;
 pub mod parser;
 pub mod collate;
 pub mod tree;

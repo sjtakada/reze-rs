@@ -17,8 +17,7 @@ use std::sync::Arc;
 use serde_json;
 use rustyline::error::ReadlineError;
 
-use common::uds_client::*;
-
+use super::client::*;
 use super::utils::*;
 use super::config::Config;
 use super::error::CliError;
@@ -50,8 +49,8 @@ pub struct Cli {
     /// Current privilege.
     privilege: Cell<u8>,
 
-    /// UDS client.
-    uds_client: Arc<UdsClient>,
+    /// Config client.
+    config_client: Arc<ConfigClient>,
 
     /// Debug mode.
     debug: bool,
@@ -61,21 +60,21 @@ pub struct Cli {
 impl Cli {
 
     /// Constructor.
-    pub fn new(uds_client: Arc<UdsClient>) -> Cli {
+    pub fn new(config_client: Arc<ConfigClient>) -> Cli {
         Cli {
             trees: HashMap::new(),
             builtins: HashMap::new(),
             mode: RefCell::new(String::new()),
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
-            uds_client: uds_client,
+            config_client: config_client,
             debug: false,
         }
     }
 
-    /// Return UDS client.
-    pub fn uds_client(&self) -> Arc<UdsClient> {
-        self.uds_client.clone()
+    /// Return Config client.
+    pub fn config_client(&self) -> Arc<ConfigClient> {
+        self.config_client.clone()
     }
 
     /// Entry point of shell initialization.
@@ -346,10 +345,10 @@ impl Cli {
         Ok(())
     }
 
-    /// Send message througm stream.
-    pub fn stream_send(&self, message: &str) {
-        let uds_client = self.uds_client();
-        uds_client.stream_send(message);
+    /// Send message througm stream config server.
+    pub fn config_send(&self, message: &str) {
+        let config_client = self.config_client();
+        config_client.stream_send(message);
     }
 }
 

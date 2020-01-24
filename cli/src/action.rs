@@ -106,8 +106,8 @@ impl CliAction for CliActionHttp {
             println!("{}", body);
         }
 
-        cli.stream_send(&request);
-        cli.stream_send(&body);
+        cli.config_send(&request);
+        cli.config_send(&body);
 
         Ok(())
     }
