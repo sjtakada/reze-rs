@@ -40,7 +40,7 @@ fn main() {
 
     let mut opts = Options::new();
     opts.optflag("d", "debug", "Runs in debug mode");
-    opts.optflag("c", "config", "Meta config file for CLI");
+    opts.optopt("c", "config", "Meta config file for CLI", "CONFIG-FILE");
     opts.optflag("h", "help", "Display this help and exit");
     opts.optflag("v", "version", "Print program version");
 
@@ -70,10 +70,14 @@ fn main() {
 
     // Read and parse config fiile.
     let path = PathBuf::from(config_file);
-    let config = match json_read(&path) {
+    let mut config = match json_read(&path) {
         Some(json) => Config::from_json(&json),
         None => Config::new(),
     };
+
+    if matches.opt_present("d") {
+        config.set_debug(true);
+    }
 
     match CliMaster::start(config) {
         Ok(_) => {},

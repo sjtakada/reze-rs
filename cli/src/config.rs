@@ -41,7 +41,7 @@ impl Config {
                             config.set_debug(v);
                         }
                     },
-                    "cli-definition" => {
+                    "cli_definition" => {
                         if let Some(v) = json.get(k).unwrap().as_str() {
                             config.set_cli_definition_dir(v);
                         }
@@ -61,8 +61,10 @@ impl Config {
                             }
                         }
                     },
+                    "description" => {},
+                    "config_schema_version" => {},
                     _ => {
-                        println!("Unknown keyword in global CLI config {:?}", k);
+                        println!("Unknown keyword in global config {:?}", k);
                     }
                 }
             }
@@ -184,6 +186,7 @@ impl ConfigRemote {
                             config.set_prefix(v);
                         }
                     },
+                    "authentication" => {},
                     _ => {
                         println!("Unknown keyword in remote config {:?}", k);
                     }

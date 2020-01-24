@@ -11,7 +11,7 @@
       "transport": "unix",
       "socket": "/tmp/routerd_confiig.sock",
       "protocol": "reze",
-      "prefix": "/config"
+      "prefix": "/config",
       "authentication": {
         "method": "basic",
         "username": "hoge",
