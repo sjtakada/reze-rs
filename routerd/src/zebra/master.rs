@@ -23,7 +23,7 @@ use crate::core::message::nexus::ProtoToNexus;
 use crate::core::message::nexus::NexusToProto;
 use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
-use crate::core::config_master::*;
+use crate::core::mds_master::*;
 
 use super::link::*;
 use super::address::*;
@@ -43,7 +43,7 @@ struct ClientTuple {
 pub struct ZebraMaster {
 
     /// Reference config tree.
-    config: RefCell<ConfigMaster>,
+    config: RefCell<MdsMaster>,
 
     /// Kernel interface.
     kernel: RefCell<Kernel>,
@@ -79,7 +79,7 @@ impl ZebraMaster {
         };
 
         ZebraMaster {
-            config: RefCell::new(ConfigMaster::new()),
+            config: RefCell::new(MdsMaster::new()),
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),

@@ -2,7 +2,7 @@
 // ReZe.Rs - Router Daemon
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
-// Core - config master.
+// Core - Management Data Store Master.
 //
 
 use std::rc::Rc;
@@ -23,18 +23,18 @@ pub enum ConfigOrProtocol {
 }
 
 /// Config master
-pub struct ConfigMaster {
+pub struct MdsMaster {
 
     /// Top level config storage.
     map: HashMap<String, ConfigOrProtocol>,
 }
 
-/// ConfigMaster implementation.
-impl ConfigMaster {
+/// MdsMaster implementation.
+impl MdsMaster {
 
     /// Constructor.
-    pub fn new() -> ConfigMaster {
-        ConfigMaster {
+    pub fn new() -> MdsMaster {
+        MdsMaster {
             map: HashMap::new(),
         }
     }
@@ -96,7 +96,7 @@ impl ConfigMaster {
 }
 
 /*
-impl Config for ConfigMaster {
+impl MdsHandler for MdsMaster {
     fn id(&self) -> &str {
         "config"
     }

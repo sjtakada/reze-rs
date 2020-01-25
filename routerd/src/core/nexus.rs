@@ -42,7 +42,7 @@ use super::message::zebra::ProtoToZebra;
 use super::message::zebra::ZebraToProto;
 use super::master::ProtocolMaster;
 use super::mds::*;
-use super::config_master::*;
+use super::mds_master::*;
 
 use crate::zebra::master::ZebraMaster;
 use crate::bgp::master::BgpMaster;
@@ -70,67 +70,6 @@ pub struct RouterNexus {
 
     /// Sender channel for ProtoToZebra.
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
-}
-
-/// Timer entry.
-pub struct TimerEntry
-where Self: Send,
-      Self: Sync
-{
-    pub sender: Mutex<mpsc::Sender<NexusToProto>>,
-    pub protocol: ProtocolType,
-    pub expiration: Mutex<Cell<Instant>>,
-    pub token: u32,
-}
-
-/// Timer entry implementation.
-impl TimerEntry {
-
-    /// Constructor.
-    pub fn new(p: ProtocolType, sender: mpsc::Sender<NexusToProto>, d: Duration, token: u32) -> TimerEntry {
-        TimerEntry {
-            sender: Mutex::new(sender),
-            protocol: p,
-            expiration: Mutex::new(Cell::new(Instant::now() + d)),
-            token: token,
-        }
-    }
-}
-
-/// EventHandler implementation for TimerEntry.
-impl EventHandler for TimerEntry {
-
-    /// Event handler.
-    fn handle(&self, e: EventType) -> Result<(), CoreError> {
-        match e {
-            EventType::TimerEvent => {
-                let sender = self.sender.lock().unwrap();
-
-                if let Err(err) = sender.send(NexusToProto::TimerExpiration(self.token)) {
-                    error!("Sending message to protocol {:?} {:?}", self.token, err);
-                }
-            },
-            _ => {
-                error!("Unknown event");
-            }
-        }
-
-        Ok(())
-    }
-}
-
-/// TimerHandler implementation for TimerEntry.
-impl TimerHandler for TimerEntry {
-
-    /// Get expiration.
-    fn expiration(&self) -> Instant {
-        self.expiration.lock().unwrap().get()
-    }
-
-    /// Set expiration.
-    fn set_expiration(&self, d: Duration) {
-        self.expiration.lock().unwrap().set(Instant::now() + d);
-    }
 }
 
 /// RouterNexus implementation.
@@ -311,8 +250,8 @@ impl RouterNexus {
 /// NexusConfig
 pub struct NexusConfig {
 
-    /// ConfigMaster.
-    config: RefCell<ConfigMaster>,
+    /// MdsMaster.
+    config: RefCell<MdsMaster>,
 
     /// RouterNexus.
     nexus: RefCell<Arc<RouterNexus>>,
@@ -324,7 +263,7 @@ impl NexusConfig {
     /// Constructor.
     pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
         NexusConfig {
-            config: RefCell::new(ConfigMaster::new()),
+            config: RefCell::new(MdsMaster::new()),
             nexus: RefCell::new(nexus),
         }
     }
@@ -349,7 +288,6 @@ impl NexusConfig {
                         let nexus = self.nexus.borrow();
 
                         match nexus.get_sender(&p) {
-//                        match self.masters.borrow_mut().get(&p) {
                             Some(sender) => {
                                 let b = match body {
                                     Some(s) => Some(Box::new(s)),
@@ -437,6 +375,68 @@ impl UdsServerHandler for NexusConfig {
 
         debug!("handle_disconnect");
         Ok(())
+    }
+}
+
+
+/// Timer entry.
+pub struct TimerEntry
+where Self: Send,
+      Self: Sync
+{
+    pub sender: Mutex<mpsc::Sender<NexusToProto>>,
+    pub protocol: ProtocolType,
+    pub expiration: Mutex<Cell<Instant>>,
+    pub token: u32,
+}
+
+/// Timer entry implementation.
+impl TimerEntry {
+
+    /// Constructor.
+    pub fn new(p: ProtocolType, sender: mpsc::Sender<NexusToProto>, d: Duration, token: u32) -> TimerEntry {
+        TimerEntry {
+            sender: Mutex::new(sender),
+            protocol: p,
+            expiration: Mutex::new(Cell::new(Instant::now() + d)),
+            token: token,
+        }
+    }
+}
+
+/// EventHandler implementation for TimerEntry.
+impl EventHandler for TimerEntry {
+
+    /// Event handler.
+    fn handle(&self, e: EventType) -> Result<(), CoreError> {
+        match e {
+            EventType::TimerEvent => {
+                let sender = self.sender.lock().unwrap();
+
+                if let Err(err) = sender.send(NexusToProto::TimerExpiration(self.token)) {
+                    error!("Sending message to protocol {:?} {:?}", self.token, err);
+                }
+            },
+            _ => {
+                error!("Unknown event");
+            }
+        }
+
+        Ok(())
+    }
+}
+
+/// TimerHandler implementation for TimerEntry.
+impl TimerHandler for TimerEntry {
+
+    /// Get expiration.
+    fn expiration(&self) -> Instant {
+        self.expiration.lock().unwrap().get()
+    }
+
+    /// Set expiration.
+    fn set_expiration(&self, d: Duration) {
+        self.expiration.lock().unwrap().set(Instant::now() + d);
     }
 }
 

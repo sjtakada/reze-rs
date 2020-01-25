@@ -5,10 +5,10 @@
 // Core module.
 //
 pub mod signal;
-pub mod mds;
 pub mod nexus;
 pub mod master;
 pub mod protocols;
 pub mod message;
 pub mod timer;
-pub mod config_master;
+pub mod mds;
+pub mod mds_master;
