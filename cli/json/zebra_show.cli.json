@@ -28,9 +28,7 @@
             "remote": {
               "target": "exec",
               "method": "GET",
-              "path": "",
-              "params": {
-              }
+              "path": "show/ipv4_route"
             }
           }
         ]
@@ -1679,44 +1677,6 @@
     "command": [
       {
         "defun": "show ipv6 route summary",
-        "mode": [
-          "EXEC-MODE"
-        ],
-        "actions": [
-          {
-            "remote": {
-              "target": "exec",
-              "method": "NOP",
-              "path": "",
-              "params": {
-              }
-            }
-          }
-        ]
-      }
-    ]
-  },
-  "show-ipv6-mroute-cmd": {
-    "token": {
-      "show": {
-        "id": "1",
-        "type": "keyword",
-        "help": "Show running system information"
-      },
-      "ipv6": {
-        "id": "2",
-        "type": "keyword",
-        "help": "IP information"
-      },
-      "mroute": {
-        "id": "3",
-        "type": "keyword",
-        "help": "IPv6 Multicast routing table"
-      }
-    },
-    "command": [
-      {
-        "defun": "show ipv6 mroute",
         "mode": [
           "EXEC-MODE"
         ],

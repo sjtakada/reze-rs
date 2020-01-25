@@ -14,6 +14,26 @@ use common::uds_client::UdsClient;
 use super::master::CliMaster;
 use super::config::Config;
 
+/// Trait Remote Client.
+pub trait RemoteClient {
+
+    /// Return UDS client.
+    fn uds_client(&self) -> Arc<UdsClient>;
+
+    /// Return API prefix.
+    fn prefix(&self) -> &str;
+
+    /// Connect config server.
+    fn connect(&self) {
+        self.uds_client().connect();
+    }
+
+    /// Send message to config server.
+    fn stream_send(&self, message: &str) {
+        self.uds_client().stream_send(message);
+    }
+}
+
 /// Config client.
 pub struct ConfigClient {
 
@@ -60,20 +80,19 @@ impl ConfigClient {
             prefix: prefix
         }
     }
+}
+
+/// RemoteClient implementation for ConfigClient.
+impl RemoteClient for ConfigClient {
+
+    /// Return UDS client.
+    fn uds_client(&self) -> Arc<UdsClient> {
+        self.uds_client.clone()
+    }
 
     /// Return API prefix.
-    pub fn prefix(&self) -> &str {
+    fn prefix(&self) -> &str {
         &self.prefix
-    }
-
-    /// Connect config server.
-    pub fn connect(&self) {
-        self.uds_client.connect();
-    }
-
-    /// Send message to config server.
-    pub fn stream_send(&self, message: &str) {
-        self.uds_client.stream_send(message);
     }
 }
 
@@ -124,19 +143,18 @@ impl ExecClient {
             prefix: prefix
         }
     }
+}
+
+/// RemoteClient implementation for ExecClient.
+impl RemoteClient for ExecClient {
+
+    /// Return UDS client.
+    fn uds_client(&self) -> Arc<UdsClient> {
+        self.uds_client.clone()
+    }
 
     /// Return API prefix.
-    pub fn prefix(&self) -> &str {
+    fn prefix(&self) -> &str {
         &self.prefix
-    }
-
-    /// Connect config server.
-    pub fn connect(&self) {
-        self.uds_client.connect();
-    }
-
-    /// Send message to config server.
-    pub fn stream_send(&self, message: &str) {
-        self.uds_client.stream_send(message);
     }
 }

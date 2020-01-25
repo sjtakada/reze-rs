@@ -49,6 +49,7 @@ impl CliAction for CliActionMode {
 // Http action.
 pub struct CliActionRemote {
     method: String,
+    target: String,
     path: String,
     params: String,
 }
@@ -56,11 +57,13 @@ pub struct CliActionRemote {
 impl CliActionRemote {
     pub fn new(value: &serde_json::Value) -> CliActionRemote {
         let method = value["method"].as_str().unwrap_or("GET");
+        let target = value["target"].as_str().unwrap_or("config");
         let path = value["path"].as_str().unwrap_or("");
         let params = value["params"].to_string();
 
         CliActionRemote {
             method: String::from(method),
+            target: String::from(target),
             path: String::from(path),
             params: params,
         }
@@ -69,8 +72,12 @@ impl CliActionRemote {
 
 impl CliAction for CliActionRemote {
     fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
-        let config_client = cli.config_client();
-        let config_prefix = config_client.prefix();
+
+        let remote_client = match cli.remote_client(&self.target) {
+            Some(remote_client) => remote_client,
+            Noee => return Err(CliError::ActionError(format!("No remote defined for {:?}", self.target)))
+        };
+        let remote_prefix = remote_client.prefix();
 
         // Replace path with params.
         let path = self.path.split('/').map(|p| {
@@ -84,7 +91,7 @@ impl CliAction for CliActionRemote {
             }
         }).collect::<Vec<String>>().join("/");
 
-        let path = format!("{}/{}", config_prefix, path);
+        let path = format!("{}/{}", remote_prefix, path);
 
         // TODO: Maybe we could just check first letter of keyword instead of using Regex..
         let re = Regex::new(r"^:[A-Z]").unwrap();
@@ -106,8 +113,8 @@ impl CliAction for CliActionRemote {
             println!("{}{}", request, body);
         }
 
-        cli.config_send(&request);
-        cli.config_send(&body);
+        cli.remote_send(&self.target, &request);
+        cli.remote_send(&self.target, &body);
 
         Ok(())
     }

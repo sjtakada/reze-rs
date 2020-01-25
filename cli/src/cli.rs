@@ -5,9 +5,9 @@
 // CLI - Core Shell functions.
 //
 
+use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
-use std::fs;
 use std::collections::HashMap;
 use std::cell::Cell;
 use std::cell::RefCell;
@@ -49,8 +49,8 @@ pub struct Cli {
     /// Current privilege.
     privilege: Cell<u8>,
 
-    /// Config client.
-    config_client: Arc<ConfigClient>,
+    /// Remote clients.
+    remote_client: RefCell<HashMap<String, Arc<dyn RemoteClient>>>,
 
     /// Debug mode.
     debug: bool,
@@ -60,21 +60,29 @@ pub struct Cli {
 impl Cli {
 
     /// Constructor.
-    pub fn new(config_client: Arc<ConfigClient>) -> Cli {
+    pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
             builtins: HashMap::new(),
             mode: RefCell::new(String::new()),
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
-            config_client: config_client,
+            remote_client: RefCell::new(HashMap::new()),
             debug: false,
         }
     }
 
-    /// Return Config client.
-    pub fn config_client(&self) -> Arc<ConfigClient> {
-        self.config_client.clone()
+    /// Register remote client.
+    pub fn set_remote_client(&self, target: &str, client: Arc<dyn RemoteClient>) {
+        self.remote_client.borrow_mut().insert(target.to_string(), client);
+    }
+
+    /// Return remote client.
+    pub fn remote_client(&self, target: &str) -> Option<Arc<dyn RemoteClient>> {
+        match self.remote_client.borrow_mut().get(target) {
+            Some(client) => Some(client.clone()),
+            None => None
+        }
     }
 
     /// Entry point of shell initialization.
@@ -345,10 +353,16 @@ impl Cli {
         Ok(())
     }
 
-    /// Send message througm stream config server.
-    pub fn config_send(&self, message: &str) {
-        let config_client = self.config_client();
-        config_client.stream_send(message);
+    /// Send message througm stream remote server.
+    pub fn remote_send(&self, target: &str, message: &str) {
+        match self.remote_client.borrow_mut().get(target) {
+            Some(client) => {
+                client.stream_send(message);
+            },
+            None => {
+                println!("No such client for {:?}", target);
+            }
+        }
     }
 }
 

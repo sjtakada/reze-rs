@@ -52,13 +52,15 @@ impl CliMaster {
         let event_manager = master.event_manager();
 
         let config_client = Arc::new(ConfigClient::new(master.clone(), &config));
-        master.set_config_client(config_client.clone());
+//        master.set_config_client(config_client.clone());
 
         let (sender, receiver) = mpsc::channel::<bool>();
 
         // Run CLI parser in another thread.
         let handle = thread::spawn(move || {
-            let mut cli = Cli::new(config_client.clone());
+            let mut cli = Cli::new();
+            cli.set_remote_client("config", config_client.clone());
+
             match cli.start(config) {
                 Ok(_) => {},
                 Err(err) => panic!("CLI Init error: {}", err),
@@ -102,9 +104,9 @@ impl CliMaster {
     }
 
     /// Set config client.
-    pub fn set_config_client(&self, config_client: Arc<ConfigClient>) {
-        self.config_client.borrow_mut().replace(config_client);
-    }
+//    pub fn set_config_client(&self, config_client: Arc<ConfigClient>) {
+//        self.remote_client.borrow_mut().replace(config_client);
+//    }
 
     /// Return event manager.
     pub fn event_manager(&self) -> Arc<EventManager> {
