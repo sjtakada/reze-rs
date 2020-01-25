@@ -21,7 +21,7 @@ use log::{debug, error};
 use rtable::prefix::*;
 use common::error::*;
 
-use crate::core::config::*;
+use crate::core::mds::*;
 use super::master::ZebraMaster;
 use super::nexthop::*;
 
@@ -89,7 +89,7 @@ impl Ipv4StaticRoute {
     }
 }
 
-impl Config for Ipv4StaticRoute {
+impl MdsHandler for Ipv4StaticRoute {
     /// Return unique identifier, this is used to register to parent as a key.
     fn id(&self) -> &str {
         "route_ipv4"

@@ -107,7 +107,7 @@ fn start() {
     let event_manager = Arc::new(EventManager::new());
     let nexus = Arc::new(RouterNexus::new());
 
-    // Config init.
+    // NexusConfig init.
     let nexus_config = NexusConfig::new(nexus.clone());
     nexus_config.config_init();
 

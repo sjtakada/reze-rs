@@ -16,8 +16,9 @@
 
 use std::time::Duration;
 
+use common::method::Method;
+
 use crate::core::protocols::ProtocolType;
-use crate::core::config::Method;
 
 /// Message from Nexus to Protocol.
 pub enum NexusToProto {

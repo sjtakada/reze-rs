@@ -11,13 +11,14 @@ use std::collections::HashMap;
 use log::error;
 
 use common::error::*;
+use common::method::Method;
 
-use super::config::*;
+use super::mds::*;
 use super::protocols::ProtocolType;
 
 /// Config or Protocol
 pub enum ConfigOrProtocol {
-    Local(Rc<dyn Config>),
+    Local(Rc<dyn MdsHandler>),
     Proto(ProtocolType),
 }
 
@@ -89,7 +90,7 @@ impl ConfigMaster {
         self.map.insert(path.to_string(), ConfigOrProtocol::Proto(protocol_type));
     }
 
-    pub fn register_config(&mut self, path: &str, config: Rc<dyn Config>) {
+    pub fn register_config(&mut self, path: &str, config: Rc<dyn MdsHandler>) {
         self.map.insert(path.to_string(), ConfigOrProtocol::Local(config));
     }
 }
