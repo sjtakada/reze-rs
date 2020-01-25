@@ -383,8 +383,6 @@ mod tests {
 
     #[test]
     pub fn test_json_read() {
-        let uds_client = Arc::new(UdsClient::new());
-        let cli = Cli::new(uds_client);
         let pathbuf = PathBuf::from(TMP_FILE);
 
         // No file written yet.
@@ -417,8 +415,7 @@ mod tests {
 
     #[test]
     pub fn test_cli_modes() {
-        let uds_client = Arc::new(UdsClient::new());
-        let mut cli = Cli::new(uds_client);
+        let mut cli = Cli::new();
         let mode_json_str = r##"
 {
   "ENABLE-MODE": {
