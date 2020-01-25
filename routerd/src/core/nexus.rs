@@ -61,9 +61,6 @@ struct MasterTuple {
 /// Router Nexus.
 pub struct RouterNexus {
 
-    /// Global config.
-    config: RefCell<ConfigMaster>,
-
     /// MasterInner map.
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
@@ -72,70 +69,6 @@ pub struct RouterNexus {
 
     /// Sender channel for ProtoToZebra.
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
-}
-
-/// UdsServerHandler implementation for RouterNexus.
-impl UdsServerHandler for RouterNexus {
-
-    /// Process command.
-    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-        if let Some(command) = entry.stream_read() {
-            let mut lines = command.lines();
-
-            if let Some(req) = lines.next() {
-                let mut words = req.split_ascii_whitespace();
-
-                if let Some(method_str) = words.next() {
-                    if let Ok(method) = Method::from_str(method_str) {
-
-                        if let Some(path) = words.next() {
-                            let mut body: Option<String> = None;
-
-                            // Skip a blank line and get body if it is present.
-                            if let Some(_) = lines.next() {
-                                if let Some(b) =  lines.next() {
-                                    body = Some(b.to_string());
-                                }
-                            }
-
-                            debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
-
-                            // dispatch command.
-                            if let Some((_id, path)) = split_id_and_path(path) {
-                                self.dispatch_command(method, &path.unwrap(), body);
-                            }
-
-                            Ok(())
-                        } else {
-                            Err(CoreError::RequestInvalid(req.to_string()))
-                        }
-                    } else {
-                        Err(CoreError::RequestInvalid(req.to_string()))
-                    }
-                } else {
-                    Err(CoreError::RequestInvalid(req.to_string()))
-                }
-            } else {
-                Err(CoreError::RequestInvalid("(no request line)".to_string()))
-            }
-        } else {
-            Err(CoreError::RequestInvalid("(no message)".to_string()))
-        }
-    }
-
-    /// Handle connect placeholder.
-    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
-        debug!("handle_connect");
-        Ok(())
-    }
-
-    /// Handle disconnect placeholder.
-    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-        server.shutdown_entry(entry);
-
-        debug!("handle_disconnect");
-        Ok(())
-    }
 }
 
 /// Timer entry.
@@ -205,10 +138,17 @@ impl RouterNexus {
     /// Constructor.
     pub fn new() -> RouterNexus {
         RouterNexus {
-            config: RefCell::new(ConfigMaster::new()),
             masters: RefCell::new(HashMap::new()),
             sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
+        }
+    }
+
+    /// Return masters.
+    fn get_sender(&self, p: &ProtocolType) -> Option<mpsc::Sender<NexusToProto>> {
+        match self.masters.borrow().get(&p) {
+            Some(tuple) => Some(tuple.sender.clone()),
+            None => None,
         }
     }
 
@@ -216,7 +156,7 @@ impl RouterNexus {
     fn spawn_zebra(&self, sender_p2n: mpsc::Sender<ProtoToNexus>)
                    -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ProtoToZebra>) {
         // Clone global config.
-        let ref mut _config = *self.config.borrow_mut();
+        //let ref mut _config = *self.config.borrow_mut();
 
         // Create channel from RouterNexus to MasterInner
         let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
@@ -296,22 +236,11 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
-    /// Initialize config.
-    fn config_init(&self) {
-        self.config.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
-        self.config.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);
-
-        self.config.borrow_mut().register_protocol("ospf", ProtocolType::Ospf);
-    }
-
     /// Entry point to start RouterNexus.
     pub fn start(nexus: Arc<RouterNexus>, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
         nexus.sender_p2n.borrow_mut().replace(sender_p2n);
-
-        // Config init.
-        nexus.config_init();
 
         // Spawn zebra instance
         let (handle, sender, sender_p2z) = nexus.spawn_zebra(nexus.clone_sender_p2n());
@@ -376,6 +305,36 @@ impl RouterNexus {
             }
         }
     }
+}
+
+/// NexusConfig
+pub struct NexusConfig {
+
+    /// ConfigMaster.
+    config: RefCell<ConfigMaster>,
+
+    /// RouterNexus.
+    nexus: RefCell<Arc<RouterNexus>>,
+}
+
+/// NexusConfig implementation.
+impl NexusConfig {
+
+    /// Constructor.
+    pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
+        NexusConfig {
+            config: RefCell::new(ConfigMaster::new()),
+            nexus: RefCell::new(nexus),
+        }
+    }
+
+    /// Initialize config tree.
+    pub fn config_init(&self) {
+        self.config.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
+        self.config.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);
+
+        self.config.borrow_mut().register_protocol("ospf", ProtocolType::Ospf);
+    }
 
     /// Dispatch command request from Uds stream to protocol channel.
     fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) {
@@ -386,15 +345,18 @@ impl RouterNexus {
                             debug!("local config");
                     },
                     ConfigOrProtocol::Proto(p) => {
-                        match self.masters.borrow_mut().get(&p) {
-                            Some(tuple) => {
+                        let nexus = self.nexus.borrow();
+
+                        match nexus.get_sender(&p) {
+//                        match self.masters.borrow_mut().get(&p) {
+                            Some(sender) => {
                                 let b = match body {
                                     Some(s) => Some(Box::new(s)),
                                     None => None
                                 };
 
                                 // XXX
-                                match tuple.sender.send(NexusToProto::SendConfig((method, path.to_string(), b))) {
+                                match sender.send(NexusToProto::SendConfig((method, path.to_string(), b))) {
                                     Ok(_) => {},
                                     Err(_) => error!("sender error"),
                                 }
@@ -412,3 +374,68 @@ impl RouterNexus {
         }
     }
 }
+
+/// UdsServerHandler implementation for NexusConfig.
+impl UdsServerHandler for NexusConfig {
+
+    /// Process command.
+    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        if let Some(command) = entry.stream_read() {
+            let mut lines = command.lines();
+
+            if let Some(req) = lines.next() {
+                let mut words = req.split_ascii_whitespace();
+
+                if let Some(method_str) = words.next() {
+                    if let Ok(method) = Method::from_str(method_str) {
+
+                        if let Some(path) = words.next() {
+                            let mut body: Option<String> = None;
+
+                            // Skip a blank line and get body if it is present.
+                            if let Some(_) = lines.next() {
+                                if let Some(b) =  lines.next() {
+                                    body = Some(b.to_string());
+                                }
+                            }
+
+                            debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
+
+                            // dispatch command.
+                            if let Some((_id, path)) = split_id_and_path(path) {
+                                self.dispatch_command(method, &path.unwrap(), body);
+                            }
+
+                            Ok(())
+                        } else {
+                            Err(CoreError::RequestInvalid(req.to_string()))
+                        }
+                    } else {
+                        Err(CoreError::RequestInvalid(req.to_string()))
+                    }
+                } else {
+                    Err(CoreError::RequestInvalid(req.to_string()))
+                }
+            } else {
+                Err(CoreError::RequestInvalid("(no request line)".to_string()))
+            }
+        } else {
+            Err(CoreError::RequestInvalid("(no message)".to_string()))
+        }
+    }
+
+    /// Handle connect placeholder.
+    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+        debug!("handle_connect");
+        Ok(())
+    }
+
+    /// Handle disconnect placeholder.
+    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        server.shutdown_entry(entry);
+
+        debug!("handle_disconnect");
+        Ok(())
+    }
+}
+
