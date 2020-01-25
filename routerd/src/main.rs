@@ -98,6 +98,7 @@ fn main() {
 // Initialize objects and associate them.
 // TODO: probably take config or command line parameters.
 fn start() {
+
     // Create Unix Domain Socket to accept configuration.
     let mut config_uds_path = env::temp_dir();
     config_uds_path.push(ROUTERD_CONFIG_UDS_FILENAME);

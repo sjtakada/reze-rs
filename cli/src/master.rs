@@ -25,11 +25,6 @@ pub struct CliMaster {
 
     /// Event Manager.
     event_manager: RefCell<Arc<EventManager>>,
-
-    /// Config Client.
-    config_client: RefCell<Option<Arc<ConfigClient>>>,
-
-    // Exec Client.
 }
 
 /// CLI Master implementation.
@@ -39,7 +34,6 @@ impl CliMaster {
     pub fn new() -> CliMaster {
         CliMaster {
             event_manager: RefCell::new(Arc::new(EventManager::new())),
-            config_client: RefCell::new(None),
         }
     }
 
@@ -51,8 +45,9 @@ impl CliMaster {
         master.init_signals()?;
         let event_manager = master.event_manager();
 
+        // Initialize Remote clients in master context, so that they run on event manager.
         let config_client = Arc::new(ConfigClient::new(master.clone(), &config));
-//        master.set_config_client(config_client.clone());
+        let exec_client = Arc::new(ExecClient::new(master.clone(), &config));
 
         let (sender, receiver) = mpsc::channel::<bool>();
 
@@ -60,6 +55,7 @@ impl CliMaster {
         let handle = thread::spawn(move || {
             let mut cli = Cli::new();
             cli.set_remote_client("config", config_client.clone());
+            cli.set_remote_client("exec", exec_client.clone());
 
             match cli.start(config) {
                 Ok(_) => {},
@@ -102,11 +98,6 @@ impl CliMaster {
 
         Ok(())
     }
-
-    /// Set config client.
-//    pub fn set_config_client(&self, config_client: Arc<ConfigClient>) {
-//        self.remote_client.borrow_mut().replace(config_client);
-//    }
 
     /// Return event manager.
     pub fn event_manager(&self) -> Arc<EventManager> {

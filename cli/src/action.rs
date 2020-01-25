@@ -75,7 +75,7 @@ impl CliAction for CliActionRemote {
 
         let remote_client = match cli.remote_client(&self.target) {
             Some(remote_client) => remote_client,
-            Noee => return Err(CliError::ActionError(format!("No remote defined for {:?}", self.target)))
+            None => return Err(CliError::ActionError(format!("No remote defined for {:?}", self.target)))
         };
         let remote_prefix = remote_client.prefix();
 
