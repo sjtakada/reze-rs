@@ -99,8 +99,8 @@ impl ProtocolMaster {
                                 }
                             }
                         },
-                        NexusToProto::ConfigRequest((method, path, body)) => {
-                            debug!("Received ConfigRequest with command {} {} {:?}", method, path, body);
+                        NexusToProto::ConfigRequest((index, method, path, body)) => {
+                            debug!("Received ConfigRequest with command {} {} {} {:?}", index, method, path, body);
                         },
                         NexusToProto::ProtoTermination => {
                             debug!("Received ProtoTermination");

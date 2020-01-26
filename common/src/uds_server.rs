@@ -12,6 +12,7 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::net::Shutdown;
+use std::collections::HashMap;
 
 use log::{debug, error};
 use mio::Token;
@@ -40,6 +41,9 @@ unsafe impl Sync for UdsServerEntry {}
 /// Unix Domain Socket server entry, created per connect.
 pub struct UdsServerEntry {
 
+    /// Index.
+    index: u32,
+
     /// EventHandler token.
     token: Cell<Token>,
 
@@ -54,12 +58,18 @@ pub struct UdsServerEntry {
 impl UdsServerEntry {
 
     /// Constructor.
-    pub fn new(server: Arc<UdsServer>) -> UdsServerEntry {
+    pub fn new(server: Arc<UdsServer>, index: u32) -> UdsServerEntry {
         UdsServerEntry {
+            index: index,
             token: Cell::new(Token(0)),
             server: RefCell::new(server),
             stream: RefCell::new(None),
         }
+    }
+
+    /// Return index.
+    pub fn index(&self) -> u32 {
+        self.index
     }
 
     /// Read stream and return String - TBD.
@@ -88,15 +98,20 @@ impl UdsServerEntry {
     }
 
     /// Send String through stream.
-    pub fn stream_send(&self, message: &str) {
+    pub fn stream_send(&self, message: &str) -> Result<(), CoreError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-                let _ = stream.write_all(message.as_bytes());
+                if let Err(err) = stream.write_all(message.as_bytes()) {
+                    return Err(CoreError::UdsWriteError)
+                }
             },
             None => {
                 error!("No stream");
+                return Err(CoreError::UdsWriteError)
             }
         }
+
+        Ok(())
     }
 }
 
@@ -125,6 +140,8 @@ impl EventHandler for UdsServerEntry {
                 let server = self.server.borrow_mut();
                 let inner = server.get_inner();
                 let handler = inner.handler.borrow_mut();
+
+                inner.entries.borrow_mut().remove(&self.index);
 
                 // Dispatch message to Server message handler.
                 return handler.handle_disconnect(server.clone(), self);
@@ -162,11 +179,18 @@ pub struct UdsServerInner {
 
     /// mio UnixListener.
     listener: UnixListener,
+
+    /// Index for UdsServerEntry.
+    index: Cell<u32>,
+
+    /// Index to UdsServerEntry map.
+    entries: RefCell<HashMap<u32, Arc<UdsServerEntry>>>,
 }
 
 /// UdsServerInner implementation.
 impl UdsServerInner {
 
+    /// Constructor.
     pub fn new(server: Arc<UdsServer>, event_manager: Arc<EventManager>,
                handler: Arc<dyn UdsServerHandler>, path: &PathBuf) -> UdsServerInner {
         let listener = match UnixListener::bind(path) {
@@ -179,6 +203,16 @@ impl UdsServerInner {
             event_manager: RefCell::new(event_manager),
             handler: RefCell::new(handler),
             listener: listener,
+            index: Cell::new(0),
+            entries: RefCell::new(HashMap::new()),
+        }
+    }
+
+    /// Return UdsServerEntry by index.
+    pub fn lookup_entry(&self, index: u32) -> Option<Arc<UdsServerEntry>> {
+        match self.entries.borrow_mut().get(&index) {
+            Some(entry) => Some(entry.clone()),
+            None => None
         }
     }
 }
@@ -252,7 +286,10 @@ impl EventHandler for UdsServerInner {
                     Ok(Some((stream, _addr))) => {
                         debug!("Accept a UDS client");
 
-                        let entry = Arc::new(UdsServerEntry::new(server.clone()));
+                        let index = self.index.get();
+                        self.index.set(index + 1);
+
+                        let entry = Arc::new(UdsServerEntry::new(server.clone(), index));
                         let event_manager = self.event_manager.borrow();
 
                         if let Err(_) = self.handler.borrow_mut().handle_connect(server.clone(), &entry) {
@@ -261,6 +298,8 @@ impl EventHandler for UdsServerInner {
 
                         event_manager.register_read(&stream, entry.clone());
                         entry.stream.borrow_mut().replace(stream);
+
+                        self.entries.borrow_mut().insert(index, entry);
                     },
                     Ok(None) => debug!("OK, but None???"),
                     Err(err) => debug!("Accept failed: {:?}", err),

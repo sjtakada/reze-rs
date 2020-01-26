@@ -116,6 +116,9 @@ impl CliAction for CliActionRemote {
         cli.remote_send(&self.target, &request);
         cli.remote_send(&self.target, &body);
 
+        let s = cli.remote_recv(&self.target);
+        println!("*** {:?}", s);
+
         Ok(())
     }
 }

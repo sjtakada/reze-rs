@@ -65,7 +65,6 @@ impl MdsMaster {
                                 }
                             },
                             _ => {
-                                // some error
                                 error!("No local config to apply");
                                 Err(CoreError::ConfigNotFound("No local config".to_string()))
                             }

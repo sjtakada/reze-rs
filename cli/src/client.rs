@@ -32,6 +32,11 @@ pub trait RemoteClient {
     fn stream_send(&self, message: &str) {
         self.uds_client().stream_send(message);
     }
+
+    /// Recv message from config server.
+    fn stream_read(&self) -> Option<String> {
+        self.uds_client().stream_read()
+    }
 }
 
 /// Config client.

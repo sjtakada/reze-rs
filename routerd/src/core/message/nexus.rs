@@ -6,12 +6,12 @@
 // - Nexus to Protocol
 //   - Timer Expiration
 //   - Config Request
-//   - Show Command (sync)
+//   - Protocol Termination
+//
 // - Protocol to Nexus
 //   - Timer Registration
-//   - Config Registration
+//   - Config Response
 //   - Show Command output
-//   - Protocol Termination
 //
 
 use std::time::Duration;
@@ -28,11 +28,12 @@ pub enum NexusToProto {
     TimerExpiration(u32),
 
     /// Config Request
-    ///   Nexus sends configuration.
+    ///   Request to add/delete/update configuration to protocol.
+    ///     u32: Client id(inferred from UdsServerEntry.index)
     ///     Method: method
     ///     String: path
     ///     Value: JSON object in String
-    ConfigRequest((Method, String, Option<Box<String>>)),
+    ConfigRequest((u32, Method, String, Option<Box<String>>)),
 
     /// Notify protocol termination.
     ///   Nexus requests protocol to terminate.
@@ -44,8 +45,8 @@ impl Clone for NexusToProto {
         match self {
             NexusToProto::TimerExpiration(v) =>
                 NexusToProto::TimerExpiration(*v),
-            NexusToProto::ConfigRequest((m, s, opt)) =>
-                 NexusToProto::ConfigRequest((m.clone(), s.clone(), opt.clone())),
+            NexusToProto::ConfigRequest((i, m, s, opt)) =>
+                 NexusToProto::ConfigRequest((*i, m.clone(), s.clone(), opt.clone())),
             NexusToProto::ProtoTermination =>
                 NexusToProto::ProtoTermination
         }
@@ -60,6 +61,12 @@ pub enum ProtoToNexus {
     ///     Duration: Time to expire
     ///     u32: Token
     TimerRegistration((ProtocolType, Duration, u32)),
+
+    /// Config Response.
+    ///   Response for configuration being applied.
+    ///     u32: Client id
+    ///     String: OK or Error message.
+    ConfigResponse((u32, String)),
 
     /// Register config to nexus.
     ///   Protocol registers config path to Nexus

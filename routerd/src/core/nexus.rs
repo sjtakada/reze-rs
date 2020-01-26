@@ -70,6 +70,12 @@ pub struct RouterNexus {
 
     /// Sender channel for ProtoToZebra.
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
+
+    /// UdsServer for Config.
+    config_server: RefCell<Option<Arc<UdsServer>>>,
+
+    /// NexusExec.
+    exec_server: RefCell<Option<Arc<UdsServer>>>,
 }
 
 /// RouterNexus implementation.
@@ -81,6 +87,8 @@ impl RouterNexus {
             masters: RefCell::new(HashMap::new()),
             sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
+            config_server: RefCell::new(None),
+            exec_server: RefCell::new(None),
         }
     }
 
@@ -90,6 +98,16 @@ impl RouterNexus {
             Some(tuple) => Some(tuple.sender.clone()),
             None => None,
         }
+    }
+
+    /// Set UdsServer for Config.
+    pub fn set_config_server(&self, uds_server: Arc<UdsServer>) {
+        self.config_server.borrow_mut().replace(uds_server);
+    }
+
+    /// Set UdsServer for Exec.
+    pub fn set_exec_server(&self, uds_server: Arc<UdsServer>) {
+        self.exec_server.borrow_mut().replace(uds_server);
     }
 
     /// Construct MasterInner instance and spawn a thread.
@@ -160,7 +178,7 @@ impl RouterNexus {
         }
     }
 
-    /// Clone P2N sender mpsc.
+    /// Clone ProtoToNexus mpsc::Sender.
     fn clone_sender_p2n(&self) -> mpsc::Sender<ProtoToNexus> {
         if let Some(ref mut sender_p2n) = *self.sender_p2n.borrow_mut() {
             return mpsc::Sender::clone(&sender_p2n);
@@ -168,7 +186,7 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
-    /// Clone P2Z sender mpsc.
+    /// Clone ProtoToZebra mpsc::Sender.
     fn _clone_sender_p2z(&self) -> mpsc::Sender<ProtoToZebra> {
         if let Some(ref mut sender_p2z) = *self.sender_p2z.borrow_mut() {
             return mpsc::Sender::clone(&sender_p2z)
@@ -239,6 +257,21 @@ impl RouterNexus {
                         event_manager.register_timer(d, Arc::new(entry));
                     }
                 },
+                ProtoToNexus::ConfigResponse((index, resp)) => {
+                    if let Some(ref mut uds_server) = *self.config_server.borrow_mut() {
+                        let inner = uds_server.get_inner();
+                        match inner.lookup_entry(index) {
+                            Some(entry) => {
+                                if let Err(err) = entry.stream_send(&resp) {
+                                    error!("Send UdsServerEntry");
+                                }
+                            },
+                            None => {
+                                error!("No UdsServerEntry");
+                            }
+                        }
+                    }
+                },
                 ProtoToNexus::ProtoException(s) => {
                     debug!("Received Exception {}", s);
                 },
@@ -277,12 +310,15 @@ impl NexusConfig {
     }
 
     /// Dispatch command request from Uds stream to protocol channel.
-    fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
+    fn dispatch_command(&self, index: u32, method: Method,
+                        path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
         match self.config.borrow().lookup(path) {
             Some(config_or_protocol) => {
                 match config_or_protocol {
                     ConfigOrProtocol::Local(_config) => {
-                            debug!("local config");
+                        // TBD
+
+                        debug!("local config");
                     },
                     ConfigOrProtocol::Proto(p) => {
                         let nexus = self.nexus.borrow();
@@ -294,23 +330,22 @@ impl NexusConfig {
                                     None => None
                                 };
 
-                                // Send to eac protocol.
-                                match sender.send(NexusToProto::ConfigRequest((method, path.to_string(), b))) {
-                                    Ok(_) => {
-                                        
-                                    },
-                                    Err(_) => error!("sender error"),
+                                // Send request to protocol thread through channel.
+                                if let Err(err) = sender.send(NexusToProto::ConfigRequest((index, method, path.to_string(), b))) {
+                                    error!("Sender error: NexusToProto::ConfigRequest");
+                                    return Err(CoreError::NexusToProto)
                                 }
                             },
                             None => {
-                                panic!("Unexpected error");
+                                panic!("Sender channel doesn't exist for {:?}", p);
                             },
                         }
                     },
                 }
             },
             None => {
-                error!("No config exists")
+                error!("No config exists");
+                return Err(CoreError::ConfigNotFound(path.to_string()))
             }
         }
 
@@ -346,7 +381,7 @@ impl UdsServerHandler for NexusConfig {
 
                             // dispatch command.
                             if let Some((_id, path)) = split_id_and_path(path) {
-                                self.dispatch_command(method, &path.unwrap(), body);
+                                self.dispatch_command(entry.index(), method, &path.unwrap(), body);
                             }
 
                             Ok(())

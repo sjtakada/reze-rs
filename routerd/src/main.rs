@@ -108,10 +108,13 @@ fn start() {
     let nexus = Arc::new(RouterNexus::new());
 
     // NexusConfig init.
-    let nexus_config = NexusConfig::new(nexus.clone());
+    let nexus_config = Arc::new(NexusConfig::new(nexus.clone()));
     nexus_config.config_init();
 
-    let _uds_server = UdsServer::start(event_manager.clone(), Arc::new(nexus_config), &config_uds_path);
+    // NexusExec init.
+
+    let uds_server = UdsServer::start(event_manager.clone(), nexus_config, &config_uds_path);
+    nexus.set_config_server(uds_server);
 
     // Start nexus.
     match RouterNexus::start(nexus, event_manager) {

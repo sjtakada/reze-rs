@@ -244,7 +244,7 @@ impl ZebraMaster {
 
     /// Entry point of zebra master.
     pub fn start(&self,
-                 _sender_p2n: mpsc::Sender<ProtoToNexus>,
+                 sender_p2n: mpsc::Sender<ProtoToNexus>,
                  receiver_n2p: mpsc::Receiver<NexusToProto>,
                  receiver_p2z: mpsc::Receiver<ProtoToZebra>) {
         // Zebra main loop
@@ -280,12 +280,19 @@ impl ZebraMaster {
                     }
                          */
                     },
-                    NexusToProto::ConfigRequest((method, path, body)) => {
-                        debug!("Received ConfigRequest with command {} {} {:?}", method, path, body);
+                    NexusToProto::ConfigRequest((index, method, path, body)) => {
+                        debug!("Received ConfigRequest with command {} {} {} {:?}", index, method, path, body);
 
-                        match self.config.borrow_mut().apply(method, &path, body) {
-                            Ok(_) => { }
-                            Err(err) => error!("{}", err.to_string()),
+                        let resp = match self.config.borrow_mut().apply(method, &path, body) {
+                            Ok(_) => "OK".to_string(),
+                            Err(err) => {
+                                error!("Error applying ConfigRequest {}", err.to_string());
+                                format!("Error ConfigRequest")
+                            }
+                        };
+
+                        if let Err(err) = sender_p2n.send(ProtoToNexus::ConfigResponse((index, resp))) {
+                            error!("Sender error: ProtoToNexus::ConfigResponse");
                         }
                     },
                     NexusToProto::ProtoTermination => {

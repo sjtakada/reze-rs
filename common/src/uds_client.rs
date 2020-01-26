@@ -5,6 +5,7 @@
 // Unix Domain Socket Client.
 //
 
+use std::io::Read;
 use std::io::Write;
 use std::sync::Arc;
 use std::cell::Cell;
@@ -98,6 +99,11 @@ impl UdsClient {
     pub fn stream_send(&self, message: &str) {
         self.get_inner().stream_send(message);
     }
+
+    /// Receive message.
+    pub fn stream_read(&self) -> Option<String> {
+        self.get_inner().stream_read()
+    }
 }
 
 unsafe impl Send for UdsClientInner {}
@@ -171,6 +177,29 @@ impl UdsClientInner {
             },
             None => {
                 error!("No stream");
+            }
+        }
+    }
+
+    /// Receive message through UnixStream.
+    pub fn stream_read(&self) -> Option<String> {
+        match *self.stream.borrow_mut() {
+            Some(ref mut stream) => {
+                let mut buffer = String::new();
+
+                if let Err(err) = stream.read_to_string(&mut buffer) {
+                    if err.kind() != std::io::ErrorKind::WouldBlock {
+                        error!("Error: {}", err);
+                        return None
+                    }
+                }
+
+                let message = String::from(buffer.trim());
+                Some(message)
+            },
+            None => {
+                error!("No stream");
+                None
             }
         }
     }

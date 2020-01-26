@@ -22,6 +22,10 @@ quick_error! {
             description("UDS connect error")
             display(r#"UDS connect error"#)
         }
+        UdsWriteError {
+            description("UDS write error")
+            display(r#"UDS write error"#)
+        }
         RequestInvalid(s: String) {
             description("Command request is invalid")
             display(r#"Command request {} is invalid"#, s)
@@ -33,6 +37,10 @@ quick_error! {
         CommandExec(s: String) {
             description("Command execution error")
             display(r#"Command execution error {}"#, s)
+        }
+        NexusToProto {
+            description("Sending message from Nexus to Protocol")
+            display(r#"Sending message from Nexus to Protocol"#)
         }
         ParseMethod {
             description("Unknown Method")
