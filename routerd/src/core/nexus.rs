@@ -294,8 +294,8 @@ impl NexusConfig {
                                     None => None
                                 };
 
-                                // XXX
-                                match sender.send(NexusToProto::SendConfig((method, path.to_string(), b))) {
+                                // Send to eac protocol.
+                                match sender.send(NexusToProto::ConfigRequest((method, path.to_string(), b))) {
                                     Ok(_) => {
                                         
                                     },

@@ -5,7 +5,7 @@
 // Nexus Message
 // - Nexus to Protocol
 //   - Timer Expiration
-//   - Send Config
+//   - Config Request
 //   - Show Command (sync)
 // - Protocol to Nexus
 //   - Timer Registration
@@ -27,12 +27,12 @@ pub enum NexusToProto {
     ///     u32: Token
     TimerExpiration(u32),
 
-    /// Send configuration.
+    /// Config Request
     ///   Nexus sends configuration.
     ///     Method: method
     ///     String: path
     ///     Value: JSON object in String
-    SendConfig((Method, String, Option<Box<String>>)),
+    ConfigRequest((Method, String, Option<Box<String>>)),
 
     /// Notify protocol termination.
     ///   Nexus requests protocol to terminate.
@@ -44,8 +44,8 @@ impl Clone for NexusToProto {
         match self {
             NexusToProto::TimerExpiration(v) =>
                 NexusToProto::TimerExpiration(*v),
-            NexusToProto::SendConfig((m, s, opt)) =>
-                 NexusToProto::SendConfig((m.clone(), s.clone(), opt.clone())),
+            NexusToProto::ConfigRequest((m, s, opt)) =>
+                 NexusToProto::ConfigRequest((m.clone(), s.clone(), opt.clone())),
             NexusToProto::ProtoTermination =>
                 NexusToProto::ProtoTermination
         }

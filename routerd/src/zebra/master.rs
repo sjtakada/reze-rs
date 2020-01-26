@@ -280,8 +280,8 @@ impl ZebraMaster {
                     }
                          */
                     },
-                    NexusToProto::SendConfig((method, path, body)) => {
-                        debug!("Received SendConfig with command {} {} {:?}", method, path, body);
+                    NexusToProto::ConfigRequest((method, path, body)) => {
+                        debug!("Received ConfigRequest with command {} {} {:?}", method, path, body);
 
                         match self.config.borrow_mut().apply(method, &path, body) {
                             Ok(_) => { }
