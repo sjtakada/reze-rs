@@ -6,6 +6,7 @@
 //
 
 use std::io::Read;
+use std::io::Write;
 use std::sync::Arc;
 use std::cell::Cell;
 use std::cell::RefCell;
@@ -83,6 +84,18 @@ impl UdsServerEntry {
                 Some(command)
             },
             None => None
+        }
+    }
+
+    /// Send String through stream.
+    pub fn stream_send(&self, message: &str) {
+        match *self.stream.borrow_mut() {
+            Some(ref mut stream) => {
+                let _ = stream.write_all(message.as_bytes());
+            },
+            None => {
+                error!("No stream");
+            }
         }
     }
 }

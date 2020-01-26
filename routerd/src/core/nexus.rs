@@ -277,7 +277,7 @@ impl NexusConfig {
     }
 
     /// Dispatch command request from Uds stream to protocol channel.
-    fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) {
+    fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
         match self.config.borrow().lookup(path) {
             Some(config_or_protocol) => {
                 match config_or_protocol {
@@ -296,7 +296,9 @@ impl NexusConfig {
 
                                 // XXX
                                 match sender.send(NexusToProto::SendConfig((method, path.to_string(), b))) {
-                                    Ok(_) => {},
+                                    Ok(_) => {
+                                        
+                                    },
                                     Err(_) => error!("sender error"),
                                 }
                             },
@@ -311,6 +313,8 @@ impl NexusConfig {
                 error!("No config exists")
             }
         }
+
+        Ok(None)
     }
 }
 
@@ -377,6 +381,110 @@ impl UdsServerHandler for NexusConfig {
         Ok(())
     }
 }
+
+// NexusExec
+pub struct NexusExec {
+
+    /// MdsMaster.
+    exec: RefCell<MdsMaster>,
+
+    /// RouterNexus.
+    nexus: RefCell<Arc<RouterNexus>>,
+}
+
+/// NexusExec implementation.
+impl NexusExec {
+
+    /// Constructor.
+    pub fn new(nexus: Arc<RouterNexus>) -> NexusExec {
+        NexusExec {
+            exec: RefCell::new(MdsMaster::new()),
+            nexus: RefCell::new(nexus),
+        }
+    }
+
+    /// Initialize exec tree.
+    pub fn exec_init(&self) {
+        
+    }
+
+    /// Dispatch command request from Uds stream to protocol channel.
+    fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) -> Option<String> {
+        let s = String::new();
+
+        debug!("dispatch command");
+
+        Some(s)
+    }
+}
+
+/// UdsServerHandler implementation for NexusExec.
+impl UdsServerHandler for NexusExec {
+
+    /// Process command.
+    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        if let Some(command) = entry.stream_read() {
+            let mut lines = command.lines();
+
+            if let Some(req) = lines.next() {
+                let mut words = req.split_ascii_whitespace();
+
+                if let Some(method_str) = words.next() {
+                    if let Ok(method) = Method::from_str(method_str) {
+
+                        if let Some(path) = words.next() {
+                            let mut body: Option<String> = None;
+
+                            // Skip a blank line and get body if it is present.
+                            if let Some(_) = lines.next() {
+                                if let Some(b) =  lines.next() {
+                                    body = Some(b.to_string());
+                                }
+                            }
+
+                            debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
+
+                            // dispatch command.
+                            if let Some((_id, path)) = split_id_and_path(path) {
+                                let resp = self.dispatch_command(method, &path.unwrap(), body);
+
+//                                entry.stream_send(&resp);
+                            }
+
+                            Ok(())
+                        } else {
+                            Err(CoreError::RequestInvalid(req.to_string()))
+                        }
+                    } else {
+                        Err(CoreError::RequestInvalid(req.to_string()))
+                    }
+                } else {
+                    Err(CoreError::RequestInvalid(req.to_string()))
+                }
+            } else {
+                Err(CoreError::RequestInvalid("(no request line)".to_string()))
+            }
+        } else {
+            Err(CoreError::RequestInvalid("(no message)".to_string()))
+        }
+    }
+
+    /// Handle connect placeholder.
+    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+        debug!("handle_connect");
+        Ok(())
+    }
+
+    /// Handle disconnect placeholder.
+    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        server.shutdown_entry(entry);
+
+        debug!("handle_disconnect");
+        Ok(())
+    }
+}
+
+
 
 
 /// Timer entry.

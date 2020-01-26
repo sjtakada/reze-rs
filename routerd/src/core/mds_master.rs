@@ -25,7 +25,7 @@ pub enum ConfigOrProtocol {
 /// Config master
 pub struct MdsMaster {
 
-    /// Top level config storage.
+    /// Top level data store.
     map: HashMap<String, ConfigOrProtocol>,
 }
 
