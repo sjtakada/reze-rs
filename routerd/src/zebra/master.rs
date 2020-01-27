@@ -30,7 +30,6 @@ use super::address::*;
 use super::kernel::*;
 use super::static_route::*;
 use super::rib::*;
-//use super::nexthop::*;
 
 /// Store Zebra Client related information.
 struct ClientTuple {
@@ -42,8 +41,11 @@ struct ClientTuple {
 /// Zebra Master.
 pub struct ZebraMaster {
 
-    /// Reference config tree.
+    /// Config Tree.
     config: RefCell<MdsMaster>,
+
+    /// Exec Tree.
+    exec: RefCell<MdsMaster>,
 
     /// Kernel interface.
     kernel: RefCell<Kernel>,
@@ -80,6 +82,7 @@ impl ZebraMaster {
 
         ZebraMaster {
             config: RefCell::new(MdsMaster::new()),
+            exec: RefCell::new(MdsMaster::new()),
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
@@ -223,6 +226,7 @@ impl ZebraMaster {
     pub fn init(master: Rc<ZebraMaster>) {
         ZebraMaster::kernel_init(master.clone());
         ZebraMaster::config_init(master.clone());
+        ZebraMaster::exec_init(master.clone());
         ZebraMaster::rib_init(master.clone());
     }
 
@@ -236,6 +240,10 @@ impl ZebraMaster {
     fn config_init(master: Rc<ZebraMaster>) {
         let ipv4_routes = Ipv4StaticRoute::new(master.clone());
         master.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
+    }
+
+    /// Initialize exec.
+    fn exec_init(master: Rc<ZebraMaster>) {
     }
 
     /// Initialize RIB.

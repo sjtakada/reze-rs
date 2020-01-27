@@ -93,30 +93,3 @@ impl MdsMaster {
         self.map.insert(path.to_string(), ConfigOrProtocol::Local(config));
     }
 }
-
-/*
-impl MdsHandler for MdsMaster {
-    fn id(&self) -> &str {
-        "config"
-    }
-
-    fn protocol_type(&self) -> ProtocolType {
-        ProtocolType::Master
-    }
-
-    fn register_child(&mut self, config: Rc<dyn Config>) {
-        self.map.insert(String::from(config.id()), config.clone());
-    }
-
-    fn lookup_child(&self, path: &str) -> Option<Rc<dyn Config>> {
-        if let Some((id, path)) = split_id_and_path(path) {
-            match self.map.get(&id) {
-                Some(config) => Some(config.clone()),
-                None => None,
-            }
-        } else {
-            None
-        }
-    }
-}
-*/

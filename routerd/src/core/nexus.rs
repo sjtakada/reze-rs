@@ -442,7 +442,8 @@ impl NexusExec {
 
     /// Initialize exec tree.
     pub fn exec_init(&self) {
-        
+        self.exec.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
+        self.exec.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);
     }
 
     /// Dispatch command request from Uds stream to protocol channel.

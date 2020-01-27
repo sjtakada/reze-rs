@@ -28,7 +28,7 @@
             "remote": {
               "target": "exec",
               "method": "GET",
-              "path": "show/ipv4_route"
+              "path": "show/route_ipv4"
             }
           }
         ]
