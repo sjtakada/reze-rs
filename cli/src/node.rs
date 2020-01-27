@@ -983,7 +983,7 @@ impl CliNode for CliNodeLine {
     }
 
     fn capture(&self, input: &str, storage: &mut HashMap<String, Value>) {
-        println!("*** {}", input);
+//        println!("*** {}", input);
         storage.insert(String::from(self.inner().defun()), Value::String(input.to_string()));
     }
 

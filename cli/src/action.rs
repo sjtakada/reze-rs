@@ -117,7 +117,9 @@ impl CliAction for CliActionRemote {
         cli.remote_send(&self.target, &body);
 
         let s = cli.remote_recv(&self.target);
-        println!("*** {:?}", s);
+        if cli.is_debug() {
+            println!("Remote response: {:?}", s);
+        }
 
         Ok(())
     }

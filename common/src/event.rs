@@ -270,3 +270,17 @@ impl EventManager {
         Ok(())
     }
 }
+
+/// Utility to blocking until fd gets readable.
+pub fn wait_until_readable(fd: &dyn Evented) {
+    let poll = Poll::new().unwrap();
+    poll.register(fd, Token(0), Ready::readable(), PollOpt::edge()).unwrap();
+    let mut events = Events::with_capacity(1024);
+
+    loop {
+        match poll.poll(&mut events, Some(Duration::from_millis(10))) {
+            Ok(_) => break,
+            Err(_) => {},
+        }
+    }
+}

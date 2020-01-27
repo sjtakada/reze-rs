@@ -13,10 +13,12 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::time::Instant;
 use std::time::Duration;
+use std::thread;
 //use std::net::Shutdown;
 
 use log::{debug, error};
 use mio_uds::UnixStream;
+use mio::*;
 
 use super::error::*;
 use super::event::*;
@@ -102,7 +104,7 @@ impl UdsClient {
 
     /// Receive message.
     pub fn stream_read(&self) -> Option<String> {
-        self.get_inner().stream_read()
+        self.get_inner().stream_read_sync()
     }
 }
 
@@ -181,18 +183,16 @@ impl UdsClientInner {
         }
     }
 
-    /// Receive message through UnixStream.
-    pub fn stream_read(&self) -> Option<String> {
+    /// Receive message through UnixStream synchronously,
+    /// i.e., will block until it gets something.
+    pub fn stream_read_sync(&self) -> Option<String> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
                 let mut buffer = String::new();
 
-                if let Err(err) = stream.read_to_string(&mut buffer) {
-                    if err.kind() != std::io::ErrorKind::WouldBlock {
-                        error!("Error: {}", err);
-                        return None
-                    }
-                }
+                wait_until_readable(stream);
+
+                stream.read_to_string(&mut buffer);
 
                 let message = String::from(buffer.trim());
                 Some(message)
