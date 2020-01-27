@@ -262,7 +262,7 @@ impl RouterNexus {
                         let inner = uds_server.get_inner();
                         match inner.lookup_entry(index) {
                             Some(entry) => {
-                                if let Err(err) = entry.stream_send(&resp) {
+                                if let Err(_err) = entry.stream_send(&resp) {
                                     error!("Send UdsServerEntry");
                                 }
                             },
@@ -331,7 +331,7 @@ impl NexusConfig {
                                 };
 
                                 // Send request to protocol thread through channel.
-                                if let Err(err) = sender.send(NexusToProto::ConfigRequest((index, method, path.to_string(), b))) {
+                                if let Err(_err) = sender.send(NexusToProto::ConfigRequest((index, method, path.to_string(), b))) {
                                     error!("Sender error: NexusToProto::ConfigRequest");
                                     return Err(CoreError::NexusToProto)
                                 }
@@ -381,7 +381,9 @@ impl UdsServerHandler for NexusConfig {
 
                             // dispatch command.
                             if let Some((_id, path)) = split_id_and_path(path) {
-                                self.dispatch_command(entry.index(), method, &path.unwrap(), body);
+                                if let Err(_err) = self.dispatch_command(entry.index(), method, &path.unwrap(), body) {
+                                    return Err(CoreError::RequestInvalid(req.to_string()))
+                                }
                             }
 
                             Ok(())
@@ -444,12 +446,46 @@ impl NexusExec {
     }
 
     /// Dispatch command request from Uds stream to protocol channel.
-    fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) -> Option<String> {
-        let s = String::new();
+    fn dispatch_command(&self, index: u32, method: Method,
+                        path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
+        match self.exec.borrow().lookup(path) {
+            Some(config_or_protocol) => {
+                match config_or_protocol {
+                    ConfigOrProtocol::Local(_config) => {
+                        // TBD
 
-        debug!("dispatch command");
+                        debug!("local config");
+                    },
+                    ConfigOrProtocol::Proto(p) => {
+                        let nexus = self.nexus.borrow();
 
-        Some(s)
+                        match nexus.get_sender(&p) {
+                            Some(sender) => {
+                                let b = match body {
+                                    Some(s) => Some(Box::new(s)),
+                                    None => None
+                                };
+
+                                // Send request to protocol thread through channel.
+                                if let Err(_err) = sender.send(NexusToProto::ConfigRequest((index, method, path.to_string(), b))) {
+                                    error!("Sender error: NexusToProto::ConfigRequest");
+                                    return Err(CoreError::NexusToProto)
+                                }
+                            },
+                            None => {
+                                panic!("Sender channel doesn't exist for {:?}", p);
+                            },
+                        }
+                    },
+                }
+            },
+            None => {
+                error!("No config exists");
+                return Err(CoreError::ConfigNotFound(path.to_string()))
+            }
+        }
+
+        Ok(None)
     }
 }
 
@@ -481,9 +517,9 @@ impl UdsServerHandler for NexusExec {
 
                             // dispatch command.
                             if let Some((_id, path)) = split_id_and_path(path) {
-                                let resp = self.dispatch_command(method, &path.unwrap(), body);
-
-//                                entry.stream_send(&resp);
+                                if let Err(_err) = self.dispatch_command(entry.index(), method, &path.unwrap(), body) {
+                                    return Err(CoreError::RequestInvalid(req.to_string()))
+                                }
                             }
 
                             Ok(())

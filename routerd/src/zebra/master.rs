@@ -291,7 +291,7 @@ impl ZebraMaster {
                             }
                         };
 
-                        if let Err(err) = sender_p2n.send(ProtoToNexus::ConfigResponse((index, resp))) {
+                        if let Err(_err) = sender_p2n.send(ProtoToNexus::ConfigResponse((index, resp))) {
                             error!("Sender error: ProtoToNexus::ConfigResponse");
                         }
                     },

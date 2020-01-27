@@ -110,6 +110,7 @@ impl CliAction for CliActionRemote {
 
         // If only debug.
         if cli.is_debug() {
+            println!("% Request");
             println!("{}{}", request, body);
         }
 
@@ -118,7 +119,8 @@ impl CliAction for CliActionRemote {
 
         let s = cli.remote_recv(&self.target);
         if cli.is_debug() {
-            println!("Remote response: {:?}", s);
+            println!("% Response");
+            println!("{:?}", s);
         }
 
         Ok(())

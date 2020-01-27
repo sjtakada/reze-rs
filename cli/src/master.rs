@@ -128,8 +128,3 @@ impl UdsClientHandler for CliMaster {
         Ok(())
     }
 }
-
-/// UDS client connect timer.
-pub struct UdsClientTimer {
-
-}

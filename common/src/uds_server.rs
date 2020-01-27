@@ -101,7 +101,7 @@ impl UdsServerEntry {
     pub fn stream_send(&self, message: &str) -> Result<(), CoreError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-                if let Err(err) = stream.write_all(message.as_bytes()) {
+                if let Err(_err) = stream.write_all(message.as_bytes()) {
                     return Err(CoreError::UdsWriteError)
                 }
             },

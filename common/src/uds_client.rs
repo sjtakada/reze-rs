@@ -13,12 +13,10 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::time::Instant;
 use std::time::Duration;
-use std::thread;
 //use std::net::Shutdown;
 
 use log::{debug, error};
 use mio_uds::UnixStream;
-use mio::*;
 
 use super::error::*;
 use super::event::*;
@@ -192,7 +190,9 @@ impl UdsClientInner {
 
                 wait_until_readable(stream);
 
-                stream.read_to_string(&mut buffer);
+                if let Err(_err) = stream.read_to_string(&mut buffer) {
+                    // TBD, should return error.
+                }
 
                 let message = String::from(buffer.trim());
                 Some(message)
