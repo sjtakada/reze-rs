@@ -90,13 +90,15 @@ impl Ipv4StaticRoute {
 }
 
 impl MdsHandler for Ipv4StaticRoute {
-    /// Return unique identifier, this is used to register to parent as a key.
-    fn id(&self) -> &str {
-        "route_ipv4"
-    }
 
     /// Handle PUT method.
     fn handle_put(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+        let pat = "/config/route_ipv4";
+        if !path.starts_with(pat) {
+            return Err(CoreError::CommandExec(format!("Invalid path")));
+        }
+        let path = &path[pat.len()..];
+
         match params {
             Some(json_str) => {
                 debug!("Configuring an IPv4 static route");

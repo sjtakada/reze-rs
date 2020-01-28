@@ -24,6 +24,7 @@ use crate::core::message::nexus::NexusToProto;
 use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
 use crate::core::mds_master::*;
+use crate::core::mds::*;
 
 use super::link::*;
 use super::address::*;
@@ -44,8 +45,8 @@ pub struct ZebraMaster {
     /// Config Tree.
     config: RefCell<MdsMaster>,
 
-    /// Exec Tree.
-    exec: RefCell<MdsMaster>,
+    /// Mds Config.
+    mds_config: RefCell<Rc<MdsNode>>,
 
     /// Kernel interface.
     kernel: RefCell<Kernel>,
@@ -82,7 +83,8 @@ impl ZebraMaster {
 
         ZebraMaster {
             config: RefCell::new(MdsMaster::new()),
-            exec: RefCell::new(MdsMaster::new()),
+            mds_config: RefCell::new(Rc::new(MdsNode::new())),
+//            exec: RefCell::new(MdsMaster::new()),
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
@@ -238,8 +240,11 @@ impl ZebraMaster {
 
     /// Initiialize configuration.
     fn config_init(master: Rc<ZebraMaster>) {
-        let ipv4_routes = Ipv4StaticRoute::new(master.clone());
-        master.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
+        let ipv4_routes = Rc::new(Ipv4StaticRoute::new(master.clone()));
+//        master.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
+
+        let mds = master.mds_config.borrow().clone();
+        MdsNode::register_handler(mds.clone(), "/config/route_ipv4", ipv4_routes.clone());
     }
 
     /// Initialize exec.
@@ -291,6 +296,11 @@ impl ZebraMaster {
                     NexusToProto::ConfigRequest((index, method, path, body)) => {
                         debug!("Received ConfigRequest with command {} {} {} {:?}", index, method, path, body);
 
+                        let mds = self.mds_config.borrow().clone();
+                        let resp = MdsNode::handle(mds, index, method, &path, body);
+                        let resp = "OK".to_string();
+
+/*
                         let resp = match self.config.borrow_mut().apply(method, &path, body) {
                             Ok(_) => "OK".to_string(),
                             Err(err) => {
@@ -298,6 +308,7 @@ impl ZebraMaster {
                                 format!("Error ConfigRequest")
                             }
                         };
+*/
 
                         if let Err(_err) = sender_p2n.send(ProtoToNexus::ConfigResponse((index, resp))) {
                             error!("Sender error: ProtoToNexus::ConfigResponse");
