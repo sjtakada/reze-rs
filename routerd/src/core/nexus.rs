@@ -42,7 +42,6 @@ use super::message::zebra::ProtoToZebra;
 use super::message::zebra::ZebraToProto;
 use super::master::ProtocolMaster;
 use super::mds::*;
-use super::mds_master::*;
 
 use crate::zebra::master::ZebraMaster;
 use crate::bgp::master::BgpMaster;
@@ -330,9 +329,6 @@ impl MdsHandler for MdsProtocolHandler {
 /// NexusConfig
 pub struct NexusConfig {
 
-    /// MdsMaster.
-    config: RefCell<MdsMaster>,
-
     /// MdsNode root.
     mds: RefCell<Rc<MdsNode>>,
 
@@ -346,7 +342,6 @@ impl NexusConfig {
     /// Constructor.
     pub fn new(nexus: Arc<RouterNexus>, mds: Rc<MdsNode>) -> NexusConfig {
         NexusConfig {
-            config: RefCell::new(MdsMaster::new()),
             mds: RefCell::new(mds),
             nexus: RefCell::new(nexus),
         }
@@ -354,8 +349,6 @@ impl NexusConfig {
 
     /// Initialize config tree.
     pub fn config_init(&self) {
-        self.config.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
-        self.config.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);
 
 //        self.config.borrow_mut().register_protocol("ospf", ProtocolType::Ospf);
     }
@@ -374,51 +367,6 @@ impl NexusConfig {
 
         Ok(None)
     }
-
-    /*
-    /// Dispatch command request from Uds stream to protocol channel.
-    fn dispatch_command(&self, index: u32, method: Method,
-                        path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
-        match self.config.borrow().lookup(path) {
-            Some(config_or_protocol) => {
-                match config_or_protocol {
-                    ConfigOrProtocol::Local(_config) => {
-                        // TBD
-
-                        debug!("local config");
-                    },
-                    ConfigOrProtocol::Proto(p) => {
-                        let nexus = self.nexus.borrow();
-
-                        match nexus.get_sender(&p) {
-                            Some(sender) => {
-                                let b = match body {
-                                    Some(s) => Some(Box::new(s)),
-                                    None => None
-                                };
-
-                                // Send request to protocol thread through channel.
-                                if let Err(_err) = sender.send(NexusToProto::ConfigRequest((index, method, path.to_string(), b))) {
-                                    error!("Sender error: NexusToProto::ConfigRequest");
-                                    return Err(CoreError::NexusToProto)
-                                }
-                            },
-                            None => {
-                                panic!("Sender channel doesn't exist for {:?}", p);
-                            },
-                        }
-                    },
-                }
-            },
-            None => {
-                error!("No config exists");
-                return Err(CoreError::ConfigNotFound(path.to_string()))
-            }
-        }
-
-        Ok(None)
-    }
-    */
 }
 
 /// UdsServerHandler implementation for NexusConfig.

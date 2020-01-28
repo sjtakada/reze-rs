@@ -23,7 +23,6 @@ use crate::core::message::nexus::ProtoToNexus;
 use crate::core::message::nexus::NexusToProto;
 use crate::core::message::zebra::ProtoToZebra;
 use crate::core::message::zebra::ZebraToProto;
-use crate::core::mds_master::*;
 use crate::core::mds::*;
 
 use super::link::*;
@@ -41,9 +40,6 @@ struct ClientTuple {
 
 /// Zebra Master.
 pub struct ZebraMaster {
-
-    /// Config Tree.
-    config: RefCell<MdsMaster>,
 
     /// Mds Config.
     mds_config: RefCell<Rc<MdsNode>>,
@@ -82,9 +78,7 @@ impl ZebraMaster {
         };
 
         ZebraMaster {
-            config: RefCell::new(MdsMaster::new()),
             mds_config: RefCell::new(Rc::new(MdsNode::new())),
-//            exec: RefCell::new(MdsMaster::new()),
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
