@@ -92,7 +92,7 @@ impl Ipv4StaticRoute {
 impl MdsHandler for Ipv4StaticRoute {
 
     /// Handle PUT method.
-    fn handle_put(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_put(&self, path: &str, params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         // TBD: XXXX
         let pat = "/config/route_ipv4";
         if !path.starts_with(pat) {
@@ -132,11 +132,11 @@ impl MdsHandler for Ipv4StaticRoute {
             },
         }
 
-        Ok(())
+        Ok(None)
     }
 
     /// Handle DELETE method.
-    fn handle_delete(&self, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_delete(&self, path: &str, params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         match params {
             Some(json_str) => {
                 debug!("Unconfiguring an IPv4 static route");
@@ -170,7 +170,7 @@ impl MdsHandler for Ipv4StaticRoute {
             },
         }
 
-        Ok(())
+        Ok(None)
     }
 }
 

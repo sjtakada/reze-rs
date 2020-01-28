@@ -100,13 +100,14 @@ impl MdsNode {
     }
 
     /// Handle request.
-    pub fn handle(curr: Rc<MdsNode>, id: u32, method: Method, path: &str, body: Option<Box<String>>) -> Result<(), CoreError> {
+    pub fn handle(curr: Rc<MdsNode>, id: u32, method: Method,
+                  path: &str, body: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         if let Some(handler) = MdsNode::lookup_handler(curr, path) {
             if handler.is_generic() {
                 if let Err(err) = handler.handle_generic(id, method, path, body) {
                     Err(err)
                 } else {
-                    Ok(())
+                    Ok(None)
                 }
             } else {
                 match method {
@@ -134,36 +135,36 @@ pub trait MdsHandler {
     }
 
     /// Handle method generic.
-    fn handle_generic(&self, _id: u32, _method: Method, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_generic(&self, _id: u32, _method: Method, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         Err(CoreError::NotImplemented)
     }
 
     /// Handle GET method.
-    fn handle_get(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_get(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         debug!("Method not implemented");
         Err(CoreError::NotImplemented)
     }
 
     /// Handle POST method.
-    fn handle_post(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_post(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         debug!("Method not implemented");
         Err(CoreError::NotImplemented)
     }
 
     /// Handle PUT method.
-    fn handle_put(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_put(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         debug!("Method not implemented");
         Err(CoreError::NotImplemented)
     }
 
     /// Handle DELETE method.
-    fn handle_delete(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_delete(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         debug!("Method not implemented");
         Err(CoreError::NotImplemented)
     }
 
     /// Handle PATCH method.
-    fn handle_patch(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_patch(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         debug!("Method not implemented");
         Err(CoreError::NotImplemented)
     }

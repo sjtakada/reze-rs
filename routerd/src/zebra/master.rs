@@ -41,8 +41,8 @@ struct ClientTuple {
 /// Zebra Master.
 pub struct ZebraMaster {
 
-    /// Mds Config.
-    mds_config: RefCell<Rc<MdsNode>>,
+    /// Mds Config and Exec.
+    mds: RefCell<Rc<MdsNode>>,
 
     /// Kernel interface.
     kernel: RefCell<Kernel>,
@@ -57,10 +57,10 @@ pub struct ZebraMaster {
     _name2ifindex: HashMap<String, i32>,
 
     /// IPv4 RIB.
-    rib_ipv4: RefCell<RibTable<Ipv4Addr>>,
+    rib_ipv4: RefCell<Rc<RibTable<Ipv4Addr>>>,
 
     /// IPv6 RIB.
-    _rib_ipv6: RefCell<RibTable<Ipv6Addr>>,
+    _rib_ipv6: RefCell<Rc<RibTable<Ipv6Addr>>>,
 }
 
 /// Zebra Master implementation.
@@ -78,13 +78,13 @@ impl ZebraMaster {
         };
 
         ZebraMaster {
-            mds_config: RefCell::new(Rc::new(MdsNode::new())),
+            mds: RefCell::new(Rc::new(MdsNode::new())),
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
             _name2ifindex: HashMap::new(),
-            rib_ipv4: RefCell::new(RibTable::<Ipv4Addr>::new()),
-            _rib_ipv6: RefCell::new(RibTable::<Ipv6Addr>::new()),
+            rib_ipv4: RefCell::new(Rc::new(RibTable::<Ipv4Addr>::new())),
+            _rib_ipv6: RefCell::new(Rc::new(RibTable::<Ipv6Addr>::new())),
         }
     }
 
@@ -153,22 +153,25 @@ impl ZebraMaster {
         let prefix = sr.prefix().clone();
         let mut map = Rib::<Ipv4Addr>::from_static_route(sr);
 
-        for (_, rib) in map.drain() {
-            self.rib_ipv4.borrow_mut().add(&prefix, rib);
+        let mut rib_ipv4 = self.rib_ipv4.borrow_mut();
+        if let Some(rib_ipv4) = Rc::get_mut(&mut rib_ipv4) {
+            for (_, rib) in map.drain() {
+                rib_ipv4.add(&prefix, rib);
+            }
+
+            rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
+                if let Some(ref mut fib) = *entry.fib() {
+                    self.rib_uninstall_kernel(prefix, &fib);
+                }
+
+                if let Some(selected) = entry.select() {
+                    self.rib_install_kernel(prefix, &selected);
+                    Some(selected)
+                } else {
+                    None
+                }
+            });
         }
-
-        self.rib_ipv4.borrow_mut().process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
-            if let Some(ref mut fib) = *entry.fib() {
-                self.rib_uninstall_kernel(prefix, &fib);
-            }
-
-            if let Some(selected) = entry.select() {
-                self.rib_install_kernel(prefix, &selected);
-                Some(selected)
-            } else {
-                None
-            }
-        });
     }
 
     /// Delete RIB for IPv4 static route.
@@ -178,22 +181,25 @@ impl ZebraMaster {
         let prefix = sr.prefix().clone();
         let mut map = Rib::<Ipv4Addr>::from_static_route(sr);
 
-        for (_, rib) in map.drain() {
-            self.rib_ipv4.borrow_mut().delete(&prefix, rib);
+        let mut rib_ipv4 = self.rib_ipv4.borrow_mut();
+        if let Some(rib_ipv4) = Rc::get_mut(&mut rib_ipv4) {
+            for (_, rib) in map.drain() {
+                rib_ipv4.delete(&prefix, rib);
+            }
+
+            rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
+                if let Some(ref mut fib) = *entry.fib() {
+                    self.rib_uninstall_kernel(prefix, &fib);
+                }
+
+                if let Some(selected) = entry.select() {
+                    self.rib_install_kernel(prefix, &selected);
+                    Some(selected)
+                } else {
+                    None
+                }
+            });
         }
-
-        self.rib_ipv4.borrow_mut().process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
-            if let Some(ref mut fib) = *entry.fib() {
-                self.rib_uninstall_kernel(prefix, &fib);
-            }
-
-            if let Some(selected) = entry.select() {
-                self.rib_install_kernel(prefix, &selected);
-                Some(selected)
-            } else {
-                None
-            }
-        });
     }
 
     /// Install a route for given RIB to kernel.
@@ -234,18 +240,23 @@ impl ZebraMaster {
 
     /// Initiialize configuration.
     fn config_init(master: Rc<ZebraMaster>) {
+        let mds = master.mds.borrow().clone();
         let ipv4_routes = Rc::new(Ipv4StaticRoute::new(master.clone()));
 
-        let mds = master.mds_config.borrow().clone();
         MdsNode::register_handler(mds.clone(), "/config/route_ipv4", ipv4_routes.clone());
     }
 
     /// Initialize exec.
-    fn exec_init(_master: Rc<ZebraMaster>) {
+    fn exec_init(master: Rc<ZebraMaster>) {
+        let mds = master.mds.borrow().clone();
+        let rib_ipv4 = master.rib_ipv4.borrow();
+
+        MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", rib_ipv4.clone());
     }
 
     /// Initialize RIB.
     fn rib_init(_master: Rc<ZebraMaster>) {
+
     }
 
     /// Entry point of zebra master.
@@ -289,19 +300,9 @@ impl ZebraMaster {
                     NexusToProto::ConfigRequest((index, method, path, body)) => {
                         debug!("Received ConfigRequest with command {} {} {} {:?}", index, method, path, body);
 
-                        let mds = self.mds_config.borrow().clone();
+                        let mds = self.mds.borrow().clone();
                         let _resp = MdsNode::handle(mds, index, method, &path, body);
                         let resp = "OK".to_string();
-
-/*
-                        let resp = match self.config.borrow_mut().apply(method, &path, body) {
-                            Ok(_) => "OK".to_string(),
-                            Err(err) => {
-                                error!("Error applying ConfigRequest {}", err.to_string());
-                                format!("Error ConfigRequest")
-                            }
-                        };
-*/
 
                         if let Err(_err) = sender_p2n.send(ProtoToNexus::ConfigResponse((index, resp))) {
                             error!("Sender error: ProtoToNexus::ConfigResponse");

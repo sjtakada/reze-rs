@@ -305,7 +305,7 @@ impl MdsProtocolHandler {
 impl MdsHandler for MdsProtocolHandler {
 
     /// Handle method generic.
-    fn handle_generic(&self, id: u32, method: Method, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_generic(&self, id: u32, method: Method, path: &str, params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         let nexus = self.nexus.borrow();
 
         match nexus.get_sender(&self.proto) {
@@ -313,7 +313,7 @@ impl MdsHandler for MdsProtocolHandler {
                 if let Err(_) = sender.send(NexusToProto::ConfigRequest((id, method, path.to_string(), params))) {
                     Err(CoreError::ChannelSendError(format!("{} {}", method, path)))
                 } else {
-                    Ok(())
+                    Ok(None)
                 }
             }
             None => {
@@ -357,7 +357,7 @@ impl NexusConfig {
 
     /// Dispatch request to MDS tree.
     fn handle_request(&self, id: u32, method: Method,
-                      path: &str, body: Option<String>) -> Result<(), CoreError> {
+                      path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
 
         let body = match body {
             Some(s) => Some(Box::new(s)),
@@ -383,6 +383,7 @@ impl UdsServerHandler for NexusConfig {
                     if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
                         Err(err)
                     } else {
+                        // Even if we get some response from handler, we don't send it right away.
                         Ok(())
                     }
                 },
@@ -437,7 +438,7 @@ impl NexusExec {
 
     /// Dispatch request to MDS tree.
     fn handle_request(&self, id: u32, method: Method,
-                      path: &str, body: Option<String>) -> Result<(), CoreError> {
+                      path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
 
         let body = match body {
             Some(s) => Some(Box::new(s)),

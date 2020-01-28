@@ -133,6 +133,9 @@ fn start() {
     if let Err(_) = fs::remove_file(config_uds_path) {
         // Nothing we can do?
     }
+    if let Err(_) = fs::remove_file(exec_uds_path) {
+        // Nothing we can do?
+    }
 
     ()
 }

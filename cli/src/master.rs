@@ -110,14 +110,14 @@ impl UdsClientHandler for CliMaster {
 
     /// callback when client connects to server.
     fn handle_connect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient) -> Result<(), CoreError> {
-        println!("Server conncted.");
+        println!("% Server connected.");
 
         Ok(())
     }
 
     /// callback when client detects server disconnected.
     fn handle_disconnect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient) -> Result<(), CoreError> {
-        println!("Server disconncted.");
+        println!("% Server disconncted.");
         // Should restart reconnect timer.
 
         Ok(())

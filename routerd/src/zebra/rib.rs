@@ -14,14 +14,18 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::collections::HashMap;
 use std::collections::BTreeMap;
+use std::net::Ipv4Addr;
 
 use log::debug;
 
 use rtable::prefix::*;
 use rtable::tree::*;
 
+use common::error::*;
+
 use super::nexthop::*;
 use super::static_route::*;
+use super::super::core::mds::*;
 
 /// RIB type.
 #[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
@@ -320,6 +324,15 @@ where T: Addressable
     }
 }
 
+/// MdsHandler implementation for RibTable<Ipv4Addr>
+impl MdsHandler for RibTable<Ipv4Addr> {
+
+    /// Handle GET method.
+    fn handle_get(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
+        debug!("*** handle get rib table");
+        Err(CoreError::NotImplemented)
+    }
+}
 
 ///
 /// Unit tests for RIB.
