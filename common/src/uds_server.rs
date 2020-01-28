@@ -101,9 +101,15 @@ impl UdsServerEntry {
     pub fn stream_send(&self, message: &str) -> Result<(), CoreError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-                if let Err(_err) = stream.write_all(message.as_bytes()) {
-                    return Err(CoreError::UdsWriteError)
+println!("*** uds server entry stream send {:?}", message);
+                if let Ok(bytes) = stream.write(message.as_bytes()) {
+                    stream.flush();
+println!("*** uds server entry stream send success {:?}", bytes);
+
                 }
+//                if let Err(_err) = stream.write_all(message.as_bytes()) {
+//                    return Err(CoreError::UdsWriteError)
+//                }
             },
             None => {
                 error!("No stream");

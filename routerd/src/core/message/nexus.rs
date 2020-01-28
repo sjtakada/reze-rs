@@ -6,12 +6,13 @@
 // - Nexus to Protocol
 //   - Timer Expiration
 //   - Config Request
+//   - Exec Reqeust
 //   - Protocol Termination
 //
 // - Protocol to Nexus
 //   - Timer Registration
 //   - Config Response
-//   - Show Command output
+//   - Exec Response
 //
 
 use std::time::Duration;
@@ -35,6 +36,14 @@ pub enum NexusToProto {
     ///     Value: JSON object in String
     ConfigRequest((u32, Method, String, Option<Box<String>>)),
 
+    /// Exec Request
+    ///   Request to execute control command
+    ///     u32: Client id(inferred from UdsServerEntry.index)
+    ///     Method: method
+    ///     String: path
+    ///     Value: JSON object in String
+    ExecRequest((u32, Method, String, Option<Box<String>>)),
+
     /// Notify protocol termination.
     ///   Nexus requests protocol to terminate.
     ProtoTermination,
@@ -47,6 +56,8 @@ impl Clone for NexusToProto {
                 NexusToProto::TimerExpiration(*v),
             NexusToProto::ConfigRequest((i, m, s, opt)) =>
                  NexusToProto::ConfigRequest((*i, m.clone(), s.clone(), opt.clone())),
+            NexusToProto::ExecRequest((i, m, s, opt)) =>
+                 NexusToProto::ExecRequest((*i, m.clone(), s.clone(), opt.clone())),
             NexusToProto::ProtoTermination =>
                 NexusToProto::ProtoTermination
         }
@@ -65,8 +76,14 @@ pub enum ProtoToNexus {
     /// Config Response.
     ///   Response for configuration being applied.
     ///     u32: Client id
-    ///     String: OK or Error message.
-    ConfigResponse((u32, String)),
+    ///     String: JSON format.
+    ConfigResponse((u32, Option<Box<String>>)),
+
+    /// Exec Response.
+    ///   Response for control command output.
+    ///     u32: Client id
+    ///     String: JSON format.
+    ExecResponse((u32, Option<Box<String>>)),
 
     /// Register config to nexus.
     ///   Protocol registers config path to Nexus
@@ -75,9 +92,6 @@ pub enum ProtoToNexus {
     ///     String: path
     ///     bool: whether or not sends current configs in bulk.
     // ConfigRegistration((ProtocolType, String, bool)),
-
-    /// Request configuration.
-    //ConfigReqeust(String),
 
     /// Notify protocol exception to Nexus.
     /// ???

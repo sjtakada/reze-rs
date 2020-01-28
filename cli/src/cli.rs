@@ -365,7 +365,7 @@ impl Cli {
         }
     }
 
-    /// Receive message through stream tremote server.
+    /// Receive message through stream remote server.
     pub fn remote_recv(&self, target: &str) -> Option<String> {
         match self.remote_client.borrow_mut().get(target) {
             Some(client) => {

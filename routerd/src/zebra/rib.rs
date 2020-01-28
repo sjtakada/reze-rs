@@ -330,7 +330,7 @@ impl MdsHandler for RibTable<Ipv4Addr> {
     /// Handle GET method.
     fn handle_get(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         debug!("*** handle get rib table");
-        Err(CoreError::NotImplemented)
+        Ok(Some(format!("RIB output\n")))
     }
 }
 

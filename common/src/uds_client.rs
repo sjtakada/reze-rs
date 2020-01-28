@@ -186,16 +186,23 @@ impl UdsClientInner {
     pub fn stream_read_sync(&self) -> Option<String> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-                let mut buffer = String::new();
+//                let mut buffer = String::new();
+                let mut buf: [u8; 128] = [0; 128];
 
                 wait_until_readable(stream);
 
-                if let Err(_err) = stream.read_to_string(&mut buffer) {
+                match stream.read(&mut buf) {
+                    Ok(bytes) => println!("*** read bytes {:?}", bytes),
+                    Err(err) => println!("*** read err {:?}", err),
+//                if let Err(_err) = stream.read_to_string(&mut buffer) {
                     // TBD, should return error.
                 }
 
-                let message = String::from(buffer.trim());
-                Some(message)
+                let message = std::str::from_utf8(&buf).unwrap();
+//                let message = String::from(buffer.trim());
+                println!("*** recv from uds client stream {:?}", message);
+
+                Some(message.to_string())
             },
             None => {
                 error!("No stream");

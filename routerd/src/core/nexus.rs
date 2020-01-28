@@ -261,6 +261,35 @@ impl RouterNexus {
                         let inner = uds_server.get_inner();
                         match inner.lookup_entry(index) {
                             Some(entry) => {
+                                let resp = match resp {
+                                    Some(s) => *s,
+                                    None => "".to_string(),
+                                };
+
+                                println!("*** in nexus resp from proto {:?}", resp);
+
+                                if let Err(_err) = entry.stream_send(&resp) {
+                                    error!("Send UdsServerEntry");
+                                }
+                            },
+                            None => {
+                                error!("No UdsServerEntry");
+                            }
+                        }
+                    }
+                },
+                ProtoToNexus::ExecResponse((index, resp)) => {
+                    if let Some(ref mut uds_server) = *self.exec_server.borrow_mut() {
+                        let inner = uds_server.get_inner();
+                        match inner.lookup_entry(index) {
+                            Some(entry) => {
+                                let resp = match resp {
+                                    Some(s) => *s,
+                                    None => "".to_string(),
+                                };
+
+                                println!("*** in nexus resp from proto {:?}", resp);
+
                                 if let Err(_err) = entry.stream_send(&resp) {
                                     error!("Send UdsServerEntry");
                                 }
@@ -299,13 +328,25 @@ impl MdsProtocolHandler {
             nexus: RefCell::new(nexus),
         }
     }
+
+/*
+    /// Static config request encoder.
+    fn config_request_encoder(id: u32, method: Method,
+                              path: &str, body: Option<Box<String>>) -> NexusToProto {
+        NexusToProto::ConfigRequest((id, method, path.to_string(), body))
+    }
+
+//    /// Static exec request encoder.
+*/
 }
+
 
 /// MdsHandler implementation for MdsProtocolHandler.
 impl MdsHandler for MdsProtocolHandler {
 
     /// Handle method generic.
-    fn handle_generic(&self, id: u32, method: Method, path: &str, params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
+    fn handle_generic(&self, id: u32, method: Method,
+                      path: &str, params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         let nexus = self.nexus.borrow();
 
         match nexus.get_sender(&self.proto) {

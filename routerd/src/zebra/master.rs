@@ -301,10 +301,35 @@ impl ZebraMaster {
                         debug!("Received ConfigRequest with command {} {} {} {:?}", index, method, path, body);
 
                         let mds = self.mds.borrow().clone();
-                        let _resp = MdsNode::handle(mds, index, method, &path, body);
-                        let resp = "OK".to_string();
+                        let resp = match MdsNode::handle(mds, index, method, &path, body) {
+                            Ok(s) => {
+                                match s {
+                                    Some(s) => Some(Box::new(s)),
+                                    None => None,
+                                }
+                            },
+                            Err(err) => Some(Box::new(err.to_string())),
+                        };
 
                         if let Err(_err) = sender_p2n.send(ProtoToNexus::ConfigResponse((index, resp))) {
+                            error!("Sender error: ProtoToNexus::ConfigResponse");
+                        }
+                    },
+                    NexusToProto::ExecRequest((index, method, path, body)) => {
+                        debug!("Received ExecRequest with command {} {} {} {:?}", index, method, path, body);
+
+                        let mds = self.mds.borrow().clone();
+                        let resp = match MdsNode::handle(mds, index, method, &path, body) {
+                            Ok(s) => {
+                                match s {
+                                    Some(s) => Some(Box::new(s)),
+                                    None => None,
+                                }
+                            },
+                            Err(err) => Some(Box::new(err.to_string())),
+                        };
+
+                        if let Err(_err) = sender_p2n.send(ProtoToNexus::ExecResponse((index, resp))) {
                             error!("Sender error: ProtoToNexus::ConfigResponse");
                         }
                     },

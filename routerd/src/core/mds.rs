@@ -104,11 +104,7 @@ impl MdsNode {
                   path: &str, body: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         if let Some(handler) = MdsNode::lookup_handler(curr, path) {
             if handler.is_generic() {
-                if let Err(err) = handler.handle_generic(id, method, path, body) {
-                    Err(err)
-                } else {
-                    Ok(None)
-                }
+                handler.handle_generic(id, method, path, body)
             } else {
                 match method {
                     Method::Get => handler.handle_get(&path, body),
