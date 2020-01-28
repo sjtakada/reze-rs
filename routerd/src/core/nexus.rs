@@ -409,12 +409,11 @@ impl UdsServerHandler for NexusConfig {
     }
 }
 
-/*
-// NexusExec
+/// NexusExec.
 pub struct NexusExec {
 
-    /// MdsMaster.
-    exec: RefCell<MdsMaster>,
+    /// MdsNode root.
+    mds: RefCell<Rc<MdsNode>>,
 
     /// RouterNexus.
     nexus: RefCell<Arc<RouterNexus>>,
@@ -424,60 +423,31 @@ pub struct NexusExec {
 impl NexusExec {
 
     /// Constructor.
-    pub fn new(nexus: Arc<RouterNexus>) -> NexusExec {
-        NexusExec {
-            exec: RefCell::new(MdsMaster::new()),
+    pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
+        let mds = Rc::new(MdsNode::new());
+
+        let zebra_handler = Rc::new(MdsProtocolHandler::new(ProtocolType::Zebra, nexus.clone()));
+        MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", zebra_handler.clone());
+        MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv6", zebra_handler.clone());
+
+        NexusConfig {
+            mds: RefCell::new(mds),
             nexus: RefCell::new(nexus),
         }
     }
 
-    /// Initialize exec tree.
-    pub fn exec_init(&self) {
-        self.exec.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
-        self.exec.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);
-    }
+    /// Dispatch request to MDS tree.
+    fn handle_request(&self, id: u32, method: Method,
+                      path: &str, body: Option<String>) -> Result<(), CoreError> {
 
-    /// Dispatch command request from Uds stream to protocol channel.
-    fn dispatch_command(&self, index: u32, method: Method,
-                        path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
-        match self.exec.borrow().lookup(path) {
-            Some(config_or_protocol) => {
-                match config_or_protocol {
-                    ConfigOrProtocol::Local(_config) => {
-                        // TBD
+        let body = match body {
+            Some(s) => Some(Box::new(s)),
+            None => None
+        };
 
-                        debug!("local config");
-                    },
-                    ConfigOrProtocol::Proto(p) => {
-                        let nexus = self.nexus.borrow();
+        let mds_root = self.mds.borrow().clone();
 
-                        match nexus.get_sender(&p) {
-                            Some(sender) => {
-                                let b = match body {
-                                    Some(s) => Some(Box::new(s)),
-                                    None => None
-                                };
-
-                                // Send request to protocol thread through channel.
-                                if let Err(_err) = sender.send(NexusToProto::ConfigRequest((index, method, path.to_string(), b))) {
-                                    error!("Sender error: NexusToProto::ConfigRequest");
-                                    return Err(CoreError::NexusToProto)
-                                }
-                            },
-                            None => {
-                                panic!("Sender channel doesn't exist for {:?}", p);
-                            },
-                        }
-                    },
-                }
-            },
-            None => {
-                error!("No config exists");
-                return Err(CoreError::ConfigNotFound(path.to_string()))
-            }
-        }
-
-        Ok(None)
+        MdsNode::handle(mds_root, id, method, path, body)
     }
 }
 
@@ -486,46 +456,18 @@ impl UdsServerHandler for NexusExec {
 
     /// Process command.
     fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-        if let Some(command) = entry.stream_read() {
-            let mut lines = command.lines();
+        if let Some(request) = entry.stream_read() {
+            match request_parse(request) {
+                Ok((method, path, body)) => {
+                    debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
 
-            if let Some(req) = lines.next() {
-                let mut words = req.split_ascii_whitespace();
-
-                if let Some(method_str) = words.next() {
-                    if let Ok(method) = Method::from_str(method_str) {
-
-                        if let Some(path) = words.next() {
-                            let mut body: Option<String> = None;
-
-                            // Skip a blank line and get body if it is present.
-                            if let Some(_) = lines.next() {
-                                if let Some(b) =  lines.next() {
-                                    body = Some(b.to_string());
-                                }
-                            }
-
-                            debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
-
-                            // dispatch command.
-                            if let Some((_id, path)) = split_id_and_path(path) {
-                                if let Err(_err) = self.dispatch_command(entry.index(), method, &path.unwrap(), body) {
-                                    return Err(CoreError::RequestInvalid(req.to_string()))
-                                }
-                            }
-
-                            Ok(())
-                        } else {
-                            Err(CoreError::RequestInvalid(req.to_string()))
-                        }
+                    if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                        Err(err)
                     } else {
-                        Err(CoreError::RequestInvalid(req.to_string()))
+                        Ok(())
                     }
-                } else {
-                    Err(CoreError::RequestInvalid(req.to_string()))
-                }
-            } else {
-                Err(CoreError::RequestInvalid("(no request line)".to_string()))
+                },
+                Err(err) => Err(err),
             }
         } else {
             Err(CoreError::RequestInvalid("(no message)".to_string()))
@@ -546,8 +488,6 @@ impl UdsServerHandler for NexusExec {
         Ok(())
     }
 }
-
-*/
 
 
 /// Timer entry.
