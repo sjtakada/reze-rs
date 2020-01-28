@@ -310,14 +310,16 @@ impl MdsHandler for MdsProtocolHandler {
 
         match nexus.get_sender(&self.proto) {
             Some(sender) => {
-                sender.send(NexusToProto::ConfigRequest((id, method, path.to_string(), params)));
+                if let Err(_) = sender.send(NexusToProto::ConfigRequest((id, method, path.to_string(), params))) {
+                    Err(CoreError::ChannelSendError(format!("{} {}", method, path)))
+                } else {
+                    Ok(())
+                }
             }
             None => {
-
+                Err(CoreError::ChannelNoSender)
             }
         }
-
-        Ok(())
     }
 
     /// Return handle_generic implmented.
@@ -340,22 +342,22 @@ pub struct NexusConfig {
 impl NexusConfig {
 
     /// Constructor.
-    pub fn new(nexus: Arc<RouterNexus>, mds: Rc<MdsNode>) -> NexusConfig {
+    pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
+        let mds = Rc::new(MdsNode::new());
+
+        let zebra_handler = Rc::new(MdsProtocolHandler::new(ProtocolType::Zebra, nexus.clone()));
+        MdsNode::register_handler(mds.clone(), "/config/route_ipv4", zebra_handler.clone());
+        MdsNode::register_handler(mds.clone(), "/config/route_ipv6", zebra_handler.clone());
+
         NexusConfig {
             mds: RefCell::new(mds),
             nexus: RefCell::new(nexus),
         }
     }
 
-    /// Initialize config tree.
-    pub fn config_init(&self) {
-
-//        self.config.borrow_mut().register_protocol("ospf", ProtocolType::Ospf);
-    }
-
-    /// Dispatch command request from Uds stream to protocol channel.
-    fn dispatch_command(&self, id: u32, method: Method,
-                        path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
+    /// Dispatch request to MDS tree.
+    fn handle_request(&self, id: u32, method: Method,
+                      path: &str, body: Option<String>) -> Result<(), CoreError> {
 
         let body = match body {
             Some(s) => Some(Box::new(s)),
@@ -363,55 +365,62 @@ impl NexusConfig {
         };
 
         let mds_root = self.mds.borrow().clone();
-        MdsNode::handle(mds_root, id, method, path, body);
 
-        Ok(None)
+        MdsNode::handle(mds_root, id, method, path, body)
+    }
+}
+
+pub fn request_parse(request: String) -> Result<(Method, String, Option<String>), CoreError> {
+    let mut lines = request.lines();
+
+    if let Some(req) = lines.next() {
+        let mut words = req.split_ascii_whitespace();
+
+        if let Some(method_str) = words.next() {
+            if let Ok(method) = Method::from_str(method_str) {
+
+                if let Some(path) = words.next() {
+                    let mut body: Option<String> = None;
+
+                    // Skip a blank line and get body if it is present.
+                    if let Some(_) = lines.next() {
+                        if let Some(b) =  lines.next() {
+                            body = Some(b.to_string());
+                        }
+                    }
+
+                    debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
+
+                    Ok((method, path.to_string(), body))
+                } else {
+                    Err(CoreError::RequestInvalid(req.to_string()))
+                }
+            } else {
+                Err(CoreError::RequestInvalid(req.to_string()))
+            }
+        } else {
+            Err(CoreError::RequestInvalid(req.to_string()))
+        }
+    } else {
+        Err(CoreError::RequestInvalid("(no request line)".to_string()))
     }
 }
 
 /// UdsServerHandler implementation for NexusConfig.
 impl UdsServerHandler for NexusConfig {
 
-    /// Process command.
+    /// Process request.
     fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-        if let Some(command) = entry.stream_read() {
-            let mut lines = command.lines();
-
-            if let Some(req) = lines.next() {
-                let mut words = req.split_ascii_whitespace();
-
-                if let Some(method_str) = words.next() {
-                    if let Ok(method) = Method::from_str(method_str) {
-
-                        if let Some(path) = words.next() {
-                            let mut body: Option<String> = None;
-
-                            // Skip a blank line and get body if it is present.
-                            if let Some(_) = lines.next() {
-                                if let Some(b) =  lines.next() {
-                                    body = Some(b.to_string());
-                                }
-                            }
-
-                            debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
-
-                            // dispatch command.
-                            if let Err(_err) = self.dispatch_command(entry.index(), method, &path, body) {
-                                return Err(CoreError::RequestInvalid(req.to_string()))
-                            }
-
-                            Ok(())
-                        } else {
-                            Err(CoreError::RequestInvalid(req.to_string()))
-                        }
+        if let Some(request) = entry.stream_read() {
+            match request_parse(request) {
+                Ok((method, path, body)) => {
+                    if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                        Err(err)
                     } else {
-                        Err(CoreError::RequestInvalid(req.to_string()))
+                        Ok(())
                     }
-                } else {
-                    Err(CoreError::RequestInvalid(req.to_string()))
-                }
-            } else {
-                Err(CoreError::RequestInvalid("(no request line)".to_string()))
+                },
+                Err(err) => Err(err),
             }
         } else {
             Err(CoreError::RequestInvalid("(no message)".to_string()))

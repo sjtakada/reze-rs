@@ -26,6 +26,14 @@ quick_error! {
             description("UDS write error")
             display(r#"UDS write error"#)
         }
+        ChannelSendError(s: String) {
+            description("Channel send error")
+            display(r#"Channel write error {}"#, s)
+        }
+        ChannelNoSender {
+            description("Channel sender does not exist")
+            display(r#"Channel sender does not exist"#)
+        }
         RequestInvalid(s: String) {
             description("Command request is invalid")
             display(r#"Command request {} is invalid"#, s)

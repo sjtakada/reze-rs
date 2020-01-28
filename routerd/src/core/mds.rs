@@ -128,18 +128,13 @@ impl MdsNode {
 ///  Dispatch REST style request to handler.
 pub trait MdsHandler {
 
-    /// Return unique identifier, this is used to register to parent as a key.
-    fn id(&self) -> &str {
-        "placeholder"
-    }
-
     /// Return handle_generic implmented.
     fn is_generic(&self) -> bool {
         false
     }
 
     /// Handle method generic.
-    fn handle_generic(&self, id: u32, method: Method, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+    fn handle_generic(&self, _id: u32, _method: Method, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         Err(CoreError::NotImplemented)
     }
 
@@ -244,8 +239,8 @@ mod tests {
         }
 
         match MdsNode::lookup_handler(root.clone(), "/show/ipv6/route/summary") {
-            Some(_) => assert!(false),
-            None => {}
+            Some(_) => {}
+            None => assert!(false),
         }
     }
 }

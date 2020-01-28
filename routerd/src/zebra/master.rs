@@ -235,7 +235,6 @@ impl ZebraMaster {
     /// Initiialize configuration.
     fn config_init(master: Rc<ZebraMaster>) {
         let ipv4_routes = Rc::new(Ipv4StaticRoute::new(master.clone()));
-//        master.config.borrow_mut().register_config("route_ipv4", Rc::new(ipv4_routes));
 
         let mds = master.mds_config.borrow().clone();
         MdsNode::register_handler(mds.clone(), "/config/route_ipv4", ipv4_routes.clone());

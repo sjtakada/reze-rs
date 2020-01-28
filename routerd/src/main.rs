@@ -4,7 +4,6 @@
 //
 
 use std::env;
-use std::rc::Rc;
 use std::sync::Arc;
 use std::fs;
 
@@ -20,8 +19,6 @@ use common::uds_server::*;
 
 use routerd::core::signal::*;
 use routerd::core::nexus::*;
-use routerd::core::mds::*;
-use routerd::core::protocols::ProtocolType;
 
 const ROUTERD_VERSION: &str = "0.1.0";
 
@@ -110,20 +107,12 @@ fn start() {
     let event_manager = Arc::new(EventManager::new());
     let nexus = Arc::new(RouterNexus::new());
 
-    // MdsHandlers.
-    let zebra_handler = Rc::new(MdsProtocolHandler::new(ProtocolType::Zebra, nexus.clone()));
-
-    let mds = Rc::new(MdsNode::new());
-    MdsNode::register_handler(mds.clone(), "/config/route_ipv4", zebra_handler.clone());
-
     // NexusConfig init.
-    let nexus_config = Arc::new(NexusConfig::new(nexus.clone(), mds));
-    nexus_config.config_init();
-
-    // NexusExec init.
-
+    let nexus_config = Arc::new(NexusConfig::new(nexus.clone()));
     let uds_server = UdsServer::start(event_manager.clone(), nexus_config, &config_uds_path);
     nexus.set_config_server(uds_server);
+
+    // NexusExec init.
 
     // Start nexus.
     match RouterNexus::start(nexus, event_manager) {
