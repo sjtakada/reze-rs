@@ -280,11 +280,61 @@ impl RouterNexus {
     }
 }
 
+/// Dispatch request to protocol.
+pub struct MdsProtocolHandler {
+
+    /// Protocol Type.
+    proto: ProtocolType,
+
+    /// Nexus.
+    nexus: RefCell<Arc<RouterNexus>>,
+}
+
+/// MdsProtocolHandler implementation.
+impl MdsProtocolHandler {
+
+    /// Constructor.
+    pub fn new(proto: ProtocolType, nexus: Arc<RouterNexus>) -> MdsProtocolHandler {
+        MdsProtocolHandler {
+            proto: proto,
+            nexus: RefCell::new(nexus),
+        }
+    }
+}
+
+/// MdsHandler implementation for MdsProtocolHandler.
+impl MdsHandler for MdsProtocolHandler {
+
+    /// Handle method generic.
+    fn handle_generic(&self, id: u32, method: Method, path: &str, params: Option<Box<String>>) -> Result<(), CoreError> {
+        let nexus = self.nexus.borrow();
+
+        match nexus.get_sender(&self.proto) {
+            Some(sender) => {
+                sender.send(NexusToProto::ConfigRequest((id, method, path.to_string(), params)));
+            }
+            None => {
+
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Return handle_generic implmented.
+    fn is_generic(&self) -> bool {
+        true
+    }
+}
+
 /// NexusConfig
 pub struct NexusConfig {
 
     /// MdsMaster.
     config: RefCell<MdsMaster>,
+
+    /// MdsNode root.
+    mds: RefCell<Rc<MdsNode>>,
 
     /// RouterNexus.
     nexus: RefCell<Arc<RouterNexus>>,
@@ -294,9 +344,10 @@ pub struct NexusConfig {
 impl NexusConfig {
 
     /// Constructor.
-    pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
+    pub fn new(nexus: Arc<RouterNexus>, mds: Rc<MdsNode>) -> NexusConfig {
         NexusConfig {
             config: RefCell::new(MdsMaster::new()),
+            mds: RefCell::new(mds),
             nexus: RefCell::new(nexus),
         }
     }
@@ -306,9 +357,25 @@ impl NexusConfig {
         self.config.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
         self.config.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);
 
-        self.config.borrow_mut().register_protocol("ospf", ProtocolType::Ospf);
+//        self.config.borrow_mut().register_protocol("ospf", ProtocolType::Ospf);
     }
 
+    /// Dispatch command request from Uds stream to protocol channel.
+    fn dispatch_command(&self, id: u32, method: Method,
+                        path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
+
+        let body = match body {
+            Some(s) => Some(Box::new(s)),
+            None => None
+        };
+
+        let mds_root = self.mds.borrow().clone();
+        MdsNode::handle(mds_root, id, method, path, body);
+
+        Ok(None)
+    }
+
+    /*
     /// Dispatch command request from Uds stream to protocol channel.
     fn dispatch_command(&self, index: u32, method: Method,
                         path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
@@ -351,6 +418,7 @@ impl NexusConfig {
 
         Ok(None)
     }
+    */
 }
 
 /// UdsServerHandler implementation for NexusConfig.
@@ -380,10 +448,8 @@ impl UdsServerHandler for NexusConfig {
                             debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
 
                             // dispatch command.
-                            if let Some((_id, path)) = split_id_and_path(path) {
-                                if let Err(_err) = self.dispatch_command(entry.index(), method, &path.unwrap(), body) {
-                                    return Err(CoreError::RequestInvalid(req.to_string()))
-                                }
+                            if let Err(_err) = self.dispatch_command(entry.index(), method, &path, body) {
+                                return Err(CoreError::RequestInvalid(req.to_string()))
                             }
 
                             Ok(())
@@ -419,6 +485,7 @@ impl UdsServerHandler for NexusConfig {
     }
 }
 
+/*
 // NexusExec
 pub struct NexusExec {
 
@@ -556,7 +623,7 @@ impl UdsServerHandler for NexusExec {
     }
 }
 
-
+*/
 
 
 /// Timer entry.

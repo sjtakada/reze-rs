@@ -30,6 +30,14 @@ quick_error! {
             description("Command request is invalid")
             display(r#"Command request {} is invalid"#, s)
         }
+        MdsNoHandler {
+            description("Mds handler does not exist")
+            display(r#"Mds handler does not exist"#)
+        }
+        NotImplemented {
+            description("Trait function not implemented")
+            display(r#"Trait function not implemented"#)
+        }
         ConfigNotFound(s: String) {
             description("The command could not be found")
             display(r#"The command "{}" could not be found"#, s)

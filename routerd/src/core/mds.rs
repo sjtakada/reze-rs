@@ -13,6 +13,7 @@ use log::debug;
 use regex::Regex;
 
 use common::error::*;
+use common::method::Method;
 
 /// Management Data Store node.
 ///  Store leaf node and handler.
@@ -39,6 +40,11 @@ impl MdsNode {
     /// Set handler to this node.
     pub fn set_handler(&self, handler: Rc<dyn MdsHandler>) {
         self.handler.borrow_mut().replace(handler);
+    }
+
+    /// Return true if the node has child.
+    pub fn has_child(&self) -> bool {
+        self.children.borrow().len() > 0
     }
 
     /// Return direct child node with given name.
@@ -81,11 +87,38 @@ impl MdsNode {
                 Some(child) => child,
                 None => return None,
             };
+
+            if !curr.has_child() {
+                break;
+            }
         }
 
         match *curr.handler.borrow_mut() {
             Some(ref mut handler) => Some(handler.clone()),
             None => None,
+        }
+    }
+
+    /// Handle request.
+    pub fn handle(curr: Rc<MdsNode>, id: u32, method: Method, path: &str, body: Option<Box<String>>) -> Result<(), CoreError> {
+        if let Some(handler) = MdsNode::lookup_handler(curr, path) {
+            if handler.is_generic() {
+                if let Err(err) = handler.handle_generic(id, method, path, body) {
+                    Err(err)
+                } else {
+                    Ok(())
+                }
+            } else {
+                match method {
+                    Method::Get => handler.handle_get(&path, body),
+                    Method::Post => handler.handle_post(&path, body),
+                    Method::Put => handler.handle_put(&path, body),
+                    Method::Delete => handler.handle_delete(&path, body),
+                    Method::Patch => handler.handle_patch(&path, body),
+                }
+            }
+        } else {
+            Err(CoreError::MdsNoHandler)
         }
     }
 }
@@ -100,34 +133,44 @@ pub trait MdsHandler {
         "placeholder"
     }
 
+    /// Return handle_generic implmented.
+    fn is_generic(&self) -> bool {
+        false
+    }
+
+    /// Handle method generic.
+    fn handle_generic(&self, id: u32, method: Method, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
+        Err(CoreError::NotImplemented)
+    }
+
     /// Handle GET method.
     fn handle_get(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
-        Ok(())
+        Err(CoreError::NotImplemented)
     }
 
     /// Handle POST method.
     fn handle_post(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
-        Ok(())
+        Err(CoreError::NotImplemented)
     }
 
     /// Handle PUT method.
     fn handle_put(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
-        Ok(())
+        Err(CoreError::NotImplemented)
     }
 
     /// Handle DELETE method.
     fn handle_delete(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
-        Ok(())
+        Err(CoreError::NotImplemented)
     }
 
     /// Handle PATCH method.
     fn handle_patch(&self, _path: &str, _params: Option<Box<String>>) -> Result<(), CoreError> {
         debug!("Method not implemented");
-        Ok(())
+        Err(CoreError::NotImplemented)
     }
 }
 
