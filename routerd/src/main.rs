@@ -99,7 +99,7 @@ fn main() {
 // TODO: probably take config or command line parameters.
 fn start() {
 
-    // Prepare some objects.
+    // Event Manager and Nexus.
     let event_manager = Arc::new(EventManager::new());
     let nexus = Arc::new(RouterNexus::new());
 
@@ -131,7 +131,7 @@ fn start() {
 
     // Cleanup.
     if let Err(_) = fs::remove_file(config_uds_path) {
-
+        // Nothing we can do?
     }
 
     ()

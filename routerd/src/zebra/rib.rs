@@ -348,13 +348,13 @@ mod tests {
 
         table.add(&p, rib1);
         let entry = table.lookup_exact(&p).unwrap();
-        if let Some(ref mut fib) = *entry.clone().fib() {
+        if let Some(ref mut _fib) = *entry.clone().fib() {
             assert!(false);
         }
 
         {
             table.process(&p, |_, _| { entry.select() });
-            let mut fib = entry.fib();
+            let fib = entry.fib();
             assert_eq!(fib.is_some(), true);
             assert_eq!((*fib).as_ref().unwrap().rib_type(), RibType::Static);
         }
@@ -362,7 +362,7 @@ mod tests {
         {
             table.add(&p, rib2);
             table.process(&p, |_, _| { entry.select() });
-            let mut fib = entry.fib();
+            let fib = entry.fib();
             assert_eq!(fib.is_some(), true);
             assert_eq!((*fib).as_ref().unwrap().rib_type(), RibType::Static);
         }
@@ -370,7 +370,7 @@ mod tests {
         {
             table.add(&p, rib3);
             table.process(&p, |_, _| { entry.select() });
-            let mut fib = entry.fib();
+            let fib = entry.fib();
             assert_eq!(fib.is_some(), true);
             assert_eq!((*fib).as_ref().unwrap().rib_type(), RibType::Static);
         }

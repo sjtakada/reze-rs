@@ -241,7 +241,7 @@ impl ZebraMaster {
     }
 
     /// Initialize exec.
-    fn exec_init(master: Rc<ZebraMaster>) {
+    fn exec_init(_master: Rc<ZebraMaster>) {
     }
 
     /// Initialize RIB.
@@ -290,7 +290,7 @@ impl ZebraMaster {
                         debug!("Received ConfigRequest with command {} {} {} {:?}", index, method, path, body);
 
                         let mds = self.mds_config.borrow().clone();
-                        let resp = MdsNode::handle(mds, index, method, &path, body);
+                        let _resp = MdsNode::handle(mds, index, method, &path, body);
                         let resp = "OK".to_string();
 
 /*

@@ -20,7 +20,6 @@ use std::sync::Mutex;
 use std::boxed::Box;
 use std::cell::Cell;
 use std::cell::RefCell;
-use std::str::FromStr;
 use std::time::Instant;
 use std::time::Duration;
 
@@ -336,7 +335,7 @@ pub struct NexusConfig {
     mds: RefCell<Rc<MdsNode>>,
 
     /// RouterNexus.
-    nexus: RefCell<Arc<RouterNexus>>,
+    _nexus: RefCell<Arc<RouterNexus>>,
 }
 
 /// NexusConfig implementation.
@@ -352,7 +351,7 @@ impl NexusConfig {
 
         NexusConfig {
             mds: RefCell::new(mds),
-            nexus: RefCell::new(nexus),
+            _nexus: RefCell::new(nexus),
         }
     }
 
@@ -416,7 +415,7 @@ pub struct NexusExec {
     mds: RefCell<Rc<MdsNode>>,
 
     /// RouterNexus.
-    nexus: RefCell<Arc<RouterNexus>>,
+    _nexus: RefCell<Arc<RouterNexus>>,
 }
 
 /// NexusExec implementation.
@@ -432,7 +431,7 @@ impl NexusExec {
 
         NexusConfig {
             mds: RefCell::new(mds),
-            nexus: RefCell::new(nexus),
+            _nexus: RefCell::new(nexus),
         }
     }
 
