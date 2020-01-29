@@ -106,16 +106,15 @@ impl CliAction for CliActionRemote {
         }
 
         // build json body.
-        let request = format!("{} {}\n\n", self.method, path);
+        let request = format!("{} {}\n\n{}", self.method, path, body);
 
         // If only debug.
         if cli.is_debug() {
             println!("% Request to {}", self.target);
-            println!("{}{}", request, body);
+            println!("{}", request);
         }
 
         cli.remote_send(&self.target, &request);
-        cli.remote_send(&self.target, &body);
 
         let resp = cli.remote_recv(&self.target);
         if cli.is_debug() {
