@@ -88,6 +88,10 @@ impl ZebraMaster {
         }
     }
 
+    pub fn rib_ipv4(&self) -> Rc<RibTable<Ipv4Addr>> {
+        self.rib_ipv4.borrow_mut().clone()
+    }
+
     /// Add link.
     pub fn add_link(&self, link: Link) {
         debug!("New Link");
@@ -249,9 +253,9 @@ impl ZebraMaster {
     /// Initialize exec.
     fn exec_init(master: Rc<ZebraMaster>) {
         let mds = master.mds.borrow().clone();
-        let rib_ipv4 = master.rib_ipv4.borrow();
+        let rib_table_ipv4 = Rc::new(RibTableIpv4::new(master.clone()));
 
-        MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", rib_ipv4.clone());
+        MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", rib_table_ipv4.clone());
     }
 
     /// Initialize RIB.

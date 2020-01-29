@@ -23,6 +23,7 @@ use rtable::tree::*;
 
 use common::error::*;
 
+use super::master::*;
 use super::nexthop::*;
 use super::static_route::*;
 use super::super::core::mds::*;
@@ -238,8 +239,6 @@ pub struct RibTable<T: Addressable>
 {
     /// Table tree.
     tree: Tree<Prefix<T>, Rc<RibEntry<T>>>,
-
-    count: Cell<u32>,
 }
 
 impl<T> RibTable<T>
@@ -249,7 +248,6 @@ where T: Addressable
     pub fn new() -> RibTable<T> {
         RibTable {
             tree: Tree::new(),
-            count: Cell::new(0)
         }
     }
 
@@ -327,12 +325,39 @@ where T: Addressable
     }
 }
 
+/// Wrapper Ipv4 Rib Table.
+pub struct RibTableIpv4 {
+
+    /// Zebra master.
+    master: Rc<ZebraMaster>,
+
+    count: Cell<u32>,
+}
+
+impl RibTableIpv4 {
+
+    /// Constructor.
+    pub fn new(master: Rc<ZebraMaster>) -> RibTableIpv4 {
+        RibTableIpv4 {
+            master: master,
+            count: Cell::new(0),
+        }
+    }
+}
+
 /// MdsHandler implementation for RibTable<Ipv4Addr>
-impl MdsHandler for RibTable<Ipv4Addr> {
+impl MdsHandler for RibTableIpv4 {
 
     /// Handle GET method.
     fn handle_get(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
-        debug!("*** handle get rib table");
+        let master = self.master.clone();
+
+        let mut rib_ipv4 = master.rib_ipv4();
+        if let Some(rib_ipv4) = Rc::get(&mut rib_ipv4) {
+            debug!("*** handle get rib table");
+        }
+        debug!("*** handle get rib table 2");
+
         let c = self.count.get();
         self.count.set(c + 1);
 
