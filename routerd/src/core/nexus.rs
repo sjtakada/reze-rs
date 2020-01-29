@@ -524,9 +524,7 @@ impl UdsServerHandler for NexusExec {
     }
 
     /// Handle connect placeholder.
-    fn handle_connect(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-//        entry.stream_send("{}");
-        
+    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
         debug!("handle_connect");
         Ok(())
     }

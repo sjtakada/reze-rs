@@ -109,7 +109,7 @@ impl CliMaster {
 impl UdsClientHandler for CliMaster {
 
     /// callback when client connects to server.
-    fn handle_connect(&self, /*client: Arc<UdsClient>, */entry: &UdsClient) -> Result<(), CoreError> {
+    fn handle_connect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient) -> Result<(), CoreError> {
         println!("% Server connected.");
 
         Ok(())
