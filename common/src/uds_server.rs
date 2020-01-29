@@ -78,20 +78,15 @@ impl UdsServerEntry {
             Some(ref mut stream) => {
                 let mut buffer = String::new();
 
-                match stream.read_to_string(&mut buffer) {
-                    Ok(_) => {
-                        // may not come here.
-                    },
-                    Err(err) => {
-                        if err.kind() != std::io::ErrorKind::WouldBlock {
-                            error!("Error: {}", err);
-                            return None
-                        }
-                    },
+                if let Err(err) = stream.read_to_string(&mut buffer) {
+                    if err.kind() != std::io::ErrorKind::WouldBlock {
+                        error!("Error: {}", err);
+                        return None
+                    }
                 }
-
-                let command = String::from(buffer.trim());
-                Some(command)
+                
+                let message = String::from(buffer.trim());
+                Some(message)
             },
             None => None
         }
@@ -101,16 +96,9 @@ impl UdsServerEntry {
     pub fn stream_send(&self, message: &str) -> Result<(), CoreError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-println!("*** uds server entry stream send {:?}", message);
-                if let Ok(bytes) = stream.write(message.as_bytes()) {
-                    stream.flush();
-
-println!("*** uds server entry stream send success {:?}", bytes);
-
+                if let Err(_err) = stream.write_all(message.as_bytes()) {
+                    return Err(CoreError::UdsWriteError)
                 }
-//                if let Err(_err) = stream.write_all(message.as_bytes()) {
-//                    return Err(CoreError::UdsWriteError)
-//                }
             },
             None => {
                 error!("No stream");

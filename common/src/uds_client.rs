@@ -170,6 +170,7 @@ impl UdsClientInner {
     }
 
     /// Send message through UnixStream.
+    /// Optionally blocking socket until it gets ready.
     pub fn stream_send(&self, message: &str, sync: bool) {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
@@ -178,7 +179,6 @@ impl UdsClientInner {
                 }
 
                 let _ = stream.write_all(message.as_bytes());
-                stream.flush();
             },
             None => {
                 error!("No stream");
@@ -186,8 +186,8 @@ impl UdsClientInner {
         }
     }
 
-    /// Receive message through UnixStream synchronously,
-    /// i.e., will block until it gets something.
+    /// Receive message through UnixStream.
+    /// Optionally blocking socket until it gets ready.
     pub fn stream_read(&self, sync: bool) -> Option<String> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
@@ -197,13 +197,16 @@ impl UdsClientInner {
                     wait_until_readable(stream);
                 }
 
-                if let Err(_err) = stream.read_to_string(&mut buffer) {
-                    // TBD, should return error.
+                if let Err(err) = stream.read_to_string(&mut buffer) {
+                    if err.kind() != std::io::ErrorKind::WouldBlock {
+                        error!("Error: {}", err);
+                        return None
+                    }
                 }
 
                 let message = String::from(buffer.trim());
 
-                Some(message.to_string())
+                Some(message)
             },
             None => {
                 error!("No stream");
