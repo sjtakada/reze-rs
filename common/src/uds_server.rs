@@ -104,6 +104,7 @@ impl UdsServerEntry {
 println!("*** uds server entry stream send {:?}", message);
                 if let Ok(bytes) = stream.write(message.as_bytes()) {
                     stream.flush();
+
 println!("*** uds server entry stream send success {:?}", bytes);
 
                 }

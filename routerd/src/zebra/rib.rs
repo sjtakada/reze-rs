@@ -238,6 +238,8 @@ pub struct RibTable<T: Addressable>
 {
     /// Table tree.
     tree: Tree<Prefix<T>, Rc<RibEntry<T>>>,
+
+    count: Cell<u32>,
 }
 
 impl<T> RibTable<T>
@@ -247,6 +249,7 @@ where T: Addressable
     pub fn new() -> RibTable<T> {
         RibTable {
             tree: Tree::new(),
+            count: Cell::new(0)
         }
     }
 
@@ -330,7 +333,10 @@ impl MdsHandler for RibTable<Ipv4Addr> {
     /// Handle GET method.
     fn handle_get(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         debug!("*** handle get rib table");
-        Ok(Some(format!("RIB output\n")))
+        let c = self.count.get();
+        self.count.set(c + 1);
+
+        Ok(Some(format!("RIB output {}\n", c)))
     }
 }
 

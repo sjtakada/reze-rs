@@ -97,7 +97,7 @@ impl UdsClient {
 
     /// Send message.
     pub fn stream_send(&self, message: &str) {
-        self.get_inner().stream_send(message);
+        self.get_inner().stream_send_sync(message);
     }
 
     /// Receive message.
@@ -181,25 +181,37 @@ impl UdsClientInner {
         }
     }
 
+    /// Send message through UnixStream.
+    pub fn stream_send_sync(&self, message: &str) {
+        match *self.stream.borrow_mut() {
+            Some(ref mut stream) => {
+                wait_until_writable(stream);
+
+                let _ = stream.write_all(message.as_bytes());
+                stream.flush();
+            },
+            None => {
+                error!("No stream");
+            }
+        }
+    }
+
     /// Receive message through UnixStream synchronously,
     /// i.e., will block until it gets something.
     pub fn stream_read_sync(&self) -> Option<String> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-//                let mut buffer = String::new();
-                let mut buf: [u8; 128] = [0; 128];
+                let mut buffer = String::new();
 
                 wait_until_readable(stream);
 
-                match stream.read(&mut buf) {
-                    Ok(bytes) => println!("*** read bytes {:?}", bytes),
-                    Err(err) => println!("*** read err {:?}", err),
-//                if let Err(_err) = stream.read_to_string(&mut buffer) {
+                if let Err(_err) = stream.read_to_string(&mut buffer) {
+                println!("*** recv from uds client stream {:?}", _err);
+
                     // TBD, should return error.
                 }
 
-                let message = std::str::from_utf8(&buf).unwrap();
-//                let message = String::from(buffer.trim());
+                let message = String::from(buffer.trim());
                 println!("*** recv from uds client stream {:?}", message);
 
                 Some(message.to_string())

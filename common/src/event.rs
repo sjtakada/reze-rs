@@ -14,6 +14,7 @@ use std::time::Duration;
 
 use mio::*;
 use log::error;
+use log::debug;
 
 use super::consts::*;
 use super::error::*;
@@ -189,8 +190,8 @@ impl EventManager {
                     Err(err) => {
                         error!("Poll fd {:?}", err);
                     }
-                    _ => {
-                        error!("Poll fd unknown error");
+                    Ok(_) => {
+                        debug!("Poll fd OK");
                     }
                 }
             }
@@ -275,6 +276,20 @@ impl EventManager {
 pub fn wait_until_readable(fd: &dyn Evented) {
     let poll = Poll::new().unwrap();
     poll.register(fd, Token(0), Ready::readable(), PollOpt::edge()).unwrap();
+    let mut events = Events::with_capacity(1024);
+
+    loop {
+        match poll.poll(&mut events, Some(Duration::from_millis(10))) {
+            Ok(_) => break,
+            Err(_) => {},
+        }
+    }
+}
+
+/// Utility to blocking until fd gets writable.
+pub fn wait_until_writable(fd: &dyn Evented) {
+    let poll = Poll::new().unwrap();
+    poll.register(fd, Token(0), Ready::writable(), PollOpt::edge()).unwrap();
     let mut events = Events::with_capacity(1024);
 
     loop {

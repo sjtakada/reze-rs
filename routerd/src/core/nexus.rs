@@ -263,7 +263,7 @@ impl RouterNexus {
                             Some(entry) => {
                                 let resp = match resp {
                                     Some(s) => *s,
-                                    None => "".to_string(),
+                                    None => "{'status':'OK'}".to_string(),
                                 };
 
                                 println!("*** in nexus resp from proto {:?}", resp);
@@ -288,7 +288,7 @@ impl RouterNexus {
                                     None => "".to_string(),
                                 };
 
-                                println!("*** in nexus resp from proto {:?}", resp);
+                                println!("*** EXEC in nexus resp from proto {:?}", resp);
 
                                 if let Err(_err) = entry.stream_send(&resp) {
                                     error!("Send UdsServerEntry");
@@ -309,13 +309,17 @@ impl RouterNexus {
 }
 
 /// Dispatch request to protocol.
-pub struct MdsProtocolHandler {
-
+pub struct MdsProtocolHandler
+{
     /// Protocol Type.
     proto: ProtocolType,
 
     /// Nexus.
     nexus: RefCell<Arc<RouterNexus>>,
+
+    /// Encoder.
+
+    encoder: &'static dyn Fn(u32, Method, &str, Option<Box<String>>) -> NexusToProto
 }
 
 /// MdsProtocolHandler implementation.
@@ -326,18 +330,22 @@ impl MdsProtocolHandler {
         MdsProtocolHandler {
             proto: proto,
             nexus: RefCell::new(nexus),
+            encoder: &|id: u32, method: Method, path: &str, body: Option<Box<String>>| -> NexusToProto {
+                NexusToProto::ConfigRequest((id, method, path.to_string(), body))
+            },
         }
     }
 
-/*
-    /// Static config request encoder.
-    fn config_request_encoder(id: u32, method: Method,
-                              path: &str, body: Option<Box<String>>) -> NexusToProto {
-        NexusToProto::ConfigRequest((id, method, path.to_string(), body))
+    /// Constructor.
+    pub fn new_exec(proto: ProtocolType, nexus: Arc<RouterNexus>) -> MdsProtocolHandler {
+        MdsProtocolHandler {
+            proto: proto,
+            nexus: RefCell::new(nexus),
+            encoder: &|id: u32, method: Method, path: &str, body: Option<Box<String>>| -> NexusToProto {
+                NexusToProto::ExecRequest((id, method, path.to_string(), body))
+            },
+        }
     }
-
-//    /// Static exec request encoder.
-*/
 }
 
 
@@ -351,7 +359,7 @@ impl MdsHandler for MdsProtocolHandler {
 
         match nexus.get_sender(&self.proto) {
             Some(sender) => {
-                if let Err(_) = sender.send(NexusToProto::ConfigRequest((id, method, path.to_string(), params))) {
+                if let Err(_) = sender.send((*self.encoder)(id, method, path, params)) {
                     Err(CoreError::ChannelSendError(format!("{} {}", method, path)))
                 } else {
                     Ok(None)
@@ -467,7 +475,7 @@ impl NexusExec {
     pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
         let mds = Rc::new(MdsNode::new());
 
-        let zebra_handler = Rc::new(MdsProtocolHandler::new(ProtocolType::Zebra, nexus.clone()));
+        let zebra_handler = Rc::new(MdsProtocolHandler::new_exec(ProtocolType::Zebra, nexus.clone()));
         MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", zebra_handler.clone());
         MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv6", zebra_handler.clone());
 
@@ -516,7 +524,9 @@ impl UdsServerHandler for NexusExec {
     }
 
     /// Handle connect placeholder.
-    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+    fn handle_connect(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+//        entry.stream_send("{}");
+        
         debug!("handle_connect");
         Ok(())
     }
