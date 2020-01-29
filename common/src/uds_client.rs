@@ -96,8 +96,8 @@ impl UdsClient {
     }
 
     /// Send message.
-    pub fn stream_send(&self, message: &str) {
-        self.get_inner().stream_send(message, true);
+    pub fn stream_send(&self, message: &str) -> Result<(), CoreError> {
+        self.get_inner().stream_send(message, true)
     }
 
     /// Receive message.
@@ -169,24 +169,29 @@ impl UdsClientInner {
         self.event_manager.borrow_mut().clone()
     }
 
-    /// Send message through UnixStream.
+    /// Send a message through UnixStream.
     /// Optionally blocking socket until it gets ready.
-    pub fn stream_send(&self, message: &str, sync: bool) {
+    pub fn stream_send(&self, message: &str, sync: bool) -> Result<(), CoreError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
                 if sync {
                     wait_until_writable(stream);
                 }
 
-                let _ = stream.write_all(message.as_bytes());
+                if let Err(_err) = stream.write_all(message.as_bytes()) {
+                    return Err(CoreError::UdsWriteError)
+                }
             },
             None => {
                 error!("No stream");
+                return Err(CoreError::UdsWriteError)
             }
         }
+
+        Ok(())
     }
 
-    /// Receive message through UnixStream.
+    /// Receive a message through UnixStream.
     /// Optionally blocking socket until it gets ready.
     pub fn stream_read(&self, sync: bool) -> Option<String> {
         match *self.stream.borrow_mut() {
@@ -205,7 +210,6 @@ impl UdsClientInner {
                 }
 
                 let message = String::from(buffer.trim());
-
                 Some(message)
             },
             None => {

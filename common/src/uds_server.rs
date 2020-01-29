@@ -72,7 +72,24 @@ impl UdsServerEntry {
         self.index
     }
 
-    /// Read stream and return String - TBD.
+    /// Send a message through UnixStream.
+    pub fn stream_send(&self, message: &str) -> Result<(), CoreError> {
+        match *self.stream.borrow_mut() {
+            Some(ref mut stream) => {
+                if let Err(_err) = stream.write_all(message.as_bytes()) {
+                    return Err(CoreError::UdsWriteError)
+                }
+            },
+            None => {
+                error!("No stream");
+                return Err(CoreError::UdsWriteError)
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Receive a message through UnixStream.
     pub fn stream_read(&self) -> Option<String> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
@@ -90,23 +107,6 @@ impl UdsServerEntry {
             },
             None => None
         }
-    }
-
-    /// Send String through stream.
-    pub fn stream_send(&self, message: &str) -> Result<(), CoreError> {
-        match *self.stream.borrow_mut() {
-            Some(ref mut stream) => {
-                if let Err(_err) = stream.write_all(message.as_bytes()) {
-                    return Err(CoreError::UdsWriteError)
-                }
-            },
-            None => {
-                error!("No stream");
-                return Err(CoreError::UdsWriteError)
-            }
-        }
-
-        Ok(())
     }
 }
 

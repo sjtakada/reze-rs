@@ -30,7 +30,9 @@ pub trait RemoteClient {
 
     /// Send message to config server.
     fn stream_send(&self, message: &str) {
-        self.uds_client().stream_send(message);
+        if let Err(err) = self.uds_client().stream_send(message) {
+            println!("% Stream send error {:?}", err);
+        }
     }
 
     /// Recv message from config server.
