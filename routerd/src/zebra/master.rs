@@ -8,7 +8,7 @@
 use log::{debug, error};
 use std::rc::Rc;
 use std::cell::RefCell;
-
+use std::cell::RefMut;
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
@@ -57,10 +57,10 @@ pub struct ZebraMaster {
     _name2ifindex: HashMap<String, i32>,
 
     /// IPv4 RIB.
-    rib_ipv4: RefCell<Rc<RibTable<Ipv4Addr>>>,
+    rib_ipv4: RefCell<RibTable<Ipv4Addr>>,
 
     /// IPv6 RIB.
-    _rib_ipv6: RefCell<Rc<RibTable<Ipv6Addr>>>,
+    rib_ipv6: RefCell<RibTable<Ipv6Addr>>,
 }
 
 /// Zebra Master implementation.
@@ -83,13 +83,17 @@ impl ZebraMaster {
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
             _name2ifindex: HashMap::new(),
-            rib_ipv4: RefCell::new(Rc::new(RibTable::<Ipv4Addr>::new())),
-            _rib_ipv6: RefCell::new(Rc::new(RibTable::<Ipv6Addr>::new())),
+            rib_ipv4: RefCell::new(RibTable::<Ipv4Addr>::new()),
+            rib_ipv6: RefCell::new(RibTable::<Ipv6Addr>::new()),
         }
     }
 
-    pub fn rib_ipv4(&self) -> Rc<RibTable<Ipv4Addr>> {
-        self.rib_ipv4.borrow_mut().clone()
+    pub fn rib_ipv4(&self) -> RefMut<RibTable<Ipv4Addr>> {
+        self.rib_ipv4.borrow_mut()
+    }
+
+    pub fn rib_ipv6(&self) -> RefMut<RibTable<Ipv6Addr>> {
+        self.rib_ipv6.borrow_mut()
     }
 
     /// Add link.
@@ -158,24 +162,23 @@ impl ZebraMaster {
         let mut map = Rib::<Ipv4Addr>::from_static_route(sr);
 
         let mut rib_ipv4 = self.rib_ipv4.borrow_mut();
-        if let Some(rib_ipv4) = Rc::get_mut(&mut rib_ipv4) {
-            for (_, rib) in map.drain() {
-                rib_ipv4.add(&prefix, rib);
+
+        for (_, rib) in map.drain() {
+            rib_ipv4.add(&prefix, rib);
+        }
+
+        rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
+            if let Some(ref mut fib) = *entry.fib() {
+                self.rib_uninstall_kernel(prefix, &fib);
             }
 
-            rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
-                if let Some(ref mut fib) = *entry.fib() {
-                    self.rib_uninstall_kernel(prefix, &fib);
-                }
-
-                if let Some(selected) = entry.select() {
-                    self.rib_install_kernel(prefix, &selected);
-                    Some(selected)
-                } else {
-                    None
-                }
-            });
-        }
+            if let Some(selected) = entry.select() {
+                self.rib_install_kernel(prefix, &selected);
+                Some(selected)
+            } else {
+                None
+            }
+        });
     }
 
     /// Delete RIB for IPv4 static route.
@@ -186,24 +189,23 @@ impl ZebraMaster {
         let mut map = Rib::<Ipv4Addr>::from_static_route(sr);
 
         let mut rib_ipv4 = self.rib_ipv4.borrow_mut();
-        if let Some(rib_ipv4) = Rc::get_mut(&mut rib_ipv4) {
-            for (_, rib) in map.drain() {
-                rib_ipv4.delete(&prefix, rib);
+
+        for (_, rib) in map.drain() {
+            rib_ipv4.delete(&prefix, rib);
+        }
+
+        rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
+            if let Some(ref mut fib) = *entry.fib() {
+                self.rib_uninstall_kernel(prefix, &fib);
             }
 
-            rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
-                if let Some(ref mut fib) = *entry.fib() {
-                    self.rib_uninstall_kernel(prefix, &fib);
-                }
-
-                if let Some(selected) = entry.select() {
-                    self.rib_install_kernel(prefix, &selected);
-                    Some(selected)
-                } else {
-                    None
-                }
-            });
-        }
+            if let Some(selected) = entry.select() {
+                self.rib_install_kernel(prefix, &selected);
+                Some(selected)
+            } else {
+                None
+            }
+        });
     }
 
     /// Install a route for given RIB to kernel.

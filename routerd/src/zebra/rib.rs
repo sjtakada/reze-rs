@@ -323,6 +323,24 @@ where T: Addressable
             None
         }
     }
+
+    /// Dump rib into JSON
+//    pub fn to_sjon(&self) -> serde_json::Value {
+//        let mut v = serde_json::Value::new();
+//
+//        v
+//    }
+
+    /// Dump route in json string
+    pub fn to_string(&self) -> String {
+        let mut v = Vec::new();
+
+        for node in self.tree.into_iter() {
+            v.push(node.prefix().to_string());
+        }
+
+        format!("{:?}", v)
+    }
 }
 
 /// Wrapper Ipv4 Rib Table.
@@ -353,10 +371,9 @@ impl MdsHandler for RibTableIpv4 {
         let master = self.master.clone();
 
         let mut rib_ipv4 = master.rib_ipv4();
-        if let Some(rib_ipv4) = Rc::get(&mut rib_ipv4) {
-            debug!("*** handle get rib table");
-        }
-        debug!("*** handle get rib table 2");
+        let s = rib_ipv4.to_string();
+
+        debug!("*** handle get rib table {}", s);
 
         let c = self.count.get();
         self.count.set(c + 1);
