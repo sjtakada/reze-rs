@@ -112,8 +112,6 @@ impl RouterNexus {
     /// Construct MasterInner instance and spawn a thread.
     fn spawn_zebra(&self, sender_p2n: mpsc::Sender<ProtoToNexus>)
                    -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ProtoToZebra>) {
-        // Clone global config.
-        //let ref mut _config = *self.config.borrow_mut();
 
         // Create channel from RouterNexus to MasterInner
         let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
@@ -266,8 +264,6 @@ impl RouterNexus {
                                     None => "{'status':'OK'}".to_string(),
                                 };
 
-                                println!("*** in nexus resp from proto {:?}", resp);
-
                                 if let Err(_err) = entry.stream_send(&resp) {
                                     error!("Send UdsServerEntry");
                                 }
@@ -287,8 +283,6 @@ impl RouterNexus {
                                     Some(s) => *s,
                                     None => "".to_string(),
                                 };
-
-                                println!("*** EXEC in nexus resp from proto {:?}", resp);
 
                                 if let Err(_err) = entry.stream_send(&resp) {
                                     error!("Send UdsServerEntry");
