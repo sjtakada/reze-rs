@@ -260,8 +260,8 @@ impl RouterNexus {
                         match inner.lookup_entry(index) {
                             Some(entry) => {
                                 let resp = match resp {
-                                    Some(s) => *s,
-                                    None => "{'status':'OK'}".to_string(),
+                                    Some(s) => format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", *s),
+                                    None => r#"{"status": "OK"}"#.to_string(),
                                 };
 
                                 if let Err(_err) = entry.stream_send(&resp) {
@@ -312,7 +312,6 @@ pub struct MdsProtocolHandler
     nexus: RefCell<Arc<RouterNexus>>,
 
     /// Encoder.
-
     encoder: &'static dyn Fn(u32, Method, &str, Option<Box<String>>) -> NexusToProto
 }
 
@@ -346,7 +345,7 @@ impl MdsProtocolHandler {
 /// MdsHandler implementation for MdsProtocolHandler.
 impl MdsHandler for MdsProtocolHandler {
 
-    /// Handle method generic.
+    /// Handle all methods.
     fn handle_generic(&self, id: u32, method: Method,
                       path: &str, params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         let nexus = self.nexus.borrow();
