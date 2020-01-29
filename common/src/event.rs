@@ -278,12 +278,7 @@ pub fn wait_until_readable(fd: &dyn Evented) {
     poll.register(fd, Token(0), Ready::readable(), PollOpt::edge()).unwrap();
     let mut events = Events::with_capacity(1024);
 
-    loop {
-        match poll.poll(&mut events, Some(Duration::from_millis(10))) {
-            Ok(_) => break,
-            Err(_) => {},
-        }
-    }
+    let _ = poll.poll(&mut events, None);
 }
 
 /// Utility to blocking until fd gets writable.
@@ -292,10 +287,5 @@ pub fn wait_until_writable(fd: &dyn Evented) {
     poll.register(fd, Token(0), Ready::writable(), PollOpt::edge()).unwrap();
     let mut events = Events::with_capacity(1024);
 
-    loop {
-        match poll.poll(&mut events, Some(Duration::from_millis(10))) {
-            Ok(_) => break,
-            Err(_) => {},
-        }
-    }
+    let _ = poll.poll(&mut events, None);
 }

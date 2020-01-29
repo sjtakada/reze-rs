@@ -97,12 +97,12 @@ impl UdsClient {
 
     /// Send message.
     pub fn stream_send(&self, message: &str) {
-        self.get_inner().stream_send_sync(message);
+        self.get_inner().stream_send(message, true);
     }
 
     /// Receive message.
     pub fn stream_read(&self) -> Option<String> {
-        self.get_inner().stream_read_sync()
+        self.get_inner().stream_read(true)
     }
 }
 
@@ -170,22 +170,12 @@ impl UdsClientInner {
     }
 
     /// Send message through UnixStream.
-    pub fn stream_send(&self, message: &str) {
+    pub fn stream_send(&self, message: &str, sync: bool) {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-                let _ = stream.write_all(message.as_bytes());
-            },
-            None => {
-                error!("No stream");
-            }
-        }
-    }
-
-    /// Send message through UnixStream.
-    pub fn stream_send_sync(&self, message: &str) {
-        match *self.stream.borrow_mut() {
-            Some(ref mut stream) => {
-                wait_until_writable(stream);
+                if sync {
+                    wait_until_writable(stream);
+                }
 
                 let _ = stream.write_all(message.as_bytes());
                 stream.flush();
@@ -198,21 +188,20 @@ impl UdsClientInner {
 
     /// Receive message through UnixStream synchronously,
     /// i.e., will block until it gets something.
-    pub fn stream_read_sync(&self) -> Option<String> {
+    pub fn stream_read(&self, sync: bool) -> Option<String> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
                 let mut buffer = String::new();
 
-                wait_until_readable(stream);
+                if sync {
+                    wait_until_readable(stream);
+                }
 
                 if let Err(_err) = stream.read_to_string(&mut buffer) {
-                println!("*** recv from uds client stream {:?}", _err);
-
                     // TBD, should return error.
                 }
 
                 let message = String::from(buffer.trim());
-                println!("*** recv from uds client stream {:?}", message);
 
                 Some(message.to_string())
             },
