@@ -14,9 +14,14 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::collections::HashMap;
 use std::collections::BTreeMap;
-use std::net::Ipv4Addr;
 
 use log::debug;
+use serde::Serialize;
+use serde::Serializer;
+use serde::ser::SerializeSeq;
+//use serde::ser::SerializeMap;
+use serde::ser::SerializeStruct;
+use serde_json;
 
 use rtable::prefix::*;
 use rtable::tree::*;
@@ -164,6 +169,21 @@ where T: Addressable
     }
 }
 
+/// Serializer for Rib.
+impl<T> Serialize for Rib<T>
+where T: Addressable
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer
+    {
+        let mut s = serializer.serialize_struct("Rib", 2)?;
+        let type_str = format!("{:?}", self.rib_type);
+        s.serialize_field("type", &type_str)?;
+        s.serialize_field("distance", &self.distance)?;
+        s.end()
+    }
+}
+
 /// RIB candidate key.
 ///
 type RibKey = (u8, RibType);
@@ -173,6 +193,9 @@ type RibKey = (u8, RibType);
 ///
 pub struct RibEntry<T: Addressable>
 {
+    /// Prefix.
+    prefix: Prefix<T>,
+
     /// FIB.
     fib: RefCell<Option<Rib<T>>>,
 
@@ -183,12 +206,29 @@ pub struct RibEntry<T: Addressable>
     updated: Cell<bool>,
 }
 
+/// Serializer for RibEntry
+impl<T> Serialize for RibEntry<T>
+where T: Addressable
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer
+    {
+        let mut s = serializer.serialize_struct("RibEntry", 1)?;
+        let prefix_str = self.prefix.to_string();
+
+        s.serialize_field("prefix", &prefix_str)?;
+        s.serialize_field("entry", &self.fib)?;
+        s.end()
+    }
+}
+
 impl<T> RibEntry<T>
 where T: Addressable
 {
     /// Constructor.
-    pub fn new() -> RibEntry<T> {
+    pub fn new(prefix: &Prefix<T>) -> RibEntry<T> {
         RibEntry {
+            prefix: prefix.clone(),
             fib: RefCell::new(None),
             ribs: RefCell::new(BTreeMap::new()),
             updated: Cell::new(false),
@@ -251,12 +291,17 @@ where T: Addressable
         }
     }
 
+    /// Return number of entries.
+    pub fn count(&self) -> usize {
+        self.tree.count()
+    }
+
     /// Add given RIBs into tree per prefix.
     pub fn add(&mut self, prefix: &Prefix<T>, rib: Rib<T>) {
         debug!("rib add {:?} type {:?} distance {:?}", prefix, rib.rib_type(), rib.distance());
 
         // Create RIB entry if it doesn't exist.
-        let it = self.tree.get_node_ctor(prefix, Some(|| { Rc::new(RibEntry::new()) }));
+        let it = self.tree.get_node_ctor(prefix, Some(|| { Rc::new(RibEntry::new(prefix)) }));
 
         if let Some(ref node) = *it.node() {
             // Node data must be present.
@@ -324,15 +369,9 @@ where T: Addressable
         }
     }
 
-    /// Dump rib into JSON
-//    pub fn to_sjon(&self) -> serde_json::Value {
-//        let mut v = serde_json::Value::new();
-//
-//        v
-//    }
-
     /// Dump route in json string
     pub fn to_string(&self) -> String {
+
         let mut v = Vec::new();
 
         for node in self.tree.into_iter() {
@@ -340,16 +379,34 @@ where T: Addressable
         }
 
         format!("{:?}", v)
+
     }
 }
 
+/// Serializer for RibTable.
+impl<T> Serialize for RibTable<T>
+where T: Addressable
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer
+    {
+        let mut s = serializer.serialize_seq(Some(self.count()))?;
+        for node in self.tree.into_iter() {
+            if let Some(ref mut data) = *node.data() {
+                let entry = data.as_ref();
+
+                s.serialize_element(entry)?;
+            }
+        }
+
+        s.end()
+    }
+}
 /// Wrapper Ipv4 Rib Table.
 pub struct RibTableIpv4 {
 
     /// Zebra master.
     master: Rc<ZebraMaster>,
-
-    count: Cell<u32>,
 }
 
 impl RibTableIpv4 {
@@ -358,7 +415,6 @@ impl RibTableIpv4 {
     pub fn new(master: Rc<ZebraMaster>) -> RibTableIpv4 {
         RibTableIpv4 {
             master: master,
-            count: Cell::new(0),
         }
     }
 }
@@ -370,15 +426,12 @@ impl MdsHandler for RibTableIpv4 {
     fn handle_get(&self, _path: &str, _params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
         let master = self.master.clone();
 
-        let mut rib_ipv4 = master.rib_ipv4();
-        let s = rib_ipv4.to_string();
+        let ref rib_ipv4 = *master.rib_ipv4();
+        let s = serde_json::to_string(rib_ipv4).unwrap();
 
         debug!("*** handle get rib table {}", s);
 
-        let c = self.count.get();
-        self.count.set(c + 1);
-
-        Ok(Some(format!("RIB output {}\n", c)))
+        Ok(Some(s))
     }
 }
 
