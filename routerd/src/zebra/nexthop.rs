@@ -7,6 +7,10 @@
 
 use std::fmt;
 
+use serde::Serialize;
+use serde::Serializer;
+use serde::ser::SerializeStruct;
+
 use rtable::prefix::*;
 
 /// Nexthop.
@@ -21,6 +25,24 @@ pub enum Nexthop<T: Addressable> {
 
     /// Network Prefix - TBD: floating nexthop.
     Network(Prefix<T>),
+}
+
+/// Serializer for Nexthop
+impl<T> Serialize for Nexthop<T>
+where T: Addressable
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer
+    {
+        let mut s = serializer.serialize_struct("Nexthop", 1)?;
+        let str = match self {
+            Nexthop::<T>::Address(addr) => addr.to_string(),
+            _ => "()".to_string(),
+        };
+
+        s.serialize_field("nexthop", &str)?;
+        s.end()
+    }
 }
 
 impl<T> Nexthop<T>

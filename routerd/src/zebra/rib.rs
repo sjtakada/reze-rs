@@ -176,10 +176,11 @@ where T: Addressable
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer
     {
-        let mut s = serializer.serialize_struct("Rib", 2)?;
+        let mut s = serializer.serialize_struct("Rib", 3)?;
         let type_str = format!("{:?}", self.rib_type);
         s.serialize_field("type", &type_str)?;
         s.serialize_field("distance", &self.distance)?;
+        s.serialize_field("nexthops", &self.nexthops)?;
         s.end()
     }
 }
@@ -213,7 +214,7 @@ where T: Addressable
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer
     {
-        let mut s = serializer.serialize_struct("RibEntry", 1)?;
+        let mut s = serializer.serialize_struct("RibEntry", 2)?;
         let prefix_str = self.prefix.to_string();
 
         s.serialize_field("prefix", &prefix_str)?;
