@@ -16,7 +16,7 @@ use super::error::*;
 pub struct CliView {
 
     /// Templates.
-    templates: HashMap<String, &'static Fn(&serde_json::Value) -> Result<(), CliError>>,
+    templates: HashMap<String, &'static dyn Fn(&serde_json::Value) -> Result<(), CliError>>,
 }
 
 /// Cli View implementation.
@@ -30,8 +30,8 @@ impl CliView {
     }
 
     /// Register view tempate function.
-    pub fn register(&mut self, source: &str, func: &'static Fn(&serde_json::Value) -> Result<(), CliError>) {
-        self.templates.insert(source.to_string(), func);
+    pub fn register(&mut self, name: &str, func: &'static dyn Fn(&serde_json::Value) -> Result<(), CliError>) {
+        self.templates.insert(name.to_string(), func);
     }
 
     /// Initialize.
@@ -59,7 +59,10 @@ impl CliView {
             .expect("Failed to execute a child");
 
         if let Some(stdin) = child.stdin.as_mut() {
-            stdin.write_all(value.to_string().as_bytes());
+            if let Err(err) = stdin.write_all(value.to_string().as_bytes()) {
+                println!("Failed to write to child process {:?}", err);
+                return Err(CliError::ChildProcessError)
+            }
         } else {
             println!("Failed to write to child process");
             return Err(CliError::ChildProcessError)
@@ -75,7 +78,7 @@ impl CliView {
     }
 
     /// Dummy.
-    pub fn dummy(value: &serde_json::Value) -> Result<(), CliError> {
+    pub fn dummy(_value: &serde_json::Value) -> Result<(), CliError> {
         println!("dummy");
         Ok(())
     }

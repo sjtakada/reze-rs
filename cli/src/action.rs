@@ -194,10 +194,10 @@ impl CliAction for CliActionRemote {
                     Ok(value) => {
                         match template {
                             CliViewTemplate::Internal(name) => {
-                                cli.view().call(&name, &value);
+                                cli.view().call(&name, &value)?;
                             },
                             CliViewTemplate::External((name, params)) => {
-                                cli.view().exec(&name, &params, &value);
+                                cli.view().exec(&name, &params, &value)?;
                             },
                         }
                     },

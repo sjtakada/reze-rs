@@ -102,7 +102,7 @@ impl Cli {
         // TBD: Terminal init
 
         // Initialize CLI modes.
-        let mut path = PathBuf::from(config.cli_definition_dir().unwrap());
+        let mut path = PathBuf::from(config.cli_definition().unwrap());
         path.push(CLI_MODE_FILE);
         self.init_cli_modes(&path)?;
 
@@ -110,7 +110,7 @@ impl Cli {
         self.init_builtins()?;
 
         // Initialize CLI comand definitions.
-        let path = PathBuf::from(config.cli_definition_dir().unwrap());
+        let path = PathBuf::from(config.cli_definition().unwrap());
         self.init_cli_commands(&path)?;
         self.set_mode(CLI_INITIAL_MODE)?;
 

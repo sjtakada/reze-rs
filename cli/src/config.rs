@@ -15,7 +15,10 @@ pub struct Config {
     debug: bool,
 
     /// CLI defintion JSON directory.
-    cli_definition_dir: Option<String>,
+    cli_definition: Option<String>,
+
+    /// Directory path for external executables.
+    external_bin: Option<String>,
 
     /// Configs for remote endpoint.
     remote: HashMap<String, ConfigRemote>,
@@ -43,9 +46,14 @@ impl Config {
                     },
                     "cli_definition" => {
                         if let Some(v) = json.get(k).unwrap().as_str() {
-                            config.set_cli_definition_dir(v);
+                            config.set_cli_definition(v);
                         }
                     },
+                    "external_bin" => {
+                        if let Some(v) = json.get(k).unwrap().as_str() {
+                            config.set_external_bin(v);
+                        }
+                    }
                     "remote" => {
                         if let Some(v) = json.get(k).unwrap().as_object() {
                             for name in v.keys() {
@@ -79,8 +87,13 @@ impl Config {
     }
 
     /// Return CLI definition directory.
-    pub fn cli_definition_dir(&self) -> Option<&str> {
-        self.cli_definition_dir.as_ref().map(|s| &s[..])
+    pub fn cli_definition(&self) -> Option<&str> {
+        self.cli_definition.as_ref().map(|s| &s[..])
+    }
+
+    /// Return external bin.
+    pub fn external_bin(&self) -> Option<&str> {
+        self.external_bin.as_ref().map(|s| &s[..])
     }
 
     /// Return config for remote endpoint.
@@ -94,8 +107,13 @@ impl Config {
     }
 
     /// Set CLI definition directory.
-    pub fn set_cli_definition_dir(&mut self, cli_definition_dir: &str) {
-        self.cli_definition_dir.replace(String::from(cli_definition_dir));
+    pub fn set_cli_definition(&mut self, cli_definition: &str) {
+        self.cli_definition.replace(String::from(cli_definition));
+    }
+
+    /// Set external bin.
+    pub fn set_external_bin(&mut self, external_bin: &str) {
+        self.external_bin.replace(String::from(external_bin));
     }
 
     /// Set config for remote endpoint.
@@ -111,7 +129,8 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             debug: false,
-            cli_definition_dir: Some(String::from("./json")),
+            cli_definition: Some(String::from("./json")),
+            external_bin: Some(String::from("./scripts")),
             remote: HashMap::new(),
         }
     }

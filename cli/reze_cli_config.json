@@ -6,6 +6,7 @@
     "directory": "json",
     "recursive": true
   },
+  "external_bin": "scripts",
   "remote": {
     "config": {
       "transport": "unix",
