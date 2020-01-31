@@ -8,6 +8,8 @@
 use std::collections::HashMap;
 use regex::Regex;
 
+use serde_json;
+
 use super::cli::Cli;
 use super::error::CliError;
 use super::node::Value;
@@ -143,6 +145,26 @@ impl CliAction for CliActionRemote {
         if cli.is_debug() {
             println!("% Response");
             println!("{:?}", resp);
+        }
+
+        if let Some((template, name)) = &self.view {
+            if let Some(json_str) = resp {
+
+                match serde_json::from_str(&json_str) {
+                    Ok(value) => {
+                        match template {
+                            CliViewTemplate::Internal => {
+                                cli.view().call(&name, &value);
+                            },
+                            CliViewTemplate::External => {
+                            },
+                        }
+                    },
+                    Err(err) => {
+                        println!("Unable to parse response from server {:?} {:?}", err, json_str);
+                    },
+                }
+            }
         }
 
         Ok(())

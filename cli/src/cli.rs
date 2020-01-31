@@ -11,6 +11,7 @@ use std::path::PathBuf;
 use std::collections::HashMap;
 use std::cell::Cell;
 use std::cell::RefCell;
+use std::cell::RefMut;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -24,6 +25,7 @@ use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
 use super::builtins;
+use super::view::*;
 
 // Constants.
 const CLI_INITIAL_MODE: &str = "EXEC-MODE";
@@ -52,6 +54,9 @@ pub struct Cli {
     /// Remote clients.
     remote_client: RefCell<HashMap<String, Arc<dyn RemoteClient>>>,
 
+    /// View.
+    view: RefCell<CliView>,
+
     /// Debug mode.
     debug: bool,
 }
@@ -68,6 +73,7 @@ impl Cli {
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
             remote_client: RefCell::new(HashMap::new()),
+            view: RefCell::new(CliView::new()),
             debug: false,
         }
     }
@@ -107,6 +113,9 @@ impl Cli {
         let path = PathBuf::from(config.cli_definition_dir().unwrap());
         self.init_cli_commands(&path)?;
         self.set_mode(CLI_INITIAL_MODE)?;
+
+        // Initialize Views.
+        self.init_views();
 
         // Init readline.
         let readline = CliReadline::new(&self);
@@ -167,6 +176,14 @@ impl Cli {
                 Err(CliError::ActionError(format!("builtin '{}'", func)))
             }
         }
+    }
+
+    fn init_views(&self) {
+        self.view.borrow_mut().init();
+    }
+
+    pub fn view(&self) -> RefMut<CliView> {
+        self.view.borrow_mut()
     }
 
     fn can_exit(&self) -> bool {

@@ -17,3 +17,4 @@ pub mod action;
 pub mod builtins;
 pub mod readline;
 pub mod signal;
+pub mod view;
