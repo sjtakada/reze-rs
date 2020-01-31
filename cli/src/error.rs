@@ -35,5 +35,9 @@ quick_error! {
             description("No action defined")
             display(r#"No action defined"#)
         }
+        ChildProcessError {
+            description("Child process execution error")
+            display(r#"Child process execution error"#)
+        }
     }
 }

@@ -5,9 +5,10 @@
 // View template.
 //
 
+use std::io;
+use std::io::Write;
 use std::collections::HashMap;
 use std::process::{Command, Stdio};
-use std::io::Write;
 
 use super::error::*;
 
@@ -36,7 +37,6 @@ impl CliView {
     /// Initialize.
     pub fn init(&mut self) {
         self.register("dummy", &CliView::dummy);
-        self.register("show_ip_route", &CliView::show_ip_route);
     }
 
     /// Call template function.
@@ -56,14 +56,20 @@ impl CliView {
             .arg(params)
             .stdin(Stdio::piped())
             .spawn()
-            .expect("Exec failed");
+            .expect("Failed to execute a child");
 
         if let Some(stdin) = child.stdin.as_mut() {
             stdin.write_all(value.to_string().as_bytes());
         } else {
-            println!("Failed to open stdin for child process");
-//            Err(CliError::);
+            println!("Failed to write to child process");
+            return Err(CliError::ChildProcessError)
         }
+
+        let output = child.wait_with_output()
+            .expect("Failed to wait on child");
+
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
 
         Ok(())
     }
@@ -71,53 +77,6 @@ impl CliView {
     /// Dummy.
     pub fn dummy(value: &serde_json::Value) -> Result<(), CliError> {
         println!("dummy");
-        Ok(())
-    }
-
-    /// "show ip route"
-    pub fn show_ip_route(value: &serde_json::Value) -> Result<(), CliError> {
-        println!("\
-Codes: C - connected, S - static, R - RIP, B - BGP
-       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-       E1 - OSPF external type 1, E2 - OSPF external type 2
-       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
-       ia - IS-IS inter area, * - candidate default
-");
-
-        if value.is_array() {
-            for r in value.as_array().unwrap() {
-                let prefix = &r["prefix"];
-                let entry = &r["entry"];
-
-                if prefix.is_string() && entry.is_object() {
-                    let prefix = prefix.as_str().unwrap();
-                    let entry = entry.as_object().unwrap();
-
-                    if !entry["type"].is_string() {
-                        continue;
-                    }
-                    let rib_type = entry["type"].as_str().unwrap();
-
-                    if !entry["distance"].is_number() {
-                        continue;
-                    }
-                    let distance = entry["distance"].as_u64().unwrap();
-
-                    if !entry["nexthops"].is_array() {
-                        continue;
-                    }
-                    let nexthops = entry["nexthops"].as_array().unwrap();
-
-                    for nh in nexthops {
-                        if nh["address"].is_string() {
-                            println!("{} {} {}", rib_type, prefix, nh["address"].as_str().unwrap());
-                        }
-                    }
-                }
-            }
-        }
-
         Ok(())
     }
 }
