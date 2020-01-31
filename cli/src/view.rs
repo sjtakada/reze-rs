@@ -6,6 +6,8 @@
 //
 
 use std::collections::HashMap;
+use std::process::{Command, Stdio};
+use std::io::Write;
 
 use super::error::*;
 
@@ -38,14 +40,32 @@ impl CliView {
     }
 
     /// Call template function.
-    pub fn call(&self, source: &str, value: &serde_json::Value) -> Result<(), CliError> {
-        match self.templates.get(source) {
+    pub fn call(&self, func: &str, value: &serde_json::Value) -> Result<(), CliError> {
+        match self.templates.get(func) {
             Some(template) => template(value),
             None => {
                 println!("No template found");
                 Ok(())
             }
         }
+    }
+
+    /// Execute extrenal template engine.
+    pub fn exec(&self, path: &str, params: &str, value: &serde_json::Value) -> Result<(), CliError> {
+        let mut child = Command::new(path)
+            .arg(params)
+            .stdin(Stdio::piped())
+            .spawn()
+            .expect("Exec failed");
+
+        if let Some(stdin) = child.stdin.as_mut() {
+            stdin.write_all(value.to_string().as_bytes());
+        } else {
+            println!("Failed to open stdin for child process");
+//            Err(CliError::);
+        }
+
+        Ok(())
     }
 
     /// Dummy.

@@ -48,18 +48,69 @@ impl CliAction for CliActionMode {
     }
 }
 
+/// View template enum.
 pub enum CliViewTemplate {
-    Internal,
-    External,
+    /// Template is an internal built-in function with given name.
+    Internal(String),
+
+    /// Template is an external executable with given name and given parameters.
+    External((String, String)),
 }
 
-// Http action.
+/// View template implementation.
+impl CliViewTemplate {
+
+    /// Constructor from JSON.
+    pub fn from_json(value: &serde_json::Value) -> Option<CliViewTemplate> {
+        if let Some(map) = value.as_object() {
+
+            map.get("template").and_then(|t| {
+                match t.as_str().unwrap_or("internal") {
+                    "internal" => {
+                        if let Some(s) = map.get("func") {
+                            if let Some(func) = s.as_str() {
+                                Some(CliViewTemplate::Internal(func.to_string()))
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    },
+                    "external" => {
+                        if let Some(s) = map.get("path") {
+                            if let Some(path) = s.as_str() {
+                                let params = if let Some(p) = map.get("params") {
+                                    p.as_str().unwrap()
+                                } else {
+                                    ""
+                                };
+                                Some(CliViewTemplate::External((path.to_string(), params.to_string())))
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    },
+                    _ => {
+                        None
+                    },
+                }
+            })
+        } else {
+            None
+        }
+    }
+}
+
+// Remote action.
 pub struct CliActionRemote {
     method: String,
     target: String,
     path: String,
     params: String,
-    view: Option<(CliViewTemplate, String)>,
+    view: Option<CliViewTemplate>,
 }
 
 impl CliActionRemote {
@@ -69,18 +120,7 @@ impl CliActionRemote {
         let path = value["path"].as_str().unwrap_or("");
         let params = value["params"].to_string();
         let view = if value["view"].is_object() {
-            let v = value["view"].as_object().unwrap();
-
-            if v["template"].is_string() && v["source"].is_string() {
-                let source = v["source"].as_str().unwrap();
-                match v["template"].as_str().unwrap() {
-                    "internal" => Some((CliViewTemplate::Internal, source.to_string())),
-                    "external" => Some((CliViewTemplate::External, source.to_string())),
-                    _ => None,
-                }
-            } else {
-                None
-            }
+            CliViewTemplate::from_json(&value["view"])
         } else {
             None
         };
@@ -147,16 +187,17 @@ impl CliAction for CliActionRemote {
             println!("{:?}", resp);
         }
 
-        if let Some((template, name)) = &self.view {
+        if let Some(template) = &self.view {
             if let Some(json_str) = resp {
 
                 match serde_json::from_str(&json_str) {
                     Ok(value) => {
                         match template {
-                            CliViewTemplate::Internal => {
+                            CliViewTemplate::Internal(name) => {
                                 cli.view().call(&name, &value);
                             },
-                            CliViewTemplate::External => {
+                            CliViewTemplate::External((name, params)) => {
+                                cli.view().exec(&name, &params, &value);
                             },
                         }
                     },

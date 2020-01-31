@@ -27,11 +27,16 @@
           {
             "remote": {
               "target": "exec",
-              "method": "GET",
+              "metho": "GET",
               "path": "show/route_ipv4",
               "view": {
+                "template": "external",
+                "path": "/home/toshiaki/reze-rs/cli/cli_exec.rb",
+                "params": "show_ip_route.erb"
+              },
+              "viewx": {
                 "template": "internal",
-                "source": "show_ip_route"
+                "func": "show_ip_route"
               }
             }
           }
