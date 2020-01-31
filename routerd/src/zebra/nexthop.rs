@@ -15,8 +15,9 @@ use rtable::prefix::*;
 
 /// Nexthop.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum Nexthop<T: Addressable> {
-
+pub enum Nexthop<T>
+where T: Addressable
+{
     /// IP Address.
     Address(T),
 
@@ -27,7 +28,6 @@ pub enum Nexthop<T: Addressable> {
     Network(Prefix<T>),
 }
 
-/// Serializer for Nexthop
 impl<T> Serialize for Nexthop<T>
 where T: Addressable
 {
@@ -35,12 +35,12 @@ where T: Addressable
     where S: Serializer
     {
         let mut s = serializer.serialize_struct("Nexthop", 1)?;
-        let str = match self {
-            Nexthop::<T>::Address(addr) => addr.to_string(),
-            _ => "()".to_string(),
+        let (name, str) = match self {
+            Nexthop::<T>::Address(addr) => ("address", addr.to_string()),
+            Nexthop::<T>::Ifname(ifname) => ("interface", ifname.to_string()),
+            Nexthop::<T>::Network(prefix) => ("network", prefix.to_string()),
         };
-
-        s.serialize_field("nexthop", &str)?;
+        s.serialize_field(name, &str)?;
         s.end()
     }
 }
