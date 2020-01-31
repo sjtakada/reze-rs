@@ -28,7 +28,11 @@
             "remote": {
               "target": "exec",
               "method": "GET",
-              "path": "show/route_ipv4"
+              "path": "show/route_ipv4",
+              "view": {
+                "template": "internal",
+                "source": "show_ip_route"
+              }
             }
           }
         ]

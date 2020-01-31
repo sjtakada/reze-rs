@@ -46,12 +46,18 @@ impl CliAction for CliActionMode {
     }
 }
 
+pub enum CliViewTemplate {
+    Internal,
+    External,
+}
+
 // Http action.
 pub struct CliActionRemote {
     method: String,
     target: String,
     path: String,
     params: String,
+    view: Option<(CliViewTemplate, String)>,
 }
 
 impl CliActionRemote {
@@ -60,12 +66,29 @@ impl CliActionRemote {
         let target = value["target"].as_str().unwrap_or("config");
         let path = value["path"].as_str().unwrap_or("");
         let params = value["params"].to_string();
+        let view = if value["view"].is_object() {
+            let v = value["view"].as_object().unwrap();
+
+            if v["template"].is_string() && v["source"].is_string() {
+                let source = v["source"].as_str().unwrap();
+                match v["template"].as_str().unwrap() {
+                    "internal" => Some((CliViewTemplate::Internal, source.to_string())),
+                    "external" => Some((CliViewTemplate::External, source.to_string())),
+                    _ => None,
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        };
 
         CliActionRemote {
             method: String::from(method),
             target: String::from(target),
             path: String::from(path),
             params: params,
+            view: view,
         }
     }
 }
