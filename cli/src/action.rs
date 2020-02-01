@@ -80,12 +80,18 @@ impl CliViewTemplate {
                     "external" => {
                         if let Some(s) = map.get("path") {
                             if let Some(path) = s.as_str() {
+                                let path = if path.starts_with("/") {
+                                    path.to_string()
+                                } else {
+                                    format!("./{}", path)
+                                };
+
                                 let params = if let Some(p) = map.get("params") {
                                     p.as_str().unwrap()
                                 } else {
                                     ""
                                 };
-                                Some(CliViewTemplate::External((path.to_string(), params.to_string())))
+                                Some(CliViewTemplate::External((path, params.to_string())))
                             } else {
                                 None
                             }

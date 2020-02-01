@@ -5,8 +5,11 @@
 // View template.
 //
 
+use std::env;
 use std::io;
 use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
 use std::collections::HashMap;
 use std::process::{Command, Stdio};
 
@@ -17,6 +20,9 @@ pub struct CliView {
 
     /// Templates.
     templates: HashMap<String, &'static dyn Fn(&serde_json::Value) -> Result<(), CliError>>,
+
+    /// External bin directory.
+    external_bin: PathBuf,
 }
 
 /// Cli View implementation.
@@ -26,6 +32,7 @@ impl CliView {
     pub fn new() -> CliView {
         CliView {
             templates: HashMap::new(),
+            external_bin: PathBuf::new(),
         }
     }
 
@@ -35,8 +42,25 @@ impl CliView {
     }
 
     /// Initialize.
-    pub fn init(&mut self) {
+    pub fn init(&mut self, external_bin: &Path) -> Result<(), CliError> {
+        let path = if external_bin.starts_with("/") {
+            external_bin.to_path_buf()
+        } else {
+            let mut cwd = env::current_dir().expect("Cannot get current directory");
+            cwd.push(external_bin);
+            cwd
+        };
+
+        self.external_bin = path.to_path_buf();
+
         self.register("dummy", &CliView::dummy);
+
+        Ok(())
+    }
+
+    /// Return external bin
+    pub fn external_bin(&self) -> &PathBuf {
+        &self.external_bin
     }
 
     /// Call template function.
@@ -52,7 +76,9 @@ impl CliView {
 
     /// Execute extrenal template engine.
     pub fn exec(&self, path: &str, params: &str, value: &serde_json::Value) -> Result<(), CliError> {
+
         let mut child = Command::new(path)
+            .current_dir(self.external_bin())
             .arg(params)
             .stdin(Stdio::piped())
             .spawn()
@@ -83,3 +109,6 @@ impl CliView {
         Ok(())
     }
 }
+
+
+

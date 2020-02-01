@@ -115,7 +115,8 @@ impl Cli {
         self.set_mode(CLI_INITIAL_MODE)?;
 
         // Initialize Views.
-        self.init_views();
+        let path = PathBuf::from(config.external_bin().unwrap());
+        self.init_views(&path);
 
         // Init readline.
         let readline = CliReadline::new(&self);
@@ -178,8 +179,8 @@ impl Cli {
         }
     }
 
-    fn init_views(&self) {
-        self.view.borrow_mut().init();
+    fn init_views(&self, external_bin: &Path) {
+        let _ = self.view.borrow_mut().init(external_bin);
     }
 
     pub fn view(&self) -> RefMut<CliView> {
