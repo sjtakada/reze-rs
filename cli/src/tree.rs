@@ -231,8 +231,8 @@ impl CliTree {
                                     let action = CliActionMode::new(obj);
                                     node.inner().push_action(Rc::new(action));
                                 },
-                                "http" => {
-                                    let action = CliActionHttp::new(obj);
+                                "remote"|"http" => {
+                                    let action = CliActionRemote::new(obj);
                                     node.inner().push_action(Rc::new(action));
                                 },
                                 "shell" => {

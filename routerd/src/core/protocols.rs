@@ -2,7 +2,7 @@
 // ReZe.Rs - Router Daemon
 //   Copyright (C) 2018-2020 Toshiaki Takada
 //
-// Protocols.
+// Protocol types.
 //
 
 use std::fmt;
@@ -22,8 +22,29 @@ pub enum ProtocolType {
     Nhrp,
 }
 
-// TBD: impl Display fro ProtocolType
+/// TBD: impl Display fro ProtocolType
 impl fmt::Display for ProtocolType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match self {
+            ProtocolType::Master => "Master",
+            ProtocolType::Zebra => "Zebra",
+            ProtocolType::Rip => "RIP",
+            ProtocolType::Ripng => "RIPng",
+            ProtocolType::Ospf => "OSPF",
+            ProtocolType::OspfV3 => "OSPFv3",
+            ProtocolType::Isis => "IS-IS",
+            ProtocolType::Eigrp => "EIGRP",
+            ProtocolType::Bgp => "BGP",
+            ProtocolType::Vrrp => "VRRP",
+            ProtocolType::Nhrp => "NHRP",
+        };
+
+        write!(f, "{}", s)
+    }
+}
+
+/// Debug implementation for ProtocolType.
+impl fmt::Debug for ProtocolType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match self {
             ProtocolType::Master => "Master",

@@ -98,14 +98,26 @@ fn main() {
 // Initialize objects and associate them.
 // TODO: probably take config or command line parameters.
 fn start() {
-    // Create Unix Domain Socket to accept configuration.
+
+    // Event Manager and Nexus.
+    let event_manager = Arc::new(EventManager::new());
+    let nexus = Arc::new(RouterNexus::new());
+
+    // UDS to accept config request.
     let mut config_uds_path = env::temp_dir();
     config_uds_path.push(ROUTERD_CONFIG_UDS_FILENAME);
 
-    // Prepare some objects.
-    let event_manager = Arc::new(EventManager::new());
-    let nexus = Arc::new(RouterNexus::new());
-    let _uds_server = UdsServer::start(event_manager.clone(), nexus.clone(), &config_uds_path);
+    let nexus_config = Arc::new(NexusConfig::new(nexus.clone()));
+    let uds_server = UdsServer::start(event_manager.clone(), nexus_config, &config_uds_path);
+    nexus.set_config_server(uds_server);
+
+    // UDS to accept exec request.
+    let mut exec_uds_path = env::temp_dir();
+    exec_uds_path.push(ROUTERD_EXEC_UDS_FILENAME);
+
+    let nexus_exec = Arc::new(NexusExec::new(nexus.clone()));
+    let uds_server = UdsServer::start(event_manager.clone(), nexus_exec, &exec_uds_path);
+    nexus.set_exec_server(uds_server);
 
     // Start nexus.
     match RouterNexus::start(nexus, event_manager) {
@@ -119,7 +131,10 @@ fn start() {
 
     // Cleanup.
     if let Err(_) = fs::remove_file(config_uds_path) {
-
+        // Nothing we can do?
+    }
+    if let Err(_) = fs::remove_file(exec_uds_path) {
+        // Nothing we can do?
     }
 
     ()

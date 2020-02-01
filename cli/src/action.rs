@@ -8,6 +8,8 @@
 use std::collections::HashMap;
 use regex::Regex;
 
+use serde_json;
+
 use super::cli::Cli;
 use super::error::CliError;
 use super::node::Value;
@@ -46,32 +48,109 @@ impl CliAction for CliActionMode {
     }
 }
 
-// Http action.
-pub struct CliActionHttp {
-    method: String,
-    path: String,
-    params: String,
+/// View template enum.
+pub enum CliViewTemplate {
+    /// Template is an internal built-in function with given name.
+    Internal(String),
+
+    /// Template is an external executable with given name and given parameters.
+    External((String, String)),
 }
 
-impl CliActionHttp {
-    pub fn new(value: &serde_json::Value) -> CliActionHttp {
-        let method = value["method"].as_str().unwrap_or("GET");
-        let path = value["path"].as_str().unwrap_or("");
-        let params = value["params"].to_string();
+/// View template implementation.
+impl CliViewTemplate {
 
-        CliActionHttp {
-            method: String::from(method),
-            path: String::from(path),
-            params: params,
+    /// Constructor from JSON.
+    pub fn from_json(value: &serde_json::Value) -> Option<CliViewTemplate> {
+        if let Some(map) = value.as_object() {
+
+            map.get("template").and_then(|t| {
+                match t.as_str().unwrap_or("internal") {
+                    "internal" => {
+                        if let Some(s) = map.get("func") {
+                            if let Some(func) = s.as_str() {
+                                Some(CliViewTemplate::Internal(func.to_string()))
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    },
+                    "external" => {
+                        if let Some(s) = map.get("path") {
+                            if let Some(path) = s.as_str() {
+                                let path = if path.starts_with("/") {
+                                    path.to_string()
+                                } else {
+                                    format!("./{}", path)
+                                };
+
+                                let params = if let Some(p) = map.get("params") {
+                                    p.as_str().unwrap()
+                                } else {
+                                    ""
+                                };
+                                Some(CliViewTemplate::External((path, params.to_string())))
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    },
+                    _ => {
+                        None
+                    },
+                }
+            })
+        } else {
+            None
         }
     }
 }
 
-impl CliAction for CliActionHttp {
-    fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
-        let config_prefix = "/config";
+// Remote action.
+pub struct CliActionRemote {
+    method: String,
+    target: String,
+    path: String,
+    params: String,
+    view: Option<CliViewTemplate>,
+}
 
-        // replace path with params.
+impl CliActionRemote {
+    pub fn new(value: &serde_json::Value) -> CliActionRemote {
+        let method = value["method"].as_str().unwrap_or("GET");
+        let target = value["target"].as_str().unwrap_or("config");
+        let path = value["path"].as_str().unwrap_or("");
+        let params = value["params"].to_string();
+        let view = if value["view"].is_object() {
+            CliViewTemplate::from_json(&value["view"])
+        } else {
+            None
+        };
+
+        CliActionRemote {
+            method: String::from(method),
+            target: String::from(target),
+            path: String::from(path),
+            params: params,
+            view: view,
+        }
+    }
+}
+
+impl CliAction for CliActionRemote {
+    fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
+
+        let remote_client = match cli.remote_client(&self.target) {
+            Some(remote_client) => remote_client,
+            None => return Err(CliError::ActionError(format!("No remote defined for {:?}", self.target)))
+        };
+        let remote_prefix = remote_client.prefix();
+
+        // Replace path with params.
         let path = self.path.split('/').map(|p| {
             if &p[0..1] == ":" {
                 match params.get(&p[1..]) {
@@ -83,7 +162,7 @@ impl CliAction for CliActionHttp {
             }
         }).collect::<Vec<String>>().join("/");
 
-        let path = format!("{}/{}", config_prefix, path);
+        let path = format!("{}/{}", remote_prefix, path);
 
         // TODO: Maybe we could just check first letter of keyword instead of using Regex..
         let re = Regex::new(r"^:[A-Z]").unwrap();
@@ -98,14 +177,42 @@ impl CliAction for CliActionHttp {
         }
 
         // build json body.
-        let request = format!("{} {}\n\n", self.method, path);
+        let request = format!("{} {}\n\n{}", self.method, path, body);
 
         // If only debug.
-        println!("{}", request);
-        println!("{}", body);
+        if cli.is_debug() {
+            println!("% Request to {}", self.target);
+            println!("{}", request);
+        }
 
-        cli.stream_send(&request);
-        cli.stream_send(&body);
+        cli.remote_send(&self.target, &request);
+
+        let resp = cli.remote_recv(&self.target);
+        if cli.is_debug() {
+            println!("% Response");
+            println!("{:?}", resp);
+        }
+
+        if let Some(template) = &self.view {
+            if let Some(json_str) = resp {
+
+                match serde_json::from_str(&json_str) {
+                    Ok(value) => {
+                        match template {
+                            CliViewTemplate::Internal(name) => {
+                                cli.view().call(&name, &value)?;
+                            },
+                            CliViewTemplate::External((name, params)) => {
+                                cli.view().exec(&name, &params, &value)?;
+                            },
+                        }
+                    },
+                    Err(err) => {
+                        println!("Unable to parse response from server {:?} {:?}", err, json_str);
+                    },
+                }
+            }
+        }
 
         Ok(())
     }

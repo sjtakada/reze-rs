@@ -5,28 +5,27 @@
 // CLI - Core Shell functions.
 //
 
-use std::io::BufReader;
-use std::io::Read;
 use std::fs;
-use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 use std::collections::HashMap;
 use std::cell::Cell;
 use std::cell::RefCell;
+use std::cell::RefMut;
 use std::rc::Rc;
 use std::sync::Arc;
 
 use serde_json;
 use rustyline::error::ReadlineError;
 
-use common::uds_client::*;
-
+use super::client::*;
+use super::utils::*;
 use super::config::Config;
 use super::error::CliError;
 use super::readline::*;
 use super::tree::CliTree;
 use super::builtins;
+use super::view::*;
 
 // Constants.
 const CLI_INITIAL_MODE: &str = "EXEC-MODE";
@@ -52,8 +51,11 @@ pub struct Cli {
     /// Current privilege.
     privilege: Cell<u8>,
 
-    /// UDS client.
-    uds_client: Arc<UdsClient>,
+    /// Remote clients.
+    remote_client: RefCell<HashMap<String, Arc<dyn RemoteClient>>>,
+
+    /// View.
+    view: RefCell<CliView>,
 
     /// Debug mode.
     debug: bool,
@@ -63,32 +65,44 @@ pub struct Cli {
 impl Cli {
 
     /// Constructor.
-    pub fn new(uds_client: Arc<UdsClient>) -> Cli {
+    pub fn new() -> Cli {
         Cli {
             trees: HashMap::new(),
             builtins: HashMap::new(),
             mode: RefCell::new(String::new()),
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
-            uds_client: uds_client,
+            remote_client: RefCell::new(HashMap::new()),
+            view: RefCell::new(CliView::new()),
             debug: false,
         }
     }
 
-    /// Return UDS client.
-    pub fn uds_client(&self) -> Arc<UdsClient> {
-        self.uds_client.clone()
+    /// Register remote client.
+    pub fn set_remote_client(&self, target: &str, client: Arc<dyn RemoteClient>) {
+        self.remote_client.borrow_mut().insert(target.to_string(), client);
+    }
+
+    /// Return remote client.
+    pub fn remote_client(&self, target: &str) -> Option<Arc<dyn RemoteClient>> {
+        match self.remote_client.borrow_mut().get(target) {
+            Some(client) => Some(client.clone()),
+            None => None
+        }
     }
 
     /// Entry point of shell initialization.
     pub fn start(&mut self, config: Config) -> Result<(), CliError> {
 
         self.debug = config.debug();
+        if self.debug {
+            println!("% Debug mode");
+        }
 
         // TBD: Terminal init
 
         // Initialize CLI modes.
-        let mut path = PathBuf::from(config.json().unwrap());
+        let mut path = PathBuf::from(config.cli_definition().unwrap());
         path.push(CLI_MODE_FILE);
         self.init_cli_modes(&path)?;
 
@@ -96,9 +110,13 @@ impl Cli {
         self.init_builtins()?;
 
         // Initialize CLI comand definitions.
-        let path = PathBuf::from(config.json().unwrap());
+        let path = PathBuf::from(config.cli_definition().unwrap());
         self.init_cli_commands(&path)?;
         self.set_mode(CLI_INITIAL_MODE)?;
+
+        // Initialize Views.
+        let path = PathBuf::from(config.external_bin().unwrap());
+        self.init_views(&path);
 
         // Init readline.
         let readline = CliReadline::new(&self);
@@ -159,6 +177,14 @@ impl Cli {
                 Err(CliError::ActionError(format!("builtin '{}'", func)))
             }
         }
+    }
+
+    fn init_views(&self, external_bin: &Path) {
+        let _ = self.view.borrow_mut().init(external_bin);
+    }
+
+    pub fn view(&self) -> RefMut<CliView> {
+        self.view.borrow_mut()
     }
 
     fn can_exit(&self) -> bool {
@@ -247,38 +273,9 @@ impl Cli {
         Ok(())
     }
 
-    // Read and return JSON, if it fails, return None.
-    fn json_read(&self, path: &Path) -> Option<serde_json::Value> {
-        let file = match File::open(path) {
-            Ok(file) => file,
-            Err(err) => {
-                println!("Unable to open file: {:?}: {:?}", path, err);
-                return None
-            }
-        };
-
-        let mut buf_reader = BufReader::new(file);
-        let mut json_str = String::new();
-        match buf_reader.read_to_string(&mut json_str) {
-            Ok(_) => {},
-            Err(err) => {
-                println!("Unable to read file: {:?}: {:?}", path, err);
-                return None
-            }
-        };
-
-        match serde_json::from_str(&json_str) {
-            Ok(value) => value,
-            Err(err) => {
-                println!("Unable to parse string as JSON: {:?}: {:?}", path, err);
-                None
-            }
-        }
-    }
-
     // Initialize CLI modes.
     fn init_cli_modes(&mut self, path: &Path) -> Result<(), CliError> {
-        match self.json_read(path) {
+        match json_read(path) {
             Some(root) => {
                 if root.is_object() {
                     self.build_mode(&root, None)?;
@@ -337,7 +334,7 @@ impl Cli {
     }
 
     fn load_cli_json(&mut self, path: &Path) {
-        if let Some(json) = self.json_read(path) {
+        if let Some(json) = json_read(path) {
             if json.is_object() {
                 for k in json.as_object().unwrap().keys() {
                     if let Some(attr) = json[k].as_object() {
@@ -374,10 +371,28 @@ impl Cli {
         Ok(())
     }
 
-    /// Send message througm stream.
-    pub fn stream_send(&self, message: &str) {
-        let uds_client = self.uds_client();
-        uds_client.stream_send(message);
+    /// Send message througm stream remote server.
+    pub fn remote_send(&self, target: &str, message: &str) {
+        match self.remote_client.borrow_mut().get(target) {
+            Some(client) => {
+                client.stream_send(message);
+            },
+            None => {
+                println!("No such client for {:?}", target);
+            }
+        }
+    }
+
+    /// Receive message through stream remote server.
+    pub fn remote_recv(&self, target: &str) -> Option<String> {
+        match self.remote_client.borrow_mut().get(target) {
+            Some(client) => {
+                client.stream_read()
+            },
+            None => {
+                None
+            }
+        }
     }
 }
 
@@ -393,34 +408,33 @@ mod tests {
     }
 
     fn rm_tmp_file() {
-        fs::remove_file(TMP_FILE);
+        let _ = fs::remove_file(TMP_FILE);
     }
 
     #[test]
     pub fn test_json_read() {
-        let cli = Cli::new();
         let pathbuf = PathBuf::from(TMP_FILE);
 
         // No file written yet.
-        let ret = cli.json_read(pathbuf.as_path());
+        let ret = json_read(pathbuf.as_path());
         assert_eq!(ret, None);
 
         // Write non UTF text to file.
         let no_utf_txt = &[0xe9, 0x5a, 0xe9, 0x4a];
         write_tmp_file(no_utf_txt);
-        let ret = cli.json_read(pathbuf.as_path());
+        let ret = json_read(pathbuf.as_path());
         assert_eq!(ret, None);
 
         // UTF but not JSON.
         let utf_txt = "饂飩";
         write_tmp_file(utf_txt.as_bytes());
-        let ret = cli.json_read(pathbuf.as_path());
+        let ret = json_read(pathbuf.as_path());
         assert_eq!(ret, None);
 
         // Proper UTF JSON.
         let json_txt = "{\"noodle\":\"饂飩\"}";
         write_tmp_file(json_txt.as_bytes());
-        let ret = cli.json_read(pathbuf.as_path());
+        let ret = json_read(pathbuf.as_path());
         let v = serde_json::from_str(json_txt).unwrap();
         assert_eq!(ret, v);
 

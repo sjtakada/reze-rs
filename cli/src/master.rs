@@ -5,18 +5,17 @@
 // CLI Master
 //
 
-use std::env;
 use std::thread;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::cell::RefCell;
 
 use common::error::*;
-use common::consts::*;
 use common::event::*;
 use common::uds_client::*;
 
 use super::cli::*;
+use super::client::*;
 use super::signal;
 use super::config::Config;
 use super::error::CliError;
@@ -26,9 +25,6 @@ pub struct CliMaster {
 
     /// Event Manager.
     event_manager: RefCell<Arc<EventManager>>,
-
-    /// UDS Client.
-    uds_client: RefCell<Option<Arc<UdsClient>>>,
 }
 
 /// CLI Master implementation.
@@ -38,29 +34,29 @@ impl CliMaster {
     pub fn new() -> CliMaster {
         CliMaster {
             event_manager: RefCell::new(Arc::new(EventManager::new())),
-            uds_client: RefCell::new(None),
         }
     }
 
     /// Start Master.
     pub fn start(config: Config) -> Result<(), CliError> {
-        // Initialize master and UDS client.
+
+        // Initialize master.
         let master = Arc::new(CliMaster::new());
         master.init_signals()?;
+        let event_manager = master.event_manager();
 
-        let mut path = env::temp_dir();
-        path.push(ROUTERD_CONFIG_UDS_FILENAME);
-        let event_manager = master.event_manager.borrow_mut();
-        let client = UdsClient::start(event_manager.clone(), master.clone(), &path);
-        master.uds_client.borrow_mut().replace(client.clone());
-
-        client.connect();
+        // Initialize Remote clients in master context, so that they run on event manager.
+        let config_client = Arc::new(ConfigClient::new(master.clone(), &config));
+        let exec_client = Arc::new(ExecClient::new(master.clone(), &config));
 
         let (sender, receiver) = mpsc::channel::<bool>();
 
         // Run CLI parser in another thread.
         let handle = thread::spawn(move || {
-            let mut cli = Cli::new(client.clone());
+            let mut cli = Cli::new();
+            cli.set_remote_client("config", config_client.clone());
+            cli.set_remote_client("exec", exec_client.clone());
+
             match cli.start(config) {
                 Ok(_) => {},
                 Err(err) => panic!("CLI Init error: {}", err),
@@ -102,6 +98,11 @@ impl CliMaster {
 
         Ok(())
     }
+
+    /// Return event manager.
+    pub fn event_manager(&self) -> Arc<EventManager> {
+        self.event_manager.borrow_mut().clone()
+    }
 }
 
 /// UdsClientHandler for CliMaster.
@@ -109,14 +110,14 @@ impl UdsClientHandler for CliMaster {
 
     /// callback when client connects to server.
     fn handle_connect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient) -> Result<(), CoreError> {
-        println!("Server conncted.");
+        println!("% Server connected.");
 
         Ok(())
     }
 
     /// callback when client detects server disconnected.
     fn handle_disconnect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient) -> Result<(), CoreError> {
-        println!("Server disconncted.");
+        println!("% Server disconncted.");
         // Should restart reconnect timer.
 
         Ok(())
@@ -126,9 +127,4 @@ impl UdsClientHandler for CliMaster {
     fn handle_message(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient) -> Result<(), CoreError> {
         Ok(())
     }
-}
-
-/// UDS client connect timer.
-pub struct UdsClientTimer {
-
 }

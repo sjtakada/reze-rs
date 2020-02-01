@@ -5,6 +5,7 @@
 // Unix Domain Socket Client.
 //
 
+use std::io::Read;
 use std::io::Write;
 use std::sync::Arc;
 use std::cell::Cell;
@@ -95,8 +96,13 @@ impl UdsClient {
     }
 
     /// Send message.
-    pub fn stream_send(&self, message: &str) {
-        self.get_inner().stream_send(message);
+    pub fn stream_send(&self, message: &str) -> Result<(), CoreError> {
+        self.get_inner().stream_send(message, true)
+    }
+
+    /// Receive message.
+    pub fn stream_read(&self) -> Option<String> {
+        self.get_inner().stream_read(true)
     }
 }
 
@@ -163,14 +169,52 @@ impl UdsClientInner {
         self.event_manager.borrow_mut().clone()
     }
 
-    /// Send message through UnixStream.
-    pub fn stream_send(&self, message: &str) {
+    /// Send a message through UnixStream.
+    /// Optionally blocking socket until it gets ready.
+    pub fn stream_send(&self, message: &str, sync: bool) -> Result<(), CoreError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-                let _ = stream.write_all(message.as_bytes());
+                if sync {
+                    wait_until_writable(stream);
+                }
+
+                if let Err(_err) = stream.write_all(message.as_bytes()) {
+                    return Err(CoreError::UdsWriteError)
+                }
             },
             None => {
                 error!("No stream");
+                return Err(CoreError::UdsWriteError)
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Receive a message through UnixStream.
+    /// Optionally blocking socket until it gets ready.
+    pub fn stream_read(&self, sync: bool) -> Option<String> {
+        match *self.stream.borrow_mut() {
+            Some(ref mut stream) => {
+                let mut buffer = String::new();
+
+                if sync {
+                    wait_until_readable(stream);
+                }
+
+                if let Err(err) = stream.read_to_string(&mut buffer) {
+                    if err.kind() != std::io::ErrorKind::WouldBlock {
+                        error!("Error: {}", err);
+                        return None
+                    }
+                }
+
+                let message = String::from(buffer.trim());
+                Some(message)
+            },
+            None => {
+                error!("No stream");
+                None
             }
         }
     }

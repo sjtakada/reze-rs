@@ -22,9 +22,29 @@ quick_error! {
             description("UDS connect error")
             display(r#"UDS connect error"#)
         }
+        UdsWriteError {
+            description("UDS write error")
+            display(r#"UDS write error"#)
+        }
+        ChannelSendError(s: String) {
+            description("Channel send error")
+            display(r#"Channel write error {}"#, s)
+        }
+        ChannelNoSender {
+            description("Channel sender does not exist")
+            display(r#"Channel sender does not exist"#)
+        }
         RequestInvalid(s: String) {
             description("Command request is invalid")
             display(r#"Command request {} is invalid"#, s)
+        }
+        MdsNoHandler {
+            description("Mds handler does not exist")
+            display(r#"Mds handler does not exist"#)
+        }
+        NotImplemented {
+            description("Trait function not implemented")
+            display(r#"Trait function not implemented"#)
         }
         ConfigNotFound(s: String) {
             description("The command could not be found")
@@ -33,6 +53,10 @@ quick_error! {
         CommandExec(s: String) {
             description("Command execution error")
             display(r#"Command execution error {}"#, s)
+        }
+        NexusToProto {
+            description("Sending message from Nexus to Protocol")
+            display(r#"Sending message from Nexus to Protocol"#)
         }
         ParseMethod {
             description("Unknown Method")

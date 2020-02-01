@@ -25,10 +25,18 @@
         ],
         "actions": [
           {
-            "http": {
-              "method": "GET",
-              "path": "",
-              "params": {
+            "remote": {
+              "target": "exec",
+              "metho": "GET",
+              "path": "show/route_ipv4",
+              "view": {
+                "template": "external",
+                "path": "cli_exec.rb",
+                "params": "show_ip_route.erb"
+              },
+              "viewx": {
+                "template": "internal",
+                "func": "show_ip_route"
               }
             }
           }
@@ -72,7 +80,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -114,7 +123,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -199,7 +209,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -241,7 +252,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -283,7 +295,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -325,7 +338,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -362,7 +376,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -399,7 +414,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -446,7 +462,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -505,7 +522,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -552,7 +570,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -611,7 +630,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -667,7 +687,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -735,7 +756,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -791,7 +813,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -859,7 +882,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -911,7 +935,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -975,7 +1000,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1027,7 +1053,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1091,7 +1118,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1152,7 +1180,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1225,7 +1254,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1286,7 +1316,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1359,7 +1390,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1396,7 +1428,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1443,7 +1476,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1528,7 +1562,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1570,7 +1605,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1612,7 +1648,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {
@@ -1654,44 +1691,8 @@
         ],
         "actions": [
           {
-            "http": {
-              "method": "NOP",
-              "path": "",
-              "params": {
-              }
-            }
-          }
-        ]
-      }
-    ]
-  },
-  "show-ipv6-mroute-cmd": {
-    "token": {
-      "show": {
-        "id": "1",
-        "type": "keyword",
-        "help": "Show running system information"
-      },
-      "ipv6": {
-        "id": "2",
-        "type": "keyword",
-        "help": "IP information"
-      },
-      "mroute": {
-        "id": "3",
-        "type": "keyword",
-        "help": "IPv6 Multicast routing table"
-      }
-    },
-    "command": [
-      {
-        "defun": "show ipv6 mroute",
-        "mode": [
-          "EXEC-MODE"
-        ],
-        "actions": [
-          {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "NOP",
               "path": "",
               "params": {

@@ -49,7 +49,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "config",
               "method": "PUT",
               "path": "route_ipv4/:IPV4-ADDRESS:3.1/:IPV4-ADDRESS:3.2",
               "params": {
@@ -125,7 +126,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "config",
               "method": "NOP",
               "path": "",
               "params": {
@@ -191,7 +193,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "config",
               "method": "DELETE",
               "path": "route_ipv4/:IPV4-ADDRESS:3.1/:IPV4-ADDRESS:3.2",
               "params": {
@@ -266,7 +269,8 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "config",
               "method": "NOP",
               "path": "",
               "params": {

@@ -20,7 +20,6 @@ use std::sync::Mutex;
 use std::boxed::Box;
 use std::cell::Cell;
 use std::cell::RefCell;
-use std::str::FromStr;
 use std::time::Instant;
 use std::time::Duration;
 
@@ -30,18 +29,19 @@ use log::error;
 use common::event::*;
 use common::timer::*;
 use common::error::*;
+use common::method::Method;
 use common::uds_server::*;
 
 use super::signal;
 use super::timer;
+use super::utils::*;
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
 use super::message::nexus::NexusToProto;
 use super::message::zebra::ProtoToZebra;
 use super::message::zebra::ZebraToProto;
 use super::master::ProtocolMaster;
-use super::config::*;
-use super::config_master::*;
+use super::mds::*;
 
 use crate::zebra::master::ZebraMaster;
 use crate::bgp::master::BgpMaster;
@@ -61,9 +61,6 @@ struct MasterTuple {
 /// Router Nexus.
 pub struct RouterNexus {
 
-    /// Global config.
-    config: RefCell<ConfigMaster>,
-
     /// MasterInner map.
     masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
 
@@ -72,131 +69,12 @@ pub struct RouterNexus {
 
     /// Sender channel for ProtoToZebra.
     sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
-}
 
-/// UdsServerHandler implementation for RouterNexus.
-impl UdsServerHandler for RouterNexus {
+    /// UdsServer for Config.
+    config_server: RefCell<Option<Arc<UdsServer>>>,
 
-    /// Process command.
-    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-        if let Some(command) = entry.stream_read() {
-            let mut lines = command.lines();
-
-            if let Some(req) = lines.next() {
-                let mut words = req.split_ascii_whitespace();
-
-                if let Some(method_str) = words.next() {
-                    if let Ok(method) = Method::from_str(method_str) {
-
-                        if let Some(path) = words.next() {
-                            let mut body: Option<String> = None;
-
-                            // Skip a blank line and get body if it is present.
-                            if let Some(_) = lines.next() {
-                                if let Some(b) =  lines.next() {
-                                    body = Some(b.to_string());
-                                }
-                            }
-
-                            debug!("received command method: {}, path: {}, body: {:?}", method, path, body);
-
-                            // dispatch command.
-                            if let Some((_id, path)) = split_id_and_path(path) {
-                                self.dispatch_command(method, &path.unwrap(), body);
-                            }
-
-                            Ok(())
-                        } else {
-                            Err(CoreError::RequestInvalid(req.to_string()))
-                        }
-                    } else {
-                        Err(CoreError::RequestInvalid(req.to_string()))
-                    }
-                } else {
-                    Err(CoreError::RequestInvalid(req.to_string()))
-                }
-            } else {
-                Err(CoreError::RequestInvalid("(no request line)".to_string()))
-            }
-        } else {
-            Err(CoreError::RequestInvalid("(no message)".to_string()))
-        }
-    }
-
-    /// Handle connect placeholder.
-    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
-        debug!("handle_connect");
-        Ok(())
-    }
-
-    /// Handle disconnect placeholder.
-    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-        server.shutdown_entry(entry);
-
-        debug!("handle_disconnect");
-        Ok(())
-    }
-}
-
-/// Timer entry.
-pub struct TimerEntry
-where Self: Send,
-      Self: Sync
-{
-    pub sender: Mutex<mpsc::Sender<NexusToProto>>,
-    pub protocol: ProtocolType,
-    pub expiration: Mutex<Cell<Instant>>,
-    pub token: u32,
-}
-
-/// Timer entry implementation.
-impl TimerEntry {
-
-    /// Constructor.
-    pub fn new(p: ProtocolType, sender: mpsc::Sender<NexusToProto>, d: Duration, token: u32) -> TimerEntry {
-        TimerEntry {
-            sender: Mutex::new(sender),
-            protocol: p,
-            expiration: Mutex::new(Cell::new(Instant::now() + d)),
-            token: token,
-        }
-    }
-}
-
-/// EventHandler implementation for TimerEntry.
-impl EventHandler for TimerEntry {
-
-    /// Event handler.
-    fn handle(&self, e: EventType) -> Result<(), CoreError> {
-        match e {
-            EventType::TimerEvent => {
-                let sender = self.sender.lock().unwrap();
-
-                if let Err(err) = sender.send(NexusToProto::TimerExpiration(self.token)) {
-                    error!("Sending message to protocol {:?} {:?}", self.token, err);
-                }
-            },
-            _ => {
-                error!("Unknown event");
-            }
-        }
-
-        Ok(())
-    }
-}
-
-/// TimerHandler implementation for TimerEntry.
-impl TimerHandler for TimerEntry {
-
-    /// Get expiration.
-    fn expiration(&self) -> Instant {
-        self.expiration.lock().unwrap().get()
-    }
-
-    /// Set expiration.
-    fn set_expiration(&self, d: Duration) {
-        self.expiration.lock().unwrap().set(Instant::now() + d);
-    }
+    /// NexusExec.
+    exec_server: RefCell<Option<Arc<UdsServer>>>,
 }
 
 /// RouterNexus implementation.
@@ -205,18 +83,35 @@ impl RouterNexus {
     /// Constructor.
     pub fn new() -> RouterNexus {
         RouterNexus {
-            config: RefCell::new(ConfigMaster::new()),
             masters: RefCell::new(HashMap::new()),
             sender_p2n: RefCell::new(None),
             sender_p2z: RefCell::new(None),
+            config_server: RefCell::new(None),
+            exec_server: RefCell::new(None),
         }
+    }
+
+    /// Return masters.
+    fn get_sender(&self, p: &ProtocolType) -> Option<mpsc::Sender<NexusToProto>> {
+        match self.masters.borrow().get(&p) {
+            Some(tuple) => Some(tuple.sender.clone()),
+            None => None,
+        }
+    }
+
+    /// Set UdsServer for Config.
+    pub fn set_config_server(&self, uds_server: Arc<UdsServer>) {
+        self.config_server.borrow_mut().replace(uds_server);
+    }
+
+    /// Set UdsServer for Exec.
+    pub fn set_exec_server(&self, uds_server: Arc<UdsServer>) {
+        self.exec_server.borrow_mut().replace(uds_server);
     }
 
     /// Construct MasterInner instance and spawn a thread.
     fn spawn_zebra(&self, sender_p2n: mpsc::Sender<ProtoToNexus>)
                    -> (JoinHandle<()>, mpsc::Sender<NexusToProto>, mpsc::Sender<ProtoToZebra>) {
-        // Clone global config.
-        let ref mut _config = *self.config.borrow_mut();
 
         // Create channel from RouterNexus to MasterInner
         let (sender_n2p, receiver_n2p) = mpsc::channel::<NexusToProto>();
@@ -280,7 +175,7 @@ impl RouterNexus {
         }
     }
 
-    /// Clone P2N sender mpsc.
+    /// Clone ProtoToNexus mpsc::Sender.
     fn clone_sender_p2n(&self) -> mpsc::Sender<ProtoToNexus> {
         if let Some(ref mut sender_p2n) = *self.sender_p2n.borrow_mut() {
             return mpsc::Sender::clone(&sender_p2n);
@@ -288,7 +183,7 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
-    /// Clone P2Z sender mpsc.
+    /// Clone ProtoToZebra mpsc::Sender.
     fn _clone_sender_p2z(&self) -> mpsc::Sender<ProtoToZebra> {
         if let Some(ref mut sender_p2z) = *self.sender_p2z.borrow_mut() {
             return mpsc::Sender::clone(&sender_p2z)
@@ -296,22 +191,11 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
-    /// Initialize config.
-    fn config_init(&self) {
-        self.config.borrow_mut().register_protocol("route_ipv4", ProtocolType::Zebra);
-        self.config.borrow_mut().register_protocol("route_ipv6", ProtocolType::Zebra);
-
-        self.config.borrow_mut().register_protocol("ospf", ProtocolType::Ospf);
-    }
-
     /// Entry point to start RouterNexus.
     pub fn start(nexus: Arc<RouterNexus>, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
         nexus.sender_p2n.borrow_mut().replace(sender_p2n);
-
-        // Config init.
-        nexus.config_init();
 
         // Spawn zebra instance
         let (handle, sender, sender_p2z) = nexus.spawn_zebra(nexus.clone_sender_p2n());
@@ -370,45 +254,342 @@ impl RouterNexus {
                         event_manager.register_timer(d, Arc::new(entry));
                     }
                 },
+                ProtoToNexus::ConfigResponse((index, resp)) => {
+                    if let Some(ref mut uds_server) = *self.config_server.borrow_mut() {
+                        let inner = uds_server.get_inner();
+                        match inner.lookup_entry(index) {
+                            Some(entry) => {
+                                let resp = match resp {
+                                    Some(s) => format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", *s),
+                                    None => r#"{"status": "OK"}"#.to_string(),
+                                };
+
+                                if let Err(_err) = entry.stream_send(&resp) {
+                                    error!("Send UdsServerEntry");
+                                }
+                            },
+                            None => {
+                                error!("No UdsServerEntry");
+                            }
+                        }
+                    }
+                },
+                ProtoToNexus::ExecResponse((index, resp)) => {
+                    if let Some(ref mut uds_server) = *self.exec_server.borrow_mut() {
+                        let inner = uds_server.get_inner();
+                        match inner.lookup_entry(index) {
+                            Some(entry) => {
+                                let resp = match resp {
+                                    Some(s) => *s,
+                                    None => "".to_string(),
+                                };
+
+                                if let Err(_err) = entry.stream_send(&resp) {
+                                    error!("Send UdsServerEntry");
+                                }
+                            },
+                            None => {
+                                error!("No UdsServerEntry");
+                            }
+                        }
+                    }
+                },
                 ProtoToNexus::ProtoException(s) => {
                     debug!("Received Exception {}", s);
                 },
             }
         }
     }
+}
 
-    /// Dispatch command request from Uds stream to protocol channel.
-    fn dispatch_command(&self, method: Method, path: &str, body: Option<String>) {
-        match self.config.borrow().lookup(path) {
-            Some(config_or_protocol) => {
-                match config_or_protocol {
-                    ConfigOrProtocol::Local(_config) => {
-                            debug!("local config");
-                    },
-                    ConfigOrProtocol::Proto(p) => {
-                        match self.masters.borrow_mut().get(&p) {
-                            Some(tuple) => {
-                                let b = match body {
-                                    Some(s) => Some(Box::new(s)),
-                                    None => None
-                                };
+/// Dispatch request to protocol.
+pub struct MdsProtocolHandler
+{
+    /// Protocol Type.
+    proto: ProtocolType,
 
-                                // XXX
-                                match tuple.sender.send(NexusToProto::SendConfig((method, path.to_string(), b))) {
-                                    Ok(_) => {},
-                                    Err(_) => error!("sender error"),
-                                }
-                            },
-                            None => {
-                                panic!("Unexpected error");
-                            },
-                        }
-                    },
-                }
+    /// Nexus.
+    nexus: RefCell<Arc<RouterNexus>>,
+
+    /// Encoder.
+    encoder: &'static dyn Fn(u32, Method, &str, Option<Box<String>>) -> NexusToProto
+}
+
+/// MdsProtocolHandler implementation.
+impl MdsProtocolHandler {
+
+    /// Constructor.
+    pub fn new(proto: ProtocolType, nexus: Arc<RouterNexus>) -> MdsProtocolHandler {
+        MdsProtocolHandler {
+            proto: proto,
+            nexus: RefCell::new(nexus),
+            encoder: &|id: u32, method: Method, path: &str, body: Option<Box<String>>| -> NexusToProto {
+                NexusToProto::ConfigRequest((id, method, path.to_string(), body))
             },
-            None => {
-                error!("No config exists")
-            }
+        }
+    }
+
+    /// Constructor.
+    pub fn new_exec(proto: ProtocolType, nexus: Arc<RouterNexus>) -> MdsProtocolHandler {
+        MdsProtocolHandler {
+            proto: proto,
+            nexus: RefCell::new(nexus),
+            encoder: &|id: u32, method: Method, path: &str, body: Option<Box<String>>| -> NexusToProto {
+                NexusToProto::ExecRequest((id, method, path.to_string(), body))
+            },
         }
     }
 }
+
+
+/// MdsHandler implementation for MdsProtocolHandler.
+impl MdsHandler for MdsProtocolHandler {
+
+    /// Handle all methods.
+    fn handle_generic(&self, id: u32, method: Method,
+                      path: &str, params: Option<Box<String>>) -> Result<Option<String>, CoreError> {
+        let nexus = self.nexus.borrow();
+
+        match nexus.get_sender(&self.proto) {
+            Some(sender) => {
+                if let Err(_) = sender.send((*self.encoder)(id, method, path, params)) {
+                    Err(CoreError::ChannelSendError(format!("{} {}", method, path)))
+                } else {
+                    Ok(None)
+                }
+            }
+            None => {
+                Err(CoreError::ChannelNoSender)
+            }
+        }
+    }
+
+    /// Return handle_generic implmented.
+    fn is_generic(&self) -> bool {
+        true
+    }
+}
+
+/// NexusConfig
+pub struct NexusConfig {
+
+    /// MdsNode root.
+    mds: RefCell<Rc<MdsNode>>,
+
+    /// RouterNexus.
+    _nexus: RefCell<Arc<RouterNexus>>,
+}
+
+/// NexusConfig implementation.
+impl NexusConfig {
+
+    /// Constructor.
+    pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
+        let mds = Rc::new(MdsNode::new());
+
+        let zebra_handler = Rc::new(MdsProtocolHandler::new(ProtocolType::Zebra, nexus.clone()));
+        MdsNode::register_handler(mds.clone(), "/config/route_ipv4", zebra_handler.clone());
+        MdsNode::register_handler(mds.clone(), "/config/route_ipv6", zebra_handler.clone());
+
+        NexusConfig {
+            mds: RefCell::new(mds),
+            _nexus: RefCell::new(nexus),
+        }
+    }
+
+    /// Dispatch request to MDS tree.
+    fn handle_request(&self, id: u32, method: Method,
+                      path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
+
+        let body = match body {
+            Some(s) => Some(Box::new(s)),
+            None => None
+        };
+
+        let mds_root = self.mds.borrow().clone();
+
+        MdsNode::handle(mds_root, id, method, path, body)
+    }
+}
+
+/// UdsServerHandler implementation for NexusConfig.
+impl UdsServerHandler for NexusConfig {
+
+    /// Process request.
+    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        if let Some(request) = entry.stream_read() {
+            match request_parse(request) {
+                Ok((method, path, body)) => {
+                    debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
+
+                    if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                        Err(err)
+                    } else {
+                        // Even if we get some response from handler, we don't send it right away.
+                        Ok(())
+                    }
+                },
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(CoreError::RequestInvalid("(no message)".to_string()))
+        }
+    }
+
+    /// Handle connect placeholder.
+    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+        debug!("handle_connect");
+        Ok(())
+    }
+
+    /// Handle disconnect placeholder.
+    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        server.shutdown_entry(entry);
+
+        debug!("handle_disconnect");
+        Ok(())
+    }
+}
+
+/// NexusExec.
+pub struct NexusExec {
+
+    /// MdsNode root.
+    mds: RefCell<Rc<MdsNode>>,
+
+    /// RouterNexus.
+    _nexus: RefCell<Arc<RouterNexus>>,
+}
+
+/// NexusExec implementation.
+impl NexusExec {
+
+    /// Constructor.
+    pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
+        let mds = Rc::new(MdsNode::new());
+
+        let zebra_handler = Rc::new(MdsProtocolHandler::new_exec(ProtocolType::Zebra, nexus.clone()));
+        MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", zebra_handler.clone());
+        MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv6", zebra_handler.clone());
+
+        NexusConfig {
+            mds: RefCell::new(mds),
+            _nexus: RefCell::new(nexus),
+        }
+    }
+
+    /// Dispatch request to MDS tree.
+    fn handle_request(&self, id: u32, method: Method,
+                      path: &str, body: Option<String>) -> Result<Option<String>, CoreError> {
+
+        let body = match body {
+            Some(s) => Some(Box::new(s)),
+            None => None
+        };
+
+        let mds_root = self.mds.borrow().clone();
+
+        MdsNode::handle(mds_root, id, method, path, body)
+    }
+}
+
+/// UdsServerHandler implementation for NexusExec.
+impl UdsServerHandler for NexusExec {
+
+    /// Process command.
+    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        if let Some(request) = entry.stream_read() {
+            match request_parse(request) {
+                Ok((method, path, body)) => {
+                    debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
+
+                    if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                        Err(err)
+                    } else {
+                        Ok(())
+                    }
+                },
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(CoreError::RequestInvalid("(no message)".to_string()))
+        }
+    }
+
+    /// Handle connect placeholder.
+    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+        debug!("handle_connect");
+        Ok(())
+    }
+
+    /// Handle disconnect placeholder.
+    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+        server.shutdown_entry(entry);
+
+        debug!("handle_disconnect");
+        Ok(())
+    }
+}
+
+
+/// Timer entry.
+pub struct TimerEntry
+where Self: Send,
+      Self: Sync
+{
+    pub sender: Mutex<mpsc::Sender<NexusToProto>>,
+    pub protocol: ProtocolType,
+    pub expiration: Mutex<Cell<Instant>>,
+    pub token: u32,
+}
+
+/// Timer entry implementation.
+impl TimerEntry {
+
+    /// Constructor.
+    pub fn new(p: ProtocolType, sender: mpsc::Sender<NexusToProto>, d: Duration, token: u32) -> TimerEntry {
+        TimerEntry {
+            sender: Mutex::new(sender),
+            protocol: p,
+            expiration: Mutex::new(Cell::new(Instant::now() + d)),
+            token: token,
+        }
+    }
+}
+
+/// EventHandler implementation for TimerEntry.
+impl EventHandler for TimerEntry {
+
+    /// Event handler.
+    fn handle(&self, e: EventType) -> Result<(), CoreError> {
+        match e {
+            EventType::TimerEvent => {
+                let sender = self.sender.lock().unwrap();
+
+                if let Err(err) = sender.send(NexusToProto::TimerExpiration(self.token)) {
+                    error!("Sending message to protocol {:?} {:?}", self.token, err);
+                }
+            },
+            _ => {
+                error!("Unknown event");
+            }
+        }
+
+        Ok(())
+    }
+}
+
+/// TimerHandler implementation for TimerEntry.
+impl TimerHandler for TimerEntry {
+
+    /// Get expiration.
+    fn expiration(&self) -> Instant {
+        self.expiration.lock().unwrap().get()
+    }
+
+    /// Set expiration.
+    fn set_expiration(&self, d: Duration) {
+        self.expiration.lock().unwrap().set(Instant::now() + d);
+    }
+}
+
