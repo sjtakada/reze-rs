@@ -13,6 +13,10 @@ use std::sync::Arc;
 use std::time::Instant;
 use std::time::Duration;
 use std::cmp::Ordering;
+use std::future::Future;
+use std::task::Context;
+use std::task::Poll;
+use std::pin::Pin;
 
 //use log::error;
 
@@ -93,6 +97,34 @@ impl TimerServer {
     /// Run all expired event handler.
     pub fn run(&self) -> Option<Arc<dyn TimerHandler>> {
         self.pop_if_expired()
+    }
+}
+
+
+/// Timer Future.
+pub struct TimerFuture {
+    fire_at: Instant,
+}
+
+impl TimerFuture {
+
+    /// Constructor.
+    pub fn new(duration: Duration) -> Self {
+        TimerFuture {
+            fire_at: Instant::now() + duration,
+        }
+    }
+}
+
+impl Future for TimerFuture {
+    type Output = ();
+    fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let now = Instant::now();
+        if self.fire_at < now {
+            Poll::Ready(())
+        } else {
+            Poll::Pending
+        }
     }
 }
 

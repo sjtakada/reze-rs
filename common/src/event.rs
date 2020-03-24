@@ -10,8 +10,16 @@ use std::thread;
 use std::collections::HashMap;
 use std::cell::RefCell;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::time::Duration;
+use std::future::Future;
+use std::task::Context;
+use std::task;
 
+use futures::future::BoxFuture;
+use futures::future::FutureExt;
+use futures::task::ArcWake;
+use futures::task::waker_ref;
 use mio::*;
 use log::error;
 use log::debug;
@@ -77,6 +85,9 @@ pub struct EventManager {
 
     /// Channel handler function.
     channel_handler: RefCell<Option<Box<dyn Fn(&EventManager) -> Result<(), CoreError>>>>,
+
+    /// Timer Futures.
+    timer_futures: RefCell<Vec<Arc<Task>>>,
 }
 
 /// EventManager implementation.
@@ -93,7 +104,17 @@ impl EventManager {
             }),
             timers: RefCell::new(TimerServer::new()),
             channel_handler: RefCell::new(None),
+            timer_futures: RefCell::new(Vec::new()),
         }
+    }
+
+    /// Register Timer Future.
+    pub fn register_timer_future(&self, future: impl Future<Output = ()> + 'static + Send) {
+        let future = future.boxed();
+        let task = Arc::new(Task {
+            future: Mutex::new(Some(future)),
+        });
+        self.timer_futures.borrow_mut().push(task.clone());
     }
 
     /// Register listen socket.
@@ -265,6 +286,21 @@ impl EventManager {
             return Err(err)
         }
 
+        let ref mut timer_futures = *self.timer_futures.borrow_mut();
+        for task in timer_futures {
+            let mut future_slot = task.future.lock().unwrap();
+            if let Some(mut future) = future_slot.take() {
+                let waker = waker_ref(&task);
+                let context = &mut Context::from_waker(&*waker);
+                if let task::Poll::Pending = future.as_mut().poll(context) {
+                    println!("*** timer future 1");
+                    *future_slot = Some(future);
+                } else {
+                    println!("*** timer future 2");
+                }
+            }
+        }
+
         // Wait a little bit.
         self.sleep();
 
@@ -288,4 +324,16 @@ pub fn wait_until_writable(fd: &dyn Evented) {
     let mut events = Events::with_capacity(1024);
 
     let _ = poll.poll(&mut events, None);
+}
+
+
+/// Task, wrapping a Future.
+struct Task {
+    future: Mutex<Option<BoxFuture<'static, ()>>>,
+}
+
+impl ArcWake for Task {
+    fn wake_by_ref(_arc_self: &Arc<Self>) {
+
+    }
 }
