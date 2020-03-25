@@ -217,6 +217,12 @@ impl RouterNexus {
         };
         event_manager.set_channel_handler(Box::new(handler));
 
+        event_manager.register_timer_future(async {
+            println!("register timer begin");
+            TimerFuture::new(Duration::new(10, 0)).await;
+            println!("register timer end");
+        });
+
         // Main event loop.
         while !signal::is_sigint_caught() {
             match event_manager.run() {
