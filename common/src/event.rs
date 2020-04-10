@@ -15,6 +15,7 @@ use std::time::Duration;
 use std::future::Future;
 use std::task::Context;
 use std::task;
+use std::os::unix::io::RawFd;
 
 use futures::future::BoxFuture;
 use futures::future::FutureExt;
@@ -27,6 +28,7 @@ use log::debug;
 use super::consts::*;
 use super::error::*;
 use super::timer::*;
+use super::epoll::*;
 
 /// Event types.
 pub enum EventType {
@@ -88,6 +90,10 @@ pub struct EventManager {
 
     /// Timer Futures.
     timer_futures: RefCell<Vec<Arc<Task>>>,
+
+    /// Epoll futures.
+    epoll: RefCell<EpollEventManager>,
+    //epoll_futures: RefCell<Vec<Arc<Task>>>,
 }
 
 /// EventManager implementation.
@@ -95,6 +101,9 @@ impl EventManager {
 
     /// Constructor.
     pub fn new() -> EventManager {
+        // XXX
+        let epoll = EpollEventManager::new().unwrap();
+
         EventManager {
             fd_events: RefCell::new(FdEvent {
                 index: 1,	// Reserve 0
@@ -105,6 +114,7 @@ impl EventManager {
             timers: RefCell::new(TimerServer::new()),
             channel_handler: RefCell::new(None),
             timer_futures: RefCell::new(Vec::new()),
+            epoll: RefCell::new(epoll),
         }
     }
 
@@ -115,6 +125,15 @@ impl EventManager {
             future: Mutex::new(Some(future)),
         });
         self.timer_futures.borrow_mut().push(task.clone());
+    }
+
+    /// Register Epoll Future.
+    pub fn register_read_future(&self, fd: RawFd, future: impl Future<Output = ()> + 'static + Send) {
+        let future = future.boxed();
+        let task = Arc::new(Task {
+            future: Mutex::new(Some(future)),
+        });
+        self.epoll.borrow_mut().register_read(fd, task);
     }
 
     /// Register listen socket.
@@ -286,6 +305,7 @@ impl EventManager {
             return Err(err)
         }
 
+        // Process Timer Future.
         let ref mut timer_futures = *self.timer_futures.borrow_mut();
         for task in timer_futures {
             let mut future_slot = task.future.lock().unwrap();
@@ -297,6 +317,21 @@ impl EventManager {
                     *future_slot = Some(future);
                 } else {
                     println!("*** timer future 2");
+                }
+            }
+        }
+
+        // Process Epoll Future.
+        while let Some(task) = self.epoll.borrow_mut().pop_ready() {
+            let mut future_slot = task.future.lock().unwrap();
+            if let Some(mut future) = future_slot.take() {
+                let waker = waker_ref(&task);
+                let context = &mut Context:: from_waker(&*waker);
+                if let task::Poll::Pending = future.as_mut().poll(context) {
+                    println!("*** epoll future 1");
+                    *future_slot = Some(future);
+                } else {
+                    println!("*** epoll future 2");
                 }
             }
         }
@@ -328,8 +363,8 @@ pub fn wait_until_writable(fd: &dyn Evented) {
 
 
 /// Task, wrapping a Future.
-struct Task {
-    future: Mutex<Option<BoxFuture<'static, ()>>>,
+pub struct Task {
+    pub future: Mutex<Option<BoxFuture<'static, ()>>>,
 }
 
 impl ArcWake for Task {
