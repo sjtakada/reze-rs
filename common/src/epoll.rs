@@ -99,7 +99,7 @@ impl EpollEventManager {
 pub struct EpollFuture {
 
     /// EventManager.
-    event_manager: Arc<EventManager>,
+//    event_manager: Arc<EventManager>,
 
     /// Raw FD.
     fd: RawFd,
@@ -108,9 +108,9 @@ pub struct EpollFuture {
 impl EpollFuture {
 
     /// Constructor.
-    pub fn new(event_manager: Arc<EventManager>, fd: RawFd) -> Self {
+    pub fn new(/*event_manager: Arc<EventManager>, */fd: RawFd) -> Self {
         EpollFuture {
-            event_manager: event_manager,
+//            event_manager: event_manager,
             fd: fd,
         }
     }

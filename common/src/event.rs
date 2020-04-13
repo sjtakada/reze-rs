@@ -322,6 +322,8 @@ impl EventManager {
         }
 
         // Process Epoll Future.
+        self.epoll.borrow_mut().wait();
+
         while let Some(task) = self.epoll.borrow_mut().pop_ready() {
             let mut future_slot = task.future.lock().unwrap();
             if let Some(mut future) = future_slot.take() {
