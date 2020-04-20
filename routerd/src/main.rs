@@ -99,6 +99,9 @@ fn main() {
 // TODO: probably take config or command line parameters.
 fn start() {
 
+    // XXX
+    let future_manager = Arc::new(FutureManager::new());
+
     // Event Manager and Nexus.
     let event_manager = Arc::new(EventManager::new());
     let nexus = Arc::new(RouterNexus::new());
@@ -120,7 +123,7 @@ fn start() {
 //    nexus.set_exec_server(uds_server);
 
     // Start nexus.
-    match RouterNexus::start(nexus, event_manager) {
+    match RouterNexus::start(nexus, event_manager, future_manager) {
         Err(CoreError::SystemShutdown) => {
             info!("Nexus terminated")
         },

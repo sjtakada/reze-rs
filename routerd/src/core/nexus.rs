@@ -198,7 +198,8 @@ impl RouterNexus {
     }
 
     /// Entry point to start RouterNexus.
-    pub fn start(nexus: Arc<RouterNexus>, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
+    pub fn start(nexus: Arc<RouterNexus>, event_manager: Arc<EventManager>,
+                 future_manager: Arc<FutureManager>) -> Result<(), CoreError> {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
         nexus.sender_p2n.borrow_mut().replace(sender_p2n);
@@ -208,13 +209,16 @@ impl RouterNexus {
         nexus.sender_p2z.borrow_mut().replace(sender_p2z);
         nexus.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
+
         let mut config_uds_path = env::temp_dir();
         config_uds_path.push(ROUTERD_CONFIG_UDS_FILENAME);
         let listener = UnixListener::bind(config_uds_path).unwrap();
         let raw_fd = listener.as_raw_fd();
-        event_manager.register_read_future(listener.as_raw_fd(), async move {
+        let future_manager_clone = future_manager.clone();
+
+        future_manager.clone().register_read_future(listener.as_raw_fd(), async move {
             println!("** register read future");
-            EpollFuture::new(raw_fd).await;
+            EpollFuture::new(future_manager_clone, raw_fd).await;
         });
 
         // XXX spawn OSPF
@@ -240,6 +244,12 @@ impl RouterNexus {
         // Main event loop.
         while !signal::is_sigint_caught() {
             match event_manager.run() {
+                Err(CoreError::SystemShutdown) => break,
+                _ => {
+                }
+            }
+
+            match future_manager.run() {
                 Err(CoreError::SystemShutdown) => break,
                 _ => {
                 }

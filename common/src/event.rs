@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use std::cell::RefCell;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::MutexGuard;
 use std::time::Duration;
 use std::future::Future;
 use std::task::Context;
@@ -90,10 +91,6 @@ pub struct EventManager {
 
     /// Timer Futures.
     timer_futures: RefCell<Vec<Arc<Task>>>,
-
-    /// Epoll futures.
-    epoll: RefCell<EpollEventManager>,
-    //epoll_futures: RefCell<Vec<Arc<Task>>>,
 }
 
 /// EventManager implementation.
@@ -101,9 +98,6 @@ impl EventManager {
 
     /// Constructor.
     pub fn new() -> EventManager {
-        // XXX
-        let epoll = EpollEventManager::new().unwrap();
-
         EventManager {
             fd_events: RefCell::new(FdEvent {
                 index: 1,	// Reserve 0
@@ -114,7 +108,6 @@ impl EventManager {
             timers: RefCell::new(TimerServer::new()),
             channel_handler: RefCell::new(None),
             timer_futures: RefCell::new(Vec::new()),
-            epoll: RefCell::new(epoll),
         }
     }
 
@@ -125,15 +118,6 @@ impl EventManager {
             future: Mutex::new(Some(future)),
         });
         self.timer_futures.borrow_mut().push(task.clone());
-    }
-
-    /// Register Epoll Future.
-    pub fn register_read_future(&self, fd: RawFd, future: impl Future<Output = ()> + 'static + Send) {
-        let future = future.boxed();
-        let task = Arc::new(Task {
-            future: Mutex::new(Some(future)),
-        });
-        self.epoll.borrow_mut().register_read(fd, task);
     }
 
     /// Register listen socket.
@@ -321,29 +305,77 @@ impl EventManager {
             }
         }
 
-        // Process Epoll Future.
-        self.epoll.borrow_mut().wait();
-
-        while let Some(task) = self.epoll.borrow_mut().pop_ready() {
-            let mut future_slot = task.future.lock().unwrap();
-            if let Some(mut future) = future_slot.take() {
-                let waker = waker_ref(&task);
-                let context = &mut Context:: from_waker(&*waker);
-                if let task::Poll::Pending = future.as_mut().poll(context) {
-                    println!("*** epoll future 1");
-                    *future_slot = Some(future);
-                } else {
-                    println!("*** epoll future 2");
-                }
-            }
-        }
-
         // Wait a little bit.
         self.sleep();
 
         Ok(())
     }
 }
+
+/// Future Event Manager.
+pub struct FutureManager {
+
+    /// Epoll Event Manager.
+    epoll: Mutex<EpollEventManager>,
+}
+
+///
+impl FutureManager {
+
+    /// Constructor.
+    pub fn new() -> FutureManager {
+        // XXX
+        let epoll = EpollEventManager::new().unwrap();
+
+        FutureManager {
+            epoll: Mutex::new(epoll),
+        }
+    }
+
+    /// Return Epoll.
+    pub fn epoll(&self) -> MutexGuard<EpollEventManager> {
+        self.epoll.lock().unwrap()
+    }
+
+    /// Register Epoll Future.
+    pub fn register_read_future(&self, fd: RawFd, future: impl Future<Output = ()> + 'static + Send) {
+        let future = future.boxed();
+        let task = Arc::new(Task {
+            future: Mutex::new(Some(future)),
+        });
+
+        self.epoll().register_read(fd, task);
+    }
+
+    /// Event loop, but just a single iteration of all possible events.
+    pub fn run(&self) -> Result<(), CoreError> {
+
+        // Process Epoll Future.
+        self.epoll().wait();
+
+        // Collect all waiting tasks.
+        let tasks: Vec<Arc<Task>> = self.epoll().task_waiting
+            .values()
+            .map(|(_, task)| task.clone())
+            .collect();
+
+        for task in &tasks {
+            let mut future_slot = task.future.lock().unwrap();
+            if let Some(mut future) = future_slot.take() {
+                let waker = waker_ref(task);
+                let context = &mut Context:: from_waker(&*waker);
+                if let task::Poll::Pending = future.as_mut().poll(context) {
+                    *future_slot = Some(future);
+                } else {
+                    // Ready, task will be done.
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
 
 /// Utility to blocking until fd gets readable.
 pub fn wait_until_readable(fd: &dyn Evented) {
