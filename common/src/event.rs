@@ -88,9 +88,6 @@ pub struct EventManager {
 
     /// Channel handler function.
     channel_handler: RefCell<Option<Box<dyn Fn(&EventManager) -> Result<(), CoreError>>>>,
-
-    /// Timer Futures.
-    timer_futures: RefCell<Vec<Arc<Task>>>,
 }
 
 /// EventManager implementation.
@@ -107,17 +104,7 @@ impl EventManager {
             }),
             timers: RefCell::new(TimerServer::new()),
             channel_handler: RefCell::new(None),
-            timer_futures: RefCell::new(Vec::new()),
         }
-    }
-
-    /// Register Timer Future.
-    pub fn register_timer_future(&self, future: impl Future<Output = ()> + 'static + Send) {
-        let future = future.boxed();
-        let task = Arc::new(Task {
-            future: Mutex::new(Some(future)),
-        });
-        self.timer_futures.borrow_mut().push(task.clone());
     }
 
     /// Register listen socket.
@@ -289,22 +276,6 @@ impl EventManager {
             return Err(err)
         }
 
-        // Process Timer Future.
-        let ref mut timer_futures = *self.timer_futures.borrow_mut();
-        for task in timer_futures {
-            let mut future_slot = task.future.lock().unwrap();
-            if let Some(mut future) = future_slot.take() {
-                let waker = waker_ref(&task);
-                let context = &mut Context::from_waker(&*waker);
-                if let task::Poll::Pending = future.as_mut().poll(context) {
-                    println!("*** timer future 1");
-                    *future_slot = Some(future);
-                } else {
-                    println!("*** timer future 2");
-                }
-            }
-        }
-
         // Wait a little bit.
         self.sleep();
 
@@ -314,6 +285,9 @@ impl EventManager {
 
 /// Future Event Manager.
 pub struct FutureManager {
+
+    /// Timer Futures.
+    timer_futures: Mutex<Vec<Arc<Task>>>,
 
     /// FD Event Manager.
     fd_poller: Mutex<EpollEventManager>,
@@ -328,6 +302,7 @@ impl FutureManager {
         let epoll = EpollEventManager::new().unwrap();
 
         FutureManager {
+            timer_futures: Mutex::new(Vec::new()),
             fd_poller: Mutex::new(epoll),
         }
     }
@@ -339,7 +314,16 @@ impl FutureManager {
         self.fd_poller.lock().unwrap()
     }
 
-    /// Register Epoll Future.
+    /// Register Timer Future.
+    pub fn register_timer_future(&self, future: impl Future<Output = ()> + 'static + Send) {
+        let future = future.boxed();
+        let task = Arc::new(Task {
+            future: Mutex::new(Some(future)),
+        });
+        self.timer_futures.lock().unwrap().push(task.clone());
+    }
+
+    /// Register FD read future.
     pub fn register_read_future(&self, fd: RawFd, future: impl Future<Output = ()> + 'static + Send) {
         let future = future.boxed();
         let task = Arc::new(Task {
@@ -355,7 +339,7 @@ impl FutureManager {
         // Process FD poller futures.
         self.fd_poller().wait();
 
-        // Collect all waiting tasks.
+        // Collect all waiting FD tasks.
         let tasks: Vec<Arc<Task>> = self.fd_poller().task_waiting()
             .values()
             .map(|(_, task)| task.clone())
@@ -370,6 +354,22 @@ impl FutureManager {
                     *future_slot = Some(future);
                 } else {
                     // Ready, task will be done.
+                }
+            }
+        }
+
+        // Process Timer Future.
+        let ref mut timer_futures = *self.timer_futures.lock().unwrap();
+        for task in timer_futures {
+            let mut future_slot = task.future.lock().unwrap();
+            if let Some(mut future) = future_slot.take() {
+                let waker = waker_ref(&task);
+                let context = &mut Context::from_waker(&*waker);
+                if let task::Poll::Pending = future.as_mut().poll(context) {
+                    println!("*** timer future 1");
+                    *future_slot = Some(future);
+                } else {
+                    println!("*** timer future 2");
                 }
             }
         }

@@ -124,6 +124,7 @@ impl EpollFuture {
 
 impl Future for EpollFuture {
     type Output = ();
+
     fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
         let event_manager = self.event_manager.clone();
         let mut epoll = event_manager.fd_poller();
