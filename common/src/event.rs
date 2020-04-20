@@ -315,8 +315,8 @@ impl EventManager {
 /// Future Event Manager.
 pub struct FutureManager {
 
-    /// Epoll Event Manager.
-    epoll: Mutex<EpollEventManager>,
+    /// FD Event Manager.
+    fd_poller: Mutex<EpollEventManager>,
 }
 
 ///
@@ -328,13 +328,15 @@ impl FutureManager {
         let epoll = EpollEventManager::new().unwrap();
 
         FutureManager {
-            epoll: Mutex::new(epoll),
+            fd_poller: Mutex::new(epoll),
         }
     }
 
-    /// Return Epoll.
-    pub fn epoll(&self) -> MutexGuard<EpollEventManager> {
-        self.epoll.lock().unwrap()
+    /// Return FD poller.
+    pub fn fd_poller(&self) -> MutexGuard<EpollEventManager> {
+
+        // Should abstract other type.
+        self.fd_poller.lock().unwrap()
     }
 
     /// Register Epoll Future.
@@ -344,17 +346,17 @@ impl FutureManager {
             future: Mutex::new(Some(future)),
         });
 
-        self.epoll().register_read(fd, task);
+        self.fd_poller().register_read(fd, task);
     }
 
     /// Event loop, but just a single iteration of all possible events.
     pub fn run(&self) -> Result<(), CoreError> {
 
-        // Process Epoll Future.
-        self.epoll().wait();
+        // Process FD poller futures.
+        self.fd_poller().wait();
 
         // Collect all waiting tasks.
-        let tasks: Vec<Arc<Task>> = self.epoll().task_waiting
+        let tasks: Vec<Arc<Task>> = self.fd_poller().task_waiting()
             .values()
             .map(|(_, task)| task.clone())
             .collect();

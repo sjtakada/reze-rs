@@ -36,7 +36,7 @@ pub struct EpollEventManager {
     events: Vec<EpollEvent>,
 
     /// Waiting tasks.
-    pub task_waiting: HashMap<RawFd, (bool, Arc<Task>)>,
+    task_waiting: HashMap<RawFd, (bool, Arc<Task>)>,
 }
 
 unsafe impl Send for EpollEventManager {}
@@ -55,9 +55,14 @@ impl EpollEventManager {
         })
     }
 
+    /// Return task waiting.
+    pub fn task_waiting(&mut self) -> &mut HashMap<RawFd, (bool, Arc<Task>)> {
+        &mut self.task_waiting
+    }
+
     /// Register.
     pub fn register_read(&mut self, fd: RawFd, task: Arc<Task>) {
-        self.task_waiting.insert(fd, (false, task.clone()));
+        self.task_waiting().insert(fd, (false, task.clone()));
 
         let mut event = libc::epoll_event {
             events: (EPOLLET | EPOLLIN | EPOLLRDHUP) as u32,
@@ -121,7 +126,7 @@ impl Future for EpollFuture {
     type Output = ();
     fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
         let event_manager = self.event_manager.clone();
-        let mut epoll = event_manager.epoll();
+        let mut epoll = event_manager.fd_poller();
 
         if let Some((flag, _)) = epoll.task_waiting.get(&self.fd) {
             if *flag {
@@ -131,6 +136,7 @@ impl Future for EpollFuture {
                 Poll::Pending
             }
         } else {
+            // Unlikely, though.
             Poll::Pending
         }
     }
