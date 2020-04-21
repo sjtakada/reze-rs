@@ -314,23 +314,39 @@ impl FutureManager {
         self.fd_poller.lock().unwrap()
     }
 
+    /// Register Timer.
+    pub fn register_timer(&self, duration: Duration, 
+                          f: Box<dyn Fn() + 'static + Send + Sync>) -> Arc<Task>
+    {
+        self.register_timer_future(async move {
+            TimerFuture::new(duration).await;
+            f();
+        })
+    }
+
     /// Register Timer Future.
-    pub fn register_timer_future(&self, future: impl Future<Output = ()> + 'static + Send) {
+    fn register_timer_future(&self, future: impl Future<Output = ()> + 'static + Send) -> Arc<Task> {
         let future = future.boxed();
         let task = Arc::new(Task {
             future: Mutex::new(Some(future)),
+            canceled: false,
         });
+
         self.timer_futures.lock().unwrap().push(task.clone());
+        task
     }
 
     /// Register FD read future.
-    pub fn register_read_future(&self, fd: RawFd, future: impl Future<Output = ()> + 'static + Send) {
+    pub fn register_read(&self, fd: RawFd,
+                         future: impl Future<Output = ()> + 'static + Send) -> Arc<Task> {
         let future = future.boxed();
         let task = Arc::new(Task {
             future: Mutex::new(Some(future)),
+            canceled: false,
         });
 
-        self.fd_poller().register_read(fd, task);
+        self.fd_poller().register_read(fd, task.clone());
+        task
     }
 
     /// Event loop, but just a single iteration of all possible events.
@@ -400,7 +416,12 @@ pub fn wait_until_writable(fd: &dyn Evented) {
 
 /// Task, wrapping a Future.
 pub struct Task {
+
+    /// Wrapped future.
     pub future: Mutex<Option<BoxFuture<'static, ()>>>,
+
+    /// Canceldd flag.
+    canceled: bool,
 }
 
 impl ArcWake for Task {

@@ -72,12 +72,6 @@ impl EpollEventManager {
         syscall!(epoll_ctl(self.epoll_fd, libc::EPOLL_CTL_ADD, fd, &mut event));
     }
 
-    /// Pop ready task.
-    pub fn pop_ready(&mut self) -> Option<Arc<Task>> {
-//        self.task_ready.pop()
-        None
-    }
-
     /// Run epoll_wait.
     pub fn wait(&mut self) {
         self.events.clear();
@@ -95,7 +89,7 @@ impl EpollEventManager {
                     }
                 };
             }
-            Err(err) => {
+            Err(_) => {
             }
         }
     }

@@ -216,7 +216,8 @@ impl RouterNexus {
         let raw_fd = listener.as_raw_fd();
         let future_manager_clone = future_manager.clone();
 
-        future_manager.clone().register_read_future(listener.as_raw_fd(), async move {
+        // XXX
+        future_manager.clone().register_read(listener.as_raw_fd(), async move {
             println!("** register read future");
             EpollFuture::new(future_manager_clone, raw_fd).await;
         });
@@ -235,11 +236,10 @@ impl RouterNexus {
         };
         event_manager.set_channel_handler(Box::new(handler));
 
-        future_manager.register_timer_future(async {
-            println!("register timer begin");
-            TimerFuture::new(Duration::new(10, 0)).await;
-            println!("register timer end");
-        });
+        // XXX
+        future_manager.register_timer(Duration::from_secs(5), Box::new(|| {
+            println!("*** timer fired {}");
+        }));
 
         // Main event loop.
         while !signal::is_sigint_caught() {
