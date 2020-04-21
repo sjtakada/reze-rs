@@ -190,33 +190,37 @@ impl TimerEventManager {
         })
     }
 
-    fn peek(&mut self) -> Option<Arc<TimerTask>> {
+/*
+    fn peek(&self) -> Option<Arc<TimerTask>> {
         match self.heap.peek() {
             Some(task) => Some(task.clone()),
             None => None
         }
     }
+*/
 
-    pub fn run_task(task: Arc<TimerTask>) {
-
+    pub fn pop(&mut self) -> Option<Arc<TimerTask>> {
+        self.heap.pop()
     }
 
-    pub fn _run(&mut self) {
-        while let Some(task) = self.peek() {
-            let mut future_slot = task.future.lock().unwrap();
-            if let Some(mut future) = future_slot.take() {
-                let waker = waker_ref(&task);
-                let context = &mut Context::from_waker(&*waker);
-                if let Poll::Pending = future.as_mut().poll(context) {
-                    println!("*** timer future pending");
-                    *future_slot = Some(future);
-                    break;
-                } else {
-                    println!("*** timer future ready");
-                    self.heap.pop();
-                }
+    pub fn push(&mut self, task: Arc<TimerTask>) {
+        self.heap.push(task);
+    }
+
+    pub fn run(task: Arc<TimerTask>) -> Poll<()> {
+        let mut future_slot = task.future.lock().unwrap();
+        if let Some(mut future) = future_slot.take() {
+            let waker = waker_ref(&task);
+            let context = &mut Context::from_waker(&*waker);
+            if let Poll::Pending = future.as_mut().poll(context) {
+                *future_slot = Some(future);
+                return Poll::Pending
+            } else {
+                return Poll::Ready(())
             }
         }
+
+        Poll::Pending
     }
 }
 

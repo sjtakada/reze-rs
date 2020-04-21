@@ -339,6 +339,14 @@ impl FutureManager {
         task
     }
 
+    fn timer_pop(&self) -> Option<Arc<TimerTask>> {
+        self.timer_events.lock().unwrap().pop()
+    }
+
+    fn timer_push(&self, task: Arc<TimerTask>) {
+        self.timer_events.lock().unwrap().push(task);
+    }
+
     /// Event loop, but just a single iteration of all possible events.
     pub fn run(&self) -> Result<(), CoreError> {
 
@@ -365,24 +373,18 @@ impl FutureManager {
         }
 
         // Process Timers.
-        self.timer_events.lock().unwrap()._run();
-
-/*
-        let ref mut timer_futures = *self.timer_futures.lock().unwrap();
-        for task in timer_futures {
-            let mut future_slot = task.future.lock().unwrap();
-            if let Some(mut future) = future_slot.take() {
-                let waker = waker_ref(&task);
-                let context = &mut Context::from_waker(&*waker);
-                if let task::Poll::Pending = future.as_mut().poll(context) {
-                    println!("*** timer future 1");
-                    *future_slot = Some(future);
-                } else {
-                    println!("*** timer future 2");
+        while let Some(task) = self.timer_pop() {
+            match TimerEventManager::run(task.clone()) {
+                task::Poll::Pending => {
+                    self.timer_push(task);
+                    break;
+                }
+                _ => {
+                    // Continue
                 }
             }
         }
-*/
+
         Ok(())
     }
 }
