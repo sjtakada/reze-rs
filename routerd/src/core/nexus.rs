@@ -197,6 +197,20 @@ impl RouterNexus {
         panic!("failed to clone");
     }
 
+    fn dummy_timer(future_manager: Arc<FutureManager>) {
+        println!("*** dummy_timer 0");
+
+        let future_manager_clone = future_manager.clone();
+        println!("*** dummy_timer 1");
+
+        // XXX
+        future_manager.clone().register_timer(Duration::from_secs(5), Box::new(move || {
+            println!("*** timer fired");
+            RouterNexus::dummy_timer(future_manager.clone());
+            println!("*** timer register dummy timer");
+        }));
+    }
+
     /// Entry point to start RouterNexus.
     pub fn start(nexus: Arc<RouterNexus>, event_manager: Arc<EventManager>,
                  future_manager: Arc<FutureManager>) -> Result<(), CoreError> {
@@ -217,7 +231,7 @@ impl RouterNexus {
         let future_manager_clone = future_manager.clone();
 
         // XXX
-        future_manager.clone().register_read(listener.as_raw_fd(), async move {
+        future_manager.register_read(listener.as_raw_fd(), async move {
             println!("** register read future");
             EpollFuture::new(future_manager_clone, raw_fd).await;
         });
@@ -236,10 +250,7 @@ impl RouterNexus {
         };
         event_manager.set_channel_handler(Box::new(handler));
 
-        // XXX
-        future_manager.register_timer(Duration::from_secs(5), Box::new(|| {
-            println!("*** timer fired {}");
-        }));
+        RouterNexus::dummy_timer(future_manager.clone());
 
         // Main event loop.
         while !signal::is_sigint_caught() {

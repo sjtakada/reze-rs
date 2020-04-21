@@ -10,6 +10,7 @@
 use std::collections::BinaryHeap;
 use std::cell::RefCell;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::time::Instant;
 use std::time::Duration;
 use std::cmp::Ordering;
@@ -17,6 +18,11 @@ use std::future::Future;
 use std::task::Context;
 use std::task::Poll;
 use std::pin::Pin;
+
+use futures::future::BoxFuture;
+use futures::future::FutureExt;
+use futures::task::ArcWake;
+use futures::task::waker_ref;
 
 //use log::error;
 
@@ -100,6 +106,119 @@ impl TimerServer {
     }
 }
 
+/* XXXX */
+
+/// Task, wrapping a Future.
+pub struct TimerTask {
+
+    /// Wrapped future.
+    pub future: Mutex<Option<BoxFuture<'static, ()>>>,
+
+    /// Expiration time.
+    fire_at: Instant,
+
+    /// Canceled flag.
+    canceled: bool,
+}
+
+impl Ord for TimerTask {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.fire_at.cmp(&self.fire_at)
+    }
+}
+
+impl PartialOrd for TimerTask {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Eq for TimerTask {
+}
+
+impl PartialEq for TimerTask {
+    fn eq(&self, other: &Self) -> bool {
+        other.fire_at == self.fire_at
+    }
+}
+
+
+impl ArcWake for TimerTask {
+    fn wake_by_ref(_arc_self: &Arc<Self>) {
+
+    }
+}
+
+/// Timer Event Manager with Future.
+pub struct TimerEventManager {
+
+    /// Ordering TimerTask by expiration time.
+    heap: BinaryHeap<Arc<TimerTask>>
+}
+
+impl TimerEventManager {
+
+    /// Constructor.
+    pub fn new() -> TimerEventManager {
+        TimerEventManager {
+            heap: BinaryHeap::new(),
+        }
+    }
+
+    /// Register Timer.
+    pub fn register_timer(&mut self, duration: Duration, 
+                          f: Box<dyn Fn() + 'static + Send>) -> Arc<TimerTask>
+    {
+        let task = self.get_timer_task(duration, async move {
+            TimerFuture::new(duration).await;
+            f();
+        });
+        self.heap.push(task.clone());
+
+        task
+    }
+
+    /// Get Timer task.
+    fn get_timer_task(&self, duration: Duration,
+                      future: impl Future<Output = ()> + 'static + Send) -> Arc<TimerTask>
+    {
+        let future = future.boxed();
+        Arc::new(TimerTask {
+            future: Mutex::new(Some(future)),
+            fire_at: Instant::now() + duration,
+            canceled: false,
+        })
+    }
+
+    fn peek(&mut self) -> Option<Arc<TimerTask>> {
+        match self.heap.peek() {
+            Some(task) => Some(task.clone()),
+            None => None
+        }
+    }
+
+    pub fn run_task(task: Arc<TimerTask>) {
+
+    }
+
+    pub fn _run(&mut self) {
+        while let Some(task) = self.peek() {
+            let mut future_slot = task.future.lock().unwrap();
+            if let Some(mut future) = future_slot.take() {
+                let waker = waker_ref(&task);
+                let context = &mut Context::from_waker(&*waker);
+                if let Poll::Pending = future.as_mut().poll(context) {
+                    println!("*** timer future pending");
+                    *future_slot = Some(future);
+                    break;
+                } else {
+                    println!("*** timer future ready");
+                    self.heap.pop();
+                }
+            }
+        }
+    }
+}
 
 /// Timer Future.
 pub struct TimerFuture {
@@ -120,11 +239,10 @@ impl Future for TimerFuture {
     type Output = ();
     fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
         let now = Instant::now();
-        if self.fire_at < now {
+        if self.fire_at <= now {
             Poll::Ready(())
         } else {
             Poll::Pending
         }
     }
 }
-

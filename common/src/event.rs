@@ -286,11 +286,16 @@ impl EventManager {
 /// Future Event Manager.
 pub struct FutureManager {
 
-    /// Timer Futures.
-    timer_futures: Mutex<Vec<Arc<Task>>>,
+    /// Timer Events.
+    timer_events: Mutex<TimerEventManager>,
 
     /// FD Event Manager.
-    fd_poller: Mutex<EpollEventManager>,
+    fd_events: Mutex<EpollEventManager>,
+
+    //
+    // chan_events:
+
+    // gen_events:
 }
 
 ///
@@ -302,8 +307,8 @@ impl FutureManager {
         let epoll = EpollEventManager::new().unwrap();
 
         FutureManager {
-            timer_futures: Mutex::new(Vec::new()),
-            fd_poller: Mutex::new(epoll),
+            timer_events: Mutex::new(TimerEventManager::new()),
+            fd_events: Mutex::new(epoll),
         }
     }
 
@@ -311,29 +316,14 @@ impl FutureManager {
     pub fn fd_poller(&self) -> MutexGuard<EpollEventManager> {
 
         // Should abstract other type.
-        self.fd_poller.lock().unwrap()
+        self.fd_events.lock().unwrap()
     }
 
     /// Register Timer.
     pub fn register_timer(&self, duration: Duration, 
-                          f: Box<dyn Fn() + 'static + Send + Sync>) -> Arc<Task>
+                          f: Box<dyn Fn() + 'static + Send>) -> Arc<TimerTask>
     {
-        self.register_timer_future(async move {
-            TimerFuture::new(duration).await;
-            f();
-        })
-    }
-
-    /// Register Timer Future.
-    fn register_timer_future(&self, future: impl Future<Output = ()> + 'static + Send) -> Arc<Task> {
-        let future = future.boxed();
-        let task = Arc::new(Task {
-            future: Mutex::new(Some(future)),
-            canceled: false,
-        });
-
-        self.timer_futures.lock().unwrap().push(task.clone());
-        task
+        self.timer_events.lock().unwrap().register_timer(duration, f)
     }
 
     /// Register FD read future.
@@ -374,7 +364,10 @@ impl FutureManager {
             }
         }
 
-        // Process Timer Future.
+        // Process Timers.
+        self.timer_events.lock().unwrap()._run();
+
+/*
         let ref mut timer_futures = *self.timer_futures.lock().unwrap();
         for task in timer_futures {
             let mut future_slot = task.future.lock().unwrap();
@@ -389,7 +382,7 @@ impl FutureManager {
                 }
             }
         }
-
+*/
         Ok(())
     }
 }
@@ -420,7 +413,7 @@ pub struct Task {
     /// Wrapped future.
     pub future: Mutex<Option<BoxFuture<'static, ()>>>,
 
-    /// Canceldd flag.
+    /// Canceled flag.
     canceled: bool,
 }
 
