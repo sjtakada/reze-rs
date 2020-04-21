@@ -190,15 +190,6 @@ impl TimerEventManager {
         })
     }
 
-/*
-    fn peek(&self) -> Option<Arc<TimerTask>> {
-        match self.heap.peek() {
-            Some(task) => Some(task.clone()),
-            None => None
-        }
-    }
-*/
-
     pub fn pop(&mut self) -> Option<Arc<TimerTask>> {
         self.heap.pop()
     }
@@ -214,13 +205,13 @@ impl TimerEventManager {
             let context = &mut Context::from_waker(&*waker);
             if let Poll::Pending = future.as_mut().poll(context) {
                 *future_slot = Some(future);
-                return Poll::Pending
+                Poll::Pending
             } else {
-                return Poll::Ready(())
+                Poll::Ready(())
             }
+        } else {
+            panic!("No future in timer task!");
         }
-
-        Poll::Pending
     }
 }
 
