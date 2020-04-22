@@ -312,20 +312,6 @@ impl FutureManager {
         }
     }
 
-    /// Return FD poller.
-    pub fn fd_poller(&self) -> MutexGuard<EpollEventManager> {
-
-        // Should abstract other type.
-        self.fd_events.lock().unwrap()
-    }
-
-    /// Register Timer.
-    pub fn register_timer(&self, duration: Duration, 
-                          f: Box<dyn Fn() + 'static + Send>) -> Arc<TimerTask>
-    {
-        self.timer_events.lock().unwrap().register_timer(duration, f)
-    }
-
     /// Register FD read future.
     pub fn register_read(&self, fd: RawFd,
                          future: impl Future<Output = ()> + 'static + Send) -> Arc<Task> {
@@ -335,8 +321,32 @@ impl FutureManager {
             canceled: false,
         });
 
-        self.fd_poller().register_read(fd, task.clone());
+        self.fd_events().register_read(fd, task.clone());
         task
+    }
+
+    /// Return FD poller.
+    pub fn fd_events(&self) -> MutexGuard<EpollEventManager> {
+
+        // Should abstract other type.
+        self.fd_events.lock().unwrap()
+    }
+
+    /// Poll FD through underlying 'poll' system.
+    fn fd_poll(&self) {
+        self.fd_events().wait();
+    }
+
+    /// Collect FD Tasks.
+    fn fd_task_collect(&self) -> Vec<Arc<Task>> {
+        self.fd_events().task_collect()
+    }
+
+    /// Register Timer.
+    pub fn register_timer(&self, duration: Duration, 
+                          f: Box<dyn Fn() + 'static + Send>) -> Arc<TimerTask>
+    {
+        self.timer_events.lock().unwrap().register_timer(duration, f)
     }
 
     fn timer_pop(&self) -> Option<Arc<TimerTask>> {
@@ -351,15 +361,17 @@ impl FutureManager {
     pub fn run(&self) -> Result<(), CoreError> {
 
         // Process FD poller futures.
-        self.fd_poller().wait();
+        self.fd_poll();
 
         // Collect all waiting FD tasks.
-        let tasks: Vec<Arc<Task>> = self.fd_poller().task_waiting()
-            .values()
-            .map(|(_, task)| task.clone())
-            .collect();
+        let tasks = self.fd_task_collect();
 
         for task in &tasks {
+            match EpollEventManager::run(task.clone()) {
+                task::Poll::Pending => {}
+                _ => {}
+            }
+/*
             let mut future_slot = task.future.lock().unwrap();
             if let Some(mut future) = future_slot.take() {
                 let waker = waker_ref(task);
@@ -370,6 +382,7 @@ impl FutureManager {
                     // Ready, task will be done.
                 }
             }
+*/
         }
 
         // Process Timers.

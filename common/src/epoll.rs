@@ -32,11 +32,11 @@ pub struct EpollEventManager {
     /// Epoll FD.
     epoll_fd: RawFd,
 
-    /// Reception vector to store ready events.
-    events: Vec<EpollEvent>,
-
     /// Waiting tasks.
-    task_waiting: HashMap<RawFd, (bool, Arc<Task>)>,
+    task_waiting: HashMap<RawFd, Arc<Task>>,
+
+    /// Ready status.
+    ready: HashMap<RawFd, bool>,
 }
 
 unsafe impl Send for EpollEventManager {}
@@ -50,19 +50,14 @@ impl EpollEventManager {
 
         Ok(EpollEventManager {
             epoll_fd: epoll_fd,
-            events: Vec::with_capacity(1024),
             task_waiting: HashMap::new(),
+            ready: HashMap::new(),
         })
-    }
-
-    /// Return task waiting.
-    pub fn task_waiting(&mut self) -> &mut HashMap<RawFd, (bool, Arc<Task>)> {
-        &mut self.task_waiting
     }
 
     /// Register.
     pub fn register_read(&mut self, fd: RawFd, task: Arc<Task>) {
-        self.task_waiting().insert(fd, (false, task.clone()));
+        self.task_waiting.insert(fd, task.clone());
 
         let mut event = libc::epoll_event {
             events: (EPOLLET | EPOLLIN | EPOLLRDHUP) as u32,
@@ -72,25 +67,52 @@ impl EpollEventManager {
         syscall!(epoll_ctl(self.epoll_fd, libc::EPOLL_CTL_ADD, fd, &mut event));
     }
 
+    /// Return vector of waiting tasks.
+    pub fn task_collect(&self) -> Vec<Arc<Task>> {
+        self.task_waiting.values()
+            .map(|task| task.clone())
+            .collect()
+    }
+
     /// Run epoll_wait.
     pub fn wait(&mut self) {
-        self.events.clear();
+        let capacity = 1024;
+        let mut events = Vec::with_capacity(capacity);
         let timeout = 10;
+        self.ready.clear();
 
-        match syscall!(epoll_wait(self.epoll_fd, self.events.as_mut_ptr(), self.events.capacity() as i32, timeout)) {
+        match syscall!(epoll_wait(self.epoll_fd, events.as_mut_ptr(),
+                                  capacity as i32, timeout)) {
             Ok(num) => {
                 unsafe {
-                    self.events.set_len(num as usize);
+                    events.set_len(num as usize);
 
-                    for e in &self.events {
+                    for e in &events {
                         let fd  = e.u64 as RawFd;
-                        let (_, task) = self.task_waiting.remove(&fd).unwrap();
-                        self.task_waiting.insert(fd, (true, task));
+                        self.ready.insert(fd, true);
+//                        let (_, task) = self.task_waiting.remove(&fd).unwrap();
+//                        self.task_waiting.insert(fd, (true, task));
                     }
                 };
             }
             Err(_) => {
             }
+        }
+    }
+
+    pub fn run(task: Arc<Task>) -> Poll<()> {
+        let mut future_slot = task.future.lock().unwrap();
+        if let Some(mut future) = future_slot.take() {
+            let waker = waker_ref(&task);
+            let context = &mut Context:: from_waker(&*waker);
+            if let Poll::Pending = future.as_mut().poll(context) {
+                *future_slot = Some(future);
+                Poll::Pending
+            } else {
+                Poll::Ready(())
+            }
+        } else {
+            panic!("No future in task!");
         }
     }
 }
@@ -121,9 +143,9 @@ impl Future for EpollFuture {
 
     fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
         let event_manager = self.event_manager.clone();
-        let mut epoll = event_manager.fd_poller();
+        let mut epoll = event_manager.fd_events();
 
-        if let Some((flag, _)) = epoll.task_waiting.get(&self.fd) {
+        if let Some(flag) = epoll.ready.get(&self.fd) {
             if *flag {
                 epoll.task_waiting.remove(&self.fd);
                 Poll::Ready(())
