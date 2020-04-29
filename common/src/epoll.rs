@@ -90,8 +90,6 @@ impl EpollEventManager {
                     for e in &events {
                         let fd  = e.u64 as RawFd;
                         self.ready.insert(fd, true);
-//                        let (_, task) = self.task_waiting.remove(&fd).unwrap();
-//                        self.task_waiting.insert(fd, (true, task));
                     }
                 };
             }
@@ -109,6 +107,7 @@ impl EpollEventManager {
                 *future_slot = Some(future);
                 Poll::Pending
             } else {
+//                *future_slot = Some(future);
                 Poll::Ready(())
             }
         } else {

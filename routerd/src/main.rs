@@ -110,6 +110,8 @@ fn start() {
     let mut config_uds_path = env::temp_dir();
     config_uds_path.push(ROUTERD_CONFIG_UDS_FILENAME);
 
+    let uds_server = FutureUdsServer::start(future_manager.clone(), &config_uds_path);
+
 //    let nexus_config = Arc::new(NexusConfig::new(nexus.clone()));
 //    let uds_server = UdsServer::start(event_manager.clone(), nexus_config, &config_uds_path);
 //    nexus.set_config_server(uds_server);

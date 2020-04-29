@@ -223,19 +223,6 @@ impl RouterNexus {
         nexus.sender_p2z.borrow_mut().replace(sender_p2z);
         nexus.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
-
-        let mut config_uds_path = env::temp_dir();
-        config_uds_path.push(ROUTERD_CONFIG_UDS_FILENAME);
-        let listener = UnixListener::bind(config_uds_path).unwrap();
-        let raw_fd = listener.as_raw_fd();
-        let future_manager_clone = future_manager.clone();
-
-        // XXX
-        future_manager.register_read(listener.as_raw_fd(), async move {
-            println!("** register read future");
-            EpollFuture::new(future_manager_clone, raw_fd).await;
-        });
-
         // XXX spawn OSPF
         let (handle, sender, _sender_z2p) = nexus.spawn_protocol(ProtocolType::Ospf,
                                                                nexus.clone_sender_p2n(),

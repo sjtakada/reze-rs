@@ -8,11 +8,15 @@
 use std::io::Read;
 use std::io::Write;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::net::Shutdown;
 use std::collections::HashMap;
+use std::os::unix::net;
+use std::os::unix::io::RawFd;
+use std::os::unix::io::AsRawFd;
 
 use log::{debug, error};
 use mio::Token;
@@ -21,6 +25,7 @@ use mio_uds::UnixStream;
 
 use super::error::*;
 use super::event::*;
+use super::epoll::*;
 
 /// Trait UdsServer handler.
 pub trait UdsServerHandler {
@@ -306,5 +311,71 @@ impl EventHandler for UdsServerInner {
         }
 
         Ok(())
+    }
+}
+
+/// UdsServer.
+pub struct FutureUdsServer {
+
+    /// EventManager.
+    event_manager: Arc<FutureManager>,
+
+    /// UnixListener.
+    listener: net::UnixListener,
+
+    /// UdsServerEntry.
+    entries: Mutex<HashMap<u32, Arc<UdsServerEntry>>>,
+}
+
+impl FutureUdsServer {
+
+    /// Constructor.
+    pub fn new(event_manager: Arc<FutureManager>,
+               path: &PathBuf) -> FutureUdsServer {
+        let listener = match net::UnixListener::bind(path) {
+            Ok(listener) => listener,
+            Err(_) => panic!("UnixListener::bind() error"),
+        };
+
+        FutureUdsServer {
+            event_manager: event_manager,
+            listener: listener,
+            entries: Mutex::new(HashMap::new()),
+        }
+    }
+
+    ///
+    pub fn start(event_manager: Arc<FutureManager>, path: &PathBuf) -> Arc<FutureUdsServer> {
+        let event_manager_clone = event_manager.clone();
+        let server = Arc::new(FutureUdsServer::new(event_manager.clone(), path));
+        let server_clone = server.clone();
+        let fd = server.listener_fd();
+
+        event_manager_clone.register_read(fd, async move {
+            let event_manager = event_manager.clone();
+
+            EpollFuture::new(event_manager.clone(), fd).await;
+            loop {
+                server.accept();
+            }
+        });
+
+        server_clone
+    }
+
+    ///
+    pub fn accept(&self) {
+        match self.listener.accept() {
+            Ok((socket, addr)) => {
+                println!("*** accept");
+            }
+            Err(_) => {
+            }
+        }
+    }
+
+    /// Return FD for listener.
+    pub fn listener_fd(&self) -> RawFd {
+        self.listener.as_raw_fd()
     }
 }

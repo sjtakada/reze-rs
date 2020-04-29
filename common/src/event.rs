@@ -22,6 +22,7 @@ use futures::future::BoxFuture;
 use futures::future::FutureExt;
 use futures::task::ArcWake;
 use futures::task::waker_ref;
+
 use mio::*;
 use log::error;
 use log::debug;
@@ -371,18 +372,6 @@ impl FutureManager {
                 task::Poll::Pending => {}
                 _ => {}
             }
-/*
-            let mut future_slot = task.future.lock().unwrap();
-            if let Some(mut future) = future_slot.take() {
-                let waker = waker_ref(task);
-                let context = &mut Context:: from_waker(&*waker);
-                if let task::Poll::Pending = future.as_mut().poll(context) {
-                    *future_slot = Some(future);
-                } else {
-                    // Ready, task will be done.
-                }
-            }
-*/
         }
 
         // Process Timers.
@@ -430,6 +419,12 @@ pub struct Task {
 
     /// Canceled flag.
     canceled: bool,
+}
+
+impl Drop for Task {
+    fn drop(&mut self) {
+        println!("*** drop task");
+    }
 }
 
 impl ArcWake for Task {
