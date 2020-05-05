@@ -19,6 +19,7 @@ use log::debug;
 use super::consts::*;
 use super::error::*;
 use super::timer::*;
+use super::channel::*;
 
 /// Event types.
 pub enum EventType {
@@ -77,6 +78,9 @@ pub struct EventManager {
 
     /// Channel handler function.
     channel_handler: RefCell<Option<Box<dyn Fn(&EventManager) -> Result<(), CoreError>>>>,
+
+    /// Channel events.
+    ch_events: RefCell<Vec<Arc<dyn ChannelHandler>>>,
 }
 
 /// EventManager implementation.
@@ -93,6 +97,7 @@ impl EventManager {
             }),
             timers: RefCell::new(TimerServer::new()),
             channel_handler: RefCell::new(None),
+            ch_events: RefCell::new(Vec::new()),
         }
     }
 
@@ -242,6 +247,19 @@ impl EventManager {
         }
     }
 
+    /// Register channel handler.
+    pub fn register_channel(&self, handler: Arc<dyn ChannelHandler>) {
+        self.ch_events.borrow_mut().push(handler);
+    }
+
+    /// Poll channel handlers.
+    pub fn poll_channel_events(&self) -> Result<(), CoreError> {
+        for handler in self.ch_events.borrow_mut().iter() {
+//
+        }
+        Ok(())
+    }
+
     /// Sleep certain period to have other events to occur.
     pub fn sleep(&self) {
         // TBD: we should sleep MIN(earlist timer, Tick).
@@ -256,9 +274,10 @@ impl EventManager {
         }
 
         // Process messages through channels.
-        if let Err(err) = self.poll_channel() {
-            return Err(err)
-        }
+//        if let Err(err) = self.poll_channel() {
+//            return Err(err)
+//        }
+
 
         // Process timer.
         if let Err(err) = self.poll_timer() {

@@ -310,6 +310,16 @@ pub struct ProtoToNexusMessageHandler {
     nexus: Arc<RouterNexus>,
 }
 
+impl ProtoToNexusMessageHandler {
+
+    /// Constructor.
+    pub fn new(nexus: Arc<RouterNexus>) -> ProtoToNexusMessageHandler {
+        ProtoToNexusMessageHandler {
+            nexus: nexus
+        }
+    }
+}
+
 impl ChannelHandler for ProtoToNexusMessageHandler {
 
 }

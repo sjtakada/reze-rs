@@ -103,6 +103,10 @@ fn start() {
     let event_manager = Arc::new(EventManager::new());
     let nexus = Arc::new(RouterNexus::new());
 
+    // Channel handler.
+    let channel_handler = ProtoToNexusMessageHandler::new(nexus.clone());
+    event_manager.register_channel(Arc::new(channel_handler));
+
     // UDS to accept config request.
     let mut config_uds_path = env::temp_dir();
     config_uds_path.push(ROUTERD_CONFIG_UDS_FILENAME);

@@ -27,7 +27,7 @@ impl ChannelManager {
     }
 
     /// Register handler.
-    pub fn register_handler(&self, handler: Box<ChannelHandler>) {
+    pub fn register_handler(&self, handler: Box<dyn ChannelHandler>) {
         self.handlers.borrow_mut().push(handler);
     }
 
