@@ -28,6 +28,7 @@ use log::error;
 
 use common::event::*;
 use common::timer::*;
+use common::channel::*;
 use common::error::*;
 use common::method::Method;
 use common::uds_server::*;
@@ -299,6 +300,80 @@ impl RouterNexus {
                 },
             }
         }
+    }
+}
+
+///
+pub struct ProtoToNexusMessageHandler {
+
+}
+
+impl ChannelHandler for ProtoToNexusMessageHandler {
+}
+
+impl ChannelMessageHandler<ProtoToNexus> for ProtoToNexusMessageHandler {
+    fn handle_message(&self, event_manager: &EventManager,
+                      receiver: &mpsc::Receiver<ProtoToNexus>) -> Result<(), CoreError> {
+
+/*
+        while let Ok(d) = receiver.try_recv() {
+            match d {
+                ProtoToNexus::TimerRegistration((p, d, token)) => {
+                    debug!("Received Timer Registration {} {}", p, token);
+
+                    if let Some(tuple) = self.masters.borrow_mut().get(&p) {
+                        let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
+                        event_manager.register_timer(d, Arc::new(entry));
+                    }
+                },
+                ProtoToNexus::ConfigResponse((index, resp)) => {
+                    if let Some(ref mut uds_server) = *self.config_server.borrow_mut() {
+                        let inner = uds_server.get_inner();
+                        match inner.lookup_entry(index) {
+                            Some(entry) => {
+                                let resp = match resp {
+                                    Some(s) => format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", *s),
+                                    None => r#"{"status": "OK"}"#.to_string(),
+                                };
+
+                                if let Err(_err) = entry.stream_send(&resp) {
+                                    error!("Send UdsServerEntry");
+                                }
+                            },
+                            None => {
+                                error!("No UdsServerEntry");
+                            }
+                        }
+                    }
+                },
+                ProtoToNexus::ExecResponse((index, resp)) => {
+                    if let Some(ref mut uds_server) = *self.exec_server.borrow_mut() {
+                        let inner = uds_server.get_inner();
+                        match inner.lookup_entry(index) {
+                            Some(entry) => {
+                                let resp = match resp {
+                                    Some(s) => *s,
+                                    None => "".to_string(),
+                                };
+
+                                if let Err(_err) = entry.stream_send(&resp) {
+                                    error!("Send UdsServerEntry");
+                                }
+                            },
+                            None => {
+                                error!("No UdsServerEntry");
+                            }
+                        }
+                    }
+                },
+                ProtoToNexus::ProtoException(s) => {
+                    debug!("Received Exception {}", s);
+                },
+            }
+        }
+*/
+
+        Ok(())
     }
 }
 
