@@ -212,11 +212,15 @@ impl RouterNexus {
 
         // Register channel handler to event manager.
         let nexus_clone = nexus.clone();
-        let handler = move |event_manager: &EventManager| -> Result<(), CoreError> {
-            nexus_clone.handle_nexus_message(&receiver, event_manager);
-            Ok(())
-        };
-        event_manager.set_channel_handler(Box::new(handler));
+//        let handler = move |event_manager: &EventManager| -> Result<(), CoreError> {
+//            nexus_clone.handle_nexus_message(&receiver, event_manager);
+//            Ok(())
+//        };
+//        event_manager.set_channel_handler(Box::new(handler));
+
+        // Channel handler.
+        let channel_handler = ProtoToNexusMessageHandler::new(nexus.clone(), receiver);
+        event_manager.register_channel(Box::new(channel_handler));
 
         // Main event loop.
         while !signal::is_sigint_caught() {
@@ -308,27 +312,38 @@ pub struct ProtoToNexusMessageHandler {
 
     /// RouterNexus.
     nexus: Arc<RouterNexus>,
+
+    /// Receiver.
+    receiver: mpsc::Receiver<ProtoToNexus>,
 }
 
 impl ProtoToNexusMessageHandler {
 
     /// Constructor.
-    pub fn new(nexus: Arc<RouterNexus>) -> ProtoToNexusMessageHandler {
+    pub fn new(nexus: Arc<RouterNexus>,
+               receiver: mpsc::Receiver<ProtoToNexus>) -> ProtoToNexusMessageHandler {
         ProtoToNexusMessageHandler {
-            nexus: nexus
+            nexus: nexus,
+            receiver: receiver,
         }
     }
 }
 
 impl ChannelHandler for ProtoToNexusMessageHandler {
-
+    fn handle_message(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
+        Ok(())
+    }
 }
 
 impl ChannelMessageHandler<ProtoToNexus> for ProtoToNexusMessageHandler {
 
+    fn get_receiver(&self) -> &mpsc::Receiver<ProtoToNexus> {
+        &self.receiver
+    }
+
     /// Handle message.
-    fn handle_message(&self, event_manager: &EventManager,
-                      receiver: &mpsc::Receiver<ProtoToNexus>) -> Result<(), CoreError> {
+    fn handle_message(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
+        let receiver = self.get_receiver();
 
         while let Ok(d) = receiver.try_recv() {
             match d {

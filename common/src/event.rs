@@ -80,7 +80,7 @@ pub struct EventManager {
     channel_handler: RefCell<Option<Box<dyn Fn(&EventManager) -> Result<(), CoreError>>>>,
 
     /// Channel events.
-    ch_events: RefCell<Vec<Arc<dyn ChannelHandler>>>,
+    ch_events: RefCell<ChannelManager>,
 }
 
 /// EventManager implementation.
@@ -97,7 +97,7 @@ impl EventManager {
             }),
             timers: RefCell::new(TimerServer::new()),
             channel_handler: RefCell::new(None),
-            ch_events: RefCell::new(Vec::new()),
+            ch_events: RefCell::new(ChannelManager::new()),
         }
     }
 
@@ -248,13 +248,13 @@ impl EventManager {
     }
 
     /// Register channel handler.
-    pub fn register_channel(&self, handler: Arc<dyn ChannelHandler>) {
-        self.ch_events.borrow_mut().push(handler);
+    pub fn register_channel(&self, handler: Box<dyn ChannelHandler>) {
+        self.ch_events.borrow_mut().register_handler(handler);
     }
 
     /// Poll channel handlers.
     pub fn poll_channel_events(&self) -> Result<(), CoreError> {
-        for handler in self.ch_events.borrow_mut().iter() {
+        while let Ok(()) = self.ch_events.borrow_mut().poll_channel() {
 //
         }
         Ok(())
