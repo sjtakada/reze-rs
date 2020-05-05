@@ -34,6 +34,10 @@ quick_error! {
             description("Channel sender does not exist")
             display(r#"Channel sender does not exist"#)
         }
+        ChannelQueueEmpty {
+            description("Channel queue is empty")
+            display(r#"Channel queue is empty"#)
+        }
         RequestInvalid(s: String) {
             description("Command request is invalid")
             display(r#"Command request {} is invalid"#, s)

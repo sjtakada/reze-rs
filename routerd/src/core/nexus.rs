@@ -218,6 +218,8 @@ impl RouterNexus {
 //        };
 //        event_manager.set_channel_handler(Box::new(handler));
 
+        EventManager::init_channel_manager(event_manager.clone());
+
         // Channel handler.
         let channel_handler = ProtoToNexusMessageHandler::new(nexus.clone(), receiver);
         event_manager.register_channel(Box::new(channel_handler));
@@ -330,22 +332,12 @@ impl ProtoToNexusMessageHandler {
 }
 
 impl ChannelHandler for ProtoToNexusMessageHandler {
-    fn handle_message(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
-        Ok(())
-    }
-}
-
-impl ChannelMessageHandler<ProtoToNexus> for ProtoToNexusMessageHandler {
-
-    fn get_receiver(&self) -> &mpsc::Receiver<ProtoToNexus> {
-        &self.receiver
-    }
 
     /// Handle message.
     fn handle_message(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
-        let receiver = self.get_receiver();
+        let receiver = &self.receiver;
 
-        while let Ok(d) = receiver.try_recv() {
+        if let Ok(d) = receiver.try_recv() {
             match d {
                 ProtoToNexus::TimerRegistration((p, d, token)) => {
                     debug!("Received Timer Registration {} {}", p, token);
@@ -399,9 +391,12 @@ impl ChannelMessageHandler<ProtoToNexus> for ProtoToNexusMessageHandler {
                     debug!("Received Exception {}", s);
                 },
             }
-        }
 
-        Ok(())
+            Ok(())
+        }
+        else {
+            Err(CoreError::ChannelQueueEmpty)
+        }
     }
 }
 

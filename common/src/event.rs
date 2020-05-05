@@ -101,6 +101,13 @@ impl EventManager {
         }
     }
 
+    ///
+    pub fn init_channel_manager(event_manager: Arc<EventManager>) {
+        let event_manager_clone = event_manager.clone();
+
+        event_manager.ch_events.borrow_mut().set_event_manager(event_manager_clone);
+    }
+
     /// Register listen socket.
     pub fn register_listen(&self, fd: &dyn Evented, handler: Arc<dyn EventHandler>) {
         let mut fd_events = self.fd_events.borrow_mut();
@@ -255,6 +262,7 @@ impl EventManager {
     /// Poll channel handlers.
     pub fn poll_channel_events(&self) -> Result<(), CoreError> {
         while let Ok(()) = self.ch_events.borrow_mut().poll_channel() {
+            println!("*** poll_channel_events");
 //
         }
         Ok(())
@@ -277,7 +285,9 @@ impl EventManager {
 //        if let Err(err) = self.poll_channel() {
 //            return Err(err)
 //        }
-
+        if let Err(err) = self.poll_channel_events() {
+            return Err(err)
+        }
 
         // Process timer.
         if let Err(err) = self.poll_timer() {

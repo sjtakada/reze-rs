@@ -20,6 +20,9 @@ pub struct ChannelManager
 
     /// Channel Message Handlers.
     handlers: RefCell<Vec<Box<dyn ChannelHandler>>>,
+
+    /// Round Robin index.
+    index: usize,
 }
 
 impl ChannelManager {
@@ -29,6 +32,7 @@ impl ChannelManager {
         ChannelManager {
             event_manager: RefCell::new(None),
             handlers: RefCell::new(Vec::new()),
+            index: 0usize,
         }
     }
 
@@ -45,24 +49,20 @@ impl ChannelManager {
     /// Poll
     pub fn poll_channel(&self) -> Result<(), CoreError> {
         if let Some(ref event_manager) = *self.event_manager.borrow() {
-            for handler in self.handlers.borrow_mut().iter() {
-                (*handler).handle_message(event_manager.clone());
-            }
-        }
+            let len = self.handlers.borrow().len();
+            let handler = &self.handlers.borrow()[self.index % len];
 
-        Ok(())
+            (*handler).handle_message(event_manager.clone())
+        } else {
+            Err(CoreError::ChannelQueueEmpty)
+//            panic!("No Event manager")
+        }
     }
 }
 
-///
-pub trait ChannelHandler {
-    fn handle_message(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError>;
-}
-
 /// Channel Handler trait.
-pub trait ChannelMessageHandler<T>: ChannelHandler {
+pub trait ChannelHandler {
 
-    fn get_receiver(&self) -> &mpsc::Receiver<T>;
-
+    /// Handle message.
     fn handle_message(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError>;
 }
