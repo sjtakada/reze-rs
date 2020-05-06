@@ -19,6 +19,7 @@ use log::debug;
 use super::consts::*;
 use super::error::*;
 use super::timer::*;
+use super::channel::*;
 
 /// Event types.
 pub enum EventType {
@@ -73,13 +74,12 @@ pub struct EventManager {
     fd_events: RefCell<FdEvent>,
 
     /// Timer Events.
-    timers: RefCell<TimerServer>,
+    tm_events: RefCell<TimerServer>,
 
-    /// Channel handler function.
-    channel_handler: RefCell<Option<Box<dyn Fn(&EventManager) -> Result<(), CoreError>>>>,
+    /// Channel events.
+    ch_events: RefCell<ChannelManager>,
 }
 
-/// EventManager implementation.
 impl EventManager {
 
     /// Constructor.
@@ -91,9 +91,16 @@ impl EventManager {
                 poll: Poll::new().unwrap(),
                 timeout: Duration::from_millis(EVENT_MANAGER_TICK),
             }),
-            timers: RefCell::new(TimerServer::new()),
-            channel_handler: RefCell::new(None),
+            tm_events: RefCell::new(TimerServer::new()),
+            ch_events: RefCell::new(ChannelManager::new()),
         }
+    }
+
+    /// TBD: need to be cleaned up.
+    pub fn init_channel_manager(event_manager: Arc<EventManager>) {
+        let event_manager_clone = event_manager.clone();
+
+        event_manager.ch_events.borrow_mut().set_event_manager(event_manager_clone);
     }
 
     /// Register listen socket.
@@ -206,13 +213,13 @@ impl EventManager {
 
     /// Register timer.
     pub fn register_timer(&self, d: Duration, handler: Arc<dyn TimerHandler>) {
-        let timers = self.timers.borrow();
+        let timers = self.tm_events.borrow();
         timers.register(d, handler);
     }
 
     /// Poll timers and handle events.
     pub fn poll_timer(&self) -> Result<(), CoreError> {
-        while let Some(handler) = self.timers.borrow().run() {
+        while let Some(handler) = self.tm_events.borrow().run() {
             let result = handler.handle(EventType::TimerEvent);
 
             match result {
@@ -228,17 +235,18 @@ impl EventManager {
         Ok(())
     }
 
-    /// Set channel handler.
-    pub fn set_channel_handler(&self, handler: Box<dyn Fn(&EventManager) -> Result<(), CoreError>>) {
-        self.channel_handler.borrow_mut().replace(handler);
+    /// Register channel handler.
+    pub fn register_channel(&self, handler: Box<dyn ChannelHandler>) {
+        self.ch_events.borrow_mut().register_handler(handler);
     }
 
-    /// Poll channel handler.
+    /// Poll channel handlers.
     pub fn poll_channel(&self) -> Result<(), CoreError> {
-        if let Some(ref mut handler) = *self.channel_handler.borrow_mut() {
-            handler(self)
-        } else {
-            Ok(())
+        loop {
+            match self.ch_events.borrow_mut().poll_channel() {
+                Ok(_) => println!("*** poll_channel_events"),
+                Err(err) => return Err(err)
+            }
         }
     }
 
@@ -250,12 +258,12 @@ impl EventManager {
 
     /// Event loop, but just a single iteration of all possible events.
     pub fn run(&self) -> Result<(), CoreError> {
-        // Process events.
+        // Process FD events.
         if let Err(err) = self.poll_fd() {
             return Err(err)
         }
 
-        // Process messages through channels.
+        // Process channels.
         if let Err(err) = self.poll_channel() {
             return Err(err)
         }

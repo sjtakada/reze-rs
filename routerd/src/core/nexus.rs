@@ -28,6 +28,7 @@ use log::error;
 
 use common::event::*;
 use common::timer::*;
+use common::channel::*;
 use common::error::*;
 use common::method::Method;
 use common::uds_server::*;
@@ -210,12 +211,11 @@ impl RouterNexus {
         nexus.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
 
         // Register channel handler to event manager.
-        let nexus_clone = nexus.clone();
-        let handler = move |event_manager: &EventManager| -> Result<(), CoreError> {
-            nexus_clone.handle_nexus_message(&receiver, event_manager);
-            Ok(())
-        };
-        event_manager.set_channel_handler(Box::new(handler));
+        EventManager::init_channel_manager(event_manager.clone());
+
+        // Channel handler.
+        let channel_handler = ProtoToNexusMessageHandler::new(nexus.clone(), receiver);
+        event_manager.register_channel(Box::new(channel_handler));
 
         // Main event loop.
         while !signal::is_sigint_caught() {
@@ -240,22 +240,48 @@ impl RouterNexus {
         // Nexus terminated.
         Err(CoreError::SystemShutdown)
     }
+}
 
-    /// Handle ProtoToNexus channel messsages.
-    fn handle_nexus_message(&self, receiver: &mpsc::Receiver<ProtoToNexus>,
-                            event_manager: &EventManager) {
-        while let Ok(d) = receiver.try_recv() {
+/// ProtoToNexus channel MessageHandler.
+pub struct ProtoToNexusMessageHandler {
+
+    /// RouterNexus.
+    nexus: Arc<RouterNexus>,
+
+    /// Receiver.
+    receiver: mpsc::Receiver<ProtoToNexus>,
+}
+
+impl ProtoToNexusMessageHandler {
+
+    /// Constructor.
+    pub fn new(nexus: Arc<RouterNexus>,
+               receiver: mpsc::Receiver<ProtoToNexus>) -> ProtoToNexusMessageHandler {
+        ProtoToNexusMessageHandler {
+            nexus: nexus,
+            receiver: receiver,
+        }
+    }
+}
+
+impl ChannelHandler for ProtoToNexusMessageHandler {
+
+    /// Handle message.
+    fn handle_message(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
+        let receiver = &self.receiver;
+
+        if let Ok(d) = receiver.try_recv() {
             match d {
                 ProtoToNexus::TimerRegistration((p, d, token)) => {
                     debug!("Received Timer Registration {} {}", p, token);
 
-                    if let Some(tuple) = self.masters.borrow_mut().get(&p) {
+                    if let Some(tuple) = self.nexus.masters.borrow_mut().get(&p) {
                         let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
                         event_manager.register_timer(d, Arc::new(entry));
                     }
                 },
                 ProtoToNexus::ConfigResponse((index, resp)) => {
-                    if let Some(ref mut uds_server) = *self.config_server.borrow_mut() {
+                    if let Some(ref mut uds_server) = *self.nexus.config_server.borrow_mut() {
                         let inner = uds_server.get_inner();
                         match inner.lookup_entry(index) {
                             Some(entry) => {
@@ -275,7 +301,7 @@ impl RouterNexus {
                     }
                 },
                 ProtoToNexus::ExecResponse((index, resp)) => {
-                    if let Some(ref mut uds_server) = *self.exec_server.borrow_mut() {
+                    if let Some(ref mut uds_server) = *self.nexus.exec_server.borrow_mut() {
                         let inner = uds_server.get_inner();
                         match inner.lookup_entry(index) {
                             Some(entry) => {
@@ -298,6 +324,11 @@ impl RouterNexus {
                     debug!("Received Exception {}", s);
                 },
             }
+
+            Ok(())
+        }
+        else {
+            Err(CoreError::ChannelQueueEmpty)
         }
     }
 }
