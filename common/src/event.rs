@@ -261,11 +261,12 @@ impl EventManager {
 
     /// Poll channel handlers.
     pub fn poll_channel_events(&self) -> Result<(), CoreError> {
-        while let Ok(()) = self.ch_events.borrow_mut().poll_channel() {
-            println!("*** poll_channel_events");
-//
+        loop {
+            match self.ch_events.borrow_mut().poll_channel() {
+                Ok(_) => println!("*** poll_channel_events"),
+                Err(err) => return Err(err)
+            }
         }
-        Ok(())
     }
 
     /// Sleep certain period to have other events to occur.
@@ -281,10 +282,6 @@ impl EventManager {
             return Err(err)
         }
 
-        // Process messages through channels.
-//        if let Err(err) = self.poll_channel() {
-//            return Err(err)
-//        }
         if let Err(err) = self.poll_channel_events() {
             return Err(err)
         }

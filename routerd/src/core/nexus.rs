@@ -211,13 +211,6 @@ impl RouterNexus {
         nexus.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
 
         // Register channel handler to event manager.
-        let nexus_clone = nexus.clone();
-//        let handler = move |event_manager: &EventManager| -> Result<(), CoreError> {
-//            nexus_clone.handle_nexus_message(&receiver, event_manager);
-//            Ok(())
-//        };
-//        event_manager.set_channel_handler(Box::new(handler));
-
         EventManager::init_channel_manager(event_manager.clone());
 
         // Channel handler.
@@ -246,66 +239,6 @@ impl RouterNexus {
 
         // Nexus terminated.
         Err(CoreError::SystemShutdown)
-    }
-
-    /// Handle ProtoToNexus channel messsages.
-    fn handle_nexus_message(&self, receiver: &mpsc::Receiver<ProtoToNexus>,
-                            event_manager: &EventManager) {
-        while let Ok(d) = receiver.try_recv() {
-            match d {
-                ProtoToNexus::TimerRegistration((p, d, token)) => {
-                    debug!("Received Timer Registration {} {}", p, token);
-
-                    if let Some(tuple) = self.masters.borrow_mut().get(&p) {
-                        let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
-                        event_manager.register_timer(d, Arc::new(entry));
-                    }
-                },
-                ProtoToNexus::ConfigResponse((index, resp)) => {
-                    if let Some(ref mut uds_server) = *self.config_server.borrow_mut() {
-                        let inner = uds_server.get_inner();
-                        match inner.lookup_entry(index) {
-                            Some(entry) => {
-                                let resp = match resp {
-                                    Some(s) => format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", *s),
-                                    None => r#"{"status": "OK"}"#.to_string(),
-                                };
-
-                                if let Err(_err) = entry.stream_send(&resp) {
-                                    error!("Send UdsServerEntry");
-                                }
-                            },
-                            None => {
-                                error!("No UdsServerEntry");
-                            }
-                        }
-                    }
-                },
-                ProtoToNexus::ExecResponse((index, resp)) => {
-                    if let Some(ref mut uds_server) = *self.exec_server.borrow_mut() {
-                        let inner = uds_server.get_inner();
-                        match inner.lookup_entry(index) {
-                            Some(entry) => {
-                                let resp = match resp {
-                                    Some(s) => *s,
-                                    None => "".to_string(),
-                                };
-
-                                if let Err(_err) = entry.stream_send(&resp) {
-                                    error!("Send UdsServerEntry");
-                                }
-                            },
-                            None => {
-                                error!("No UdsServerEntry");
-                            }
-                        }
-                    }
-                },
-                ProtoToNexus::ProtoException(s) => {
-                    debug!("Received Exception {}", s);
-                },
-            }
-        }
     }
 }
 

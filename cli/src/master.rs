@@ -12,6 +12,7 @@ use std::cell::RefCell;
 
 use common::error::*;
 use common::event::*;
+use common::channel::*;
 use common::uds_client::*;
 
 use super::cli::*;
@@ -66,14 +67,10 @@ impl CliMaster {
             sender.send(true).unwrap();
         });
 
-        let handler = move |_event_manager: &EventManager| -> Result<(), CoreError> {
-            if let Ok(_) = receiver.try_recv() {
-                Err(CoreError::SystemShutdown)
-            } else {
-                Ok(())
-            }
-        };
-        event_manager.set_channel_handler(Box::new(handler));
+        EventManager::init_channel_manager(event_manager.clone());
+
+        let shutdown_handler = ShutdownMessageHandler { receiver };
+        event_manager.register_channel(Box::new(shutdown_handler));
 
         // Event loop.
         'main: loop {
@@ -104,6 +101,27 @@ impl CliMaster {
         self.event_manager.borrow_mut().clone()
     }
 }
+
+/// 
+pub struct ShutdownMessageHandler {
+
+    /// Receiver.
+    receiver: mpsc::Receiver<bool>,
+}
+
+///
+impl ChannelHandler for ShutdownMessageHandler {
+
+    /// Handle message.
+    fn handle_message(&self, _event_manager: Arc<EventManager>) -> Result<(), CoreError> {
+        if let Ok(_) = self.receiver.try_recv() {
+            Err(CoreError::SystemShutdown)
+        } else {
+            Err(CoreError::ChannelQueueEmpty)
+        }
+    }
+}
+
 
 /// UdsClientHandler for CliMaster.
 impl UdsClientHandler for CliMaster {

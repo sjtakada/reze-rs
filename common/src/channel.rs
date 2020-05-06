@@ -7,7 +7,6 @@
 
 use std::cell::RefCell;
 use std::sync::Arc;
-use std::sync::mpsc;
 
 use super::event::*;
 use super::error::*;
