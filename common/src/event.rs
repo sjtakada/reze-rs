@@ -74,13 +74,12 @@ pub struct EventManager {
     fd_events: RefCell<FdEvent>,
 
     /// Timer Events.
-    timers: RefCell<TimerServer>,
+    tm_events: RefCell<TimerServer>,
 
     /// Channel events.
     ch_events: RefCell<ChannelManager>,
 }
 
-/// EventManager implementation.
 impl EventManager {
 
     /// Constructor.
@@ -92,12 +91,12 @@ impl EventManager {
                 poll: Poll::new().unwrap(),
                 timeout: Duration::from_millis(EVENT_MANAGER_TICK),
             }),
-            timers: RefCell::new(TimerServer::new()),
+            tm_events: RefCell::new(TimerServer::new()),
             ch_events: RefCell::new(ChannelManager::new()),
         }
     }
 
-    ///
+    /// TBD: need to be cleaned up.
     pub fn init_channel_manager(event_manager: Arc<EventManager>) {
         let event_manager_clone = event_manager.clone();
 
@@ -214,13 +213,13 @@ impl EventManager {
 
     /// Register timer.
     pub fn register_timer(&self, d: Duration, handler: Arc<dyn TimerHandler>) {
-        let timers = self.timers.borrow();
+        let timers = self.tm_events.borrow();
         timers.register(d, handler);
     }
 
     /// Poll timers and handle events.
     pub fn poll_timer(&self) -> Result<(), CoreError> {
-        while let Some(handler) = self.timers.borrow().run() {
+        while let Some(handler) = self.tm_events.borrow().run() {
             let result = handler.handle(EventType::TimerEvent);
 
             match result {
