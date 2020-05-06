@@ -76,9 +76,6 @@ pub struct EventManager {
     /// Timer Events.
     timers: RefCell<TimerServer>,
 
-    /// Channel handler function.
-    channel_handler: RefCell<Option<Box<dyn Fn(&EventManager) -> Result<(), CoreError>>>>,
-
     /// Channel events.
     ch_events: RefCell<ChannelManager>,
 }
@@ -96,7 +93,6 @@ impl EventManager {
                 timeout: Duration::from_millis(EVENT_MANAGER_TICK),
             }),
             timers: RefCell::new(TimerServer::new()),
-            channel_handler: RefCell::new(None),
             ch_events: RefCell::new(ChannelManager::new()),
         }
     }
@@ -240,27 +236,13 @@ impl EventManager {
         Ok(())
     }
 
-    /// Set channel handler.
-    pub fn set_channel_handler(&self, handler: Box<dyn Fn(&EventManager) -> Result<(), CoreError>>) {
-        self.channel_handler.borrow_mut().replace(handler);
-    }
-
-    /// Poll channel handler.
-    pub fn poll_channel(&self) -> Result<(), CoreError> {
-        if let Some(ref mut handler) = *self.channel_handler.borrow_mut() {
-            handler(self)
-        } else {
-            Ok(())
-        }
-    }
-
     /// Register channel handler.
     pub fn register_channel(&self, handler: Box<dyn ChannelHandler>) {
         self.ch_events.borrow_mut().register_handler(handler);
     }
 
     /// Poll channel handlers.
-    pub fn poll_channel_events(&self) -> Result<(), CoreError> {
+    pub fn poll_channel(&self) -> Result<(), CoreError> {
         loop {
             match self.ch_events.borrow_mut().poll_channel() {
                 Ok(_) => println!("*** poll_channel_events"),
@@ -277,12 +259,13 @@ impl EventManager {
 
     /// Event loop, but just a single iteration of all possible events.
     pub fn run(&self) -> Result<(), CoreError> {
-        // Process events.
+        // Process FD events.
         if let Err(err) = self.poll_fd() {
             return Err(err)
         }
 
-        if let Err(err) = self.poll_channel_events() {
+        // Process channels.
+        if let Err(err) = self.poll_channel() {
             return Err(err)
         }
 

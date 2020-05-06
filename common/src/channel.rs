@@ -54,7 +54,6 @@ impl ChannelManager {
             (*handler).handle_message(event_manager.clone())
         } else {
             Err(CoreError::ChannelQueueEmpty)
-//            panic!("No Event manager")
         }
     }
 }
