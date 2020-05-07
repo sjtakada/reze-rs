@@ -5,7 +5,6 @@
 // Channel Event Manager/Handler
 //
 
-use std::cell::Cell;
 use std::cell::RefCell;
 use std::sync::Arc;
 
@@ -20,9 +19,6 @@ pub struct ChannelManager
 
     /// Channel Message Handlers.
     handlers: RefCell<Vec<Box<dyn ChannelHandler>>>,
-
-    /// Round Robin index.
-    index: Cell<usize>,
 }
 
 impl ChannelManager {
@@ -32,7 +28,6 @@ impl ChannelManager {
         ChannelManager {
             event_manager: RefCell::new(None),
             handlers: RefCell::new(Vec::new()),
-            index: Cell::new(0usize),
         }
     }
 
@@ -46,18 +41,22 @@ impl ChannelManager {
         self.handlers.borrow_mut().push(handler);
     }
 
-    /// Poll
+    /// Poll all channels and handle all messages.
     pub fn poll_channel(&self) -> Result<(), CoreError> {
         if let Some(ref event_manager) = *self.event_manager.borrow() {
-            let len = self.handlers.borrow().len();
-            let index = self.index.get();
-            let handler = &self.handlers.borrow()[index % len];
-            self.index.set(index + 1);
 
-            (*handler).handle_message(event_manager.clone())
-        } else {
-            Err(CoreError::ChannelQueueEmpty)
+            for handler in self.handlers.borrow().iter() {
+                loop {
+                    match (*handler).handle_message(event_manager.clone()) {
+                        Err(CoreError::ChannelQueueEmpty) => break,
+                        Err(err) => return Err(err),
+                        _ => {},
+                    }
+                }
+            }
         }
+
+        Err(CoreError::ChannelQueueEmpty)
     }
 }
 
