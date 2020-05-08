@@ -15,3 +15,4 @@ pub mod interface;
 pub mod network;
 pub mod neighbor;
 pub mod lsdb;
+pub mod lsa;

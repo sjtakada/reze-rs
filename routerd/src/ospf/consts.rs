@@ -5,8 +5,11 @@
 // OSPF - OSPF constatns and enums.
 //
 
+use std::fmt;
+
 /// LSA type (supposed to be 0 origin).
-pub enum OspfLsa {
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum OspfLsaType {
 
     /// Type 0: Unknown (Reserved)
     Unknown,
@@ -45,12 +48,57 @@ pub enum OspfLsa {
     AsScopedOpaqueLsa,
 }
 
+impl OspfLsaType {
+
+    pub fn to_string(&self) -> &str {
+        match *self {
+            OspfLsaType::Unknown => "Unknown",
+            OspfLsaType::RouterLsa => "Router-LSA",
+            OspfLsaType::NetworkLsa => "Network-LSA",
+            OspfLsaType::SummaryLsa => "Summary-LSA",
+            OspfLsaType::AsbrSummaryLsa => "ASBR-Summary-LSA",
+            OspfLsaType::AsExternalLsa => "AS-External-LSA",
+            OspfLsaType::GroupMembershipLsa => "Group-Membreship-LSA",
+            OspfLsaType::NssaAsExternalLsa => "NSSA-AS-External-LSA",
+            OspfLsaType::ExternalAttributesLsa => "External-Attributes-LSA",
+            OspfLsaType::LinkScopedOpaqueLsa => "Link-Scoped-Opaque-LSA",
+            OspfLsaType::AreaScopedOpaqueLsa => "Area-Scoped-Opaque-LSA",
+            OspfLsaType::AsScopedOpaqueLsa => "AS-Scoped-Opaque-LSA",
+        }
+    }
+}
+
+impl fmt::Display for OspfLsaType {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_string())
+    }
+}
+
+impl fmt::Debug for OspfLsaType {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_string())
+    }
+}
+
 const MIN_LSA: u8 = 1;
 const MAX_LSA: u8 = 12;
 
+/// Flooding Scope.
+pub enum OspfFloodingScope {
+
+    /// Link Scope.
+    Link,
+
+    /// Area Scope.
+    Area,
+
+    /// AS Scope.
+    As,
+}
+
 /// OSPF Auth Type.
 pub enum OspfAuth {
-    
+
     /// 0: No Authentication (default)
     NoAuthentication,
 

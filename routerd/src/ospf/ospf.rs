@@ -9,7 +9,7 @@ use std::net::Ipv4Addr;
 
 /// OSPF process.
 pub struct Ospf {
-    
+
     /// Router ID.
     router_id: Ipv4Addr,
 
@@ -22,13 +22,13 @@ pub struct Ospf {
 
 /// OSPF config.
 pub struct OspfConfig {
-    
+
     /// Static Router ID.
     router_id: Ipv4Addr,
 
     /// RFC1583 compatiblity.
     rfc1583_compat: bool,
-    
+
     /// Log Adjacency Changes.
     log_adjacency_changes: bool,
 
