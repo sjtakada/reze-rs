@@ -224,7 +224,7 @@ pub struct OspfLsdb {
 
 impl OspfLsdb {
 
-    fn new(scope: OspfFloodingScope) -> OspfLsdb {
+    pub fn new(scope: OspfFloodingScope) -> OspfLsdb {
         let mut lsdb = OspfLsdb {
             info: HashMap::new(),
             total: 0usize,
