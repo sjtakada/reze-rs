@@ -34,7 +34,7 @@ pub struct Link {
     index: i32,
 
     /// Name from kernel.
-    pub name: String,
+    name: String,
     
     /// Hardware type.
     hwtype: u16,

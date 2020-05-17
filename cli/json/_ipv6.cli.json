@@ -1,0 +1,978 @@
+{
+  "ipv6-route-cmd": {
+    "token": {
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4.0": {
+        "id": "4.0",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:4.1": {
+        "id": "4.1",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      }
+    },
+    "command": [
+      {
+        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1)",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ipv6-route-flags-cmd": {
+    "token": {
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4.0": {
+        "id": "4.0",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:4.1": {
+        "id": "4.1",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "reject": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Emit an ICMP unreachable when matched",
+        "enum": "ENUM:5"
+      },
+      "blackhole": {
+        "id": "5.1",
+        "type": "keyword",
+        "help": "Silently discard pkts when matched",
+        "enum": "ENUM:5"
+      }
+    },
+    "command": [
+      {
+        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) (reject|blackhole)",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ipv6-route-ifname-cmd": {
+    "token": {
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:5": {
+        "id": "5",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      }
+    },
+    "command": [
+      {
+        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ipv6-route-ifname-flags-cmd": {
+    "token": {
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:5": {
+        "id": "5",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "reject": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "Emit an ICMP unreachable when matched",
+        "enum": "ENUM:6"
+      },
+      "blackhole": {
+        "id": "6.1",
+        "type": "keyword",
+        "help": "Silently discard pkts when matched",
+        "enum": "ENUM:6"
+      }
+    },
+    "command": [
+      {
+        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 (reject|blackhole)",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ipv6-route-pref-cmd": {
+    "token": {
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4.0": {
+        "id": "4.0",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:4.1": {
+        "id": "4.1",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "RANGE:5": {
+        "id": "5",
+        "type": "integer",
+        "help": "Distance value for this prefix",
+        "range": [
+          1,
+          255
+        ]
+      }
+    },
+    "command": [
+      {
+        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) RANGE:5",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ipv6-route-flags-pref-cmd": {
+    "token": {
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4.0": {
+        "id": "4.0",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:4.1": {
+        "id": "4.1",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "reject": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Emit an ICMP unreachable when matched",
+        "enum": "ENUM:5"
+      },
+      "blackhole": {
+        "id": "5.1",
+        "type": "keyword",
+        "help": "Silently discard pkts when matched",
+        "enum": "ENUM:5"
+      },
+      "RANGE:6": {
+        "id": "6",
+        "type": "integer",
+        "help": "Distance value for this prefix",
+        "range": [
+          1,
+          255
+        ]
+      }
+    },
+    "command": [
+      {
+        "defun": "ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ipv6-route-ifname-pref-cmd": {
+    "token": {
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:5": {
+        "id": "5",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "RANGE:6": {
+        "id": "6",
+        "type": "integer",
+        "help": "Distance value for this prefix",
+        "range": [
+          1,
+          255
+        ]
+      }
+    },
+    "command": [
+      {
+        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 RANGE:6",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ipv6-route-ifname-flags-pref-cmd": {
+    "token": {
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:5": {
+        "id": "5",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "reject": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "Emit an ICMP unreachable when matched",
+        "enum": "ENUM:6"
+      },
+      "blackhole": {
+        "id": "6.1",
+        "type": "keyword",
+        "help": "Silently discard pkts when matched",
+        "enum": "ENUM:6"
+      },
+      "RANGE:7": {
+        "id": "7",
+        "type": "integer",
+        "help": "Distance value for this prefix",
+        "range": [
+          1,
+          255
+        ]
+      }
+    },
+    "command": [
+      {
+        "defun": "ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 (reject|blackhole) RANGE:7",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ipv6-route-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4.0": {
+        "id": "4.0",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:4.1": {
+        "id": "4.1",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      }
+    },
+    "command": [
+      {
+        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1)",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ipv6-route-flags-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4.0": {
+        "id": "4.0",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:4.1": {
+        "id": "4.1",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "reject": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Emit an ICMP unreachable when matched",
+        "enum": "ENUM:5"
+      },
+      "blackhole": {
+        "id": "5.1",
+        "type": "keyword",
+        "help": "Silently discard pkts when matched",
+        "enum": "ENUM:5"
+      }
+    },
+    "command": [
+      {
+        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) (reject|blackhole)",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ipv6-route-ifname-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:5": {
+        "id": "5",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      }
+    },
+    "command": [
+      {
+        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ipv6-route-ifname-flags-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:5": {
+        "id": "5",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "reject": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "Emit an ICMP unreachable when matched",
+        "enum": "ENUM:6"
+      },
+      "blackhole": {
+        "id": "6.1",
+        "type": "keyword",
+        "help": "Silently discard pkts when matched",
+        "enum": "ENUM:6"
+      }
+    },
+    "command": [
+      {
+        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 (reject|blackhole)",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ipv6-route-pref-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4.0": {
+        "id": "4.0",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:4.1": {
+        "id": "4.1",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "RANGE:5": {
+        "id": "5",
+        "type": "integer",
+        "help": "Distance value for this prefix",
+        "range": [
+          1,
+          255
+        ]
+      }
+    },
+    "command": [
+      {
+        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) RANGE:5",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ipv6-route-flags-pref-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4.0": {
+        "id": "4.0",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:4.1": {
+        "id": "4.1",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "reject": {
+        "id": "5.0",
+        "type": "keyword",
+        "help": "Emit an ICMP unreachable when matched",
+        "enum": "ENUM:5"
+      },
+      "blackhole": {
+        "id": "5.1",
+        "type": "keyword",
+        "help": "Silently discard pkts when matched",
+        "enum": "ENUM:5"
+      },
+      "RANGE:6": {
+        "id": "6",
+        "type": "integer",
+        "help": "Distance value for this prefix",
+        "range": [
+          1,
+          255
+        ]
+      }
+    },
+    "command": [
+      {
+        "defun": "no ipv6 route IPV6-PREFIX:3 (IPV6-ADDRESS:4.0|WORD:4.1) (reject|blackhole) RANGE:6",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ipv6-route-ifname-pref-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:5": {
+        "id": "5",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "RANGE:6": {
+        "id": "6",
+        "type": "integer",
+        "help": "Distance value for this prefix",
+        "range": [
+          1,
+          255
+        ]
+      }
+    },
+    "command": [
+      {
+        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 RANGE:6",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "no-ipv6-route-ifname-flags-pref-cmd": {
+    "token": {
+      "no": {
+        "id": "0",
+        "type": "keyword",
+        "help": "Negate a command or set its defaults"
+      },
+      "ipv6": {
+        "id": "1",
+        "type": "keyword",
+        "help": "IP information"
+      },
+      "route": {
+        "id": "2",
+        "type": "keyword",
+        "help": "Establish static routes"
+      },
+      "IPV6-PREFIX:3": {
+        "id": "3",
+        "type": "ipv6prefix",
+        "help": "IPv6 destination prefix (e.g. 3ffe:506::/32)"
+      },
+      "IPV6-ADDRESS:4": {
+        "id": "4",
+        "type": "ipv6address",
+        "help": "IPv6 gateway address"
+      },
+      "WORD:5": {
+        "id": "5",
+        "type": "string",
+        "help": "IPv6 gateway interface name"
+      },
+      "reject": {
+        "id": "6.0",
+        "type": "keyword",
+        "help": "Emit an ICMP unreachable when matched",
+        "enum": "ENUM:6"
+      },
+      "blackhole": {
+        "id": "6.1",
+        "type": "keyword",
+        "help": "Silently discard pkts when matched",
+        "enum": "ENUM:6"
+      },
+      "RANGE:7": {
+        "id": "7",
+        "type": "integer",
+        "help": "Distance value for this prefix",
+        "range": [
+          1,
+          255
+        ]
+      }
+    },
+    "command": [
+      {
+        "defun": "no ipv6 route IPV6-PREFIX:3 IPV6-ADDRESS:4 WORD:5 (reject|blackhole) RANGE:7",
+        "mode": [
+          "CONFIG-MODE"
+        ],
+        "actions": [
+          {
+            "remote": {
+              "target": "exec",
+              "method": "NOP",
+              "path": "",
+              "params": {
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+}
