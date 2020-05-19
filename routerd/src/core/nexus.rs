@@ -454,6 +454,12 @@ impl UdsServerHandler for NexusConfig {
                     debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
 
                     if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                        // Immediate error should send back error
+                        let resp = format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", err.to_string());
+                        if let Err(_) = entry.stream_send(&resp) {
+                            error!("Send in UdsServerHandler");
+                        }
+
                         Err(err)
                     } else {
                         // Even if we get some response from handler, we don't send it right away.
@@ -535,6 +541,12 @@ impl UdsServerHandler for NexusExec {
                     debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
 
                     if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                        // Immediate error should send back error
+                        let resp = format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", err.to_string());
+                        if let Err(_) = entry.stream_send(&resp) {
+                            error!("Send in UdsServerHandler");
+                        }
+
                         Err(err)
                     } else {
                         Ok(())
