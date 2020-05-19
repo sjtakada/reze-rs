@@ -78,7 +78,7 @@ impl ZebraMaster {
         };
 
         ZebraMaster {
-            mds: RefCell::new(Rc::new(MdsNode::new())),
+            mds: RefCell::new(Rc::new(MdsNode::new("ZebraMaster"))),
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
             links: RefCell::new(HashMap::new()),
@@ -258,6 +258,7 @@ impl ZebraMaster {
         let rib_table_ipv4 = Rc::new(RibTableIpv4::new(master.clone()));
 
         MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", rib_table_ipv4.clone());
+//        MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", rib_table_ipv4.clone());
     }
 
     /// Initialize RIB.
@@ -314,7 +315,7 @@ impl ZebraMaster {
                                     None => None,
                                 }
                             },
-                            Err(err) => Some(Box::new(err.to_string())),
+                            Err(err) => Some(Box::new(err.json_status()))
                         };
 
                         if let Err(_err) = sender_p2n.send(ProtoToNexus::ConfigResponse((index, resp))) {
@@ -332,7 +333,7 @@ impl ZebraMaster {
                                     None => None,
                                 }
                             },
-                            Err(err) => Some(Box::new(err.to_string())),
+                            Err(err) => Some(Box::new(err.json_status()))
                         };
 
                         if let Err(_err) = sender_p2n.send(ProtoToNexus::ExecResponse((index, resp))) {

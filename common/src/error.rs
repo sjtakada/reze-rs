@@ -10,6 +10,10 @@ use quick_error::*;
 quick_error! {
     #[derive(Debug)]
     pub enum CoreError {
+        GenericError(s: String) {
+            description("Generic Error")
+            display(r#"{}"#, s)
+        }
         SystemShutdown {
             description("System shutdown")
             display(r#"System shutdown"#)
@@ -42,9 +46,9 @@ quick_error! {
             description("Command request is invalid")
             display(r#"Command request {} is invalid"#, s)
         }
-        MdsNoHandler {
+        MdsNoHandler(s: String) {
             description("Mds handler does not exist")
-            display(r#"Mds handler does not exist"#)
+            display(r#"Mds handler does not exist in {}"#, s)
         }
         NotImplemented {
             description("Trait function not implemented")
@@ -69,3 +73,9 @@ quick_error! {
     }
 }
 
+/// Utility.
+impl CoreError {
+    pub fn json_status(&self) -> String {
+        format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", self.to_string())
+    }
+}

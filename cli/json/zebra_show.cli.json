@@ -25,50 +25,14 @@
         ],
         "actions": [
           {
-            "http": {
+            "remote": {
+              "target": "exec",
               "method": "GET",
               "path": "show/interface",
               "view": {
                 "template": "external",
                 "path": "cli_exec.rb",
                 "params": "placeholder.erb"
-              }
-            }
-          }
-        ]
-      }
-    ]
-  },
-  "show-interface-desc-cmd": {
-    "token": {
-      "show": {
-        "id": "1",
-        "type": "keyword",
-        "help": "Show running system information"
-      },
-      "interface": {
-        "id": "2",
-        "type": "keyword",
-        "help": "Interface status and configuration"
-      },
-      "description": {
-        "id": "3",
-        "type": "keyword",
-        "help": "Interface description"
-      }
-    },
-    "command": [
-      {
-        "defun": "show interface description",
-        "mode": [
-          "EXEC-MODE"
-        ],
-        "actions": [
-          {
-            "http": {
-              "method": "NOP",
-              "path": "",
-              "params": {
               }
             }
           }
@@ -111,7 +75,7 @@
                 "path": "cli_exec.rb",
                 "params": "show_ip_route.erb"
               },
-              "viewx": {
+              "tmp_view": {
                 "template": "internal",
                 "func": "show_ip_route"
               }
