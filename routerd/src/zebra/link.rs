@@ -5,8 +5,12 @@
 // Zebra - Link handler.
 //
 
+use std::collections::HashMap;
+use std::rc::Rc;
 use std::cell::RefCell;
 use std::net::{Ipv4Addr, Ipv6Addr};
+
+use log::{debug, error};
 
 use super::address::*;
 use super::error::*;
@@ -27,7 +31,73 @@ pub trait LinkHandler {
     fn set_link_down(&self) -> bool;
 }
 
-/// Generic Link information
+/// Link Master.
+pub struct LinkMaster {
+
+    /// Ifindex to Link map.
+    index_map: RefCell<HashMap<i32, Rc<Link>>>,
+
+    /// TBD
+    name_map: RefCell<HashMap<String, Rc<Link>>>,
+}
+
+impl LinkMaster {
+
+    /// Constructor.
+    pub fn new() -> LinkMaster {
+        LinkMaster {
+            index_map: RefCell::new(HashMap::new()),
+            name_map: RefCell::new(HashMap::new()),
+        }
+    }
+
+    /// Add link to table.
+    pub fn add_link(&mut self, link: Link) {
+        let link = Rc::new(link);
+
+        self.index_map.borrow_mut().insert(link.index(), link.clone());
+        self.name_map.borrow_mut().insert(String::from(link.name()), link.clone());
+    }
+
+    /// Delete link from tables.
+    pub fn delete_link(&mut self, link: Link) {
+        // TBD
+    }
+
+    /// Add IPv4 Address to link with the index.
+    pub fn add_ipv4_address(&mut self, index: i32, conn: Connected<Ipv4Addr>) {
+        match self.index_map.borrow_mut().get(&index) {
+            Some(link) => link.add_ipv4_address(conn),
+            None => error!("No link found with index {}", index),
+        }
+    }
+
+    /// Delete IPv4 Address from the link.
+    pub fn delete_ipv4_address(&mut self, index: i32, conn: Connected<Ipv4Addr>) {
+        match self.index_map.borrow_mut().get(&index) {
+            Some(link) => link.delete_ipv4_address(conn),
+            None => error!("No link found with index {}", index),
+        }
+    }
+
+    /// Add IPv6 Address to link with the index.
+    pub fn add_ipv6_address(&mut self, index: i32, conn: Connected<Ipv6Addr>) {
+        match self.index_map.borrow_mut().get(&index) {
+            Some(link) => link.add_ipv6_address(conn),
+            None => error!("No link found with index {}", index),
+        }
+    }
+
+    /// Delete IPv6 Address from the link.
+    pub fn delete_ipv6_address(&mut self, index: i32, conn: Connected<Ipv6Addr>) {
+        match self.index_map.borrow_mut().get(&index) {
+            Some(link) => link.delete_ipv6_address(conn),
+            None => error!("No link found with index {}", index),
+        }
+    }
+}
+
+/// Link.
 pub struct Link {
 
     /// Interface index.
@@ -50,7 +120,6 @@ pub struct Link {
     addr6: RefCell<Vec<Connected<Ipv6Addr>>>,
 }
 
-/// Link implementaiton.
 impl Link {
 
     /// Constructor.
@@ -68,6 +137,10 @@ impl Link {
 
     pub fn index(&self) -> i32 {
         self.index
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     pub fn hwtype(&self) -> u16 {

@@ -5,7 +5,6 @@
 // Zebra Master
 //
 
-use log::{debug, error};
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::cell::RefMut;
@@ -16,6 +15,7 @@ use std::sync::Arc;
 use std::sync::mpsc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
+use log::{debug, error};
 use rtable::prefix::*;
 
 use crate::core::protocols::ProtocolType;
@@ -50,11 +50,8 @@ pub struct ZebraMaster {
     /// ProtocolType to Zebra Client Tuple Map.
     clients: RefCell<HashMap<ProtocolType, ClientTuple>>,
 
-    /// Ifindex to Link map.
-    links: RefCell<HashMap<i32, Rc<Link>>>,
-
-    /// TBD
-    _name2ifindex: HashMap<String, i32>,
+    /// Link Master.
+    link_master: RefCell<LinkMaster>,
 
     /// IPv4 RIB.
     rib_ipv4: RefCell<RibTable<Ipv4Addr>>,
@@ -63,7 +60,6 @@ pub struct ZebraMaster {
     rib_ipv6: RefCell<RibTable<Ipv6Addr>>,
 }
 
-/// Zebra Master implementation.
 impl ZebraMaster {
 
     /// Constructor.
@@ -81,8 +77,7 @@ impl ZebraMaster {
             mds: RefCell::new(Rc::new(MdsNode::new("ZebraMaster"))),
             kernel: RefCell::new(Kernel::new(callbacks)),
             clients: RefCell::new(HashMap::new()),
-            links: RefCell::new(HashMap::new()),
-            _name2ifindex: HashMap::new(),
+            link_master: RefCell::new(LinkMaster::new()),
             rib_ipv4: RefCell::new(RibTable::<Ipv4Addr>::new()),
             rib_ipv6: RefCell::new(RibTable::<Ipv6Addr>::new()),
         }
@@ -100,16 +95,17 @@ impl ZebraMaster {
     pub fn add_link(&self, link: Link) {
         debug!("New Link");
 
-        self.links.borrow_mut().insert(link.index(), Rc::new(link));
+        self.link_master.borrow_mut().add_link(link);
+//        self.link_master.borrow_mut().insert(link.index(), Rc::new(link));
 
         // TODO: notify this to other protocols.
     }
 
     /// Delete link.
-    pub fn delete_link(&self, _link: Link) {
+    pub fn delete_link(&self, link: Link) {
         debug!("Delete Link");
 
-        //self.links.borrow_mut().insert(link.index(), Rc::new(link));
+        self.link_master.borrow_mut().delete_link(link);
 
         // TODO: notify this to other protocols.
     }
@@ -118,40 +114,28 @@ impl ZebraMaster {
     pub fn add_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
         debug!("Add IPv4 Address");
 
-        match self.links.borrow().get(&index) {
-            Some(link) => link.add_ipv4_address(conn),
-            None => error!("No link found with index {}", index),
-        }
+        self.link_master.borrow_mut().add_ipv4_address(index, conn);
     }
 
     /// Delete IPv4 address.
     pub fn delete_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
         debug!("Delete IPv4 Address");
 
-        match self.links.borrow().get(&index) {
-            Some(link) => link.delete_ipv4_address(conn),
-            None => error!("No link found with index {}", index),
-        }
+        self.link_master.borrow_mut().delete_ipv4_address(index, conn);
     }
 
     /// Add IPv6 address.
     pub fn add_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
         debug!("Add IPv6 Address");
 
-        match self.links.borrow().get(&index) {
-            Some(link) => link.add_ipv6_address(conn),
-            None => error!("No link found with index {}", index),
-        }
+        self.link_master.borrow_mut().add_ipv6_address(index, conn);
     }
 
     /// Delete IPv6 address.
     pub fn delete_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
         debug!("Delete IPv6 Address");
 
-        match self.links.borrow().get(&index) {
-            Some(link) => link.delete_ipv6_address(conn),
-            None => error!("No link found with index {}", index),
-        }
+        self.link_master.borrow_mut().delete_ipv6_address(index, conn);
     }
 
     /// Add RIB for IPv4 static route.
