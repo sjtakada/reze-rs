@@ -6,6 +6,7 @@
 //
 
 use std::net::{Ipv4Addr, Ipv6Addr};
+use std::sync::Arc;
 
 use log::error;
 use quick_error::*;
@@ -175,7 +176,7 @@ pub trait KernelDriver {
 pub struct Kernel {
 
     /// Kernel driver for Linux.
-    driver: Netlink,
+    driver: Arc<dyn KernelDriver>,
 }
 
 /// Kernel implementation.
@@ -186,7 +187,7 @@ impl Kernel {
         let netlink = Netlink::new().unwrap();
 
         Kernel {
-            driver: netlink,
+            driver: Arc::new(netlink),
         }
     }
 
@@ -210,8 +211,8 @@ impl Kernel {
     }
 
     /// Return driver.
-    pub fn driver(&self) -> &Netlink {
-        &self.driver
+    pub fn driver(&self) -> Arc<dyn KernelDriver> {
+        self.driver.clone()
     }
 
     /// Install an IPv4 route through driver.
