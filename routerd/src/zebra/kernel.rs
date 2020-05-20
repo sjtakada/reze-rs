@@ -6,12 +6,10 @@
 //
 
 use std::net::{Ipv4Addr, Ipv6Addr};
-use std::str::FromStr;
 
+use log::error;
 use quick_error::*;
 use rtable::prefix::*;
-
-use common::address_family::AddressFamily;
 
 use super::rib::*;
 use super::linux::netlink::*;
@@ -151,8 +149,11 @@ pub trait KernelDriver {
     /// Set link down.
     fn set_link_down(&self) -> bool;
 
-    /// Get all addresses from system.
-    fn get_address_all<T: AddressFamily + Addressable + FromStr>(&self) ->  Result<(), KernelError>;
+    /// Get all IPv4 addresses from system.
+    fn get_ipv4_address_all(&self) -> Result<(), KernelError>;
+
+    /// Get all IPv6 addresses from system.
+    fn get_ipv6_address_all(&self) -> Result<(), KernelError>;
 }
 
 /// Kernel driver.
@@ -176,9 +177,19 @@ impl Kernel {
 
     /// Initialization.
     pub fn init(&mut self) {
-        let _links = self.driver.get_link_all();
-        let _v4addr = self.driver.get_address_all::<Ipv4Addr>();
-        let _v6addr = self.driver.get_address_all::<Ipv6Addr>();
+
+        if let Err(err) = self.driver.get_link_all() {
+            error!("Kernel get_link_all error {}", err);
+        }
+
+        if let Err(err) = self.driver.get_ipv4_address_all() {
+            error!("Kernel get_get_ipv4_address_all error {}", err);
+        }
+
+        if let Err(err) = self.driver.get_ipv6_address_all() {
+            error!("Kernel get_get_ipv6_address_all error {}", err);
+        }
+
         // route ipv4
         // route ipv6
     }

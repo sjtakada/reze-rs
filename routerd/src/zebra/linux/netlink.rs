@@ -765,6 +765,25 @@ impl Netlink {
 
         true
     }
+
+
+    /// Get all addresses per Address Family from kernel.
+    fn get_address_all<T>(&self) -> Result<(), KernelError>
+    where T: AddressFamily + Addressable {
+        debug!("Get address all");
+
+        if let Err(err) = self.send_request(T::address_family(), libc::RTM_GETADDR as i32) {
+            error!("Send request: RTM_GETADDR");
+            return Err(KernelError::Address(err.to_string()))
+        }
+
+        if let Err(err) = self.parse_info(&Netlink::parse_interface_address::<T>) {
+            error!("Parse info: RTM_GETADDR");
+            return Err(KernelError::Address(err.to_string()))
+        }
+
+        Ok(())
+    }
 }
 
 impl KernelDriver for Netlink {
@@ -831,22 +850,13 @@ impl KernelDriver for Netlink {
         true
     }
 
+    /// Get all IPv4 addresses from system.
+    fn get_ipv4_address_all(&self) -> Result<(), KernelError> {
+        self.get_address_all::<Ipv4Addr>()
+    }
 
-    /// Get all addresses per Address Family from kernel.
-    fn get_address_all<T>(&self) -> Result<(), KernelError>
-    where T: AddressFamily + Addressable {
-        debug!("Get address all");
-
-        if let Err(err) = self.send_request(T::address_family(), libc::RTM_GETADDR as i32) {
-            error!("Send request: RTM_GETADDR");
-            return Err(KernelError::Address(err.to_string()))
-        }
-
-        if let Err(err) = self.parse_info(&Netlink::parse_interface_address::<T>) {
-            error!("Parse info: RTM_GETADDR");
-            return Err(KernelError::Address(err.to_string()))
-        }
-
-        Ok(())
+    /// Get all IPv6 addresses from system.
+    fn get_ipv6_address_all(&self) -> Result<(), KernelError> {
+        self.get_address_all::<Ipv6Addr>()
     }
 }
