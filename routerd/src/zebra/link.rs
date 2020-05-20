@@ -13,24 +13,7 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 use log::error;
 
 use super::address::*;
-use super::error::*;
 use super::kernel::KernelLink;
-
-/// Abstracted event handler between Zebra and OS.
-pub trait LinkHandler {
-
-    /// Get all links from kernel.
-    fn get_links_all(&self) -> Result<(), ZebraError>;
-
-    /// Set MTU.
-    fn set_mtu(&self, mtu: u16) -> bool; // ? Error
-
-    /// Set link up.
-    fn set_link_up(&self) -> bool;
-
-    /// Set link down.
-    fn set_link_down(&self) -> bool;
-}
 
 /// Link Master.
 pub struct LinkMaster {

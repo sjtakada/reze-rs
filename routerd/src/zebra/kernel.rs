@@ -6,13 +6,45 @@
 //
 
 use std::net::{Ipv4Addr, Ipv6Addr};
+use std::str::FromStr;
 
+use quick_error::*;
 use rtable::prefix::*;
 
 use super::rib::*;
-use super::link::*;
 use super::address::*;
 use super::linux::netlink::*;
+
+// Kernel Error
+quick_error! {
+    #[derive(Debug)]
+    pub enum KernelError {
+        Other(s: String) {
+            description("Other error")
+            display(r#"Other error {}"#, s)
+        }
+        System(s: String) {
+            description("System error")
+            display(r#"System error {}"#, s)
+        }
+        Route(s: String) {
+            description("Route error")
+            display(r#"Route error {}"#, s)
+        }
+        Link(s: String) {
+            description("Link error")
+            display(r#"Link error {}"#, s)
+        }
+        Address(s: String) {
+            description("Address error")
+            display(r#"Address error {}"#, s)
+        }
+        Encode(s: String) {
+            description("Encode error")
+            display(r#"Encode error {}"#, s)
+        }
+    }
+}
 
 /// Kernel Link Abstraction.
 pub struct KernelLink {
@@ -105,10 +137,26 @@ pub trait KernelDriver {
 
     /// Register Delete IPv6 Address callback function.
     fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>)>);
+
+    /// Send a command to kernel to retrieve all link information.
+    fn get_link_all(&self) -> Result<(), KernelError>;
+
+    /// Set MTU.
+    fn set_mtu(&self, mtu: u16) -> bool; // ? Error
+
+    /// Set link up.
+    fn set_link_up(&self) -> bool;
+
+    /// Set link down.
+    fn set_link_down(&self) -> bool;
+
+    /// Get all addresses from system.
+    fn get_address_all<T: AddressFamily + Addressable + FromStr>(&self) ->  Result<(), KernelError>;
 }
 
 /// Kernel driver.
 pub struct Kernel {
+
     /// Kernel driver for Linux.
     driver: Netlink,
 }
@@ -127,9 +175,9 @@ impl Kernel {
 
     /// Initialization.
     pub fn init(&mut self) {
-        let _links = self.driver.get_links_all();
-        let _v4addr = self.driver.get_addresses_all::<Ipv4Addr>();
-        let _v6addr = self.driver.get_addresses_all::<Ipv6Addr>();
+        let _links = self.driver.get_link_all();
+        let _v4addr = self.driver.get_address_all::<Ipv4Addr>();
+        let _v6addr = self.driver.get_address_all::<Ipv6Addr>();
         // route ipv4
         // route ipv6
     }

@@ -5,6 +5,7 @@
 // Zebra Error.
 //
 
+/*
 use quick_error::*;
 
 quick_error! {
@@ -37,3 +38,4 @@ quick_error! {
     }
 }
 
+*/

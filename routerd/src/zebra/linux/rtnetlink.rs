@@ -25,7 +25,7 @@ use std::mem::size_of;
 use rtable::prefix::*;
 
 use super::encode::*;
-use super::super::error::ZebraError;
+use super::super::kernel::KernelError;
 
 const RTA_ALIGNTO: usize = 4usize;
 
@@ -49,7 +49,7 @@ pub struct Rtattr {
 }
 
 pub fn nlmsg_addattr_l(nlmsg_len: &mut u32, buf: &mut [u8],
-                       rta_type: i32, data: &[u8], alen: usize) -> Result<usize, ZebraError> {
+                       rta_type: i32, data: &[u8], alen: usize) -> Result<usize, KernelError> {
     let len = addattr_l(buf, rta_type, data, alen)?;
 
     *nlmsg_len += len as u32;
@@ -58,12 +58,12 @@ pub fn nlmsg_addattr_l(nlmsg_len: &mut u32, buf: &mut [u8],
 }
 
 /// Add Rtattr with arbitrary data to buffer.
-pub fn addattr_l(buf: &mut [u8], rta_type: i32, data: &[u8], alen: usize) -> Result<usize, ZebraError> {
+pub fn addattr_l(buf: &mut [u8], rta_type: i32, data: &[u8], alen: usize) -> Result<usize, KernelError> {
     let header_len = size_of::<Rtattr>();
     let rta_len = rta_length(alen);
 
     if rta_len > buf.len() {
-        Err(ZebraError::Encode("buffer overflow".to_string()))
+        Err(KernelError::Encode("buffer overflow".to_string()))
     } else {
         // RTA length.
         encode_num::<u16>(&mut buf[..], rta_len as u16);
@@ -79,8 +79,8 @@ pub fn addattr_l(buf: &mut [u8], rta_type: i32, data: &[u8], alen: usize) -> Res
 }
 
 pub fn nlmsg_addattr_payload<F>(nlmsg_len: &mut u32, buf: &mut [u8],
-                                rta_type: i32,  encode_payload: F) -> Result<usize, ZebraError>
-where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
+                                rta_type: i32,  encode_payload: F) -> Result<usize, KernelError>
+where F: Fn(&mut [u8]) -> Result<usize, KernelError>
 {
     let len = addattr_payload(buf, rta_type, encode_payload)?;
 
@@ -90,13 +90,13 @@ where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
 }
 
 /// Add Rtattr with payload encoded by encoder to buffer.
-pub fn addattr_payload<F>(buf: &mut [u8], rta_type: i32, encoder: F) -> Result<usize, ZebraError>
-where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
+pub fn addattr_payload<F>(buf: &mut [u8], rta_type: i32, encoder: F) -> Result<usize, KernelError>
+where F: Fn(&mut [u8]) -> Result<usize, KernelError>
 {
     let header_len = size_of::<Rtattr>();
 
     if header_len > buf.len() {
-        Err(ZebraError::Encode("buffer overflow".to_string()))
+        Err(KernelError::Encode("buffer overflow".to_string()))
     } else {
         // RTA type.
         encode_num::<u16>(&mut buf[2..], rta_type as u16);
@@ -112,7 +112,7 @@ where F: Fn(&mut [u8]) -> Result<usize, ZebraError>
 }
 
 pub fn nlmsg_addattr32(nlmsg_len: &mut u32, buf: &mut [u8],
-                       rta_type: i32, src: u32) -> Result<usize, ZebraError> {
+                       rta_type: i32, src: u32) -> Result<usize, KernelError> {
     let len = addattr32(buf, rta_type, src)?;
 
     *nlmsg_len += len as u32;
@@ -121,11 +121,11 @@ pub fn nlmsg_addattr32(nlmsg_len: &mut u32, buf: &mut [u8],
 }
 
 /// Add Rtattr with u32 value to buffer.
-pub fn addattr32(buf: &mut [u8], rta_type: libc::c_int, src: u32) -> Result<usize, ZebraError> {
+pub fn addattr32(buf: &mut [u8], rta_type: libc::c_int, src: u32) -> Result<usize, KernelError> {
     let rta_len = rta_length(size_of::<u32>());
 
     if rta_len > buf.len() {
-        Err(ZebraError::Encode("buffer overflow".to_string()))
+        Err(KernelError::Encode("buffer overflow".to_string()))
     } else {
         // RTA type.
         encode_num::<u16>(&mut buf[2..], rta_type as u16);
@@ -172,12 +172,12 @@ pub fn rtnh_length(len: usize) -> usize {
     rtnh_align(size_of::<Rtnexthop>()) + len
 }
 
-pub fn nlmsg_add_rtnexthop<T: Addressable>(buf: &mut [u8], address: &T) -> Result<usize, ZebraError> {
+pub fn nlmsg_add_rtnexthop<T: Addressable>(buf: &mut [u8], address: &T) -> Result<usize, KernelError> {
     let octets: &[u8] = address.octets_ref();
     let rtnh_len = size_of::<Rtnexthop>() + size_of::<Rtattr>() + T::byte_len() as usize;  // XXX probably should align.
 
     if rtnh_len > buf.len() {
-        Err(ZebraError::Encode("buffer overflow".to_string()))
+        Err(KernelError::Encode("buffer overflow".to_string()))
     } else {
         // rtnh_len
         encode_num::<u16>(&mut buf[..], rtnh_len as u16);
