@@ -11,6 +11,7 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 use rtable::prefix::*;
 
 use super::error::*;
+use super::kernel::KernelAddr;
 
 /// AddressFamily trait.
 ///   Abstract net::Ipv4Addr and net::Ipv6Addr.
@@ -48,31 +49,62 @@ pub struct Connected<T: Addressable> {
     address: Prefix<T>,
 
     /// Destination address prefix for peer.
-    _destination: Option<Prefix<T>>,
+    destination: Option<Prefix<T>>,
 
     /// Secondary address.
-    _secondary: bool,
+    secondary: bool,
 
     /// Unnumbered.
-    _unnumbered: bool,
+    unnumbered: bool,
 
     /// Label.
-    _label: Option<String>,
+    label: Option<String>,
 }
 
 /// Connected implementation.
 impl<T: Addressable> Connected<T> {
+
+    /// Constructor.
     pub fn new(prefix: Prefix<T>) -> Connected<T> {
         Connected::<T> {
             address: prefix,
-            _destination: None,
-            _secondary: false,
-            _unnumbered: false,
-            _label: None,
+            destination: None,
+            secondary: false,
+            unnumbered: false,
+            label: None,
         }
     }
 
+    /// Construct from kernel.
+    pub fn from_kernel(ka: KernelAddr<T>) -> Connected<T> {
+        Connected::<T> {
+            address: ka.address,
+            destination: ka.destination,
+            secondary: ka.secondary,
+            unnumbered: ka.unnumbered,
+            label: ka.label,
+        }
+    }
+
+    /// Return address prefix.
     pub fn address(&self) -> &Prefix<T> {
         &self.address
+    }
+
+    ///
+    pub fn destination(&self) -> &Option<Prefix<T>> {
+        &self.destination
+    }
+
+    pub fn secondary(&self) -> bool {
+        self.secondary
+    }
+
+    pub fn unnumbered(&self) -> bool {
+        self.unnumbered
+    }
+
+    pub fn label(&self) -> Option<&String> {
+        self.label.as_ref()
     }
 }

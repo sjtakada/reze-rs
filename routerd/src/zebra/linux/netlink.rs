@@ -9,7 +9,6 @@ use std::io;
 use std::str;
 use std::mem::{size_of, zeroed};
 use std::rc::Rc;
-use std::rc::Weak;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -24,7 +23,6 @@ use rtable::prefix::*;
 use super::rtnetlink::*;
 use super::encode::*;
 use super::super::error::*;
-use super::super::master::ZebraMaster;
 use super::super::kernel::*;
 use super::super::link::*;
 use super::super::address::*;
@@ -216,8 +214,81 @@ impl Buffer {
     }
 }
 
+/// Netlink kernel callbacks.
+pub struct NetlinkKernelCallback {
+
+    /// Add Link callback.
+    pub add_link: Option<Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>>,
+
+    /// Delete Link callback.
+    pub delete_link: Option<Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>>,
+
+    /// Add IPv4 Address callback.
+    pub add_ipv4_address: Option<Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>>,
+
+    /// Delete IPv4 Address callback.
+    pub delete_ipv4_address: Option<Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>>,
+
+    /// Add IPv6 Address callback.
+    pub add_ipv6_address: Option<Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>>,
+
+    /// Delete IPv6 Address callback.
+    pub delete_ipv6_address: Option<Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>>,
+}
+
+impl NetlinkKernelCallback {
+
+    pub fn new() -> NetlinkKernelCallback {
+        NetlinkKernelCallback {
+            add_link: None,
+            delete_link: None,
+            add_ipv4_address: None,
+            delete_ipv4_address: None,
+            add_ipv6_address: None,
+            delete_ipv6_address: None,
+        }
+    }
+
+    pub fn call_add_link(&self, link: KernelLink) {
+        if let Some(f) = &self.add_link {
+            (*f)(link);
+        }
+    }
+
+    pub fn call_delete_link(&self, link: KernelLink) {
+        if let Some(f) = &self.delete_link {
+            (*f)(link);
+        }
+    }
+
+    pub fn call_add_ipv4_address(&self, addr: KernelAddr<Ipv4Addr>) {
+        if let Some(f) = &self.add_ipv4_address {
+            (*f)(addr);
+        }
+    }
+
+    pub fn call_delete_ipv4_address(&self, addr: KernelAddr<Ipv4Addr>) {
+        if let Some(f) = &self.delete_ipv4_address {
+            (*f)(addr);
+        }
+    }
+    
+    pub fn call_add_ipv6_address(&self, addr: KernelAddr<Ipv6Addr>) {
+        if let Some(f) = &self.add_ipv6_address {
+            (*f)(addr);
+        }
+    }
+
+    pub fn call_delete_ipv6_address(&self, addr: KernelAddr<Ipv6Addr>) {
+        if let Some(f) = &self.delete_ipv6_address {
+            (*f)(addr);
+        }
+    }
+}
+
 /// Netlink Socket handler.
 pub struct Netlink {
+
     /// File descriptor for Netlink socket.
     sock: c_int,
     
@@ -230,12 +301,10 @@ pub struct Netlink {
     /// Receive buffer.
     buf: RefCell<Buffer>,
 
-    /// ZebraMaster.
-    master: Weak<ZebraMaster>,
-
-    /// Zebra Callbak functions.
-    callbacks: KernelCallbacks,
+    /// Kernel callback functions.
+    kernel_callback: RefCell<NetlinkKernelCallback>,
 }
+
 
 #[repr(C)]
 struct Request {
@@ -252,7 +321,7 @@ impl Request {
 
 impl Netlink {
     /// Constructor - open Netlink socket and bind.
-    pub fn new(callbacks: KernelCallbacks) -> Result<Netlink, io::Error> {
+    pub fn new() -> Result<Netlink, io::Error> {
         let sock = unsafe {
             libc::socket(libc::AF_NETLINK, libc::SOCK_RAW, libc::NETLINK_ROUTE)
         };
@@ -294,14 +363,8 @@ impl Netlink {
             pid: snl.nl_pid,
             seq: Cell::new(0u32),
             buf: RefCell::new(Buffer::new()),
-            master: Default::default(),
-            callbacks: callbacks,
+            kernel_callback: RefCell::new(NetlinkKernelCallback::new()),
         })
-    }
-
-    /// Set ZebraMaster.
-    pub fn set_master(&mut self, master: Rc<ZebraMaster>) {
-        self.master = Rc::downgrade(&master);
     }
 
     /// Install route to kernel.
@@ -628,15 +691,12 @@ impl Netlink {
                ifindex, ifname, ifi.ifi_type, hwaddr, mtu);
 
         // Call master to add Link.
-        if let Some(master) = self.master.upgrade() {
-            let link = Link::new(ifi.ifi_index, ifname, ifi.ifi_type as u16, hwaddr, mtu);
-            (self.callbacks.add_link)(&master, link);
+        let kc = self.kernel_callback.borrow();
+        let ka = KernelLink::new(ifi.ifi_index, ifname, ifi.ifi_type as u16, hwaddr, mtu);
+        kc.call_add_link(ka);
+        // TBD: maybe we should check result.
 
-            true
-        } else {
-            error!("Callback failed");
-            false
-        }
+        true
     }
 
     fn parse_interface_address<T>(&self, h: &Nlmsghdr, ifa: &Ifaddrmsg, attr: &AttrMap) -> bool
@@ -667,40 +727,33 @@ impl Netlink {
 
         let index = ifa.ifa_index as i32;
 
-        if let Some(master) = self.master.upgrade() {
-            match ifa.ifa_family as i32 {
-                libc::AF_INET => {
-                    let prefix = Prefix::<Ipv4Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
-                    let connected = Connected::<Ipv4Addr>::new(prefix);
+        let kc = self.kernel_callback.borrow();
 
-                    match h.nlmsg_type {
-                        libc::RTM_NEWADDR =>
-                            (self.callbacks.add_ipv4_address)(&master, index, connected),
-                        libc::RTM_DELADDR =>
-                            (self.callbacks.delete_ipv4_address)(&master, index, connected),
-                        _ => assert!(false),
-                    }
-                },
-                libc::AF_INET6 => {
-                    let prefix = Prefix::<Ipv6Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
-                    let connected = Connected::<Ipv6Addr>::new(prefix);
+        match ifa.ifa_family as i32 {
+            libc::AF_INET => {
+                let prefix = Prefix::<Ipv4Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
+                let ka = KernelAddr::<Ipv4Addr>::new(index, prefix, None, false, false, None);
 
-                    match h.nlmsg_type {
-                        libc::RTM_NEWADDR =>
-                            (self.callbacks.add_ipv6_address)(&master, index, connected),
-                        libc::RTM_DELADDR =>
-                            (self.callbacks.delete_ipv6_address)(&master, index, connected),
-                        _ => assert!(false),
-                    }
-                },
-                _ => assert!(false),
-            }
+                match h.nlmsg_type {
+                    libc::RTM_NEWADDR => kc.call_add_ipv4_address(ka),
+                    libc::RTM_DELADDR => kc.call_delete_ipv4_address(ka),
+                    _ => assert!(false),
+                }
+            },
+            libc::AF_INET6 => {
+                let prefix = Prefix::<Ipv6Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
+                let ka = KernelAddr::<Ipv6Addr>::new(index, prefix, None, false, false, None);
 
-            true
-        } else {
-            error!("Callback failed");
-            true
+                match h.nlmsg_type {
+                    libc::RTM_NEWADDR => kc.call_add_ipv6_address(ka),
+                    libc::RTM_DELADDR => kc.call_delete_ipv6_address(ka),
+                    _ => assert!(false),
+                }
+            },
+            _ => assert!(false),
         }
+
+        true
     }
 }
 
@@ -743,6 +796,7 @@ impl LinkHandler for Netlink {
 }
 
 impl AddressHandler for Netlink {
+
     /// Get all addresses per Address Family from kernel.
     fn get_addresses_all<T>(&self) -> Result<(), ZebraError>
     where T: AddressFamily + Addressable {
@@ -759,5 +813,38 @@ impl AddressHandler for Netlink {
         }
 
         Ok(())
+    }
+}
+
+impl KernelDriver for Netlink {
+
+    /// Register Add Link callback.
+    fn register_add_link(&self, f: Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>) {
+        self.kernel_callback.borrow_mut().add_link.replace(f);
+    }
+
+    /// Register Delete Link callback function.
+    fn register_delete_link(&self, f: Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>) {
+        self.kernel_callback.borrow_mut().delete_link.replace(f);
+    }
+
+    /// Register Add IPv4 Address callback function.
+    fn register_add_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>) {
+        self.kernel_callback.borrow_mut().add_ipv4_address.replace(f);
+    }
+
+    /// Register Delete IPv4 Address callback function.
+    fn register_delete_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>) {
+        self.kernel_callback.borrow_mut().delete_ipv4_address.replace(f);
+    }
+
+    /// Register Add IPv6 Address callback function.
+    fn register_add_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>) {
+        self.kernel_callback.borrow_mut().add_ipv6_address.replace(f);
+    }
+
+    /// Register Delete IPv6 Address callback function.
+    fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>) {
+        self.kernel_callback.borrow_mut().delete_ipv6_address.replace(f);
     }
 }

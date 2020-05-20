@@ -10,10 +10,11 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use log::{debug, error};
+use log::error;
 
 use super::address::*;
 use super::error::*;
+use super::kernel::KernelLink;
 
 /// Abstracted event handler between Zebra and OS.
 pub trait LinkHandler {
@@ -60,7 +61,7 @@ impl LinkMaster {
     }
 
     /// Delete link from tables.
-    pub fn delete_link(&mut self, link: Link) {
+    pub fn delete_link(&mut self, _link: Link) {
         // TBD
     }
 
@@ -126,10 +127,23 @@ impl Link {
     pub fn new(index: i32, name: &str, hwtype: u16, hwaddr: [u8; 6], mtu: u32) -> Link {
         Link {
             index,
-            hwtype: hwtype,
             name: name.to_string(),
+            hwtype: hwtype,
             hwaddr: hwaddr,
             mtu: mtu,
+            addr4: RefCell::new(Vec::new()),
+            addr6: RefCell::new(Vec::new()),
+        }
+    }
+
+    /// Construct from KernelLink.
+    pub fn from_kernel(kl: KernelLink) -> Link {
+        Link {
+            index: kl.ifindex,
+            hwtype: kl.hwtype,
+            name: kl.name,
+            hwaddr: kl.hwaddr,
+            mtu: kl.mtu,
             addr4: RefCell::new(Vec::new()),
             addr6: RefCell::new(Vec::new()),
         }
