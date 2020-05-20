@@ -19,10 +19,11 @@ use log::error;
 
 use rtable::prefix::*;
 
+use common::address_family::AddressFamily;
+
 use super::rtnetlink::*;
 use super::encode::*;
 use super::super::kernel::*;
-use super::super::address::*;
 use super::super::rib::*;
 use super::super::nexthop::*;
 

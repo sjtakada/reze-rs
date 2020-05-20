@@ -5,33 +5,9 @@
 // Zebra - IPv4 and IPv6 address handler.
 //
 
-use std::net::{Ipv4Addr, Ipv6Addr};
-
 use rtable::prefix::*;
 
 use super::kernel::KernelAddr;
-
-/// AddressFamily trait.
-///   Abstract net::Ipv4Addr and net::Ipv6Addr.
-pub trait AddressFamily {
-
-    /// Return libc Addressfamily
-    fn address_family() -> libc::c_int;
-}
-
-/// AddressFamily for Ipv4Addr.
-impl AddressFamily for Ipv4Addr {
-    fn address_family() -> libc::c_int {
-        libc::AF_INET
-    }
-}
-
-/// AddressFamily for Ipv6Addr.
-impl AddressFamily for Ipv6Addr {
-    fn address_family() -> libc::c_int {
-        libc::AF_INET6
-    }
-}
 
 /// Connected Address.
 pub struct Connected<T: Addressable> {

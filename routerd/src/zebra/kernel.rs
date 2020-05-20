@@ -11,8 +11,9 @@ use std::str::FromStr;
 use quick_error::*;
 use rtable::prefix::*;
 
+use common::address_family::AddressFamily;
+
 use super::rib::*;
-use super::address::*;
 use super::linux::netlink::*;
 
 // Kernel Error
