@@ -5,17 +5,14 @@
 // Zebra - Kernel abstraction layer.
 //
 
-use std::rc::Rc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
 use rtable::prefix::*;
 
 use super::rib::*;
-use super::master::*;
 use super::link::*;
 use super::address::*;
 use super::linux::netlink::*;
-use super::error::*;
 
 /// Kernel Link Abstraction.
 pub struct KernelLink {
@@ -92,22 +89,22 @@ impl<T: Addressable> KernelAddr<T> {
 pub trait KernelDriver {
 
     /// Register Add Link callback function.
-    fn register_add_link(&self, f: Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>);
+    fn register_add_link(&self, f: Box<dyn Fn(KernelLink)>);
 
     /// Register Delete Link callback function.
-    fn register_delete_link(&self, f: Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>);
+    fn register_delete_link(&self, f: Box<dyn Fn(KernelLink)>);
 
     /// Register Add IPv4 Address callback function.
-    fn register_add_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>);
+    fn register_add_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>)>);
 
     /// Register Delete IPv4 Address callback function.
-    fn register_delete_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>);
+    fn register_delete_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>)>);
 
     /// Register Add IPv6 Address callback function.
-    fn register_add_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>);
+    fn register_add_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>)>);
 
     /// Register Delete IPv6 Address callback function.
-    fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>);
+    fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>)>);
 }
 
 /// Kernel driver.
@@ -129,7 +126,7 @@ impl Kernel {
     }
 
     /// Initialization.
-    pub fn init(&mut self, master: Rc<ZebraMaster>) {
+    pub fn init(&mut self) {
         let _links = self.driver.get_links_all();
         let _v4addr = self.driver.get_addresses_all::<Ipv4Addr>();
         let _v6addr = self.driver.get_addresses_all::<Ipv6Addr>();

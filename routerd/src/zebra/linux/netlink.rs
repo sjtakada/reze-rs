@@ -8,7 +8,6 @@
 use std::io;
 use std::str;
 use std::mem::{size_of, zeroed};
-use std::rc::Rc;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -215,25 +214,26 @@ impl Buffer {
 }
 
 /// Netlink kernel callbacks.
+/// It passes info up to application, but cannot handle error here.
 pub struct NetlinkKernelCallback {
 
     /// Add Link callback.
-    pub add_link: Option<Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>>,
+    pub add_link: Option<Box<dyn Fn(KernelLink)>>,
 
     /// Delete Link callback.
-    pub delete_link: Option<Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>>,
+    pub delete_link: Option<Box<dyn Fn(KernelLink)>>,
 
     /// Add IPv4 Address callback.
-    pub add_ipv4_address: Option<Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>>,
+    pub add_ipv4_address: Option<Box<dyn Fn(KernelAddr<Ipv4Addr>)>>,
 
     /// Delete IPv4 Address callback.
-    pub delete_ipv4_address: Option<Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>>,
+    pub delete_ipv4_address: Option<Box<dyn Fn(KernelAddr<Ipv4Addr>)>>,
 
     /// Add IPv6 Address callback.
-    pub add_ipv6_address: Option<Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>>,
+    pub add_ipv6_address: Option<Box<dyn Fn(KernelAddr<Ipv6Addr>)>>,
 
     /// Delete IPv6 Address callback.
-    pub delete_ipv6_address: Option<Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>>,
+    pub delete_ipv6_address: Option<Box<dyn Fn(KernelAddr<Ipv6Addr>)>>,
 }
 
 impl NetlinkKernelCallback {
@@ -252,36 +252,48 @@ impl NetlinkKernelCallback {
     pub fn call_add_link(&self, link: KernelLink) {
         if let Some(f) = &self.add_link {
             (*f)(link);
+        } else {
+            debug!("Add link callback function is not set.");
         }
     }
 
     pub fn call_delete_link(&self, link: KernelLink) {
         if let Some(f) = &self.delete_link {
             (*f)(link);
+        } else {
+            debug!("Delete link callback function is not set.");
         }
     }
 
     pub fn call_add_ipv4_address(&self, addr: KernelAddr<Ipv4Addr>) {
         if let Some(f) = &self.add_ipv4_address {
             (*f)(addr);
+        } else {
+            debug!("Add IPv4 address callback function is not set.");
         }
     }
 
     pub fn call_delete_ipv4_address(&self, addr: KernelAddr<Ipv4Addr>) {
         if let Some(f) = &self.delete_ipv4_address {
             (*f)(addr);
+        } else {
+            debug!("Delete IPv4 address callback function is not set.");
         }
     }
     
     pub fn call_add_ipv6_address(&self, addr: KernelAddr<Ipv6Addr>) {
         if let Some(f) = &self.add_ipv6_address {
             (*f)(addr);
+        } else {
+            debug!("Add IPv6 address callback function is not set.");
         }
     }
 
     pub fn call_delete_ipv6_address(&self, addr: KernelAddr<Ipv6Addr>) {
         if let Some(f) = &self.delete_ipv6_address {
             (*f)(addr);
+        } else {
+            debug!("Delete IPv6 address callback function is not set.");
         }
     }
 }
@@ -759,6 +771,7 @@ impl Netlink {
 
 
 impl LinkHandler for Netlink {
+
     /// Get all links from kernel.
     fn get_links_all(&self) -> Result<(), ZebraError> {
         debug!("Get links all");
@@ -819,32 +832,32 @@ impl AddressHandler for Netlink {
 impl KernelDriver for Netlink {
 
     /// Register Add Link callback.
-    fn register_add_link(&self, f: Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>) {
+    fn register_add_link(&self, f: Box<dyn Fn(KernelLink)>) {
         self.kernel_callback.borrow_mut().add_link.replace(f);
     }
 
     /// Register Delete Link callback function.
-    fn register_delete_link(&self, f: Box<dyn Fn(KernelLink) -> Result<(), ZebraError>>) {
+    fn register_delete_link(&self, f: Box<dyn Fn(KernelLink)>) {
         self.kernel_callback.borrow_mut().delete_link.replace(f);
     }
 
     /// Register Add IPv4 Address callback function.
-    fn register_add_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>) {
+    fn register_add_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>)>) {
         self.kernel_callback.borrow_mut().add_ipv4_address.replace(f);
     }
 
     /// Register Delete IPv4 Address callback function.
-    fn register_delete_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>) -> Result<(), ZebraError>>) {
+    fn register_delete_ipv4_address(&self, f: Box<dyn Fn(KernelAddr<Ipv4Addr>)>) {
         self.kernel_callback.borrow_mut().delete_ipv4_address.replace(f);
     }
 
     /// Register Add IPv6 Address callback function.
-    fn register_add_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>) {
+    fn register_add_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>)>) {
         self.kernel_callback.borrow_mut().add_ipv6_address.replace(f);
     }
 
     /// Register Delete IPv6 Address callback function.
-    fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>) -> Result<(), ZebraError>>) {
+    fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>)>) {
         self.kernel_callback.borrow_mut().delete_ipv6_address.replace(f);
     }
 }

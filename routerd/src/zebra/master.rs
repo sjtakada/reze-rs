@@ -30,7 +30,6 @@ use super::address::*;
 use super::kernel::*;
 use super::static_route::*;
 use super::rib::*;
-use super::error::ZebraError;
 
 /// Store Zebra Client related information.
 struct ClientTuple {
@@ -266,50 +265,44 @@ impl ZebraMaster {
 
         let clone = master.clone();
         master.kernel.borrow_mut().driver().register_add_link(
-            Box::new(move |kl: KernelLink| -> Result<(), ZebraError> {
+            Box::new(move |kl: KernelLink| {
                 // TBD error hanadling
                 clone.get_add_link(kl);
-                Ok(())
             }));
 
         let clone = master.clone();
         master.kernel.borrow_mut().driver().register_delete_link(
-            Box::new(move |kl: KernelLink| -> Result<(), ZebraError> {
+            Box::new(move |kl: KernelLink| {
                 // TBD error handling.
                 clone.get_delete_link(kl);
-                Ok(())
             }));
 
         let clone = master.clone();
         master.kernel.borrow_mut().driver().register_add_ipv4_address(
-            Box::new(move |ka: KernelAddr<Ipv4Addr>| -> Result<(), ZebraError> {
+            Box::new(move |ka: KernelAddr<Ipv4Addr>| {
                 // TBD error handling.
                 clone.get_add_ipv4_address(ka);
-                Ok(())
             }));
 
         let clone = master.clone();
         master.kernel.borrow_mut().driver().register_delete_ipv4_address(
-            Box::new(move |ka: KernelAddr<Ipv4Addr>| -> Result<(), ZebraError> {
+            Box::new(move |ka: KernelAddr<Ipv4Addr>| {
                 // TBD error handling.
                 clone.get_delete_ipv4_address(ka);
-                Ok(())
             }));
 
         let clone = master.clone();
         master.kernel.borrow_mut().driver().register_add_ipv6_address(
-            Box::new(move |ka: KernelAddr<Ipv6Addr>| -> Result<(), ZebraError> {
+            Box::new(move |ka: KernelAddr<Ipv6Addr>| {
                 // TBD error handling.
                 clone.get_add_ipv6_address(ka);
-                Ok(())
             }));
 
         let clone = master.clone();
         master.kernel.borrow_mut().driver().register_delete_ipv6_address(
-            Box::new(move |ka: KernelAddr<Ipv6Addr>| -> Result<(), ZebraError> {
+            Box::new(move |ka: KernelAddr<Ipv6Addr>| {
                 // TBD error handling.
                 clone.get_delete_ipv6_address(ka);
-                Ok(())
             }));
 
         ZebraMaster::kernel_init(master.clone());
@@ -321,7 +314,7 @@ impl ZebraMaster {
     /// Kernel layer initialization.
     fn kernel_init(master: Rc<ZebraMaster>) {
         // Init Kernel driver.
-        master.kernel.borrow_mut().init(master.clone());
+        master.kernel.borrow_mut().init();
     }
 
     /// Initiialize configuration.
