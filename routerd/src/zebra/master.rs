@@ -136,53 +136,6 @@ impl ZebraMaster {
         self.link_master.borrow_mut().delete_ipv6_address(index, Connected::<Ipv6Addr>::from_kernel(ka));
     }
 
-/*
-    /// Add link.
-    pub fn add_link(&self, link: Link) {
-        self.link_master.borrow_mut().add_link(link);
-
-        // TODO: notify this to other protocols.
-    }
-
-    /// Delete link.
-    pub fn delete_link(&self, link: Link) {
-        debug!("Delete Link");
-
-        self.link_master.borrow_mut().delete_link(link);
-
-        // TODO: notify this to other protocols.
-    }
-
-    /// Add IPv4 address.
-    pub fn add_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
-        debug!("Add IPv4 Address");
-
-        self.link_master.borrow_mut().add_ipv4_address(index, conn);
-    }
-
-    /// Delete IPv4 address.
-    pub fn delete_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
-        debug!("Delete IPv4 Address");
-
-        self.link_master.borrow_mut().delete_ipv4_address(index, conn);
-    }
-
-    /// Add IPv6 address.
-    pub fn add_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
-        debug!("Add IPv6 Address");
-
-        self.link_master.borrow_mut().add_ipv6_address(index, conn);
-    }
-
-    /// Delete IPv6 address.
-    pub fn delete_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
-        debug!("Delete IPv6 Address");
-
-        self.link_master.borrow_mut().delete_ipv6_address(index, conn);
-    }
-*/
-
-
     /// Add RIB for IPv4 static route.
     pub fn rib_add_static_ipv4(&self, sr: Arc<StaticRoute<Ipv4Addr>>) {
         debug!("RIB add static IPv4 {:?}", sr.prefix());
@@ -198,11 +151,11 @@ impl ZebraMaster {
 
         rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
             if let Some(ref mut fib) = *entry.fib() {
-                self.rib_uninstall_kernel(prefix, &fib);
+                self.rib_ipv4_uninstall_kernel(prefix, &fib);
             }
 
             if let Some(selected) = entry.select() {
-                self.rib_install_kernel(prefix, &selected);
+                self.rib_ipv4_install_kernel(prefix, &selected);
                 Some(selected)
             } else {
                 None
@@ -225,11 +178,11 @@ impl ZebraMaster {
 
         rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
             if let Some(ref mut fib) = *entry.fib() {
-                self.rib_uninstall_kernel(prefix, &fib);
+                self.rib_ipv4_uninstall_kernel(prefix, &fib);
             }
 
             if let Some(selected) = entry.select() {
-                self.rib_install_kernel(prefix, &selected);
+                self.rib_ipv4_install_kernel(prefix, &selected);
                 Some(selected)
             } else {
                 None
@@ -237,26 +190,34 @@ impl ZebraMaster {
         });
     }
 
-    /// Install a route for given RIB to kernel.
-    pub fn rib_install_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable
-    {
-        self.kernel.borrow_mut().install(prefix, rib);
+    /// Install an IPv4 route for given RIB to kernel.
+    pub fn rib_ipv4_install_kernel(&self, prefix: &Prefix<Ipv4Addr>, new: &Rib<Ipv4Addr>) {
+        self.kernel.borrow_mut().ipv4_route_install(prefix, new);
     }
 
-    /// Update a route for given RIB to kkernel.
-    pub fn rib_update_kernel<T>(&self, prefix: &Prefix<T>, new: &Rib<T>, old: &Rib<T>)
-    where T: Addressable
-    {
-        self.kernel.borrow_mut().uninstall(prefix, old);
-        self.kernel.borrow_mut().install(prefix, new);
+    /// Update an IPv4 route for given RIB to kkernel.
+    pub fn rib_ipv4_update_kernel(&self, prefix: &Prefix<Ipv4Addr>, new: &Rib<Ipv4Addr>, old: &Rib<Ipv4Addr>) {
+        self.kernel.borrow_mut().ipv4_route_update(prefix, new, old);
     }
 
-    /// Uninstall a route for given RIB from kernel.
-    pub fn rib_uninstall_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable
-    {
-        self.kernel.borrow_mut().uninstall(prefix, rib);
+    /// Uninstall an IPv4 route for given RIB from kernel.
+    pub fn rib_ipv4_uninstall_kernel(&self, prefix: &Prefix<Ipv4Addr>, old: &Rib<Ipv4Addr>) {
+        self.kernel.borrow_mut().ipv4_route_uninstall(prefix, old);
+    }
+
+    /// Install an IPv6 route for given RIB to kernel.
+    pub fn rib_ipv6_install_kernel(&self, prefix: &Prefix<Ipv6Addr>, new: &Rib<Ipv6Addr>) {
+        self.kernel.borrow_mut().ipv6_route_install(prefix, new);
+    }
+
+    /// Update an IPv6 route for given RIB to kkernel.
+    pub fn rib_ipv6_update_kernel(&self, prefix: &Prefix<Ipv6Addr>, new: &Rib<Ipv6Addr>, old: &Rib<Ipv6Addr>) {
+        self.kernel.borrow_mut().ipv6_route_update(prefix, new, old);
+    }
+
+    /// Uninstall an IPv6 route for given RIB from kernel.
+    pub fn rib_ipv6_uninstall_kernel(&self, prefix: &Prefix<Ipv6Addr>, old: &Rib<Ipv6Addr>) {
+        self.kernel.borrow_mut().ipv6_route_uninstall(prefix, old);
     }
 
     /// Initialization.

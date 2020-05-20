@@ -379,7 +379,7 @@ impl Netlink {
     }
 
     /// Install route to kernel.
-    pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
     where T: Addressable
     {
         match self.route_msg::<T>(libc::RTM_NEWROUTE as i32, prefix, rib) {
@@ -389,7 +389,7 @@ impl Netlink {
     }
 
     /// Unnstall route to kernel.
-    pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
+    fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
     where T: Addressable
     {
         match self.route_msg::<T>(libc::RTM_DELROUTE as i32, prefix, rib) {
@@ -858,5 +858,25 @@ impl KernelDriver for Netlink {
     /// Get all IPv6 addresses from system.
     fn get_ipv6_address_all(&self) -> Result<(), KernelError> {
         self.get_address_all::<Ipv6Addr>()
+    }
+
+    /// Add an IPv4 route to system.
+    fn add_ipv4_route(&self, prefix: &Prefix<Ipv4Addr>, rib: &Rib<Ipv4Addr>) {
+        self.install(prefix, rib);
+    }
+
+    /// Delete an IPv4 route from system.
+    fn delete_ipv4_route(&self, prefix: &Prefix<Ipv4Addr>, rib: &Rib<Ipv4Addr>) {
+        self.uninstall(prefix, rib);
+    }
+
+    /// Add an IPv6 route to system.
+    fn add_ipv6_route(&self, prefix: &Prefix<Ipv6Addr>, rib: &Rib<Ipv6Addr>) {
+        self.install(prefix, rib);
+    }
+
+    /// Delete an IPv6 route from system.
+    fn delete_ipv6_route(&self, prefix: &Prefix<Ipv6Addr>, rib: &Rib<Ipv6Addr>) {
+        self.uninstall(prefix, rib);
     }
 }

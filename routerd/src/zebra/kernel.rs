@@ -137,6 +137,7 @@ pub trait KernelDriver {
     /// Register Delete IPv6 Address callback function.
     fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>)>);
 
+
     /// Send a command to kernel to retrieve all link information.
     fn get_link_all(&self) -> Result<(), KernelError>;
 
@@ -149,11 +150,25 @@ pub trait KernelDriver {
     /// Set link down.
     fn set_link_down(&self) -> bool;
 
+
     /// Get all IPv4 addresses from system.
     fn get_ipv4_address_all(&self) -> Result<(), KernelError>;
 
     /// Get all IPv6 addresses from system.
     fn get_ipv6_address_all(&self) -> Result<(), KernelError>;
+
+
+    /// Add an IPv4 route to system.
+    fn add_ipv4_route(&self, prefix: &Prefix<Ipv4Addr>, rib: &Rib<Ipv4Addr>);
+
+    /// Delete an IPv4 route from system.
+    fn delete_ipv4_route(&self, prefix: &Prefix<Ipv4Addr>, rib: &Rib<Ipv4Addr>);
+
+    /// Add an IPv6 route to system.
+    fn add_ipv6_route(&self, prefix: &Prefix<Ipv6Addr>, rib: &Rib<Ipv6Addr>);
+
+    /// Delete an IPv6 route from system.
+    fn delete_ipv6_route(&self, prefix: &Prefix<Ipv6Addr>, rib: &Rib<Ipv6Addr>);
 }
 
 /// Kernel driver.
@@ -199,17 +214,35 @@ impl Kernel {
         &self.driver
     }
 
-    /// Install route to kernel.
-    pub fn install<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable
-    {
-        self.driver.install(prefix, rib);
+    /// Install an IPv4 route through driver.
+    pub fn ipv4_route_install(&self, prefix: &Prefix<Ipv4Addr>, new: &Rib<Ipv4Addr>) {
+        self.driver.add_ipv4_route(prefix, new);
     }
 
-    /// Uninstall route from kernel.
-    pub fn uninstall<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable
-    {
-        self.driver.uninstall(prefix, rib);
+    /// Update an IPv4 route through driver.
+    pub fn ipv4_route_update(&self, prefix: &Prefix<Ipv4Addr>, new: &Rib<Ipv4Addr>, old: &Rib<Ipv4Addr>) {
+        self.driver.delete_ipv4_route(prefix, old);
+        self.driver.add_ipv4_route(prefix, new);
+    }
+
+    /// Uninstall an IPv4 route through driver.
+    pub fn ipv4_route_uninstall(&self, prefix: &Prefix<Ipv4Addr>, old: &Rib<Ipv4Addr>) {
+        self.driver.delete_ipv4_route(prefix, old);
+    }
+
+    /// Install an IPv6 route through driver.
+    pub fn ipv6_route_install(&self, prefix: &Prefix<Ipv6Addr>, new: &Rib<Ipv6Addr>) {
+        self.driver.add_ipv6_route(prefix, new);
+    }
+
+    /// Update an IPv6 route through driver.
+    pub fn ipv6_route_update(&self, prefix: &Prefix<Ipv6Addr>, new: &Rib<Ipv6Addr>, old: &Rib<Ipv6Addr>) {
+        self.driver.delete_ipv6_route(prefix, old);
+        self.driver.add_ipv6_route(prefix, new);
+    }
+
+    /// Uninstall an IPv6 route through driver.
+    pub fn ipv6_route_uninstall(&self, prefix: &Prefix<Ipv6Addr>, old: &Rib<Ipv6Addr>) {
+        self.driver.delete_ipv6_route(prefix, old);
     }
 }
