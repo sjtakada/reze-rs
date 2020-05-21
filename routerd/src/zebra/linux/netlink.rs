@@ -40,7 +40,6 @@ const NETLINK_RECV_BUFSIZ: usize = 4096;
 
 const NLMSG_ALIGNTO: usize = 4usize;
 
-
 /// Dump Netlink message.
 fn nlmsg_dump(h: &Nlmsghdr) {
     unsafe {
@@ -316,7 +315,7 @@ impl NetlinkKernelCallback {
         if let Some(f) = &self.add_ipv4_route {
             (*f)(route);
         } else {
-            debug!("Add Ipv4 route callback function is not set.");
+            debug!("Add IPv4 route callback function is not set.");
         }
     }
 
@@ -324,7 +323,7 @@ impl NetlinkKernelCallback {
         if let Some(f) = &self.delete_ipv4_route {
             (*f)(route);
         } else {
-            debug!("Delete Ipv4 route callback function is not set.");
+            debug!("Delete IPv4 route callback function is not set.");
         }
     }
 
@@ -332,7 +331,7 @@ impl NetlinkKernelCallback {
         if let Some(f) = &self.add_ipv6_route {
             (*f)(route);
         } else {
-            debug!("Add Ipv6 route callback function is not set.");
+            debug!("Add IPv6 route callback function is not set.");
         }
     }
 
@@ -340,7 +339,7 @@ impl NetlinkKernelCallback {
         if let Some(f) = &self.delete_ipv6_route {
             (*f)(route);
         } else {
-            debug!("Delete Ipv6 route callback function is not set.");
+            debug!("Delete IPv6 route callback function is not set.");
         }
     }
 }
@@ -797,7 +796,7 @@ impl Netlink {
                     libc::RTM_DELADDR => kc.call_delete_ipv4_address(ka),
                     _ => assert!(false),
                 }
-            },
+            }
             libc::AF_INET6 => {
                 let prefix = Prefix::<Ipv6Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
                 let ka = KernelAddr::<Ipv6Addr>::new(index, prefix, None, false, false, None);
@@ -807,9 +806,91 @@ impl Netlink {
                     libc::RTM_DELADDR => kc.call_delete_ipv6_address(ka),
                     _ => assert!(false),
                 }
-            },
+            }
             _ => assert!(false),
         }
+
+        true
+    }
+
+    fn parse_route<T>(&self, h: &Nlmsghdr, rtm: &Rtmsg, attr: &AttrMap) -> bool
+    where T: AddressFamily + Addressable {
+        assert!(h.nlmsg_type == libc::RTM_NEWROUTE || h.nlmsg_type == libc::RTM_DELROUTE);
+
+        //
+        if rtm.rtm_type != libc::RTN_UNICAST && rtm.rtm_type != libc::RTN_BLACKHOLE {
+            return true
+        }
+
+        //
+        if (rtm.rtm_flags & libc::RTM_F_CLONED) != 0 {
+            return true
+        }
+
+        //
+        if rtm.rtm_protocol == libc::RTPROT_REDIRECT || rtm.rtm_protocol == libc::RTPROT_KERNEL {
+            return true
+        }
+
+        //
+        if rtm.rtm_src_len == 0 {
+            return true
+        }
+
+        // Get destination prefix.
+        let dest: Prefix<T> = Prefix::from(
+            match attr.get(&(libc::RTA_DST as i32)) {
+                Some(dst) => T::from_slice(dst),
+                None => T::empty_new(),
+            },
+            rtm.rtm_dst_len);
+
+        // Prepare KernelRoute.
+        let mut kr = KernelRoute::new(dest);
+
+        // This route is self route originated earlier.
+        if rtm.rtm_protocol == RTPROT_ZEBRA as u8 {
+            kr.is_self = true;
+        }
+
+        // Get ifindex.
+        if let Some(index) = attr.get(&(libc::RTA_OIF as i32)) {
+            kr.ifindex = Some(decode_num::<u32>(*index) as i32);
+        }
+
+        // Get metric.
+        if let Some(metric) = attr.get(&(libc::RTA_PRIORITY as i32)) {
+            kr.metric = Some(decode_num::<u32>(*metric));
+        }
+
+        // Get gateway.
+        if let Some(gateway) = attr.get(&(libc::RTA_GATEWAY as i32)) {
+            kr.gateway = Some(T::from_slice(gateway));
+        }
+
+        if kr.ifindex == None && kr.gateway == None && rtm.rtm_type != libc::RTN_BLACKHOLE {
+            return true
+        }
+
+        if let Some(table_id) = attr.get(&(libc::RTA_TABLE as i32)) {
+            kr.table_id = Some(decode_num::<u32>(*table_id) as i32);
+        }
+
+        debug!("parse_route()");
+
+/*
+        let kc = self.callback.borrow();
+
+        match rtm.rtm_family as i32 {
+            libc::AF_INET => {
+                kc.call_add_ipv4_route(kr);
+            }
+            libc::AF_INET6 => {
+                kc.call_add_ipv6_route(kr);
+            }
+            _ => assert!(false),
+        }
+*/
 
         true
     }

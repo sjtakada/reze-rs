@@ -124,14 +124,42 @@ impl<T: Addressable> KernelAddr<T> {
 /// Kernel Route Abstraction.
 pub struct KernelRoute<T: Addressable> {
 
-    /// Prefix.
-    pub prefix: Prefix<T>,
+    /// Destination network prefix.
+    pub destination: Prefix<T>,
 
-    /// Flags.
-    pub flags: u32,
+    /// Outgoing interface index.
+    pub ifindex: Option<i32>,
+
+    /// Gateway Address.
+    pub gateway: Option<T>,
+
+    /// Metric.
+    pub metric: Option<u32>,
+
+    /// Table ID.
+    pub table_id: Option<i32>,
 
     /// Nexthops.
     pub nexthops: Vec<Nexthop<T>>,
+
+    /// Self route flag
+    pub is_self: bool,
+}
+
+impl<T: Addressable> KernelRoute<T> {
+
+    /// Constructor.
+    pub fn new(destination: Prefix<T>) -> KernelRoute<T> {
+        KernelRoute {
+            destination: destination,
+            ifindex: None,
+            gateway: None,
+            metric: None,
+            table_id: None,
+            nexthops: Vec::new(),
+            is_self: false,
+        }
+    }
 }
 
 /// Kernel Driver trait.
