@@ -12,6 +12,7 @@ use log::error;
 use quick_error::*;
 use rtable::prefix::*;
 
+use super::nexthop::*;
 use super::rib::*;
 use super::linux::netlink::*;
 
@@ -117,6 +118,19 @@ impl<T: Addressable> KernelAddr<T> {
     }
 }
 
+/// Kernel Route Abstraction.
+pub struct KernelRoute<T: Addressable> {
+
+    /// Prefix.
+    pub prefix: Prefix<T>,
+
+    /// Flags.
+    pub flags: u32,
+
+    /// Nexthops.
+    pub nexthops: Vec<Nexthop<T>>,
+}
+
 /// Kernel Driver trait.
 pub trait KernelDriver {
 
@@ -137,6 +151,20 @@ pub trait KernelDriver {
 
     /// Register Delete IPv6 Address callback function.
     fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>)>);
+
+/*
+    /// Register Add IPv4 route callback function.
+    fn register_add_ipv4_route(&self, f: Box<dyn Fn(KernelRoute<Ipv4Addr>)>);
+
+    /// Register Delete IPv4 route callback function.
+    fn register_delete_ipv4_route(&self, f: Box<dyn Fn(KernelRoute<Ipv4Addr>)>);
+
+    /// Register Add IPv6 route callback function.
+    fn register_add_ipv6_route(&self, f: Box<dyn Fn(KernelRoute<Ipv6Addr>)>);
+
+    /// Register Delete IPv6 route callback function.
+    fn register_delete_ipv6_route(&self, f: Box<dyn Fn(KernelRoute<Ipv6Addr>)>);
+*/
 
 
     /// Send a command to kernel to retrieve all link information.
