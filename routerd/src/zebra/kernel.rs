@@ -155,7 +155,6 @@ pub trait KernelDriver {
     /// Register Delete IPv6 Address callback function.
     fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>)>);
 
-/*
     /// Register Add IPv4 route callback function.
     fn register_add_ipv4_route(&self, f: Box<dyn Fn(KernelRoute<Ipv4Addr>)>);
 
@@ -167,7 +166,6 @@ pub trait KernelDriver {
 
     /// Register Delete IPv6 route callback function.
     fn register_delete_ipv6_route(&self, f: Box<dyn Fn(KernelRoute<Ipv6Addr>)>);
-*/
 
 
     /// Send a command to kernel to retrieve all link information.

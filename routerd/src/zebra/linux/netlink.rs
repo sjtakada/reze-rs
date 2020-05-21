@@ -233,6 +233,18 @@ pub struct NetlinkKernelCallback {
 
     /// Delete IPv6 Address callback.
     pub delete_ipv6_address: Option<Box<dyn Fn(KernelAddr<Ipv6Addr>)>>,
+
+    /// Add IPv4 Route callback.
+    pub add_ipv4_route: Option<Box<dyn Fn(KernelRoute<Ipv4Addr>)>>,
+
+    /// Delete IPv4 Route callback.
+    pub delete_ipv4_route: Option<Box<dyn Fn(KernelRoute<Ipv4Addr>)>>,
+
+    /// Add IPv6 Route callback.
+    pub add_ipv6_route: Option<Box<dyn Fn(KernelRoute<Ipv6Addr>)>>,
+
+    /// Delete IPv6 Route callback.
+    pub delete_ipv6_route: Option<Box<dyn Fn(KernelRoute<Ipv6Addr>)>>,
 }
 
 impl NetlinkKernelCallback {
@@ -245,6 +257,10 @@ impl NetlinkKernelCallback {
             delete_ipv4_address: None,
             add_ipv6_address: None,
             delete_ipv6_address: None,
+            add_ipv4_route: None,
+            delete_ipv4_route: None,
+            add_ipv6_route: None,
+            delete_ipv6_route: None,
         }
     }
 
@@ -293,6 +309,38 @@ impl NetlinkKernelCallback {
             (*f)(addr);
         } else {
             debug!("Delete IPv6 address callback function is not set.");
+        }
+    }
+
+    pub fn call_add_ipv4_route(&self, route: KernelRoute<Ipv4Addr>) {
+        if let Some(f) = &self.add_ipv4_route {
+            (*f)(route);
+        } else {
+            debug!("Add Ipv4 route callback function is not set.");
+        }
+    }
+
+    pub fn call_delete_ipv4_route(&self, route: KernelRoute<Ipv4Addr>) {
+        if let Some(f) = &self.delete_ipv4_route {
+            (*f)(route);
+        } else {
+            debug!("Delete Ipv4 route callback function is not set.");
+        }
+    }
+
+    pub fn call_add_ipv6_route(&self, route: KernelRoute<Ipv6Addr>) {
+        if let Some(f) = &self.add_ipv6_route {
+            (*f)(route);
+        } else {
+            debug!("Add Ipv6 route callback function is not set.");
+        }
+    }
+
+    pub fn call_delete_ipv6_route(&self, route: KernelRoute<Ipv6Addr>) {
+        if let Some(f) = &self.delete_ipv6_route {
+            (*f)(route);
+        } else {
+            debug!("Delete Ipv6 route callback function is not set.");
         }
     }
 }
@@ -817,6 +865,27 @@ impl KernelDriver for Netlink {
     fn register_delete_ipv6_address(&self, f: Box<dyn Fn(KernelAddr<Ipv6Addr>)>) {
         self.callback.borrow_mut().delete_ipv6_address.replace(f);
     }
+
+    /// Register Add IPv4 route callback function.
+    fn register_add_ipv4_route(&self, f: Box<dyn Fn(KernelRoute<Ipv4Addr>)>) {
+        self.callback.borrow_mut().add_ipv4_route.replace(f);
+    }
+
+    /// Register Delete IPv4 route callback function.
+    fn register_delete_ipv4_route(&self, f: Box<dyn Fn(KernelRoute<Ipv4Addr>)>) {
+        self.callback.borrow_mut().delete_ipv4_route.replace(f);
+    }
+
+    /// Register Add IPv6 route callback function.
+    fn register_add_ipv6_route(&self, f: Box<dyn Fn(KernelRoute<Ipv6Addr>)>) {
+        self.callback.borrow_mut().add_ipv6_route.replace(f);
+    }
+
+    /// Register Delete IPv6 route callback function.
+    fn register_delete_ipv6_route(&self, f: Box<dyn Fn(KernelRoute<Ipv6Addr>)>) {
+        self.callback.borrow_mut().delete_ipv6_route.replace(f);
+    }
+
 
     /// Get all links from kernel.
     fn get_link_all(&self) -> Result<(), KernelError> {
