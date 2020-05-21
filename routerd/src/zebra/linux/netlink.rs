@@ -332,7 +332,7 @@ impl Request {
 
 impl Netlink {
     /// Constructor - open Netlink socket and bind.
-    pub fn new() -> Result<Netlink, io::Error> {
+    fn new() -> Result<Netlink, io::Error> {
         let sock = unsafe {
             libc::socket(libc::AF_NETLINK, libc::SOCK_RAW, libc::NETLINK_ROUTE)
         };
@@ -878,5 +878,16 @@ impl KernelDriver for Netlink {
     /// Delete an IPv6 route from system.
     fn delete_ipv6_route(&self, prefix: &Prefix<Ipv6Addr>, rib: &Rib<Ipv6Addr>) {
         self.uninstall(prefix, rib);
+    }
+}
+
+/// Public interface to get driver.
+pub fn get_driver() -> Option<Netlink> {
+    match Netlink::new() {
+        Ok(netlink) => Some(netlink),
+        Err(err) => {
+            error!("Failed to initlaize Netlink driver {}", err);
+            None
+        }
     }
 }

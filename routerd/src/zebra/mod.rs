@@ -15,5 +15,6 @@ pub mod rib;
 pub mod static_route;
 
 pub mod kernel;
-pub mod linux;
 
+#[cfg(target_os = "linux")]
+pub mod linux;

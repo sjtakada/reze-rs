@@ -14,6 +14,8 @@ use rtable::prefix::*;
 
 use super::nexthop::*;
 use super::rib::*;
+
+#[cfg(target_os = "linux")]
 use super::linux::netlink::*;
 
 // Kernel Error
@@ -212,10 +214,12 @@ impl Kernel {
 
     /// Constructor.
     pub fn new() -> Kernel {
-        let netlink = Netlink::new().unwrap();
-
-        Kernel {
-            driver: Arc::new(netlink),
+        if let Some(driver) = get_driver() {
+            Kernel {
+                driver: Arc::new(driver),
+            }
+        } else {
+            panic!("Failed to intitialize Kernel");
         }
     }
 
