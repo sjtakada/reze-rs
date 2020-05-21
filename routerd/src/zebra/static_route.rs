@@ -20,10 +20,10 @@ use log::{debug, error};
 
 use rtable::prefix::*;
 use common::error::*;
+use common::nexthop::*;
 
 use crate::core::mds::*;
 use super::master::ZebraMaster;
-use super::nexthop::*;
 
 /// Constants.
 const ZEBRA_ADMINISTRATIVE_DISTANCE_DEFAULT: u8 = 1;

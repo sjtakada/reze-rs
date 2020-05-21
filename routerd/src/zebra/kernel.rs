@@ -12,7 +12,8 @@ use log::error;
 use quick_error::*;
 use rtable::prefix::*;
 
-use super::nexthop::*;
+use common::nexthop::*;
+
 use super::rib::*;
 
 #[cfg(target_os = "linux")]

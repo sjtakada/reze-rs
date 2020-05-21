@@ -20,12 +20,12 @@ use log::error;
 use rtable::prefix::*;
 
 use common::address_family::AddressFamily;
+use common::nexthop::*;
 
 use super::rtnetlink::*;
 use super::encode::*;
 use super::super::kernel::*;
 use super::super::rib::*;
-use super::super::nexthop::*;
 
 
 const RTMGRP_LINK: libc::c_int = 1;

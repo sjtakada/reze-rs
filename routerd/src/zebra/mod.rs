@@ -10,7 +10,6 @@ pub mod master;
 pub mod link;
 pub mod address;   
 pub mod route;
-pub mod nexthop;
 pub mod rib;
 pub mod static_route;
 

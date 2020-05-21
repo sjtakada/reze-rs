@@ -27,9 +27,9 @@ use rtable::prefix::*;
 use rtable::tree::*;
 
 use common::error::*;
+use common::nexthop::*;
 
 use super::master::*;
-use super::nexthop::*;
 use super::static_route::*;
 use super::super::core::mds::*;
 
