@@ -783,31 +783,37 @@ impl Netlink {
         };
 
         let index = ifa.ifa_index as i32;
-
         let kc = self.callback.borrow();
 
-        match ifa.ifa_family as i32 {
-            libc::AF_INET => {
+        match (ifa.ifa_family as i32, h.nlmsg_type) {
+            (libc::AF_INET, libc::RTM_NEWADDR) => {
                 let prefix = Prefix::<Ipv4Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
                 let ka = KernelAddr::<Ipv4Addr>::new(index, prefix, None, false, false, None);
 
-                match h.nlmsg_type {
-                    libc::RTM_NEWADDR => kc.call_add_ipv4_address(ka),
-                    libc::RTM_DELADDR => kc.call_delete_ipv4_address(ka),
-                    _ => assert!(false),
-                }
+                kc.call_add_ipv4_address(ka);
             }
-            libc::AF_INET6 => {
+            (libc::AF_INET, libc::RTM_DELADDR) => {
+                let prefix = Prefix::<Ipv4Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
+                let ka = KernelAddr::<Ipv4Addr>::new(index, prefix, None, false, false, None);
+
+                kc.call_delete_ipv4_address(ka);
+            }
+            (libc::AF_INET6, libc::RTM_NEWADDR) => {
                 let prefix = Prefix::<Ipv6Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
                 let ka = KernelAddr::<Ipv6Addr>::new(index, prefix, None, false, false, None);
 
-                match h.nlmsg_type {
-                    libc::RTM_NEWADDR => kc.call_add_ipv6_address(ka),
-                    libc::RTM_DELADDR => kc.call_delete_ipv6_address(ka),
-                    _ => assert!(false),
-                }
+                kc.call_add_ipv6_address(ka);
             }
-            _ => assert!(false),
+            (libc::AF_INET6, libc::RTM_DELADDR) => {
+                let prefix = Prefix::<Ipv6Addr>::from_slice(address.unwrap(), ifa.ifa_prefixlen);
+                let ka = KernelAddr::<Ipv6Addr>::new(index, prefix, None, false, false, None);
+
+                kc.call_delete_ipv6_address(ka);
+            }
+            _ => {
+                error!("Invalid family or message type");
+                return false
+            }
         }
 
         true
@@ -837,11 +843,18 @@ impl Netlink {
             return true
         }
 
-        // Get destination prefix.
-        let dest: Prefix<T> = Prefix::from(
+        match rtm.rtm_family as i32 {
+            libc::AF_INET => self.parse_route_ipv4(h, rtm, attr),
+            libc::AF_INET => self.parse_route_ipv6(h, rtm, attr),
+            _ => true,
+        }
+    }
+
+    fn parse_route_ipv4(&self, _h: &Nlmsghdr, rtm: &Rtmsg, attr: &AttrMap) -> bool {
+        let dest: Prefix<Ipv4Addr> = Prefix::from(
             match attr.get(&(libc::RTA_DST as i32)) {
-                Some(dst) => T::from_slice(dst),
-                None => T::empty_new(),
+                Some(dst) => Ipv4Addr::from_slice(dst),
+                None => Ipv4Addr::empty_new(),
             },
             rtm.rtm_dst_len);
 
@@ -865,36 +878,73 @@ impl Netlink {
 
         // Get gateway.
         if let Some(gateway) = attr.get(&(libc::RTA_GATEWAY as i32)) {
-            kr.gateway = Some(T::from_slice(gateway));
+            kr.gateway = Some(Ipv4Addr::from_slice(gateway));
         }
 
         if kr.ifindex == None && kr.gateway == None && rtm.rtm_type != libc::RTN_BLACKHOLE {
             return true
         }
 
+        // Get table ID.
         if let Some(table_id) = attr.get(&(libc::RTA_TABLE as i32)) {
             kr.table_id = Some(decode_num::<u32>(*table_id) as i32);
         }
 
-        debug!("parse_route()");
+        debug!("parse_route_ipv4()");
 
-/*
         let kc = self.callback.borrow();
-
-        match rtm.rtm_family as i32 {
-            libc::AF_INET => {
-                kc.call_add_ipv4_route(kr);
-            }
-            libc::AF_INET6 => {
-                kc.call_add_ipv6_route(kr);
-            }
-            _ => assert!(false),
-        }
-*/
+        kc.call_add_ipv4_route(kr);
 
         true
     }
 
+    fn parse_route_ipv6(&self, _h: &Nlmsghdr, rtm: &Rtmsg, attr: &AttrMap) -> bool {
+        let dest: Prefix<Ipv6Addr> = Prefix::from(
+            match attr.get(&(libc::RTA_DST as i32)) {
+                Some(dst) => Ipv6Addr::from_slice(dst),
+                None => Ipv6Addr::empty_new(),
+            },
+            rtm.rtm_dst_len);
+
+        // Prepare KernelRoute.
+        let mut kr = KernelRoute::new(dest);
+
+        // This route is self route originated earlier.
+        if rtm.rtm_protocol == RTPROT_ZEBRA as u8 {
+            kr.is_self = true;
+        }
+
+        // Get ifindex.
+        if let Some(index) = attr.get(&(libc::RTA_OIF as i32)) {
+            kr.ifindex = Some(decode_num::<u32>(*index) as i32);
+        }
+
+        // Get metric.
+        if let Some(metric) = attr.get(&(libc::RTA_PRIORITY as i32)) {
+            kr.metric = Some(decode_num::<u32>(*metric));
+        }
+
+        // Get gateway.
+        if let Some(gateway) = attr.get(&(libc::RTA_GATEWAY as i32)) {
+            kr.gateway = Some(Ipv6Addr::from_slice(gateway));
+        }
+
+        if kr.ifindex == None && kr.gateway == None && rtm.rtm_type != libc::RTN_BLACKHOLE {
+            return true
+        }
+
+        // Get table ID.
+        if let Some(table_id) = attr.get(&(libc::RTA_TABLE as i32)) {
+            kr.table_id = Some(decode_num::<u32>(*table_id) as i32);
+        }
+
+        debug!("parse_route_ipv6()");
+
+        let kc = self.callback.borrow();
+        kc.call_add_ipv6_route(kr);
+
+        true
+    }
 
     /// Get all addresses per Address Family from kernel.
     fn get_address_all<T>(&self) -> Result<(), KernelError>
