@@ -286,7 +286,7 @@ impl ChannelHandler for ProtoToNexusMessageHandler {
                         match inner.lookup_entry(index) {
                             Some(entry) => {
                                 let resp = match resp {
-                                    Some(s) => format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", *s),
+                                    Some(s) => *s,//format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", *s),
                                     None => r#"{"status": "OK"}"#.to_string(),
                                 };
 
@@ -307,7 +307,7 @@ impl ChannelHandler for ProtoToNexusMessageHandler {
                             Some(entry) => {
                                 let resp = match resp {
                                     Some(s) => *s,
-                                    None => "".to_string(),
+                                    None => "{{}}".to_string(),
                                 };
 
                                 if let Err(_err) = entry.stream_send(&resp) {
@@ -416,7 +416,7 @@ impl NexusConfig {
 
     /// Constructor.
     pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
-        let mds = Rc::new(MdsNode::new());
+        let mds = Rc::new(MdsNode::new("NexusConfig"));
 
         let zebra_handler = Rc::new(MdsProtocolHandler::new(ProtocolType::Zebra, nexus.clone()));
         MdsNode::register_handler(mds.clone(), "/config/route_ipv4", zebra_handler.clone());
@@ -454,6 +454,12 @@ impl UdsServerHandler for NexusConfig {
                     debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
 
                     if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                        // Immediate error should send back error
+                        let resp = err.json_status();
+                        if let Err(_) = entry.stream_send(&resp) {
+                            error!("Send in UdsServerHandler");
+                        }
+
                         Err(err)
                     } else {
                         // Even if we get some response from handler, we don't send it right away.
@@ -496,14 +502,15 @@ pub struct NexusExec {
 impl NexusExec {
 
     /// Constructor.
-    pub fn new(nexus: Arc<RouterNexus>) -> NexusConfig {
-        let mds = Rc::new(MdsNode::new());
+    pub fn new(nexus: Arc<RouterNexus>) -> NexusExec {
+        let mds = Rc::new(MdsNode::new("NexusExec"));
 
         let zebra_handler = Rc::new(MdsProtocolHandler::new_exec(ProtocolType::Zebra, nexus.clone()));
         MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", zebra_handler.clone());
         MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv6", zebra_handler.clone());
+        MdsNode::register_handler(mds.clone(), "/exec/show/interface", zebra_handler.clone());
 
-        NexusConfig {
+        NexusExec {
             mds: RefCell::new(mds),
             _nexus: RefCell::new(nexus),
         }
@@ -535,6 +542,12 @@ impl UdsServerHandler for NexusExec {
                     debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
 
                     if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                        // Immediate error should send back error
+                        let resp = err.json_status();
+                        if let Err(_) = entry.stream_send(&resp) {
+                            error!("Send in UdsServerHandler");
+                        }
+
                         Err(err)
                     } else {
                         Ok(())

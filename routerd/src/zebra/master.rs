@@ -5,7 +5,6 @@
 // Zebra Master
 //
 
-use log::{debug, error};
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::cell::RefMut;
@@ -16,6 +15,7 @@ use std::sync::Arc;
 use std::sync::mpsc;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
+use log::{debug, error};
 use rtable::prefix::*;
 
 use crate::core::protocols::ProtocolType;
@@ -50,11 +50,8 @@ pub struct ZebraMaster {
     /// ProtocolType to Zebra Client Tuple Map.
     clients: RefCell<HashMap<ProtocolType, ClientTuple>>,
 
-    /// Ifindex to Link map.
-    links: RefCell<HashMap<i32, Rc<Link>>>,
-
-    /// TBD
-    _name2ifindex: HashMap<String, i32>,
+    /// Link Master.
+    link_master: RefCell<LinkMaster>,
 
     /// IPv4 RIB.
     rib_ipv4: RefCell<RibTable<Ipv4Addr>>,
@@ -63,26 +60,15 @@ pub struct ZebraMaster {
     rib_ipv6: RefCell<RibTable<Ipv6Addr>>,
 }
 
-/// Zebra Master implementation.
 impl ZebraMaster {
 
     /// Constructor.
     pub fn new() -> ZebraMaster {
-        let callbacks = KernelCallbacks {
-            add_link: &ZebraMaster::add_link,
-            delete_link: &ZebraMaster::delete_link,
-            add_ipv4_address: &ZebraMaster::add_ipv4_address,
-            delete_ipv4_address: &ZebraMaster::delete_ipv4_address,
-            add_ipv6_address: &ZebraMaster::add_ipv6_address,
-            delete_ipv6_address: &ZebraMaster::delete_ipv6_address,
-        };
-
         ZebraMaster {
-            mds: RefCell::new(Rc::new(MdsNode::new())),
-            kernel: RefCell::new(Kernel::new(callbacks)),
+            mds: RefCell::new(Rc::new(MdsNode::new("ZebraMaster"))),
+            kernel: RefCell::new(Kernel::new()),
             clients: RefCell::new(HashMap::new()),
-            links: RefCell::new(HashMap::new()),
-            _name2ifindex: HashMap::new(),
+            link_master: RefCell::new(LinkMaster::new()),
             rib_ipv4: RefCell::new(RibTable::<Ipv4Addr>::new()),
             rib_ipv6: RefCell::new(RibTable::<Ipv6Addr>::new()),
         }
@@ -96,62 +82,58 @@ impl ZebraMaster {
         self.rib_ipv6.borrow_mut()
     }
 
-    /// Add link.
-    pub fn add_link(&self, link: Link) {
+    /// Get Add link from kernel.
+    pub fn get_add_link(&self, kl: KernelLink) {
         debug!("New Link");
 
-        self.links.borrow_mut().insert(link.index(), Rc::new(link));
+        self.link_master.borrow_mut().add_link(Link::from_kernel(kl));
 
         // TODO: notify this to other protocols.
     }
 
-    /// Delete link.
-    pub fn delete_link(&self, _link: Link) {
+    /// Get Delete link from kernel.
+    pub fn get_delete_link(&self, kl: KernelLink) {
         debug!("Delete Link");
 
-        //self.links.borrow_mut().insert(link.index(), Rc::new(link));
+        self.link_master.borrow_mut().delete_link(Link::from_kernel(kl));
 
         // TODO: notify this to other protocols.
     }
 
-    /// Add IPv4 address.
-    pub fn add_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
-        debug!("Add IPv4 Address");
+    /// Get Add IPv4 Adress from kernel.
+    pub fn get_add_ipv4_address(&self, ka: KernelAddr<Ipv4Addr>) {
+        debug!("Add Ipv4Address");
 
-        match self.links.borrow().get(&index) {
-            Some(link) => link.add_ipv4_address(conn),
-            None => error!("No link found with index {}", index),
-        }
+        let index = ka.ifindex;
+
+        self.link_master.borrow_mut().add_ipv4_address(index, Connected::<Ipv4Addr>::from_kernel(ka));
     }
 
-    /// Delete IPv4 address.
-    pub fn delete_ipv4_address(&self, index: i32, conn: Connected<Ipv4Addr>) {
-        debug!("Delete IPv4 Address");
+    /// Get Delete IPv4 Adress from kernel.
+    pub fn get_delete_ipv4_address(&self, ka: KernelAddr<Ipv4Addr>) {
+        debug!("Add Ipv4Address");
 
-        match self.links.borrow().get(&index) {
-            Some(link) => link.delete_ipv4_address(conn),
-            None => error!("No link found with index {}", index),
-        }
+        let index = ka.ifindex;
+
+        self.link_master.borrow_mut().delete_ipv4_address(index, Connected::<Ipv4Addr>::from_kernel(ka));
     }
 
-    /// Add IPv6 address.
-    pub fn add_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
-        debug!("Add IPv6 Address");
+    /// Get Add IPv6 Adress from kernel.
+    pub fn get_add_ipv6_address(&self, ka: KernelAddr<Ipv6Addr>) {
+        debug!("Add Ipv6Address");
 
-        match self.links.borrow().get(&index) {
-            Some(link) => link.add_ipv6_address(conn),
-            None => error!("No link found with index {}", index),
-        }
+        let index = ka.ifindex;
+
+        self.link_master.borrow_mut().add_ipv6_address(index, Connected::<Ipv6Addr>::from_kernel(ka));
     }
 
-    /// Delete IPv6 address.
-    pub fn delete_ipv6_address(&self, index: i32, conn: Connected<Ipv6Addr>) {
-        debug!("Delete IPv6 Address");
+    /// Get Delete IPv6 Adress from kernel.
+    pub fn get_delete_ipv6_address(&self, ka: KernelAddr<Ipv6Addr>) {
+        debug!("Add Ipv6Address");
 
-        match self.links.borrow().get(&index) {
-            Some(link) => link.delete_ipv6_address(conn),
-            None => error!("No link found with index {}", index),
-        }
+        let index = ka.ifindex;
+
+        self.link_master.borrow_mut().delete_ipv6_address(index, Connected::<Ipv6Addr>::from_kernel(ka));
     }
 
     /// Add RIB for IPv4 static route.
@@ -169,11 +151,11 @@ impl ZebraMaster {
 
         rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
             if let Some(ref mut fib) = *entry.fib() {
-                self.rib_uninstall_kernel(prefix, &fib);
+                self.rib_ipv4_uninstall_kernel(prefix, &fib);
             }
 
             if let Some(selected) = entry.select() {
-                self.rib_install_kernel(prefix, &selected);
+                self.rib_ipv4_install_kernel(prefix, &selected);
                 Some(selected)
             } else {
                 None
@@ -196,11 +178,11 @@ impl ZebraMaster {
 
         rib_ipv4.process(&prefix, |prefix: &Prefix<Ipv4Addr>, entry: &RibEntry<Ipv4Addr>| {
             if let Some(ref mut fib) = *entry.fib() {
-                self.rib_uninstall_kernel(prefix, &fib);
+                self.rib_ipv4_uninstall_kernel(prefix, &fib);
             }
 
             if let Some(selected) = entry.select() {
-                self.rib_install_kernel(prefix, &selected);
+                self.rib_ipv4_install_kernel(prefix, &selected);
                 Some(selected)
             } else {
                 None
@@ -208,30 +190,82 @@ impl ZebraMaster {
         });
     }
 
-    /// Install a route for given RIB to kernel.
-    pub fn rib_install_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable
-    {
-        self.kernel.borrow_mut().install(prefix, rib);
+    /// Install an IPv4 route for given RIB to kernel.
+    pub fn rib_ipv4_install_kernel(&self, prefix: &Prefix<Ipv4Addr>, new: &Rib<Ipv4Addr>) {
+        self.kernel.borrow_mut().ipv4_route_install(prefix, new);
     }
 
-    /// Update a route for given RIB to kkernel.
-    pub fn rib_update_kernel<T>(&self, prefix: &Prefix<T>, new: &Rib<T>, old: &Rib<T>)
-    where T: Addressable
-    {
-        self.kernel.borrow_mut().uninstall(prefix, old);
-        self.kernel.borrow_mut().install(prefix, new);
+    /// Update an IPv4 route for given RIB to kkernel.
+    pub fn rib_ipv4_update_kernel(&self, prefix: &Prefix<Ipv4Addr>, new: &Rib<Ipv4Addr>, old: &Rib<Ipv4Addr>) {
+        self.kernel.borrow_mut().ipv4_route_update(prefix, new, old);
     }
 
-    /// Uninstall a route for given RIB from kernel.
-    pub fn rib_uninstall_kernel<T>(&self, prefix: &Prefix<T>, rib: &Rib<T>)
-    where T: Addressable
-    {
-        self.kernel.borrow_mut().uninstall(prefix, rib);
+    /// Uninstall an IPv4 route for given RIB from kernel.
+    pub fn rib_ipv4_uninstall_kernel(&self, prefix: &Prefix<Ipv4Addr>, old: &Rib<Ipv4Addr>) {
+        self.kernel.borrow_mut().ipv4_route_uninstall(prefix, old);
+    }
+
+    /// Install an IPv6 route for given RIB to kernel.
+    pub fn rib_ipv6_install_kernel(&self, prefix: &Prefix<Ipv6Addr>, new: &Rib<Ipv6Addr>) {
+        self.kernel.borrow_mut().ipv6_route_install(prefix, new);
+    }
+
+    /// Update an IPv6 route for given RIB to kkernel.
+    pub fn rib_ipv6_update_kernel(&self, prefix: &Prefix<Ipv6Addr>, new: &Rib<Ipv6Addr>, old: &Rib<Ipv6Addr>) {
+        self.kernel.borrow_mut().ipv6_route_update(prefix, new, old);
+    }
+
+    /// Uninstall an IPv6 route for given RIB from kernel.
+    pub fn rib_ipv6_uninstall_kernel(&self, prefix: &Prefix<Ipv6Addr>, old: &Rib<Ipv6Addr>) {
+        self.kernel.borrow_mut().ipv6_route_uninstall(prefix, old);
     }
 
     /// Initialization.
     pub fn init(master: Rc<ZebraMaster>) {
+        // Register callbacks.
+
+        let clone = master.clone();
+        master.kernel.borrow_mut().driver().register_add_link(
+            Box::new(move |kl: KernelLink| {
+                // TBD error hanadling
+                clone.get_add_link(kl);
+            }));
+
+        let clone = master.clone();
+        master.kernel.borrow_mut().driver().register_delete_link(
+            Box::new(move |kl: KernelLink| {
+                // TBD error handling.
+                clone.get_delete_link(kl);
+            }));
+
+        let clone = master.clone();
+        master.kernel.borrow_mut().driver().register_add_ipv4_address(
+            Box::new(move |ka: KernelAddr<Ipv4Addr>| {
+                // TBD error handling.
+                clone.get_add_ipv4_address(ka);
+            }));
+
+        let clone = master.clone();
+        master.kernel.borrow_mut().driver().register_delete_ipv4_address(
+            Box::new(move |ka: KernelAddr<Ipv4Addr>| {
+                // TBD error handling.
+                clone.get_delete_ipv4_address(ka);
+            }));
+
+        let clone = master.clone();
+        master.kernel.borrow_mut().driver().register_add_ipv6_address(
+            Box::new(move |ka: KernelAddr<Ipv6Addr>| {
+                // TBD error handling.
+                clone.get_add_ipv6_address(ka);
+            }));
+
+        let clone = master.clone();
+        master.kernel.borrow_mut().driver().register_delete_ipv6_address(
+            Box::new(move |ka: KernelAddr<Ipv6Addr>| {
+                // TBD error handling.
+                clone.get_delete_ipv6_address(ka);
+            }));
+
         ZebraMaster::kernel_init(master.clone());
         ZebraMaster::config_init(master.clone());
         ZebraMaster::exec_init(master.clone());
@@ -241,7 +275,7 @@ impl ZebraMaster {
     /// Kernel layer initialization.
     fn kernel_init(master: Rc<ZebraMaster>) {
         // Init Kernel driver.
-        master.kernel.borrow_mut().init(master.clone());
+        master.kernel.borrow_mut().init();
     }
 
     /// Initiialize configuration.
@@ -258,6 +292,7 @@ impl ZebraMaster {
         let rib_table_ipv4 = Rc::new(RibTableIpv4::new(master.clone()));
 
         MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", rib_table_ipv4.clone());
+//        MdsNode::register_handler(mds.clone(), "/exec/show/route_ipv4", rib_table_ipv4.clone());
     }
 
     /// Initialize RIB.
@@ -314,7 +349,7 @@ impl ZebraMaster {
                                     None => None,
                                 }
                             },
-                            Err(err) => Some(Box::new(err.to_string())),
+                            Err(err) => Some(Box::new(err.json_status()))
                         };
 
                         if let Err(_err) = sender_p2n.send(ProtoToNexus::ConfigResponse((index, resp))) {
@@ -332,7 +367,7 @@ impl ZebraMaster {
                                     None => None,
                                 }
                             },
-                            Err(err) => Some(Box::new(err.to_string())),
+                            Err(err) => Some(Box::new(err.json_status()))
                         };
 
                         if let Err(_err) = sender_p2n.send(ProtoToNexus::ExecResponse((index, resp))) {

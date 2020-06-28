@@ -242,12 +242,7 @@ impl EventManager {
 
     /// Poll channel handlers.
     pub fn poll_channel(&self) -> Result<(), CoreError> {
-        loop {
-            match self.ch_events.borrow_mut().poll_channel() {
-                Ok(_) => println!("*** poll_channel_events"),
-                Err(err) => return Err(err)
-            }
-        }
+        self.ch_events.borrow_mut().poll_channel()
     }
 
     /// Sleep certain period to have other events to occur.

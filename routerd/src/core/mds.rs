@@ -19,6 +19,9 @@ use common::method::Method;
 ///  Store leaf node and handler.
 pub struct MdsNode {
 
+    /// Name of node.
+    name: String,
+
     /// Map for children nodes.
     children: RefCell<HashMap<String, Rc<MdsNode>>>,
 
@@ -30,11 +33,17 @@ pub struct MdsNode {
 impl MdsNode {
 
     /// Constructor.
-    pub fn new() -> MdsNode {
+    pub fn new(s: &str) -> MdsNode {
         MdsNode {
+            name: String::from(s),
             children: RefCell::new(HashMap::new()),
             handler: RefCell::new(None),
         }
+    }
+
+    /// Return name.
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set handler to this node.
@@ -70,7 +79,7 @@ impl MdsNode {
         for p in v {
             curr = match curr.lookup_child(p) {
                 Some(child) => child,
-                None => curr.register(p, Rc::new(MdsNode::new())),
+                None => curr.register(p, Rc::new(MdsNode::new(curr.name()))),
             };
         }
 
@@ -102,7 +111,7 @@ impl MdsNode {
     /// Handle request.
     pub fn handle(curr: Rc<MdsNode>, id: u32, method: Method,
                   path: &str, body: Option<Box<String>>) -> Result<Option<String>, CoreError> {
-        if let Some(handler) = MdsNode::lookup_handler(curr, path) {
+        if let Some(handler) = MdsNode::lookup_handler(curr.clone(), path) {
             if handler.is_generic() {
                 handler.handle_generic(id, method, path, body)
             } else {
@@ -115,7 +124,7 @@ impl MdsNode {
                 }
             }
         } else {
-            Err(CoreError::MdsNoHandler)
+            Err(CoreError::MdsNoHandler(String::from(curr.name())))
         }
     }
 }
@@ -204,7 +213,7 @@ mod tests {
     #[test]
     pub fn test_mds_node() {
         let handler = Rc::new(Handler {});
-        let root = Rc::new(MdsNode::new());
+        let root = Rc::new(MdsNode::new("test"));
 
         MdsNode::register_handler(root.clone(), "/show/ip/route", handler.clone());
         MdsNode::register_handler(root.clone(), "/show/ip/route/summary", handler.clone());

@@ -27,9 +27,9 @@ use rtable::prefix::*;
 use rtable::tree::*;
 
 use common::error::*;
+use common::nexthop::*;
 
 use super::master::*;
-use super::nexthop::*;
 use super::static_route::*;
 use super::super::core::mds::*;
 
@@ -429,8 +429,6 @@ impl MdsHandler for RibTableIpv4 {
 
         let ref rib_ipv4 = *master.rib_ipv4();
         let s = serde_json::to_string(rib_ipv4).unwrap();
-
-        debug!("*** handle get rib table {}", s);
 
         Ok(Some(s))
     }
