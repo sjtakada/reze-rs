@@ -113,7 +113,7 @@ impl UdsClient {
     }
 
     /// Receive message.
-    pub fn stream_read(&self) -> Result<Option<String>, EventError> {
+    pub fn stream_read(&self) -> Result<String, EventError> {
         self.get_inner().stream_read()
     }
 }
@@ -185,13 +185,6 @@ impl UdsClientInner {
     pub fn stream_send(&self, message: &str) -> Result<(), EventError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-/*
-                if sync {
-                    if let Err(err) = wait_until_writable(stream) {
-                        return Err(err)
-                    }
-                }
-*/
                 if let Err(_err) = stream.write_all(message.as_bytes()) {
                     return Err(EventError::UdsWriteError)
                 }
@@ -205,25 +198,25 @@ impl UdsClientInner {
     }
 
     /// Receive a message through UnixStream.
-    pub fn stream_read(&self) -> Result<Option<String>, EventError> {
+    /// Return UTF8 string. If it is empty, consider an error.
+    pub fn stream_read(&self) -> Result<String, EventError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
-                let mut buffer = String::new();
+                let mut buffer = Vec::new();
 
-/*
-                if sync {
-                    wait_until_readable(stream)?;
-                }
-*/
-                if let Err(err) = stream.read_to_string(&mut buffer) {
+                if let Err(err) = stream.read_to_end(&mut buffer) {
                     if err.kind() != std::io::ErrorKind::WouldBlock {
-                        error!("Error: {}", err);
                         return Err(EventError::ReadError(err.to_string()))
                     }
                 }
 
-                let message = String::from(buffer.trim());
-                Ok(Some(message))
+                let str = std::str::from_utf8(&buffer).unwrap();
+                if str.len() > 0 {
+                    let message = String::from(str);
+                    Ok(message)
+                } else {
+                    Err(EventError::ReadError("Empty string from stream".to_string()))
+                }
             },
             None => {
                 Err(EventError::NoStream)
@@ -237,8 +230,6 @@ impl EventHandler for UdsClientInner {
 
     /// Handle event.
     fn handle(&self, e: EventType) -> Result<(), EventError> {
-println!("*** UdsClientInner handle {:?}", e);
-
         match e {
             EventType::TimerEvent => {
                 // Reconnect timer expired.
@@ -249,21 +240,28 @@ println!("*** UdsClientInner handle {:?}", e);
             },
             EventType::ReadEvent => {
                 let handler = self.handler.borrow_mut();
+                let client = self.client.borrow();
 
                 // Dispatch message to message handler.
-                handler.handle_message(&self.client.borrow())
+                if let Err(_) = handler.handle_message(&client) {
+                    // If read causes an error, most likely server disconnected,
+                    // so schedule reconnect.
+                    client.connect_timer();
+                }
+
+                Ok(())
             },
             EventType::ErrorEvent => {
                 self.stream.borrow_mut().take();
 
-                // TBD: want to schedule reconnect timer.
-                let client = self.client.borrow_mut().clone();
-                client.connect();
+                // TODO: Schedule reconnect timer.
+                let client = self.client.borrow();
+                client.connect_timer();
 
                 let handler = self.handler.borrow_mut();
 
                 // Dispatch message to Client message handler.
-                handler.handle_disconnect(&self.client.borrow())
+                handler.handle_disconnect(&client)
             },
             _ => {
                 Err(EventError::InvalidEvent)

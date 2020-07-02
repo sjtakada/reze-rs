@@ -392,7 +392,7 @@ impl Cli {
                         println!("Error: {:?}", err);
                         None
                     }
-                    Ok(s) => s,
+                    Ok(s) => Some(s),
                 }
             },
             None => {

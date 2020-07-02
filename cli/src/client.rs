@@ -38,7 +38,7 @@ pub trait RemoteClient {
     }
 
     /// Recv message from config server.
-    fn stream_read(&self) -> Result<Option<String>, EventError> {
+    fn stream_read(&self) -> Result<String, EventError> {
         self.uds_client().stream_read()
     }
 }

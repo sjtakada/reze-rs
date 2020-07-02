@@ -174,18 +174,20 @@ impl UdsClientHandler for CliMaster {
         println!("% Server disconncted.");
         // Should restart reconnect timer.
 
-        entry.connect_timer();
+//        entry.connect_timer();
 
         Ok(())
     }
 
     /// callback when client received message.
     fn handle_message(&self, entry: &UdsClient) -> Result<(), EventError> {
-        let inner = entry.get_inner();
+//        let inner = entry.get_inner();
 
-        if let Err(_err) = entry.stream_read() {
-            self.handle_disconnect(entry);
-        }
+        entry.stream_read()?;
+
+//        if let Err(_err) = entry.stream_read() {
+//            self.handle_disconnect(entry)?;
+//        }
 
         Ok(())
     }
