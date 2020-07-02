@@ -87,24 +87,38 @@ impl UdsClient {
         match inner.connect() {
             Ok(_) => {
                 if let Some(ref mut stream) = *inner.stream.borrow_mut() {
-                    if inner.sync {
+//                    if inner.sync {
                         // Do nothing, fd is polled every send and recv.
-                    } else {
+//                    } else {
                         event_manager
                             .lock()
                             .unwrap()
-                            .register_read_write(stream, inner.clone());
-                    }
+                            .register_read(stream, inner.clone());
+//                    }
                 }
             },
-            Err(_) => {
+            Err(_) => self.connect_timer(),
+/*
+            {
                 let d = Duration::from_secs(5);
                 event_manager
                     .lock()
                     .unwrap()
                     .register_timer(d, inner.clone());
             },
+*/
         }
+    }
+
+    /// Start connect timer.
+    pub fn connect_timer(&self) {
+        let inner = self.get_inner();
+        let event_manager = inner.get_event_manager();
+
+        event_manager
+            .lock()
+            .unwrap()
+            .register_timer(Duration::from_secs(5), inner.clone());
     }
 
     /// Send message.
@@ -113,7 +127,7 @@ impl UdsClient {
     }
 
     /// Receive message.
-    pub fn stream_read(&self) -> Option<String> {
+    pub fn stream_read(&self) -> Result<Option<String>, EventError> {
         self.get_inner().stream_read(true)
     }
 }
@@ -209,30 +223,27 @@ impl UdsClientInner {
 
     /// Receive a message through UnixStream.
     /// Optionally blocking socket until it gets ready.
-    pub fn stream_read(&self, sync: bool) -> Option<String> {
+    pub fn stream_read(&self, sync: bool) -> Result<Option<String>, EventError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
                 let mut buffer = String::new();
 
                 if sync {
-                    if let Err(_) = wait_until_readable(stream) {
-                        return None
-                    }
+                    wait_until_readable(stream)?;
                 }
 
                 if let Err(err) = stream.read_to_string(&mut buffer) {
                     if err.kind() != std::io::ErrorKind::WouldBlock {
                         error!("Error: {}", err);
-                        return None
+                        return Err(EventError::ReadError(err.to_string()))
                     }
                 }
 
                 let message = String::from(buffer.trim());
-                Some(message)
+                Ok(Some(message))
             },
             None => {
-                error!("No stream");
-                None
+                Err(EventError::NoStream)
             }
         }
     }
@@ -243,6 +254,8 @@ impl EventHandler for UdsClientInner {
 
     /// Handle event.
     fn handle(&self, e: EventType) -> Result<(), EventError> {
+println!("*** UdsClientInner handle {:?}", e);
+
         match e {
             EventType::TimerEvent => {
                 // Reconnect timer expired.

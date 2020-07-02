@@ -387,7 +387,13 @@ impl Cli {
     pub fn remote_recv(&self, target: &str) -> Option<String> {
         match self.remote_client.borrow_mut().get(target) {
             Some(client) => {
-                client.stream_read()
+                match client.stream_read() {
+                    Err(err) => {
+                        println!("Error: {:?}", err);
+                        None
+                    }
+                    Ok(s) => s,
+                }
             },
             None => {
                 None

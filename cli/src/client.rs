@@ -8,6 +8,8 @@
 use std::env;
 use std::sync::Arc;
 
+use eventum::EventError;
+
 use common::consts::*;
 
 use super::master::CliMaster;
@@ -36,7 +38,7 @@ pub trait RemoteClient {
     }
 
     /// Recv message from config server.
-    fn stream_read(&self) -> Option<String> {
+    fn stream_read(&self) -> Result<Option<String>, EventError> {
         self.uds_client().stream_read()
     }
 }

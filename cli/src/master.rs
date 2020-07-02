@@ -163,25 +163,30 @@ impl EventHandler for ShutdownMessageHandler {
 impl UdsClientHandler for CliMaster {
 
     /// callback when client connects to server.
-    fn handle_connect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient)
-                      -> Result<(), EventError> {
+    fn handle_connect(&self, _entry: &UdsClient) -> Result<(), EventError> {
         println!("% Server connected.");
 
         Ok(())
     }
 
     /// callback when client detects server disconnected.
-    fn handle_disconnect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient)
-                         -> Result<(), EventError> {
+    fn handle_disconnect(&self, entry: &UdsClient) -> Result<(), EventError> {
         println!("% Server disconncted.");
         // Should restart reconnect timer.
+
+        entry.connect_timer();
 
         Ok(())
     }
 
     /// callback when client received message.
-    fn handle_message(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient)
-                      -> Result<(), EventError> {
+    fn handle_message(&self, entry: &UdsClient) -> Result<(), EventError> {
+        let inner = entry.get_inner();
+
+        if let Err(_err) = entry.stream_read() {
+            self.handle_disconnect(entry);
+        }
+
         Ok(())
     }
 }
