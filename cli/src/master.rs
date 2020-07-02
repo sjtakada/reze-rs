@@ -8,24 +8,23 @@
 use std::thread;
 use std::sync::mpsc;
 use std::sync::Arc;
-use std::cell::RefCell;
-
-use common::error::*;
-use common::event::*;
-use common::channel::*;
-use common::uds_client::*;
+use std::sync::Mutex;
 
 use super::cli::*;
 use super::client::*;
 use super::signal;
 use super::config::Config;
 use super::error::CliError;
+use super::uds_client::*;
+
+use eventum::*;
+
 
 /// CLI Master.
 pub struct CliMaster {
 
     /// Event Manager.
-    event_manager: RefCell<Arc<EventManager>>,
+    event_manager: Arc<Mutex<EventManager>>,
 }
 
 /// CLI Master implementation.
@@ -34,7 +33,7 @@ impl CliMaster {
     /// Constructor.
     pub fn new() -> CliMaster {
         CliMaster {
-            event_manager: RefCell::new(Arc::new(EventManager::new())),
+            event_manager: Arc::new(Mutex::new(EventManager::new())),
         }
     }
 
@@ -50,7 +49,7 @@ impl CliMaster {
         let config_client = Arc::new(ConfigClient::new(master.clone(), &config));
         let exec_client = Arc::new(ExecClient::new(master.clone(), &config));
 
-        let (sender, receiver) = mpsc::channel::<bool>();
+        let (sender, receiver) = mpsc::channel::<CliMessage>();
 
         // Run CLI parser in another thread.
         let handle = thread::spawn(move || {
@@ -64,19 +63,20 @@ impl CliMaster {
             }
 
             // Notify main thread to terminate.
-            sender.send(true).unwrap();
+            sender.send(CliMessage { shutdown: true }).unwrap();
         });
 
-        EventManager::init_channel_manager(event_manager.clone());
+        let cli_channel_handler = CliChannelHandler { receiver };
+        event_manager.lock().unwrap().register_channel(Box::new(cli_channel_handler));
 
-        let shutdown_handler = ShutdownMessageHandler { receiver };
-        event_manager.register_channel(Box::new(shutdown_handler));
+        let runner = SimpleRunner::new();
 
         // Event loop.
         'main: loop {
-            match event_manager.run() {
-                Err(CoreError::SystemShutdown) => break 'main,
-                _ => {},
+            let events = event_manager.lock().unwrap().poll();
+            match runner.run(events) {
+                Err(EventError::SystemShutdown) => break 'main,
+                _ => {}
             }
         }
 
@@ -97,44 +97,82 @@ impl CliMaster {
     }
 
     /// Return event manager.
-    pub fn event_manager(&self) -> Arc<EventManager> {
-        self.event_manager.borrow_mut().clone()
+    pub fn event_manager(&self) -> Arc<Mutex<EventManager>> {
+        self.event_manager.clone()
     }
 }
 
-/// 
-pub struct ShutdownMessageHandler {
-
-    /// Receiver.
-    receiver: mpsc::Receiver<bool>,
+/// CliMessage for shutdown.
+struct CliMessage {
+    shutdown: bool,
 }
 
-///
-impl ChannelHandler for ShutdownMessageHandler {
+struct CliChannelHandler {
+    receiver: mpsc::Receiver<CliMessage>,
+}
 
-    /// Handle message.
-    fn handle_message(&self, _event_manager: Arc<EventManager>) -> Result<(), CoreError> {
-        if let Ok(_) = self.receiver.try_recv() {
-            Err(CoreError::SystemShutdown)
-        } else {
-            Err(CoreError::ChannelQueueEmpty)
+impl CliChannelHandler {
+    pub fn new(receiver: mpsc::Receiver<CliMessage>) -> CliChannelHandler {
+        CliChannelHandler {
+            receiver: receiver,
         }
     }
 }
 
+impl ChannelHandler for CliChannelHandler {
+    fn poll_channel(&self) -> Vec<(EventType, Arc<dyn EventHandler>)> {
+        let mut vec = Vec::new();
+
+        while let Ok(d) = self.receiver.try_recv() {
+            let handler = ShutdownMessageHandler::new(d);
+            vec.push((EventType::ChannelEvent, handler));
+        }
+
+        vec
+    }
+}
+
+struct ShutdownMessageHandler {
+    _message: CliMessage,
+}
+
+impl ShutdownMessageHandler {
+    pub fn new(message: CliMessage) -> Arc<dyn EventHandler> {
+        Arc::new(ShutdownMessageHandler {
+            _message: message,
+        })
+    }
+}
+
+impl EventHandler for ShutdownMessageHandler {
+
+    /// Handle message.
+    fn handle(&self, event_type: EventType) -> Result<(), EventError> {
+        match event_type {
+            EventType::ChannelEvent => {
+                Err(EventError::SystemShutdown)
+            }
+            _ => {
+                Ok(())
+            }
+        }
+    }
+}
 
 /// UdsClientHandler for CliMaster.
 impl UdsClientHandler for CliMaster {
 
     /// callback when client connects to server.
-    fn handle_connect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient) -> Result<(), CoreError> {
+    fn handle_connect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient)
+                      -> Result<(), EventError> {
         println!("% Server connected.");
 
         Ok(())
     }
 
     /// callback when client detects server disconnected.
-    fn handle_disconnect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient) -> Result<(), CoreError> {
+    fn handle_disconnect(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient)
+                         -> Result<(), EventError> {
         println!("% Server disconncted.");
         // Should restart reconnect timer.
 
@@ -142,7 +180,8 @@ impl UdsClientHandler for CliMaster {
     }
 
     /// callback when client received message.
-    fn handle_message(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient) -> Result<(), CoreError> {
+    fn handle_message(&self, /*client: Arc<UdsClient>, */_entry: &UdsClient)
+                      -> Result<(), EventError> {
         Ok(())
     }
 }

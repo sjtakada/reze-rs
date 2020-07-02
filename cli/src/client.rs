@@ -9,10 +9,10 @@ use std::env;
 use std::sync::Arc;
 
 use common::consts::*;
-use common::uds_client::UdsClient;
 
 use super::master::CliMaster;
 use super::config::Config;
+use super::uds_client::UdsClient;
 
 /// Trait Remote Client.
 pub trait RemoteClient {
@@ -69,7 +69,7 @@ impl ConfigClient {
             None => path.push(ROUTERD_CONFIG_UDS_FILENAME),
         }
 
-        let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path);
+        let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path, true);
         uds_client.connect();
 
         let prefix = match config.remote("config") {
@@ -132,7 +132,7 @@ impl ExecClient {
             None => path.push(ROUTERD_EXEC_UDS_FILENAME),
         }
 
-        let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path);
+        let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path, true);
         uds_client.connect();
 
         let prefix = match config.remote("exec") {

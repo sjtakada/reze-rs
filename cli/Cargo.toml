@@ -10,11 +10,14 @@ quick-error = "1.2.3"
 serde = "1.0.104"
 serde_json = "1.0.44"
 regex = "1.3.3"
-mio = "0.6.21"
-mio-uds = "0.6.7"
+mio = { version = "0.7.0", features = ["os-poll", "os-util", "uds"] }
 nix = "0.13.0"
+log = "0.4.8"
 
 #rustyline = "3.0.0"
 rustyline = { git = "https://github.com/sjtakada/rustyline", branch = "custom" }
 
 common = { path = "../common" }
+
+#eventum = { git = "https://github.com/sjtakada/eventum-rs" }
+eventum = { path = "/home/toshiaki/git/eventum-rs" }
