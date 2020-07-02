@@ -8,18 +8,12 @@
 use std::io::Read;
 use std::io::Write;
 use std::sync::Arc;
-use std::cell::Cell;
 use std::cell::RefCell;
 use std::path::PathBuf;
-use std::time::Instant;
 use std::time::Duration;
 use std::sync::Mutex;
 
-//use std::net::Shutdown;
-
-use log::error;
 use mio::net::UnixStream;
-
 use eventum::*;
 
 
@@ -86,10 +80,13 @@ impl UdsClient {
         match inner.connect() {
             Ok(_) => {
                 if let Some(ref mut stream) = *inner.stream.borrow_mut() {
-                    event_manager
+                    if let Err(_)  = event_manager
                         .lock()
                         .unwrap()
-                        .register_read_write(stream, inner.clone());
+                        .register_read_write(stream, inner.clone())
+                    {
+                        self.connect_timer();
+                    }
                 }
             },
             Err(_) => self.connect_timer(),
@@ -138,9 +135,6 @@ pub struct UdsClientInner {
 
     /// Client stream.
     stream: RefCell<Option<UnixStream>>,
-
-    /// Reconnect timer.
-    reconnect: Cell<Instant>,
 }
 
 /// UdsClientInner implementation.
@@ -156,7 +150,6 @@ impl UdsClientInner {
             event_manager: event_manager,
             handler: RefCell::new(handler),
             stream: RefCell::new(None),
-            reconnect: Cell::new(Instant::now()),
         }
     }
 

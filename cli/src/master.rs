@@ -63,7 +63,7 @@ impl CliMaster {
             }
 
             // Notify main thread to terminate.
-            sender.send(CliMessage { shutdown: true }).unwrap();
+            sender.send(CliMessage::Shutdown).unwrap();
         });
 
         let cli_channel_handler = CliChannelHandler { receiver };
@@ -103,8 +103,8 @@ impl CliMaster {
 }
 
 /// CliMessage for shutdown.
-struct CliMessage {
-    shutdown: bool,
+enum CliMessage {
+    Shutdown,
 }
 
 struct CliChannelHandler {
@@ -124,7 +124,7 @@ impl ChannelHandler for CliChannelHandler {
         let mut vec = Vec::new();
 
         while let Ok(d) = self.receiver.try_recv() {
-            let handler = ShutdownMessageHandler::new(d);
+            let handler = CliMessageHandler::new(d);
             vec.push((EventType::ChannelEvent, handler));
         }
 
@@ -132,19 +132,19 @@ impl ChannelHandler for CliChannelHandler {
     }
 }
 
-struct ShutdownMessageHandler {
+struct CliMessageHandler {
     _message: CliMessage,
 }
 
-impl ShutdownMessageHandler {
+impl CliMessageHandler {
     pub fn new(message: CliMessage) -> Arc<dyn EventHandler> {
-        Arc::new(ShutdownMessageHandler {
+        Arc::new(CliMessageHandler {
             _message: message,
         })
     }
 }
 
-impl EventHandler for ShutdownMessageHandler {
+impl EventHandler for CliMessageHandler {
 
     /// Handle message.
     fn handle(&self, event_type: EventType) -> Result<(), EventError> {
@@ -170,24 +170,15 @@ impl UdsClientHandler for CliMaster {
     }
 
     /// callback when client detects server disconnected.
-    fn handle_disconnect(&self, entry: &UdsClient) -> Result<(), EventError> {
+    fn handle_disconnect(&self, _entry: &UdsClient) -> Result<(), EventError> {
         println!("% Server disconncted.");
-        // Should restart reconnect timer.
-
-//        entry.connect_timer();
 
         Ok(())
     }
 
     /// callback when client received message.
     fn handle_message(&self, entry: &UdsClient) -> Result<(), EventError> {
-//        let inner = entry.get_inner();
-
         entry.stream_read()?;
-
-//        if let Err(_err) = entry.stream_read() {
-//            self.handle_disconnect(entry)?;
-//        }
 
         Ok(())
     }
