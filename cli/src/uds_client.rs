@@ -68,12 +68,11 @@ impl UdsClient {
 
     /// Start UdsClient.
     pub fn start(event_manager: Arc<Mutex<EventManager>>,
-                 handler: Arc<dyn UdsClientHandler>, path: &PathBuf,
-                 sync: bool) -> Arc<UdsClient> {
+                 handler: Arc<dyn UdsClientHandler>, path: &PathBuf) -> Arc<UdsClient> {
 
         let client = Arc::new(UdsClient::new());
         let inner = Arc::new(UdsClientInner::new(client.clone(), event_manager.clone(),
-                                                 handler.clone(), path, sync));
+                                                 handler.clone(), path));
 
         client.inner.borrow_mut().replace(inner);
         client
@@ -87,26 +86,13 @@ impl UdsClient {
         match inner.connect() {
             Ok(_) => {
                 if let Some(ref mut stream) = *inner.stream.borrow_mut() {
-//                    if inner.sync {
-                        // Do nothing, fd is polled every send and recv.
-//                    } else {
-                        event_manager
-                            .lock()
-                            .unwrap()
-                            .register_read(stream, inner.clone());
-//                    }
+                    event_manager
+                        .lock()
+                        .unwrap()
+                        .register_read_write(stream, inner.clone());
                 }
             },
             Err(_) => self.connect_timer(),
-/*
-            {
-                let d = Duration::from_secs(5);
-                event_manager
-                    .lock()
-                    .unwrap()
-                    .register_timer(d, inner.clone());
-            },
-*/
         }
     }
 
@@ -123,12 +109,12 @@ impl UdsClient {
 
     /// Send message.
     pub fn stream_send(&self, message: &str) -> Result<(), EventError> {
-        self.get_inner().stream_send(message, true)
+        self.get_inner().stream_send(message)
     }
 
     /// Receive message.
     pub fn stream_read(&self) -> Result<Option<String>, EventError> {
-        self.get_inner().stream_read(true)
+        self.get_inner().stream_read()
     }
 }
 
@@ -155,9 +141,6 @@ pub struct UdsClientInner {
 
     /// Reconnect timer.
     reconnect: Cell<Instant>,
-
-    /// Synchronous.
-    sync: bool,
 }
 
 /// UdsClientInner implementation.
@@ -165,7 +148,7 @@ impl UdsClientInner {
 
     /// Constructdor.
     pub fn new(client: Arc<UdsClient>, event_manager: Arc<Mutex<EventManager>>,
-               handler: Arc<dyn UdsClientHandler>, path: &PathBuf, sync: bool)
+               handler: Arc<dyn UdsClientHandler>, path: &PathBuf)
                -> UdsClientInner {
         UdsClientInner {
             path: path.clone(),
@@ -174,7 +157,6 @@ impl UdsClientInner {
             handler: RefCell::new(handler),
             stream: RefCell::new(None),
             reconnect: Cell::new(Instant::now()),
-            sync: sync,
         }
     }
 
@@ -200,15 +182,16 @@ impl UdsClientInner {
     }
 
     /// Send a message through UnixStream.
-    /// Optionally blocking socket until it gets ready.
-    pub fn stream_send(&self, message: &str, sync: bool) -> Result<(), EventError> {
+    pub fn stream_send(&self, message: &str) -> Result<(), EventError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
+/*
                 if sync {
                     if let Err(err) = wait_until_writable(stream) {
                         return Err(err)
                     }
                 }
+*/
                 if let Err(_err) = stream.write_all(message.as_bytes()) {
                     return Err(EventError::UdsWriteError)
                 }
@@ -222,16 +205,16 @@ impl UdsClientInner {
     }
 
     /// Receive a message through UnixStream.
-    /// Optionally blocking socket until it gets ready.
-    pub fn stream_read(&self, sync: bool) -> Result<Option<String>, EventError> {
+    pub fn stream_read(&self) -> Result<Option<String>, EventError> {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
                 let mut buffer = String::new();
 
+/*
                 if sync {
                     wait_until_readable(stream)?;
                 }
-
+*/
                 if let Err(err) = stream.read_to_string(&mut buffer) {
                     if err.kind() != std::io::ErrorKind::WouldBlock {
                         error!("Error: {}", err);

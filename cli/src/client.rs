@@ -71,7 +71,7 @@ impl ConfigClient {
             None => path.push(ROUTERD_CONFIG_UDS_FILENAME),
         }
 
-        let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path, true);
+        let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path);
         uds_client.connect();
 
         let prefix = match config.remote("config") {
@@ -134,7 +134,7 @@ impl ExecClient {
             None => path.push(ROUTERD_EXEC_UDS_FILENAME),
         }
 
-        let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path, true);
+        let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path);
         uds_client.connect();
 
         let prefix = match config.remote("exec") {
