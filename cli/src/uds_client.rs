@@ -21,13 +21,13 @@ use eventum::*;
 pub trait UdsClientHandler {
 
     /// callback when client connects to server.
-    fn handle_connect(&self, /*client: Arc<UdsClient>, */entry: &UdsClient) -> Result<(), EventError>;
+    fn handle_connect(&self, entry: &UdsClient) -> Result<(), EventError>;
 
     /// callback when client detects server disconnected.
-    fn handle_disconnect(&self, /*client: Arc<UdsClient>, */entry: &UdsClient) -> Result<(), EventError>;
+    fn handle_disconnect(&self, entry: &UdsClient) -> Result<(), EventError>;
 
     /// callback when client received message.
-    fn handle_message(&self, /*client: Arc<UdsClient>, */entry: &UdsClient) -> Result<(), EventError>;
+    fn handle_message(&self, entry: &UdsClient) -> Result<(), EventError>;
 }
 
 unsafe impl Send for UdsClient {}
@@ -164,7 +164,7 @@ impl UdsClientInner {
                 Ok(())
             },
             Err(_) => {
-                Err(EventError::UdsConnectError)
+                Err(EventError::ConnectError("UDS".to_string()))
             }
         }
     }
@@ -179,11 +179,11 @@ impl UdsClientInner {
         match *self.stream.borrow_mut() {
             Some(ref mut stream) => {
                 if let Err(_err) = stream.write_all(message.as_bytes()) {
-                    return Err(EventError::UdsWriteError)
+                    return Err(EventError::WriteError("UDS".to_string()))
                 }
             },
             None => {
-                return Err(EventError::UdsWriteError)
+                return Err(EventError::WriteError("UDS".to_string()))
             }
         }
 
