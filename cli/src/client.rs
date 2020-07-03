@@ -8,13 +8,13 @@
 use std::env;
 use std::sync::Arc;
 
-use eventum::EventError;
+use eventum::core::*;
+use eventum::uds_client::*;
 
 use common::consts::*;
 
 use super::master::CliMaster;
 use super::config::Config;
-use super::uds_client::UdsClient;
 
 /// Trait Remote Client.
 pub trait RemoteClient {

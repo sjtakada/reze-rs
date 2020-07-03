@@ -16,9 +16,10 @@ log = "0.4.8"
 
 #rustyline = "3.0.0"
 rustyline = { git = "https://github.com/sjtakada/rustyline", branch = "custom" }
-eventum = "0.1.0"
+#eventum = "0.1.0"
+eventum = { git = "https://github.com/sjtakada/eventum-rs" }
+#eventum = { path = "/home/toshiaki/git/eventum-rs" }
 
 common = { path = "../common" }
 
-#eventum = { git = "https://github.com/sjtakada/eventum-rs" }
 

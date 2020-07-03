@@ -9,7 +9,7 @@ use std::thread;
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::cell::RefCell;
+//use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
@@ -18,9 +18,9 @@ use super::client::*;
 use super::signal;
 use super::config::Config;
 use super::error::CliError;
-use super::uds_client::*;
 
-use eventum::*;
+use eventum::core::*;
+use eventum::uds_client::*;
 
 
 /// CLI Master.
