@@ -39,5 +39,13 @@ quick_error! {
             description("Child process execution error")
             display(r#"Child process execution error"#)
         }
+        RemoteSendError {
+            description("Remote send error")
+            display(r#"Remote send error"#)
+        }
+        RemoteReceiveError {
+            description("Remote receive error")
+            display(r#"Remote receive error"#)
+        }
     }
 }

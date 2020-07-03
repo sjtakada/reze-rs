@@ -18,3 +18,5 @@ pub mod builtins;
 pub mod readline;
 pub mod signal;
 pub mod view;
+
+pub mod uds_client;

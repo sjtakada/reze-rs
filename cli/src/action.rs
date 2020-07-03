@@ -144,11 +144,10 @@ impl CliActionRemote {
 impl CliAction for CliActionRemote {
     fn handle(&self, cli: &Cli, params: &HashMap<String, Value>) -> Result<(), CliError> {
 
-        let remote_client = match cli.remote_client(&self.target) {
-            Some(remote_client) => remote_client,
+        let remote_prefix = match cli.remote_prefix(&self.target) {
+            Some(remote_prefix) => remote_prefix,
             None => return Err(CliError::ActionError(format!("No remote defined for {:?}", self.target)))
         };
-        let remote_prefix = remote_client.prefix();
 
         // Replace path with params.
         let path = self.path.split('/').map(|p| {
@@ -185,32 +184,31 @@ impl CliAction for CliActionRemote {
             println!("{}", request);
         }
 
-        cli.remote_send(&self.target, &request);
+        cli.remote_send(&self.target, request);
 
-        let resp = cli.remote_recv(&self.target);
+        let resp = cli.remote_recv(&self.target)?;
         if cli.is_debug() {
             println!("% Response");
             println!("{:?}", resp);
         }
 
         if let Some(template) = &self.view {
-            if let Some(json_str) = resp {
+            let json_str = resp;
 
-                match serde_json::from_str(&json_str) {
-                    Ok(value) => {
-                        match template {
-                            CliViewTemplate::Internal(name) => {
-                                cli.view().call(&name, &value)?;
-                            },
-                            CliViewTemplate::External((name, params)) => {
-                                cli.view().exec(&name, &params, &value)?;
-                            },
-                        }
-                    },
-                    Err(err) => {
-                        println!("Unable to parse response from server {:?} {:?}", err, json_str);
-                    },
-                }
+            match serde_json::from_str(&json_str) {
+                Ok(value) => {
+                    match template {
+                        CliViewTemplate::Internal(name) => {
+                            cli.view().call(&name, &value)?;
+                        },
+                        CliViewTemplate::External((name, params)) => {
+                            cli.view().exec(&name, &params, &value)?;
+                        },
+                    }
+                },
+                Err(err) => {
+                    println!("Unable to parse response from server {:?} {:?}", err, json_str);
+                },
             }
         }
 

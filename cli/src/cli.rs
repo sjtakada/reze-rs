@@ -13,12 +13,12 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::cell::RefMut;
 use std::rc::Rc;
-use std::sync::Arc;
+use std::sync::mpsc;
 
 use serde_json;
 use rustyline::error::ReadlineError;
 
-use super::client::*;
+use super::master::*;
 use super::utils::*;
 use super::config::Config;
 use super::error::CliError;
@@ -36,6 +36,15 @@ const CLI_MODE_FILE: &str = "reze.cli_mode.json";
 //
 pub struct Cli {
 
+    /// Remote prefix map.
+    remotes: HashMap<String, String>,
+
+    /// Channel to send CLI Request to main thread.
+    sender_r2m: mpsc::Sender::<CliRequest>,
+
+    /// Channel to receiver CLI Response from main thread.
+    receiver_m2r: mpsc::Receiver::<CliResponse>,
+
     /// HashMap from mode name to CLI tree.
     trees: HashMap<String, Rc<CliTree>>,
 
@@ -51,9 +60,6 @@ pub struct Cli {
     /// Current privilege.
     privilege: Cell<u8>,
 
-    /// Remote clients.
-    remote_client: RefCell<HashMap<String, Arc<dyn RemoteClient>>>,
-
     /// View.
     view: RefCell<CliView>,
 
@@ -65,29 +71,20 @@ pub struct Cli {
 impl Cli {
 
     /// Constructor.
-    pub fn new() -> Cli {
+    pub fn new(remotes: HashMap<String, String>,
+               sender_r2m: mpsc::Sender::<CliRequest>,
+               receiver_m2r: mpsc::Receiver::<CliResponse>) -> Cli {
         Cli {
+            remotes: remotes,
+            sender_r2m: sender_r2m,
+            receiver_m2r: receiver_m2r,
             trees: HashMap::new(),
             builtins: HashMap::new(),
             mode: RefCell::new(String::new()),
             prompt: RefCell::new(String::new()),
             privilege: Cell::new(1),
-            remote_client: RefCell::new(HashMap::new()),
             view: RefCell::new(CliView::new()),
             debug: false,
-        }
-    }
-
-    /// Register remote client.
-    pub fn set_remote_client(&self, target: &str, client: Arc<dyn RemoteClient>) {
-        self.remote_client.borrow_mut().insert(target.to_string(), client);
-    }
-
-    /// Return remote client.
-    pub fn remote_client(&self, target: &str) -> Option<Arc<dyn RemoteClient>> {
-        match self.remote_client.borrow_mut().get(target) {
-            Some(client) => Some(client.clone()),
-            None => None
         }
     }
 
@@ -153,6 +150,32 @@ impl Cli {
                     println!("Error: {:?}", err);
                 }
             };
+        }
+    }
+
+    pub fn send_shutdown(&self) {
+        self.sender_r2m.send(CliRequest::Shutdown).unwrap();
+    }
+
+    pub fn remote_prefix(&self, target: &str) -> Option<&String> {
+        self.remotes.get(target)
+    }
+
+    pub fn remote_send(&self, target: &str, message: String) -> Result<(), CliError> {
+        if let Err(_) = self.sender_r2m.send(CliRequest::Request((target.to_string(), message))) {
+            Err(CliError::RemoteSendError)
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn remote_recv(&self, _target: &str) -> Result<String, CliError> {
+        match self.receiver_m2r.recv() {
+            Err(_) => Err(CliError::RemoteReceiveError),
+            Ok(d) => match d {
+                CliResponse::Response((_, message)) => Ok(message),
+                _ =>  Err(CliError::RemoteReceiveError),
+            }
         }
     }
 
@@ -369,30 +392,6 @@ impl Cli {
         }
 
         Ok(())
-    }
-
-    /// Send message througm stream remote server.
-    pub fn remote_send(&self, target: &str, message: &str) {
-        match self.remote_client.borrow_mut().get(target) {
-            Some(client) => {
-                client.stream_send(message);
-            },
-            None => {
-                println!("No such client for {:?}", target);
-            }
-        }
-    }
-
-    /// Receive message through stream remote server.
-    pub fn remote_recv(&self, target: &str) -> Option<String> {
-        match self.remote_client.borrow_mut().get(target) {
-            Some(client) => {
-                client.stream_read()
-            },
-            None => {
-                None
-            }
-        }
     }
 }
 
