@@ -19,11 +19,12 @@ lazy_static = "1.4.0"
 
 #rtable = "0.2.1"
 rtable = { git = "https://github.com/sjtakada/rtable" }
+#eventum = "0.1.0"
+#eventum = { git = "https://github.com/sjtakada/eventum-rs" }
+eventum = { path = "/home/toshiaki/git/eventum-rs" }
 
 common = { path = "../common" }
 
-## maybe not used
-#tempdir = "0.3.7"
 
 [features]
 #with-deprecated = []
