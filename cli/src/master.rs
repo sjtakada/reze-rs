@@ -39,6 +39,12 @@ pub struct CliMaster {
     sender_m2r: mpsc::Sender::<CliResponse>,
 }
 
+impl Drop for CliMaster {
+    fn drop(&mut self) {
+        println!("Drop CliMaster");
+    }
+}
+
 unsafe impl Sync for CliMaster {}
 unsafe impl Send for CliMaster {}
 
@@ -53,6 +59,11 @@ impl CliMaster {
             message_queue: Arc::new(Mutex::new(VecDeque::new())),
             sender_m2r: sender_m2r,
         }
+    }
+
+    /// Release object in CliMaster.
+    pub fn release(&self) {
+        self.remote_client.lock().unwrap().drain();
     }
 
     /// Register remote client.
@@ -126,8 +137,8 @@ impl CliMaster {
         let event_manager = master.event_manager();
 
         // Initialize Remote clients in master context, so that they run on event manager.
-        let config_client = Arc::new(ConfigClient::new(master.clone(), &config));
-        let exec_client = Arc::new(ExecClient::new(master.clone(), &config));
+        let mut config_client = Arc::new(ConfigClient::new(master.clone(), &config));
+        let mut exec_client = Arc::new(ExecClient::new(master.clone(), &config));
         master.set_remote_client("config", config_client.clone());
         master.set_remote_client("exec", exec_client.clone());
 
@@ -149,9 +160,8 @@ impl CliMaster {
         let cli_channel_handler = CliChannelHandler::new(master.clone(), receiver_r2m);
         event_manager.lock().unwrap().register_channel(Box::new(cli_channel_handler));
 
-        let runner = SimpleRunner::new();
-
         // Event loop.
+        let runner = SimpleRunner::new();
         'main: loop {
             let events = event_manager.lock().unwrap().poll();
             match runner.run(events) {
@@ -159,6 +169,15 @@ impl CliMaster {
                 _ => {}
             }
         }
+
+        // Release objects associated with the master.
+        master.release();
+
+        Arc::get_mut(&mut config_client).unwrap().release();
+        Arc::get_mut(&mut exec_client).unwrap().release();
+
+        event_manager.lock().unwrap().shutdown();
+        drop(event_manager);
 
         // CLI is done.
         if let Err(err) = handle.join() {

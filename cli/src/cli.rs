@@ -14,6 +14,7 @@ use std::cell::RefCell;
 use std::cell::RefMut;
 use std::rc::Rc;
 use std::sync::mpsc;
+use std::time::Duration;
 
 use serde_json;
 use rustyline::error::ReadlineError;
@@ -170,7 +171,7 @@ impl Cli {
     }
 
     pub fn remote_recv(&self, _target: &str) -> Result<String, CliError> {
-        match self.receiver_m2r.recv() {
+        match self.receiver_m2r.recv_timeout(Duration::from_millis(500)) {
             Err(_) => Err(CliError::RemoteReceiveError),
             Ok(d) => match d {
                 CliResponse::Response((_, message)) => Ok(message),
