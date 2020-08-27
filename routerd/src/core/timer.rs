@@ -11,7 +11,7 @@ use std::cell::RefCell;
 use std::time::Duration;
 use std::sync::Mutex;
 
-use common::event::*;
+use eventum::core::*;
 
 use super::master::ProtocolMaster;
 

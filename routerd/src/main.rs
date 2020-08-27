@@ -5,6 +5,7 @@
 
 use std::env;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::fs;
 
 use log::info;
@@ -12,10 +13,11 @@ use log::error;
 use simplelog::*;
 use getopts::Options;
 
+use eventum::core::*;
+use eventum::uds_server::*;
+
 use common::consts::*;
 use common::error::*;
-use common::event::*;
-use common::uds_server::*;
 
 use routerd::core::signal::*;
 use routerd::core::nexus::*;
@@ -100,8 +102,8 @@ fn main() {
 fn start() {
 
     // Event Manager and Nexus.
-    let event_manager = Arc::new(EventManager::new());
-    let nexus = Arc::new(RouterNexus::new());
+    let event_manager = Arc::new(Mutex::new(EventManager::new()));
+    let nexus = Arc::new(RouterNexus::new(event_manager.clone()));
 
     // UDS to accept config request.
     let mut config_uds_path = env::temp_dir();
