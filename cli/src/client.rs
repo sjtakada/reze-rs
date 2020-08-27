@@ -7,39 +7,40 @@
 
 use std::env;
 use std::sync::Arc;
+use std::sync::Mutex;
 
-use eventum::EventError;
+use eventum::core::*;
+use eventum::uds_client::*;
 
 use common::consts::*;
 
 use super::master::CliMaster;
 use super::config::Config;
-use super::uds_client::UdsClient;
 
 /// Trait Remote Client.
 pub trait RemoteClient {
 
     /// Return UDS client.
-    fn uds_client(&self) -> Arc<UdsClient>;
+    fn uds_client(&self) -> Arc<Mutex<UdsClient>>;
 
     /// Return API prefix.
     fn prefix(&self) -> &str;
 
     /// Connect config server.
     fn connect(&self) {
-        self.uds_client().connect();
+        self.uds_client().lock().unwrap().connect();
     }
 
     /// Send message to config server.
     fn stream_send(&self, message: &str) {
-        if let Err(err) = self.uds_client().stream_send(message) {
+        if let Err(err) = self.uds_client().lock().unwrap().stream_send(message) {
             println!("% Stream send error {:?}", err);
         }
     }
 
     /// Recv message from config server.
     fn stream_read(&self) -> Result<String, EventError> {
-        self.uds_client().stream_read()
+        self.uds_client().lock().unwrap().stream_read()
     }
 }
 
@@ -47,10 +48,16 @@ pub trait RemoteClient {
 pub struct ConfigClient {
 
     /// UDS client.
-    uds_client: Arc<UdsClient>,
+    uds_client: Option<Arc<Mutex<UdsClient>>>,
 
     /// API path prefix.
     prefix: String,
+}
+
+impl Drop for ConfigClient {
+    fn drop(&mut self) {
+        println!("Drop ConfigClient");
+    }
 }
 
 /// Config client implementation.
@@ -72,7 +79,7 @@ impl ConfigClient {
         }
 
         let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path);
-        uds_client.connect();
+        uds_client.lock().unwrap().connect();
 
         let prefix = match config.remote("config") {
             Some(remote) => {
@@ -85,9 +92,13 @@ impl ConfigClient {
         };
 
         ConfigClient {
-            uds_client: uds_client,
+            uds_client: Some(uds_client),
             prefix: prefix
         }
+    }
+
+    pub fn release(&mut self) {
+        self.uds_client = None;
     }
 }
 
@@ -95,8 +106,11 @@ impl ConfigClient {
 impl RemoteClient for ConfigClient {
 
     /// Return UDS client.
-    fn uds_client(&self) -> Arc<UdsClient> {
-        self.uds_client.clone()
+    fn uds_client(&self) -> Arc<Mutex<UdsClient>> {
+        match &self.uds_client {
+            Some(client) => client.clone(),
+            None => panic!("Uds Client doesn't exist"),
+        }
     }
 
     /// Return API prefix.
@@ -110,10 +124,16 @@ impl RemoteClient for ConfigClient {
 pub struct ExecClient {
 
     /// UDS client.
-    uds_client: Arc<UdsClient>,
+    uds_client: Option<Arc<Mutex<UdsClient>>>,
 
     /// API path prefix.
     prefix: String,
+}
+
+impl Drop for ExecClient {
+    fn drop(&mut self) {
+        println!("Drop ExecClient");
+    }
 }
 
 /// Exec client implementation.
@@ -135,7 +155,7 @@ impl ExecClient {
         }
 
         let uds_client = UdsClient::start(master.event_manager(), master.clone(), &path);
-        uds_client.connect();
+        uds_client.lock().unwrap().connect();
 
         let prefix = match config.remote("exec") {
             Some(remote) => {
@@ -148,9 +168,13 @@ impl ExecClient {
         };
 
         ExecClient {
-            uds_client: uds_client,
+            uds_client: Some(uds_client),
             prefix: prefix
         }
+    }
+
+    pub fn release(&mut self) {
+        self.uds_client = None;
     }
 }
 
@@ -158,8 +182,11 @@ impl ExecClient {
 impl RemoteClient for ExecClient {
 
     /// Return UDS client.
-    fn uds_client(&self) -> Arc<UdsClient> {
-        self.uds_client.clone()
+    fn uds_client(&self) -> Arc<Mutex<UdsClient>> {
+        match &self.uds_client {
+            Some(client) => client.clone(),
+            None => panic!("Uds Client doesn't exist"),
+        }
     }
 
     /// Return API prefix.

@@ -26,12 +26,11 @@ use std::time::Duration;
 use log::debug;
 use log::error;
 
-use common::event::*;
-use common::timer::*;
-use common::channel::*;
+use eventum::core::*;
+use eventum::uds_server::*;
+
 use common::error::*;
 use common::method::Method;
-use common::uds_server::*;
 
 use super::signal;
 use super::timer;
@@ -52,7 +51,7 @@ use crate::ospf::master::OspfMasterInner;
 /// Thread handle and Channel tuple.
 struct MasterTuple {
 
-    /// Thread Join handle.
+    /// Thread join handle.
     handle: JoinHandle<()>,
 
     /// Channel sender from Master To Protocol
@@ -62,39 +61,42 @@ struct MasterTuple {
 /// Router Nexus.
 pub struct RouterNexus {
 
-    /// MasterInner map.
-    masters: RefCell<HashMap<ProtocolType, MasterTuple>>,
+    /// Event Manager.
+    event_manager: Arc<Mutex<EventManager>>,
+
+    /// 
+    masters: Mutex<HashMap<ProtocolType, MasterTuple>>,
 
     /// Sender channel for ProtoToNexus.
-    sender_p2n: RefCell<Option<mpsc::Sender<ProtoToNexus>>>,
+    sender_p2n: Mutex<Option<mpsc::Sender<ProtoToNexus>>>,
 
     /// Sender channel for ProtoToZebra.
-    sender_p2z: RefCell<Option<mpsc::Sender<ProtoToZebra>>>,
+    sender_p2z: Mutex<Option<mpsc::Sender<ProtoToZebra>>>,
 
     /// UdsServer for Config.
-    config_server: RefCell<Option<Arc<UdsServer>>>,
+    config_server: Mutex<Option<Arc<UdsServer>>>,
 
-    /// NexusExec.
-    exec_server: RefCell<Option<Arc<UdsServer>>>,
+    /// UdsServer for Exec.
+    exec_server: Mutex<Option<Arc<UdsServer>>>,
 }
 
-/// RouterNexus implementation.
 impl RouterNexus {
 
     /// Constructor.
-    pub fn new() -> RouterNexus {
+    pub fn new(event_manager: Arc<Mutex<EventManager>>) -> RouterNexus {
         RouterNexus {
-            masters: RefCell::new(HashMap::new()),
-            sender_p2n: RefCell::new(None),
-            sender_p2z: RefCell::new(None),
-            config_server: RefCell::new(None),
-            exec_server: RefCell::new(None),
+            event_manager: event_manager,
+            masters: Mutex::new(HashMap::new()),
+            sender_p2n: Mutex::new(None),
+            sender_p2z: Mutex::new(None),
+            config_server: Mutex::new(None),
+            exec_server: Mutex::new(None),
         }
     }
 
     /// Return masters.
     fn get_sender(&self, p: &ProtocolType) -> Option<mpsc::Sender<NexusToProto>> {
-        match self.masters.borrow().get(&p) {
+        match self.masters.lock().unwrap().get(&p) {
             Some(tuple) => Some(tuple.sender.clone()),
             None => None,
         }
@@ -102,12 +104,12 @@ impl RouterNexus {
 
     /// Set UdsServer for Config.
     pub fn set_config_server(&self, uds_server: Arc<UdsServer>) {
-        self.config_server.borrow_mut().replace(uds_server);
+        self.config_server.lock().unwrap().replace(uds_server);
     }
 
     /// Set UdsServer for Exec.
     pub fn set_exec_server(&self, uds_server: Arc<UdsServer>) {
-        self.exec_server.borrow_mut().replace(uds_server);
+        self.exec_server.lock().unwrap().replace(uds_server);
     }
 
     /// Construct MasterInner instance and spawn a thread.
@@ -160,7 +162,7 @@ impl RouterNexus {
 
     /// Shutdown and cleanup protocol gracefully.
     fn finish_protocol(&self, proto: &ProtocolType) {
-        if let Some(tuple) = self.masters.borrow_mut().remove(&proto) {
+        if let Some(tuple) = self.masters.lock().unwrap().remove(&proto) {
             if let Err(err) = tuple.sender.send(NexusToProto::ProtoTermination) {
                 error!("Send protocol termination {:?}", err);
             }
@@ -178,7 +180,7 @@ impl RouterNexus {
 
     /// Clone ProtoToNexus mpsc::Sender.
     fn clone_sender_p2n(&self) -> mpsc::Sender<ProtoToNexus> {
-        if let Some(ref mut sender_p2n) = *self.sender_p2n.borrow_mut() {
+        if let Some(ref mut sender_p2n) = *self.sender_p2n.lock().unwrap() {
             return mpsc::Sender::clone(&sender_p2n);
         }
         panic!("failed to clone");
@@ -186,50 +188,48 @@ impl RouterNexus {
 
     /// Clone ProtoToZebra mpsc::Sender.
     fn _clone_sender_p2z(&self) -> mpsc::Sender<ProtoToZebra> {
-        if let Some(ref mut sender_p2z) = *self.sender_p2z.borrow_mut() {
+        if let Some(ref mut sender_p2z) = *self.sender_p2z.lock().unwrap() {
             return mpsc::Sender::clone(&sender_p2z)
         }
         panic!("failed to clone");
     }
 
     /// Entry point to start RouterNexus.
-    pub fn start(nexus: Arc<RouterNexus>, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
+    pub fn start(nexus: Arc<RouterNexus>, event_manager: Arc<Mutex<EventManager>>) -> Result<(), CoreError> {
         // Create multi sender channel from MasterInner to RouterNexus
         let (sender_p2n, receiver) = mpsc::channel::<ProtoToNexus>();
-        nexus.sender_p2n.borrow_mut().replace(sender_p2n);
+        nexus.sender_p2n.lock().unwrap().replace(sender_p2n);
 
         // Spawn zebra instance
         let (handle, sender, sender_p2z) = nexus.spawn_zebra(nexus.clone_sender_p2n());
-        nexus.sender_p2z.borrow_mut().replace(sender_p2z);
-        nexus.masters.borrow_mut().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
+        nexus.sender_p2z.lock().unwrap().replace(sender_p2z);
+        nexus.masters.lock().unwrap().insert(ProtocolType::Zebra, MasterTuple { handle, sender });
 
 
         // XXX spawn OSPF
         let (handle, sender, _sender_z2p) = nexus.spawn_protocol(ProtocolType::Ospf,
                                                                nexus.clone_sender_p2n(),
                                                                nexus._clone_sender_p2z());
-        nexus.masters.borrow_mut().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
+        nexus.masters.lock().unwrap().insert(ProtocolType::Ospf, MasterTuple { handle, sender });
 
         // Register channel handler to event manager.
-        EventManager::init_channel_manager(event_manager.clone());
+        let channel_handler = ProtoToNexusChannelHandler::new(nexus.clone(), receiver);
+        event_manager.lock().unwrap().register_channel(Box::new(channel_handler));
 
-        // Channel handler.
-        let channel_handler = ProtoToNexusMessageHandler::new(nexus.clone(), receiver);
-        event_manager.register_channel(Box::new(channel_handler));
-
-        // Main event loop.
+        // Event loop.
+        let runner = SimpleRunner::new();
         while !signal::is_sigint_caught() {
-            match event_manager.run() {
-                Err(CoreError::SystemShutdown) => break,
-                _ => {
-                }
+            let events = event_manager.lock().unwrap().poll();
+            match runner.run(events) {
+                Err(EventError::SystemShutdown) => break,
+                _ => {}
             }
         }
 
         // Send termination message to all threads first.
         // TODO: is there better way to iterate hashmap and remove it at the same time?
         let mut v = Vec::new();
-        for (proto, _tuple) in nexus.masters.borrow_mut().iter_mut() {
+        for (proto, _tuple) in nexus.masters.lock().unwrap().iter_mut() {
             v.push(proto.clone());
         }
 
@@ -242,8 +242,8 @@ impl RouterNexus {
     }
 }
 
-/// ProtoToNexus channel MessageHandler.
-pub struct ProtoToNexusMessageHandler {
+/// ProtoToNexus channel handler.
+pub struct ProtoToNexusChannelHandler {
 
     /// RouterNexus.
     nexus: Arc<RouterNexus>,
@@ -252,42 +252,73 @@ pub struct ProtoToNexusMessageHandler {
     receiver: mpsc::Receiver<ProtoToNexus>,
 }
 
-impl ProtoToNexusMessageHandler {
+impl ProtoToNexusChannelHandler {
 
     /// Constructor.
     pub fn new(nexus: Arc<RouterNexus>,
-               receiver: mpsc::Receiver<ProtoToNexus>) -> ProtoToNexusMessageHandler {
-        ProtoToNexusMessageHandler {
+               receiver: mpsc::Receiver<ProtoToNexus>
+    ) -> ProtoToNexusChannelHandler {
+        ProtoToNexusChannelHandler {
             nexus: nexus,
             receiver: receiver,
         }
     }
 }
 
-impl ChannelHandler for ProtoToNexusMessageHandler {
+impl ChannelHandler for ProtoToNexusChannelHandler {
+
+    fn poll_channel(&self) -> Vec<(EventType, Arc<dyn EventHandler>)> {
+        let mut vec = Vec::new();
+
+        while let Ok(message) = self.receiver.try_recv() {
+            let handler = ProtoToNexusMessageHandler::new(self.nexus.clone(), message);
+
+            vec.push((EventType::ChannelEvent, handler));
+        }
+        
+        vec
+    }
+}
+
+pub struct ProtoToNexusMessageHandler {
+    nexus: Arc<RouterNexus>,
+    message: ProtoToNexus,
+}
+
+impl ProtoToNexusMessageHandler {
+    pub fn new(nexus: Arc<RouterNexus>, message: ProtoToNexus) -> Arc<dyn EventHandler> {
+        Arc::new(ProtoToNexusMessageHandler {
+            nexus: nexus,
+            message: message,
+        })
+    }
+}
+
+unsafe impl Sync for ProtoToNexusMessageHandler {}
+unsafe impl Send for ProtoToNexusMessageHandler {}
+
+impl EventHandler for ProtoToNexusMessageHandler {
 
     /// Handle message.
-    fn handle_message(&self, event_manager: Arc<EventManager>) -> Result<(), CoreError> {
-        let receiver = &self.receiver;
-
-        if let Ok(d) = receiver.try_recv() {
-            match d {
+    fn handle(&self, event_type: EventType) -> Result<(), EventError> {
+        match event_type {
+            EventType::ChannelEvent => match &self.message {
                 ProtoToNexus::TimerRegistration((p, d, token)) => {
                     debug!("Received Timer Registration {} {}", p, token);
 
-                    if let Some(tuple) = self.nexus.masters.borrow_mut().get(&p) {
-                        let entry = TimerEntry::new(p, tuple.sender.clone(), d, token);
-                        event_manager.register_timer(d, Arc::new(entry));
+                    if let Some(tuple) = self.nexus.masters.lock().unwrap().get(&p) {
+                        let entry = TimerEntry::new(*p, tuple.sender.clone(), *d, *token);
+                        self.nexus.event_manager.lock().unwrap().register_timer(*d, Arc::new(entry));
                     }
                 },
                 ProtoToNexus::ConfigResponse((index, resp)) => {
-                    if let Some(ref mut uds_server) = *self.nexus.config_server.borrow_mut() {
+                    if let Some(ref mut uds_server) = *self.nexus.config_server.lock().unwrap() {
                         let inner = uds_server.get_inner();
-                        match inner.lookup_entry(index) {
+                        match inner.lookup_entry(*index) {
                             Some(entry) => {
                                 let resp = match resp {
-                                    Some(s) => *s,//format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", *s),
-                                    None => r#"{"status": "OK"}"#.to_string(),
+                                    Some(s) => s.clone(),//format!("{{\"status\":\"Error\",\"message\":\"{}\"}}", *s),
+                                    None => Box::new(r#"{"status": "OK"}"#.to_string()),
                                 };
 
                                 if let Err(_err) = entry.stream_send(&resp) {
@@ -301,13 +332,13 @@ impl ChannelHandler for ProtoToNexusMessageHandler {
                     }
                 },
                 ProtoToNexus::ExecResponse((index, resp)) => {
-                    if let Some(ref mut uds_server) = *self.nexus.exec_server.borrow_mut() {
+                    if let Some(ref mut uds_server) = *self.nexus.exec_server.lock().unwrap() {
                         let inner = uds_server.get_inner();
-                        match inner.lookup_entry(index) {
+                        match inner.lookup_entry(*index) {
                             Some(entry) => {
                                 let resp = match resp {
-                                    Some(s) => *s,
-                                    None => "{{}}".to_string(),
+                                    Some(s) => s.clone(),
+                                    None => Box::new("{{}}".to_string()),
                                 };
 
                                 if let Err(_err) = entry.stream_send(&resp) {
@@ -323,13 +354,11 @@ impl ChannelHandler for ProtoToNexusMessageHandler {
                 ProtoToNexus::ProtoException(s) => {
                     debug!("Received Exception {}", s);
                 },
-            }
+            },
+            _ => assert!(false),
+        }
 
-            Ok(())
-        }
-        else {
-            Err(CoreError::ChannelQueueEmpty)
-        }
+        Ok(())
     }
 }
 
@@ -447,40 +476,41 @@ impl NexusConfig {
 impl UdsServerHandler for NexusConfig {
 
     /// Process request.
-    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-        if let Some(request) = entry.stream_read() {
-            match request_parse(request) {
-                Ok((method, path, body)) => {
-                    debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
+    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), EventError> {
+        match entry.stream_read() {
+            Ok(request) => {
+                match request_parse(request) {
+                    Ok((method, path, body)) => {
+                        debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
 
-                    if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
-                        // Immediate error should send back error
-                        let resp = err.json_status();
-                        if let Err(_) = entry.stream_send(&resp) {
-                            error!("Send in UdsServerHandler");
+                        if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                            // Immediate error should send back error
+                            let resp = err.json_status();
+                            if let Err(_) = entry.stream_send(&resp) {
+                                error!("Send in UdsServerHandler");
+                            }
+
+                            Err(EventError::UdsServerError(err.to_string()))
+                        } else {
+                            // Even if we get some response from handler, we don't send it right away.
+                            Ok(())
                         }
-
-                        Err(err)
-                    } else {
-                        // Even if we get some response from handler, we don't send it right away.
-                        Ok(())
-                    }
-                },
-                Err(err) => Err(err),
+                    },
+                    Err(err) => Err(EventError::UdsServerError(err.to_string())),
+                }
             }
-        } else {
-            Err(CoreError::RequestInvalid("(no message)".to_string()))
+            Err(err) => Err(err)
         }
     }
 
     /// Handle connect placeholder.
-    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), EventError> {
         debug!("handle_connect");
         Ok(())
     }
 
     /// Handle disconnect placeholder.
-    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), EventError> {
         server.shutdown_entry(entry);
 
         debug!("handle_disconnect");
@@ -535,39 +565,40 @@ impl NexusExec {
 impl UdsServerHandler for NexusExec {
 
     /// Process command.
-    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
-        if let Some(request) = entry.stream_read() {
-            match request_parse(request) {
-                Ok((method, path, body)) => {
-                    debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
+    fn handle_message(&self, _server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), EventError> {
+        match entry.stream_read() {
+            Ok(request) => {
+                match request_parse(request) {
+                    Ok((method, path, body)) => {
+                        debug!("Received request method: {}, path: {}, body: {:?}", method, path, body);
 
-                    if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
-                        // Immediate error should send back error
-                        let resp = err.json_status();
-                        if let Err(_) = entry.stream_send(&resp) {
-                            error!("Send in UdsServerHandler");
+                        if let Err(err) = self.handle_request(entry.index(), method, &path, body) {
+                            // Immediate error should send back error
+                            let resp = err.json_status();
+                            if let Err(_) = entry.stream_send(&resp) {
+                                error!("Send in UdsServerHandler");
+                            }
+
+                            Err(EventError::UdsServerError(err.to_string()))
+                        } else {
+                            Ok(())
                         }
-
-                        Err(err)
-                    } else {
-                        Ok(())
-                    }
-                },
-                Err(err) => Err(err),
+                    },
+                    Err(err) => Err(EventError::UdsServerError(err.to_string())),
+                }
             }
-        } else {
-            Err(CoreError::RequestInvalid("(no message)".to_string()))
+            Err(err) => Err(err)
         }
     }
 
     /// Handle connect placeholder.
-    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), CoreError> {
+    fn handle_connect(&self, _server: Arc<UdsServer>, _entry: &UdsServerEntry) -> Result<(), EventError> {
         debug!("handle_connect");
         Ok(())
     }
 
     /// Handle disconnect placeholder.
-    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), CoreError> {
+    fn handle_disconnect(&self, server: Arc<UdsServer>, entry: &UdsServerEntry) -> Result<(), EventError> {
         server.shutdown_entry(entry);
 
         debug!("handle_disconnect");
@@ -605,7 +636,7 @@ impl TimerEntry {
 impl EventHandler for TimerEntry {
 
     /// Event handler.
-    fn handle(&self, e: EventType) -> Result<(), CoreError> {
+    fn handle(&self, e: EventType) -> Result<(), EventError> {
         match e {
             EventType::TimerEvent => {
                 let sender = self.sender.lock().unwrap();
@@ -615,7 +646,7 @@ impl EventHandler for TimerEntry {
                 }
             },
             _ => {
-                error!("Unknown event");
+                return Err(EventError::InvalidEvent);
             }
         }
 
@@ -623,6 +654,7 @@ impl EventHandler for TimerEntry {
     }
 }
 
+/*
 /// TimerHandler implementation for TimerEntry.
 impl TimerHandler for TimerEntry {
 
@@ -636,4 +668,4 @@ impl TimerHandler for TimerEntry {
         self.expiration.lock().unwrap().set(Instant::now() + d);
     }
 }
-
+*/

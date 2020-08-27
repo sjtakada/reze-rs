@@ -13,8 +13,9 @@ use std::sync::Arc;
 use std::sync::Weak;
 use std::cell::RefCell;
 
+use eventum::core::*;
+
 use common::error::*;
-use common::event::*;
 
 use crate::core::master::ProtocolMaster;
 use crate::core::master::MasterInner;
@@ -97,7 +98,7 @@ impl Ospf {
 }
 
 impl EventHandler for OspfHelloTimer {
-    fn handle(&self, e: EventType) -> Result<(), CoreError> {
+    fn handle(&self, e: EventType) -> Result<(), EventError> {
         match e {
             EventType::TimerEvent => {
                 debug!("Hello Timer fired");

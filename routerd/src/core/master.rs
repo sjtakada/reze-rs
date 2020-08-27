@@ -18,7 +18,7 @@ use std::time::Duration;
 
 use log::{debug, error};
 
-use common::event::*;
+use eventum::core::*;
 
 use super::protocols::ProtocolType;
 use super::message::nexus::ProtoToNexus;
