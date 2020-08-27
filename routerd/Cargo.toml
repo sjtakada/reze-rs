@@ -19,9 +19,9 @@ nix = "0.13.0"
 
 #rtable = "0.2.1"
 rtable = { git = "https://github.com/sjtakada/rtable" }
-#eventum = "0.1.0"
+eventum = "0.1.1"
 #eventum = { git = "https://github.com/sjtakada/eventum-rs" }
-eventum = { path = "/home/toshiaki/git/eventum-rs" }
+#eventum = { path = "/home/toshiaki/git/eventum-rs" }
 
 common = { path = "../common" }
 
